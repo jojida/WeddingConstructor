@@ -1,0 +1,10 @@
+{
+  "name": "wedding-constructor",
+  "version": "1.0.0",
+  "description": "Online Wedding Invitation Constructor",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install"
+  }
+}

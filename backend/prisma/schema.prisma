@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String
+  name          String
+  createdAt     DateTime   @default(now())
+  invitations   Invitation[]
+}
+
+model Invitation {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  slug          String   @unique
+  templateId    String
+  status        String   @default("draft") // draft | paid | published
+  title         String   @default("")
+
+  // Couple info
+  groomName     String   @default("")
+  brideName     String   @default("")
+  weddingDate   String   @default("")
+  weddingTime   String   @default("")
+  venue         String   @default("")
+  venueAddress  String   @default("")
+  mapLink       String   @default("")
+  story         String   @default("")
+  inviteText    String   @default("")
+  dressCode     String   @default("")
+  schedule      String   @default("[]") // JSON: [{time,title,icon}]
+
+  // Media
+  coverPhoto    String   @default("")  // path to uploaded file
+  galleryPhotos String   @default("[]") // JSON array of paths
+
+  // Appearance
+  colorScheme   String   @default("classic")
+  musicUrl      String   @default("")
+
+  // Payment
+  paymentId     String   @default("")
+  paidAt        DateTime?
+  plan          String   @default("basic") // basic | standard | premium
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  guestResponses GuestResponse[]
+}
+
+model GuestResponse {
+  id            String   @id @default(uuid())
+  invitationId  String
+  invitation    Invitation @relation(fields: [invitationId], references: [id])
+  guestName     String
+  attending     Boolean
+  drinkChoice   String   @default("")   // wine | champagne | juice | water | no_alcohol | other
+  wishes        String   @default("")
+  createdAt     DateTime @default(now())
+}

@@ -1,0 +1,78 @@
+export const TEMPLATES = [
+  {
+    id: 'classic',
+    name: 'Classic Elegance',
+    description: 'Элегантный классический стиль с золотыми акцентами и каллиграфным шрифтом',
+    tags: ['Классика', 'Золото', 'Элегантность'],
+    colors: ['#f5f0e8', '#c9a96e', '#2c2c2c'],
+    preview: '/templates/classic/preview.jpg',
+  },
+  {
+    id: 'modern',
+    name: 'Modern Minimal',
+    description: 'Современный минимализм с чёрно-белой палитрой и крупной типографикой',
+    tags: ['Минимализм', 'Современный', 'Монохром'],
+    colors: ['#ffffff', '#111111', '#888888'],
+    preview: '/templates/modern/preview.jpg',
+  },
+  {
+    id: 'bohemian',
+    name: 'Bohemian Garden',
+    description: 'Романтичный стиль с цветочными акцентами и тёплыми природными тонами',
+    tags: ['Бохо', 'Цветы', 'Романтика'],
+    colors: ['#fdf6ec', '#b5813d', '#6b8f5c'],
+    preview: '/templates/bohemian/preview.jpg',
+  },
+  {
+    id: 'luxury',
+    name: 'Luxury Dark',
+    description: 'Роскошный тёмный стиль с золотыми деталями и эффектом параллакса',
+    tags: ['Люкс', 'Тёмный', 'Параллакс'],
+    colors: ['#1a1a2e', '#c9a96e', '#e8e8e8'],
+    preview: '/templates/luxury/preview.jpg',
+  },
+  {
+    id: 'pastel',
+    name: 'Pastel Dream',
+    description: 'Нежный пастельный стиль с акварельными элементами и розовой гаммой',
+    tags: ['Пастель', 'Нежный', 'Розовый'],
+    colors: ['#fce4ec', '#f48fb1', '#ad1457'],
+    preview: '/templates/pastel/preview.jpg',
+  },
+  {
+    id: 'vintage',
+    name: 'Vintage Rose',
+    description: 'Винтажный романтичный стиль с пыльной розой, шалфеем и состаренными деталями',
+    tags: ['Винтаж', 'Роза', 'Шалфей'],
+    colors: ['#f7ede8', '#c4837a', '#6b8c7a'],
+    preview: '/templates/vintage/preview.jpg',
+  },
+];
+
+export const PLANS = [
+  {
+    id: 'basic',
+    name: 'Базовый',
+    price: 990,
+    period: '6 месяцев',
+    features: ['1 шаблон на выбор', 'До 3 фотографий', 'Базовая форма RSVP', 'Ссылка-приглашение'],
+    color: '#6b8f5c',
+  },
+  {
+    id: 'standard',
+    name: 'Стандарт',
+    price: 1990,
+    period: '1 год',
+    features: ['Все шаблоны', 'До 10 фотографий', 'Полная форма RSVP', 'Карта Google Maps', 'История пары'],
+    color: '#c9a96e',
+    popular: true,
+  },
+  {
+    id: 'premium',
+    name: 'Премиум',
+    price: 3490,
+    period: 'Бессрочно',
+    features: ['Всё из Стандарта', 'Неограниченно фото', 'Музыкальный фон', 'QR-код для гостей', 'Приоритетная поддержка'],
+    color: '#9c27b0',
+  },
+];

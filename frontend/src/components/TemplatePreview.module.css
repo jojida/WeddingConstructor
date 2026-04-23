@@ -1,0 +1,382 @@
+/* ─── Wrapper ────────────────────────────────────────────────────────────────*/
+.preview {
+  width: 390px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+  font-family: var(--font-inter);
+}
+.fullPage {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0 auto;
+}
+
+/* ─── HERO ───────────────────────────────────────────────────────────────────*/
+.hero {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 24px 24px;
+  position: relative;
+  text-align: center;
+}
+.fullPage .hero { min-height: 100vh; padding: 60px 40px 48px; }
+
+.heroTop {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  width: 100%;
+  justify-content: center;
+}
+.heroOrnament {
+  font-size: 12px;
+  opacity: 0.8;
+}
+.heroEyebrow {
+  font-size: 9px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65);
+  font-weight: 500;
+}
+.fullPage .heroEyebrow { font-size: 13px; }
+
+.heroCenter { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+.heroNames {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #fff;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.3);
+}
+.fullPage .heroNames { font-size: 56px; margin-bottom: 20px; }
+
+.heroDate {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.75);
+  font-weight: 400;
+}
+.fullPage .heroDate { font-size: 16px; letter-spacing: 3px; }
+
+.heroCountdown {
+  margin-top: 20px;
+  text-align: center;
+}
+.countdownNum {
+  font-family: var(--font-playfair);
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+.fullPage .countdownNum { font-size: 64px; }
+.countdownLabel {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+}
+.fullPage .countdownLabel { font-size: 13px; }
+
+.heroScrollHint {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.scrollArrow {
+  font-size: 16px;
+  color: rgba(255,255,255,0.4);
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+/* ─── SECTIONS ───────────────────────────────────────────────────────────────*/
+.section { padding: 20px 18px; }
+.fullPage .section { padding: 48px 56px; }
+
+/* ─── INVITE TEXT ────────────────────────────────────────────────────────────*/
+.inviteText {
+  font-size: 13px;
+  line-height: 1.8;
+  text-align: center;
+  font-style: italic;
+}
+.fullPage .inviteText { font-size: 18px; }
+
+/* ─── DETAIL CARDS ───────────────────────────────────────────────────────────*/
+.detailCards { margin-bottom: 12px; }
+
+/* ─── MAP BTN ────────────────────────────────────────────────────────────────*/
+.mapBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-inter);
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.mapBtn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.fullPage .mapBtn { padding: 14px 32px; font-size: 15px; }
+
+/* ─── TIMELINE ───────────────────────────────────────────────────────────────*/
+.timeline { display: flex; flex-direction: column; gap: 0; }
+
+.timelineItem {
+  display: grid;
+  grid-template-columns: 52px 24px 1fr;
+  gap: 0 8px;
+  align-items: flex-start;
+}
+.fullPage .timelineItem { grid-template-columns: 80px 32px 1fr; gap: 0 16px; }
+
+.timelineLeft {
+  text-align: right;
+  padding-top: 2px;
+}
+.timelineTime {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.fullPage .timelineTime { font-size: 16px; }
+
+.timelineConnector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 48px;
+}
+.fullPage .timelineConnector { min-height: 72px; }
+
+.timelineDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+.fullPage .timelineDot { width: 14px; height: 14px; margin-top: 6px; }
+
+.timelineLine {
+  width: 2px;
+  flex: 1;
+  margin-top: 4px;
+}
+
+.timelineRight {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding-bottom: 16px;
+}
+.fullPage .timelineRight { padding-bottom: 24px; }
+
+.timelineIcon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.fullPage .timelineIcon { font-size: 24px; }
+
+.timelineTitle { font-size: 13px; font-weight: 500; padding-top: 2px; line-height: 1.3; }
+.fullPage .timelineTitle { font-size: 17px; }
+
+/* ─── DRESS CODE ─────────────────────────────────────────────────────────────*/
+.dressCodeBlock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid;
+}
+.fullPage .dressCodeBlock { padding: 20px 24px; gap: 20px; }
+
+.dressCodeIcon { font-size: 24px; }
+.fullPage .dressCodeIcon { font-size: 36px; }
+
+.dressCodeName { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.fullPage .dressCodeName { font-size: 20px; }
+
+.dressCodeHint { font-size: 11px; }
+.fullPage .dressCodeHint { font-size: 14px; }
+
+/* ─── STORY ──────────────────────────────────────────────────────────────────*/
+.storyText {
+  font-size: 13px;
+  line-height: 1.8;
+  text-align: center;
+  font-style: italic;
+  position: relative;
+}
+.fullPage .storyText { font-size: 17px; }
+
+/* ─── GALLERY ────────────────────────────────────────────────────────────────*/
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+.fullPage .gallery { gap: 8px; }
+
+.galleryItem {
+  aspect-ratio: 1;
+  background-size: cover;
+  background-position: center;
+  background-color: rgba(201,169,110,0.1);
+  border-radius: 6px;
+  transition: transform 0.2s;
+}
+.galleryItemLarge {
+  grid-column: span 2;
+  aspect-ratio: 2/1;
+}
+.fullPage .galleryItem { border-radius: 12px; }
+
+/* ─── RSVP ───────────────────────────────────────────────────────────────────*/
+.rsvpSection { padding: 20px 18px; }
+.fullPage .rsvpSection { padding: 48px 56px; }
+
+.rsvpIntro {
+  font-size: 11px;
+  text-align: center;
+  margin-bottom: 16px;
+  margin-top: -10px;
+}
+.fullPage .rsvpIntro { font-size: 14px; }
+
+.rsvpThanks { text-align: center; padding: 20px 0; }
+
+.rsvpForm { display: flex; flex-direction: column; gap: 10px; }
+
+.rsvpInput {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid;
+  border-radius: 10px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  background: rgba(255,255,255,0.7);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.rsvpInput:focus { border-color: var(--accent) !important; }
+.fullPage .rsvpInput { padding: 14px 18px; font-size: 15px; }
+
+.rsvpAttend { display: flex; gap: 8px; }
+.rsvpBtn {
+  flex: 1;
+  padding: 10px;
+  border: 1.5px solid;
+  border-radius: 10px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.2s;
+}
+.fullPage .rsvpBtn { padding: 14px; font-size: 15px; }
+
+.drinkLabel2 {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+}
+.fullPage .drinkLabel2 { font-size: 12px; }
+
+.drinkGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.fullPage .drinkGrid { gap: 10px; }
+
+.drinkBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  border: 1.5px solid;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-inter);
+  transition: all 0.2s;
+}
+.fullPage .drinkBtn { padding: 14px 8px; }
+.drinkItemLabel {
+  font-size: 9px;
+  font-weight: 500;
+  text-align: center;
+  color: var(--dark);
+  line-height: 1.2;
+}
+.fullPage .drinkItemLabel { font-size: 12px; }
+
+.rsvpSubmit {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 50px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 0.5px;
+}
+.rsvpSubmit:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+.rsvpSubmit:disabled { opacity: 0.5; cursor: not-allowed; }
+.fullPage .rsvpSubmit { padding: 18px; font-size: 16px; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────────────────────*/
+.footer {
+  padding: 28px 20px 32px;
+  text-align: center;
+}
+.fullPage .footer { padding: 60px 40px 80px; }
+
+.footerNames {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.fullPage .footerNames { font-size: 32px; }
+
+.footerDate {
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+.fullPage .footerDate { font-size: 14px; margin-bottom: 20px; }
+
+.footerBrand {
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.fullPage .footerBrand { font-size: 13px; }

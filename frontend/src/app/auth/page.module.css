@@ -1,0 +1,108 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  background: linear-gradient(160deg, #fdf6ec, #f0e4cc);
+}
+.bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(201,169,110,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(107,143,92,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(201,169,110,0.3);
+  border-radius: 28px;
+  padding: 44px 40px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.08);
+}
+
+.logo {
+  display: block;
+  font-family: var(--font-playfair);
+  font-size: 20px;
+  color: var(--gold);
+  text-decoration: none;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.tabs {
+  display: flex;
+  background: rgba(201,169,110,0.08);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 28px;
+}
+.tab {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tabActive {
+  background: #fff;
+  color: var(--dark);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.title {
+  font-family: var(--font-playfair);
+  font-size: 26px;
+  color: var(--dark);
+  margin-bottom: 8px;
+  text-align: center;
+}
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.form { display: flex; flex-direction: column; gap: 16px; }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0.2px;
+}
+
+.switch {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.switchBtn {
+  background: none;
+  border: none;
+  color: var(--gold-dark);
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-inter);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
