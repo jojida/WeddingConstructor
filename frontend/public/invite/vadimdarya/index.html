@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Приглашение на свадьбу — Вадим & Дарья</title>
-  <meta name="description" content="Приглашение на свадьбу Вадима и Дарьи. 18 июля 2026 года, Артурс Спа Отель." />
+  <title>Приглашение на свадьбу — Александр & Анна</title>
+  <meta name="description" content="Приглашение на свадьбу Александра и Анны. 18 июля 2026 года, Артурс Спа Отель." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=36" />
+  <link rel="stylesheet" href="style.css?v=37" />
 </head>
 <body>
 
@@ -19,16 +19,16 @@
     <section class="hero" id="hero">
       <div class="hero-overlay"></div>
       <div class="hero-photo-bg" id="hero-bg">
-        <img src="images/couple.jpg" alt="Вадим и Дарья" class="hero-img" id="heroImg" />
+        <img src="images/couple.jpg" alt="Александр и Анна" class="hero-img" id="heroImg" />
         <div class="hero-photo-fallback" id="heroFallback"></div>
       </div>
 
       <div class="hero-content">
         <p class="invite-label reveal" data-delay="300">Приглашение на свадьбу</p>
         <div class="names-block">
-          <h1 class="name name-groom reveal" data-delay="500" data-edit="groomName">Вадим</h1>
+          <h1 class="name name-groom reveal" data-delay="500" data-edit="groomName">Александр</h1>
           <span class="and-symbol reveal" data-delay="650">&amp;</span>
-          <h1 class="name name-bride reveal" data-delay="800" data-edit="brideName">Дарья</h1>
+          <h1 class="name name-bride reveal" data-delay="800" data-edit="brideName">Анна</h1>
         </div>
         <div class="hero-date reveal" data-delay="1100">
           <span class="hero-date-num" data-edit="dateDay">18</span>
@@ -77,7 +77,7 @@
           <p class="venue-label">Место проведения</p>
           <p class="venue-name" data-edit="venue">«АРТУРС СПА ОТЕЛЬ»</p>
           <div class="venue-photo-frame">
-            <img src="images/hotel.png" alt="Артурс Спа Отель" class="venue-photo" />
+            <img src="images/hotel.jpg" alt="Артурс Спа Отель" class="venue-photo" />
           </div>
           <a href="https://yandex.com/maps/-/CDVvEDYt" target="_blank" class="venue-address-link" data-edit="venueAddress">
             Московская область, городской округ Мытищи, деревня Ларёво, Хвойная улица, 26/11
@@ -300,21 +300,40 @@
         <h2 class="section-title">Ждём вас!</h2>
         
         <div class="photo-grid" style="max-width: 500px; margin: 1.5rem auto;">
-          <img src="images/footer_photo_new1.jpg" alt="Фото Вадима и Дарьи" class="closing-photo" />
-          <img src="images/footer_photo_new2.jpg" alt="Фото Вадима и Дарьи" class="closing-photo" />
+          <img src="images/footer_photo_new1.jpg" alt="Фото Александра и Анны" class="closing-photo" />
+          <img src="images/footer_photo_new2.jpg" alt="Фото Александра и Анны" class="closing-photo" />
         </div>
         
         <div class="footer-seal">
-          <img src="images/wax_seal.png?v=2" alt="Печать" class="footer-seal-img" />
+          <div class="seal-wrap" role="img" aria-label="Печать с инициалами">
+            <svg class="seal-bg" viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <radialGradient id="sealGold" cx="38%" cy="30%" r="78%">
+                  <stop offset="0%"  stop-color="#efd98f" />
+                  <stop offset="45%" stop-color="#c9a84c" />
+                  <stop offset="100%" stop-color="#8f6a2b" />
+                </radialGradient>
+              </defs>
+              <circle cx="50" cy="50" r="47.5" fill="url(#sealGold)" />
+              <circle cx="50" cy="50" r="47.5" fill="none" stroke="#6f5118" stroke-width="1.2" opacity="0.55" />
+              <circle cx="50" cy="50" r="39"   fill="none" stroke="#6f5118" stroke-width="1"   opacity="0.4" />
+              <circle cx="50" cy="50" r="36"   fill="none" stroke="#f3e2a3" stroke-width="0.6" opacity="0.55" />
+              <circle cx="50" cy="13.5" r="1.4" fill="#6f5118" opacity="0.5" />
+              <circle cx="50" cy="86.5" r="1.4" fill="#6f5118" opacity="0.5" />
+            </svg>
+            <span class="seal-initials">
+              <span class="seal-letter" data-edit="sealGroomInitial">А</span><span class="seal-amp">&amp;</span><span class="seal-letter" data-edit="sealBrideInitial">А</span>
+            </span>
+          </div>
         </div>
-        <p class="footer-names">С любовью,<br><span data-edit="footerNames">Вадим и Дарья</span></p>
+        <p class="footer-names">С любовью,<br><span data-edit="footerNames">Александр и Анна</span></p>
         <p class="footer-copy" data-edit="footerDate">18 · ИЮЛЯ · 2026</p>
       </div>
     </section>
 
   </main>
 
-  <script src="script.js?v=20"></script>
+  <script src="script.js?v=21"></script>
 </body>
 </html>
 

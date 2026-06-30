@@ -66,6 +66,8 @@ export const TEMPLATES = [
     preview: '/invite/vadimdarya/images/couple.jpg',
     defaultCover: '/invite/vadimdarya/images/couple.jpg',
     defaultGallery: [] as string[],
+    sampleBride: 'Анна',
+    sampleGroom: 'Александр',
   }
 ];
 

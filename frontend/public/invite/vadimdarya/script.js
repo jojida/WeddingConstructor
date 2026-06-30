@@ -53,6 +53,9 @@
     if (groom || bride) {
       setText('footerNames', (groom || '') + (groom && bride ? ' и ' : '') + (bride || ''));
     }
+    // Инициалы на печати — первые буквы имён, меняются вместе с именами
+    if (groom) setText('sealGroomInitial', groom.charAt(0).toUpperCase());
+    if (bride) setText('sealBrideInitial', bride.charAt(0).toUpperCase());
 
     // Дата
     if (d.weddingDate) {

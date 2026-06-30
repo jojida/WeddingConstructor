@@ -51,6 +51,8 @@ export default async function DemoPage({ params }: Props) {
       <TemplatePreview
         data={{
           ...SAMPLE_DATA,
+          brideName: (template as any).sampleBride || SAMPLE_DATA.brideName,
+          groomName: (template as any).sampleGroom || SAMPLE_DATA.groomName,
           templateId: template.id,
           coverPhoto: template.defaultCover,
           galleryPhotos: template.defaultGallery,
