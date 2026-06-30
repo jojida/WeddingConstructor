@@ -15,7 +15,7 @@
 
   // Текущее состояние данных (для таймера и т.п.)
   var STATE = {
-    weddingDate: '2026-07-18',
+    weddingDate: '2026-09-20',
     weddingTime: '15:00',
     apiBase: ''
   };
@@ -265,10 +265,10 @@
   var countdownInterval = null;
   function restartCountdown() {
     if (countdownInterval) clearInterval(countdownInterval);
-    var dateStr = STATE.weddingDate || '2026-07-18';
+    var dateStr = STATE.weddingDate || '2026-09-20';
     var timeStr = STATE.weddingTime || '15:00';
     var target = new Date(dateStr + 'T' + (timeStr.length === 5 ? timeStr + ':00' : timeStr));
-    if (isNaN(target.getTime())) target = new Date('2026-07-18T15:00:00');
+    if (isNaN(target.getTime())) target = new Date('2026-09-20T15:00:00');
 
     function tick() {
       var diff = target - new Date();
