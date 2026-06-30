@@ -47,7 +47,10 @@ export default async function DemoPage({ params }: Props) {
   const defs = TEMPLATE_DEFAULTS[template.id] || {};
 
   return (
-    <div style={{ minHeight: '100vh', background: '#000', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: '#000', position: 'relative', display: 'flex', justifyContent: 'center' }}>
+      {/* Единая ширина превью для всех шаблонов (как у «Скетч» / «Цветущая арка»).
+          На десктопе — центрированная колонка, на телефоне — на всю ширину экрана. */}
+      <div style={{ width: '100%', maxWidth: 500, boxShadow: '0 0 80px rgba(0,0,0,0.6)' }}>
       <TemplatePreview
         data={{
           ...SAMPLE_DATA,
@@ -67,6 +70,7 @@ export default async function DemoPage({ params }: Props) {
         apiBase={apiBase}
         fullPage
       />
+      </div>
 
       <DemoActions templateId={template.id} />
     </div>
