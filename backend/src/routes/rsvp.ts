@@ -16,7 +16,7 @@ const DRINK_LABELS: Record<string, string> = {
 
 // POST /api/rsvp/:slug — публичная отправка анкеты гостем
 router.post('/:slug', async (req: Request, res: Response) => {
-  const { slug } = req.params;
+  const slug = req.params.slug as string;
   try {
     const invite = await prisma.invitation.findUnique({ where: { slug } });
     if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
@@ -66,7 +66,7 @@ router.post('/:slug', async (req: Request, res: Response) => {
 
 // GET /api/rsvp/:invitationId — список ответов (только для владельца)
 router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const { invitationId } = req.params;
+  const invitationId = req.params.invitationId as string;
   const invite = await prisma.invitation.findUnique({ where: { id: invitationId } });
   if (!invite || invite.userId !== req.userId) {
     return res.status(403).json({ error: 'Нет доступа' });

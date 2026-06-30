@@ -109,7 +109,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
 
 // GET /api/payment/status/:inviteId
 router.get('/status/:inviteId', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const invite = await prisma.invitation.findUnique({ where: { id: req.params.inviteId } });
+  const invite = await prisma.invitation.findUnique({ where: { id: req.params.inviteId as string } });
   if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
   return res.json({ status: invite.status, plan: invite.plan, paidAt: invite.paidAt });
 });

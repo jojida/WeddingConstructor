@@ -20,7 +20,7 @@ async function loadOwnedInvite(inviteId: string, userId?: string) {
 // ── Публичный резолв персональной ссылки (для страницы приглашения) ──────────
 // ВАЖНО: объявлен до /:inviteId, отдаёт только обращение/имя/статус — без утечки.
 router.get('/resolve/:token', async (req: Request, res: Response) => {
-  const guest = await prisma.guest.findUnique({ where: { token: req.params.token } });
+  const guest = await prisma.guest.findUnique({ where: { token: req.params.token as string } });
   if (!guest) return res.status(404).json({ error: 'Гость не найден' });
   let attending: boolean | null = null;
   if (guest.responseId) {
@@ -36,7 +36,7 @@ router.get('/resolve/:token', async (req: Request, res: Response) => {
 
 // ── Список гостей приглашения (владелец) ─────────────────────────────────────
 router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const invite = await loadOwnedInvite(req.params.inviteId, req.userId);
+  const invite = await loadOwnedInvite(req.params.inviteId as string, req.userId);
   if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
 
   const guests = await prisma.guest.findMany({
@@ -67,7 +67,7 @@ router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response)
 
 // ── Добавить гостя (владелец, только продвинутый тариф) ──────────────────────
 router.post('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const invite = await loadOwnedInvite(req.params.inviteId, req.userId);
+  const invite = await loadOwnedInvite(req.params.inviteId as string, req.userId);
   if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
   if (!isAdvanced(invite.plan)) {
     return res.status(403).json({ error: 'Кабинет гостей доступен на тарифах Стандарт и Премиум' });
@@ -86,7 +86,7 @@ router.post('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response
 
 // ── Редактировать гостя ──────────────────────────────────────────────────────
 router.put('/:guestId', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const guest = await prisma.guest.findUnique({ where: { id: req.params.guestId } });
+  const guest = await prisma.guest.findUnique({ where: { id: req.params.guestId as string } });
   if (!guest) return res.status(404).json({ error: 'Гость не найден' });
   const invite = await loadOwnedInvite(guest.invitationId, req.userId);
   if (!invite) return res.status(403).json({ error: 'Нет доступа' });
@@ -105,7 +105,7 @@ router.put('/:guestId', authMiddleware, async (req: AuthRequest, res: Response) 
 
 // ── Удалить гостя ────────────────────────────────────────────────────────────
 router.delete('/:guestId', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const guest = await prisma.guest.findUnique({ where: { id: req.params.guestId } });
+  const guest = await prisma.guest.findUnique({ where: { id: req.params.guestId as string } });
   if (!guest) return res.status(404).json({ error: 'Гость не найден' });
   const invite = await loadOwnedInvite(guest.invitationId, req.userId);
   if (!invite) return res.status(403).json({ error: 'Нет доступа' });
