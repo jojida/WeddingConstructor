@@ -38,7 +38,7 @@ export default function AuthPage() {
     <div className={styles.page}>
       <div className={styles.bg} />
       <div className={styles.card}>
-        <Link href="/" className={styles.logo}>✦ Eloquence</Link>
+        <Link href="/" className={styles.logo}>✦ WeddingCraft</Link>
         
         <div className={styles.tabs}>
           <button

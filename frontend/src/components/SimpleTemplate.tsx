@@ -175,7 +175,7 @@ export default function SimpleTemplate({ data, apiBase }: Props) {
 
       {/* Footer */}
       <div className={styles.footer}>
-        <p className={styles.footerText}>Eloquence · Цифровые приглашения</p>
+        <p className={styles.footerText}>WeddingCraft · Цифровые приглашения</p>
       </div>
 
     </div>

@@ -56,7 +56,7 @@ function PaymentContent() {
         <Link href="/editor" className={styles.back}>← Вернуться к редактору</Link>
         
         <div className={styles.header}>
-          <div className={styles.logo}>✦ Eloquence</div>
+          <div className={styles.logo}>✦ WeddingCraft</div>
           <h1 className={styles.title}>Выберите тариф</h1>
           <p className={styles.subtitle}>После оплаты вы получите уникальную ссылку для гостей</p>
         </div>

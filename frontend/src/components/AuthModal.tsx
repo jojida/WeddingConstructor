@@ -54,7 +54,7 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
 
         {/* Header */}
         <div className={styles.header}>
-          <div className={styles.logo}>Eloquence</div>
+          <div className={styles.logo}>WeddingCraft</div>
           <h2 className={styles.title}>
             {step === 'email' ? 'Вход в аккаунт' : 'Введите код'}
           </h2>

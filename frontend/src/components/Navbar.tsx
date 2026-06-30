@@ -21,7 +21,7 @@ export default function Navbar() {
   return (
     <header className={styles.navbar}>
       <div className={styles.inner}>
-        <Link href="/" className={styles.logo}>Eloquence</Link>
+        <Link href="/" className={styles.logo}>WeddingCraft</Link>
 
         <nav className={styles.links}>
           <Link href="/templates" className={`${styles.link} ${pathname === '/templates' ? styles.active : ''}`}>

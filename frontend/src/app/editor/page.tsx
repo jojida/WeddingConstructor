@@ -117,7 +117,7 @@ function SetupStep({ templateId, onComplete, initialData }: {
   return (
     <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column' }}>
       <header style={{ padding: '0 48px', height: 64, borderBottom: '1px solid rgba(206,197,186,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', flexShrink: 0 }}>
-        <Link href="/" style={{ fontFamily: 'var(--font-playfair)', fontSize: 20, color: '#0e1d26', textDecoration: 'none', fontWeight: 500 }}>Eloquence</Link>
+        <Link href="/" style={{ fontFamily: 'var(--font-playfair)', fontSize: 20, color: '#0e1d26', textDecoration: 'none', fontWeight: 500 }}>WeddingCraft</Link>
         <Link href="/templates" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#7d766c', textDecoration: 'none' }}>
           <ArrowLeft style={{ width: 14, height: 14 }} /> Назад к шаблонам
         </Link>
@@ -426,7 +426,7 @@ function EditorContent() {
         {/* ── TOP BAR ─────────────────────────────────────────────────────── */}
         <header className={styles.topBar}>
           <div className={styles.topBarLeft}>
-            <Link href="/" className={styles.topBarTitle}>Eloquence</Link>
+            <Link href="/" className={styles.topBarTitle}>WeddingCraft</Link>
             <div className={styles.topBarBreadcrumb}>
               <span className={styles.topBarSep}>›</span>
               <span>Шаблоны</span>

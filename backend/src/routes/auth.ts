@@ -8,10 +8,11 @@ const router = Router();
 import nodemailer from 'nodemailer';
 
 // Настройка почты (если данные пустые, письма не отправятся, но код будет в консоли)
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || '465');
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.yandex.ru',
-  port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: true,
+  port: SMTP_PORT,
+  secure: SMTP_PORT === 465, // 465 → SSL, 587 → STARTTLS (secure:false)
   auth: {
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
@@ -38,17 +39,24 @@ router.post('/send-code', async (req: Request, res: Response) => {
     // Всегда выводим код в консоль для разработки и тестов
     console.log(`\n🔑 [AUTH CODE] Код для входа ${email}: ${code}\n`);
 
-    // Пытаемся отправить письмо, если настроен SMTP
+    // Пытаемся отправить письмо, если настроен SMTP.
+    // Сбой почты НЕ должен ронять вход: код уже сохранён в БД и выведен в консоль.
+    let emailSent = false;
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      await transporter.sendMail({
-        from: `"WeddingCraft" <${process.env.SMTP_USER}>`,
-        to: email,
-        subject: 'Код для входа',
-        text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.`,
-      });
+      try {
+        await transporter.sendMail({
+          from: process.env.SMTP_FROM || `"WeddingCraft" <${process.env.SMTP_USER}>`,
+          to: email,
+          subject: 'Код для входа — WeddingCraft',
+          text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.`,
+        });
+        emailSent = true;
+      } catch (mailErr) {
+        console.error('[AUTH CODE] Не удалось отправить письмо (код всё равно сохранён):', mailErr);
+      }
     }
 
-    return res.json({ success: true, message: 'Код отправлен' });
+    return res.json({ success: true, emailSent, message: 'Код отправлен' });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: 'Ошибка отправки кода' });

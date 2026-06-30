@@ -21,7 +21,7 @@ function Header() {
   return (
     <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
       <div className={styles.headerInner}>
-        <Link href="/" className={styles.logo}>Eloquence</Link>
+        <Link href="/" className={styles.logo}>WeddingCraft</Link>
 
         <nav className={styles.nav}>
           <Link href="/templates" className={styles.navLink}>Шаблоны</Link>
@@ -425,9 +425,9 @@ function Footer() {
       <div className={styles.sectionInner}>
         <div className={styles.footerGrid}>
           <div>
-            <div className={styles.footerLogo}>Eloquence</div>
+            <div className={styles.footerLogo}>WeddingCraft</div>
             <p className={styles.footerDesc}>
-              © 2025 Цифровая свадебная полиграфия Eloquence. Будущее ваших традиций.
+              © 2025 Цифровая свадебная полиграфия WeddingCraft. Будущее ваших традиций.
             </p>
           </div>
           <div>

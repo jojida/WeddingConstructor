@@ -369,7 +369,7 @@ export default function ClassicTemplate({ data, apiBase, fullPage = false, slug 
             {dateParts.day} {dateParts.monthName} {dateParts.year}
           </div>
         )}
-        <div className={styles.footerBrand}>✦ Eloquence ✦</div>
+        <div className={styles.footerBrand}>✦ WeddingCraft ✦</div>
       </div>
 
     </div>

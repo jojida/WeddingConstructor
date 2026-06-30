@@ -398,7 +398,7 @@ export default function ParchmentTemplate({ data, apiBase, fullPage = false, slu
           {data.brideName || 'Дарья'} & {data.groomName || 'Вадим'}
         </div>
         {dp && <div className={styles.footerDate}>{dp.day} {dp.month} {dp.year}</div>}
-        <div className={styles.footerBrand}>✦ Eloquence ✦</div>
+        <div className={styles.footerBrand}>✦ WeddingCraft ✦</div>
       </footer>
     </div>
   );

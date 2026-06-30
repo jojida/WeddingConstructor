@@ -561,7 +561,7 @@ export default function NauticalTemplate({ data, apiBase, fullPage = false, slug
         <div className={styles.footerAnchorRow}>
           <Anchor className={styles.footerAnchor} />
         </div>
-        <div className={styles.footerBrand}>⚓ Eloquence</div>
+        <div className={styles.footerBrand}>⚓ WeddingCraft</div>
       </div>
 
     </div>

@@ -525,7 +525,7 @@ export default function VideoTemplate({ data, apiBase, fullPage = false, slug }:
           <p className={`${styles.footerNames} ${styles.serif}`}>
             {data.groomName || 'Viktor'} & {data.brideName || 'Paula'}
           </p>
-          <span className={styles.footerBrand}>Created with Eloquence</span>
+          <span className={styles.footerBrand}>Created with WeddingCraft</span>
         </footer>
 
       </div>

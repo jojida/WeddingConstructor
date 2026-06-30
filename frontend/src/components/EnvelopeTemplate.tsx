@@ -498,7 +498,7 @@ export default function EnvelopeTemplate({ data, apiBase, fullPage = false, slug
           <div className={styles.footerNames}>{data.brideName || 'Viktor'} and {data.groomName || 'Paula'}</div>
           {/* Couple photo at bottom */}
           {coverUrl && <div className={styles.footerPhoto} style={{ backgroundImage: `url(${coverUrl})` }} />}
-          <div className={styles.footerBrand}>✦ Eloquence ✦</div>
+          <div className={styles.footerBrand}>✦ WeddingCraft ✦</div>
         </footer>
       </div>
     </div>
