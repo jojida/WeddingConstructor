@@ -17,6 +17,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
   },
+  // Чтобы недоступный/заблокированный SMTP не висел минутами
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 });
 
 // POST /api/auth/send-code
@@ -39,24 +43,21 @@ router.post('/send-code', async (req: Request, res: Response) => {
     // Всегда выводим код в консоль для разработки и тестов
     console.log(`\n🔑 [AUTH CODE] Код для входа ${email}: ${code}\n`);
 
-    // Пытаемся отправить письмо, если настроен SMTP.
-    // Сбой почты НЕ должен ронять вход: код уже сохранён в БД и выведен в консоль.
-    let emailSent = false;
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      try {
-        await transporter.sendMail({
-          from: process.env.SMTP_FROM || `"WeddingCraft" <${process.env.SMTP_USER}>`,
-          to: email,
-          subject: 'Код для входа — WeddingCraft',
-          text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.`,
-        });
-        emailSent = true;
-      } catch (mailErr) {
-        console.error('[AUTH CODE] Не удалось отправить письмо (код всё равно сохранён):', mailErr);
-      }
-    }
+    // Отвечаем СРАЗУ — код уже сохранён в БД. Письмо шлём в фоне (best-effort),
+    // чтобы медленный/заблокированный SMTP не подвешивал HTTP-запрос.
+    res.json({ success: true, message: 'Код отправлен' });
 
-    return res.json({ success: true, emailSent, message: 'Код отправлен' });
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      transporter.sendMail({
+        from: process.env.SMTP_FROM || `"WeddingCraft" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: 'Код для входа — WeddingCraft',
+        text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.`,
+      })
+        .then(() => console.log(`✉️  [AUTH CODE] письмо отправлено на ${email}`))
+        .catch((mailErr) => console.error('[AUTH CODE] Не удалось отправить письмо:', (mailErr && mailErr.message) || mailErr));
+    }
+    return;
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: 'Ошибка отправки кода' });
