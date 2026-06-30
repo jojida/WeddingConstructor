@@ -62,7 +62,6 @@ export default function ManageInvitePage() {
 
   const advanced = isAdvancedPlan(invite.plan);
   const couple = [invite.groomName, invite.brideName].filter(Boolean).join(' & ') || 'Без названия';
-  const siteUrl = `${origin}/invite/${invite.slug}`;
 
   const TABS: { key: Tab; label: string; show: boolean }[] = [
     { key: 'responses', label: '📋 Ответы', show: true },
@@ -81,21 +80,12 @@ export default function ManageInvitePage() {
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
             <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>
-              Тариф: <b>{invite.plan}</b> · Статус: {invite.status === 'draft' ? 'черновик' : 'опубликовано'}
+              Тариф: <b>{invite.plan}</b>
             </div>
           </div>
-          {invite.status !== 'draft' && (
-            <a href={siteUrl} target="_blank" rel="noreferrer" className="btn-outline" style={{ textDecoration: 'none', padding: '9px 18px', fontSize: 13 }}>
-              Открыть сайт ↗
-            </a>
-          )}
         </div>
 
-        {invite.status === 'draft' && (
-          <div style={{ background: '#fff6e6', border: '1px solid #f0d9a8', borderRadius: 10, padding: '12px 16px', fontSize: 14, color: '#8a6d2f', margin: '12px 0' }}>
-            Приглашение ещё не оплачено. <Link href={`/payment?id=${invite.id}`} style={{ color: '#8a6d2f', fontWeight: 700 }}>Перейти к оплате →</Link>
-          </div>
-        )}
+        <SiteAddressCard invite={invite} origin={origin} onSaved={loadInvite} />
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 6, borderBottom: BORDER, margin: '20px 0 24px', flexWrap: 'wrap' }}>
@@ -209,7 +199,7 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
   };
 
   const copyLink = (token: string) => {
-    navigator.clipboard.writeText(`${origin}/invite/${invite.slug}?g=${token}`);
+    navigator.clipboard.writeText(`${origin}/${invite.slug}?g=${token}`);
     toast.success('Персональная ссылка скопирована');
   };
 
@@ -380,6 +370,49 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── Адрес сайта (slug) ────────────────────────────────────────────────────
+function SiteAddressCard({ invite, origin, onSaved }: { invite: Invite; origin: string; onSaved: () => void }) {
+  const [slug, setSlug] = useState(invite.slug);
+  const [saving, setSaving] = useState(false);
+  const url = `${origin}/${invite.slug}`;
+  const originHost = origin.replace(/^https?:\/\//, '');
+
+  const save = async () => {
+    const v = slug.trim().toLowerCase();
+    if (!v || v === invite.slug) { toast('Адрес не изменился'); return; }
+    setSaving(true);
+    try {
+      await api.patch(`/api/invites/${invite.id}/slug`, { slug: v });
+      toast.success('Адрес сайта обновлён');
+      onSaved();
+    } catch (e: any) {
+      toast.error(e.response?.data?.error || 'Не удалось изменить адрес');
+    } finally { setSaving(false); }
+  };
+
+  const copy = () => { navigator.clipboard.writeText(url); toast.success('Ссылка скопирована'); };
+
+  return (
+    <div style={{ background: '#fff', border: BORDER, borderRadius: 12, padding: 16, margin: '14px 0 4px' }}>
+      <div style={{ fontSize: 12, fontWeight: 700, color: '#7d766c', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Адрес сайта</div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginBottom: 14 }}>
+        <a href={url} target="_blank" rel="noreferrer" style={{ flex: 1, minWidth: 200, fontSize: 15, color: PRIMARY, fontWeight: 600, textDecoration: 'none', wordBreak: 'break-all' }}>{url} ↗</a>
+        <button onClick={copy} className="btn-outline" style={{ padding: '8px 14px', fontSize: 13 }}>Копировать</button>
+        <a href={url} target="_blank" rel="noreferrer" className="btn-primary" style={{ textDecoration: 'none', padding: '8px 16px', fontSize: 13 }}>Открыть</a>
+      </div>
+      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#7d766c', marginBottom: 6 }}>Изменить адрес</label>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 220, border: BORDER, borderRadius: 8, overflow: 'hidden', background: '#fff' }}>
+          <span style={{ fontSize: 13, color: '#9a948a', padding: '0 2px 0 10px', whiteSpace: 'nowrap' }}>{originHost}/</span>
+          <input value={slug} onChange={e => setSlug(e.target.value)} className="input-field" style={{ border: 'none', flex: 1, minWidth: 80, padding: '10px 8px' }} placeholder="mysite" />
+        </div>
+        <button className="btn-primary" onClick={save} disabled={saving} style={{ padding: '10px 20px', fontSize: 14 }}>{saving ? 'Сохранение…' : 'Сохранить'}</button>
+      </div>
+      <div style={{ fontSize: 12, color: '#9a948a', marginTop: 8 }}>3–40 символов: латиница, цифры, дефис. Например: <b>anna-i-aleksandr</b></div>
     </div>
   );
 }

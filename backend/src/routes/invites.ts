@@ -6,6 +6,14 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Слова, которые нельзя использовать как slug, чтобы не конфликтовать
+// с маршрутами фронтенда (weddingcraft.ru/<slug>).
+const RESERVED_SLUGS = new Set([
+  'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment',
+  'templates', 'admin', 'login', 'register', 'signup', 'about', 'pricing', 'help',
+  'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads',
+]);
+
 // Приватные поля приглашения — не отдавать в публичных ответах (by-slug/by-domain).
 function stripPrivate(invite: any) {
   const { notifyChannel, notifyEmail, notifyTelegramChatId, telegramConnectToken, paymentId, ...pub } = invite;
@@ -81,11 +89,9 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
       musicUrl, templateId, title, enabledSections, customData,
     } = req.body;
 
-    // Re-generate slug if names changed
-    let slug = invite.slug;
-    if ((groomName && groomName !== invite.groomName) || (brideName && brideName !== invite.brideName)) {
-      slug = generateSlug(groomName || '', brideName || '');
-    }
+    // Slug стабилен: задаётся один раз при создании, далее меняется только
+    // вручную через PATCH /:id/slug. Обновление данных адрес сайта НЕ меняет.
+    const slug = invite.slug;
 
     const updated = await prisma.invitation.update({
       where: { id: id as string },
@@ -114,7 +120,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
 router.get('/by-slug/:slug', async (req, res: Response) => {
   const invite = await prisma.invitation.findUnique({ where: { slug: req.params.slug } });
   if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
-  if (invite.status === 'draft') return res.status(403).json({ error: 'Приглашение ещё не оплачено' });
+  // Оплата временно отключена — сайт доступен сразу после создания.
   return res.json(publicInvite(invite));
 });
 
@@ -124,7 +130,7 @@ router.get('/by-domain/:host', async (req, res: Response) => {
   if (!host) return res.status(404).json({ error: 'Не найдено' });
   const invite = await prisma.invitation.findFirst({ where: { customDomain: host } });
   if (!invite) return res.status(404).json({ error: 'Домен не привязан' });
-  if (invite.status === 'draft') return res.status(403).json({ error: 'Приглашение ещё не оплачено' });
+  // Оплата временно отключена — сайт доступен сразу.
   return res.json(publicInvite(invite));
 });
 
@@ -146,6 +152,24 @@ router.patch('/:id/settings', authMiddleware, async (req: AuthRequest, res: Resp
   }
   const updated = await prisma.invitation.update({ where: { id: invite.id }, data });
   return res.json(stripPrivate(updated));
+});
+
+// PATCH /api/invites/:id/slug — задать «красивый» адрес сайта (weddingcraft.ru/<slug>)
+router.patch('/:id/slug', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const invite = await prisma.invitation.findUnique({ where: { id: req.params.id as string } });
+  if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
+
+  const raw = String(req.body.slug || '').trim().toLowerCase();
+  if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(raw)) {
+    return res.status(400).json({ error: 'Адрес: 3–40 символов, латиница, цифры и дефис (не с дефиса)' });
+  }
+  if (RESERVED_SLUGS.has(raw)) return res.status(400).json({ error: 'Этот адрес зарезервирован, выберите другой' });
+
+  const taken = await prisma.invitation.findUnique({ where: { slug: raw } });
+  if (taken && taken.id !== invite.id) return res.status(409).json({ error: 'Этот адрес уже занят' });
+
+  const updated = await prisma.invitation.update({ where: { id: invite.id }, data: { slug: raw } });
+  return res.json({ slug: updated.slug });
 });
 
 // POST /api/invites/:id/telegram-connect — выдать deep-link для подключения Telegram

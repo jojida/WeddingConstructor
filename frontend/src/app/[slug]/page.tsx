@@ -1,0 +1,77 @@
+import { notFound } from 'next/navigation';
+import TemplatePreview from '@/components/TemplatePreview';
+import { TEMPLATE_GREETING_KEY } from '@/lib/constants';
+
+/* Корневой адрес сайта-приглашения: weddingcraft.ru/<slug>.
+   Зеркалит /invite/[slug] — статические маршруты (editor, demo, templates,
+   dashboard, auth, payment, invite, by-domain) имеют приоритет над этим
+   динамическим сегментом, поэтому сюда попадают только пользовательские slug. */
+
+interface Props {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ g?: string }>;
+}
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+async function getInvite(slug: string) {
+  try {
+    const res = await fetch(`${API}/api/invites/by-slug/${slug}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
+async function getGuest(token: string) {
+  try {
+    const res = await fetch(`${API}/api/guests/resolve/${token}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json() as Promise<{ greeting: string; names: string; attending: boolean | null }>;
+  } catch { return null; }
+}
+
+export default async function SiteBySlugPage({ params, searchParams }: Props) {
+  const { slug } = await params;
+  const { g } = await searchParams;
+  const invite = await getInvite(slug);
+
+  if (!invite) {
+    notFound();
+  }
+
+  if (g) {
+    const guest = await getGuest(g);
+    if (guest) {
+      const greetingKey = TEMPLATE_GREETING_KEY[invite.templateId];
+      invite.customData = { ...(invite.customData || {}) };
+      if (greetingKey) invite.customData[greetingKey] = guest.greeting;
+      invite.customData.guestName = guest.names;
+      invite.customData.guestToken = g;
+    }
+  }
+
+  return (
+    <div style={{ minHeight: '100vh' }}>
+      <TemplatePreview data={invite} apiBase={API} fullPage slug={slug} />
+    </div>
+  );
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { slug } = await params;
+  const invite = await getInvite(slug);
+  if (!invite) return {};
+
+  const title = invite.groomName && invite.brideName
+    ? `Свадьба ${invite.groomName} & ${invite.brideName}`
+    : 'Свадебное приглашение';
+
+  return {
+    title,
+    description: invite.inviteText || `Вас приглашают на свадьбу! ${invite.weddingDate ? new Date(invite.weddingDate).toLocaleDateString('ru-RU') : ''}`,
+    openGraph: {
+      title,
+      images: invite.coverPhoto ? [`${process.env.NEXT_PUBLIC_API_URL}${invite.coverPhoto}`] : [],
+    },
+  };
+}
