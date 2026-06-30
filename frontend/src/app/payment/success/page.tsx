@@ -3,6 +3,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { isAdvancedPlan } from '@/lib/constants';
 import styles from './page.module.css';
 
 function SuccessContent() {
@@ -63,6 +64,18 @@ function SuccessContent() {
                 Мои приглашения →
               </Link>
             </div>
+
+            {isAdvancedPlan(invite.plan) && (
+              <div style={{ marginTop: 20, padding: '16px 18px', background: 'rgba(201,169,110,0.12)', border: '1px solid rgba(201,169,110,0.4)', borderRadius: 12, textAlign: 'center' }}>
+                <div style={{ fontWeight: 700, color: '#8a6d2f', marginBottom: 4 }}>✦ Доступен кабинет гостей</div>
+                <p style={{ fontSize: 13, color: '#7d6a45', margin: '0 0 12px' }}>
+                  Добавьте гостей и получите для каждого персональную ссылку с именным обращением.
+                </p>
+                <Link href={`/dashboard/${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '10px 22px', fontSize: 14 }}>
+                  Перейти к гостям →
+                </Link>
+              </div>
+            )}
           </>
         ) : (
           <div className={styles.loading}>

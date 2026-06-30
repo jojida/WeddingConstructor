@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -56,7 +56,7 @@ function PaymentContent() {
         <Link href="/editor" className={styles.back}>← Вернуться к редактору</Link>
         
         <div className={styles.header}>
-          <div className={styles.logo}>✦ WeddingCraft</div>
+          <div className={styles.logo}>✦ Eloquence</div>
           <h1 className={styles.title}>Выберите тариф</h1>
           <p className={styles.subtitle}>После оплаты вы получите уникальную ссылку для гостей</p>
         </div>

@@ -1,0 +1,953 @@
+/* ════════════════════════════════════════════════════════════
+   ШАБЛОН «ЦВЕТУЩАЯ АРКА» — Blue/White/Green Garden Arch
+════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #ffffff;
+  --ink: #4b4f44;
+  --ink-soft: #74786a;
+  --gold: #b89a6a;
+  --gold-deep: #9c7f4f;
+  --sage: #8fa07c;
+  --pink: #c98ba0;
+  --pad-x: 30px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #d7dcd0;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.card {
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  background: var(--bg);
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 60px rgba(60, 70, 50, 0.18);
+}
+
+.script-h {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(34px, 9vw, 46px);
+  color: var(--ink);
+  text-align: center;
+  line-height: 1.08;
+}
+
+/* ── site-wide reveal-on-scroll (секции + поэлементно со стэггером) ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(46px);
+  transition: opacity 1s cubic-bezier(.22, 1, .36, 1), transform 1s cubic-bezier(.22, 1, .36, 1);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* поэлементное появление — назначается из script.js */
+.anim {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .85s cubic-bezier(.22, 1, .36, 1), transform .85s cubic-bezier(.22, 1, .36, 1);
+}
+
+.anim.anim-in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .reveal,
+  .anim {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* ━━━━━━━━━━━━ ОБЛОЖКА (целый PNG) ━━━━━━━━━━━━ */
+.cover {
+  background: var(--bg);
+}
+
+.cover-art {
+  position: relative;
+  width: 100%;
+}
+
+.cover-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: block;
+  /* резервируем высоту обложки (соотношение arch.svg), чтобы она не
+     схлопывалась во время загрузки картинки и не «всплывала» след. секция */
+  aspect-ratio: 1038 / 1351;
+}
+
+/* Шатёр (беседка) и пара — отдельными слоями в проёме арки */
+.cover-venue {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 20%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: auto;
+  pointer-events: none;
+}
+
+.cover-couple {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 14%;
+  transform: translateX(-50%);
+  width: 30%;
+  height: auto;
+  pointer-events: none;
+}
+
+/* Белая маска поверх «запечённых» имён и адреса. За ними фон чисто белый
+   (светлое облако арки), поэтому плотная маска НЕ видна как «коробка» —
+   она лишь скрывает запечённый текст, чтобы не было двойных имён. */
+.cover-namemask {
+  position: absolute;
+  left: 6%;
+  top: 24%;
+  width: 88%;
+  height: 34%;
+  background: radial-gradient(ellipse 77% 91% at 50% 48%,
+      #fff 0%, #fff 85%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+
+.cover-inner {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  right: 0;
+  top: 21%;
+  text-align: center;
+  padding: 0 20%;
+}
+
+.cover-eyebrow {
+  font-size: clamp(8px, 2.4vw, 11px);
+  font-weight: 400;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.cover-names {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 0.96;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-shadow: 0 0 14px #fff, 0 0 26px #fff, 0 0 40px #fff;
+}
+
+.cover-names .cn-line {
+  font-size: clamp(40px, 12.5vw, 66px);
+}
+
+.cover-names .cn-amp {
+  font-size: clamp(22px, 6.5vw, 34px);
+  color: var(--gold);
+  margin: -3px 0;
+}
+
+.cover-date {
+  font-size: clamp(9px, 2.6vw, 12px);
+  font-weight: 400;
+  letter-spacing: 0.28em;
+  color: var(--ink-soft);
+  margin-top: 12px;
+  text-shadow: 0 0 12px #fff, 0 0 22px #fff;
+}
+
+/* ━━━━━━━━━━━━ ДОРОГИЕ ДРУЗЬЯ ━━━━━━━━━━━━ */
+.friends {
+  background: var(--bg);
+  padding: 54px var(--pad-x) 44px;
+}
+
+.friends-frame {
+  position: relative;
+  padding: 60px 30px 50px;
+}
+
+.friends-goldframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.friends-bouquet {
+  position: absolute;
+  top: -46px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 165px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.friends-olive {
+  position: absolute;
+  width: 96px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.friends-olive-tr {
+  top: -10px;
+  right: -14px;
+  transform: rotate(8deg);
+}
+
+.friends-olive-bl {
+  bottom: -10px;
+  left: -14px;
+  transform: rotate(180deg);
+}
+
+.friends-inner {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-top: 14px;
+}
+
+.friends-text {
+  font-size: clamp(11px, 3.1vw, 13px);
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  line-height: 2;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  max-width: 330px;
+  margin: 18px auto 28px;
+}
+
+.friends-photos {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.polaroid {
+  background: #fff;
+  padding: 8px 8px 22px;
+  box-shadow: 2px 4px 14px rgba(40, 50, 30, 0.2);
+  width: 46%;
+  overflow: hidden;
+  transition: transform .4s cubic-bezier(.22, 1, .36, 1), box-shadow .4s;
+}
+
+.polaroid img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  height: auto;
+  object-fit: cover;
+  object-position: top center;
+}
+
+.polaroid-l {
+  transform: rotate(-5deg);
+  margin-right: -10px;
+  z-index: 1;
+}
+
+.polaroid-r {
+  transform: rotate(4deg);
+  z-index: 2;
+}
+
+.polaroid-l:hover {
+  transform: rotate(-2deg) translateY(-6px) scale(1.03);
+  z-index: 5;
+}
+
+.polaroid-r:hover {
+  transform: rotate(1deg) translateY(-6px) scale(1.03);
+  z-index: 5;
+}
+
+/* ━━━━━━━━━━━━ WEDDING DAY / ИНТЕРАКТИВНОЕ СЕРДЦЕ ━━━━━━━━━━━━ */
+.wedday {
+  background: var(--bg);
+  padding: 30px var(--pad-x) 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wedday-script {
+  width: 200px;
+  max-width: 60%;
+  opacity: 0.9;
+  mix-blend-mode: multiply;
+}
+
+.wedday-divider {
+  width: 150px;
+  margin: 6px 0 14px;
+  mix-blend-mode: multiply;
+}
+
+.wedday-hint {
+  font-size: clamp(11px, 3vw, 13px);
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sage);
+  transition: opacity .5s;
+}
+
+.wedday-hint.done {
+  opacity: .55;
+}
+
+.heart-wrap {
+  position: relative;
+  width: 330px;
+  max-width: 86%;
+  aspect-ratio: 1 / 1;
+  margin: 14px auto 4px;
+}
+
+.heart-day {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: clamp(65px, 18vw, 100px);
+  color: var(--pink);
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+}
+
+.heart-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  cursor: grab;
+  touch-action: none;
+}
+
+/* ━━━━━━━━━━━━ МЕСТО ПРОВЕДЕНИЯ ━━━━━━━━━━━━ */
+.venue {
+  background: var(--bg);
+  padding: 30px var(--pad-x) 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.venue-sprig {
+  width: 120px;
+  margin-bottom: 4px;
+}
+
+.venue-name {
+  font-size: clamp(13px, 3.6vw, 17px);
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 14px 0 18px;
+}
+
+.venue-illustration {
+  width: 100%;
+  max-width: 470px;
+}
+
+.venue-laurel {
+  width: 230px;
+  max-width: 70%;
+  margin-top: 16px;
+  mix-blend-mode: multiply;
+}
+
+/* ━━━━━━━━━━━━ ПРОГРАММА ДНЯ ━━━━━━━━━━━━ */
+.program {
+  position: relative;
+  background: var(--bg);
+  padding: 72px var(--pad-x) 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* цветочная рамка ТОЛЬКО сверху и снизу (как в оригинале): горизонтальные гирлянды,
+   режутся только по бокам (уходят за край), не перекрывают иконки/текст */
+.program .script-h {
+  margin-bottom: 22px;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  z-index: 2;
+}
+
+.tl-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tl-heart-follow {}
+
+/* image inside svg, moved by JS */
+.tl-node {
+  position: absolute;
+  width: 42%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: translateY(-38%);
+  /* чуть ниже — не загораживает трек и сердечко */
+}
+
+.tl-nl {
+  left: -2%;
+}
+
+.tl-nr {
+  right: -2%;
+}
+
+.tl-icon-node {
+  width: clamp(72px, 20vw, 116px);
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.tl-node-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tl-time {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(24px, 6.5vw, 30px);
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+}
+
+.tl-text {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+
+/* ━━━━━━━━━━━━ ОБРАТНЫЙ ОТСЧЁТ ━━━━━━━━━━━━ */
+.countdown-sec {
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Сцена-плашка (25).svg показывается целиком; текст и пара — поверх */
+.cd-scene {
+  position: relative;
+  width: 100%;
+}
+
+.cd-scene-img {
+  width: 100%;
+  display: block;
+}
+
+.cd-plashka {
+  position: absolute;
+  top: 7%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  padding: 0 var(--pad-x);
+  z-index: 2;
+}
+
+.cd-title {
+  margin-bottom: 18px;
+}
+
+.countdown {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+}
+
+.cd-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 58px;
+}
+
+.cd-cell span {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(38px, 11vw, 54px);
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+  font-feature-settings: "lnum" 1;
+}
+
+.cd-cell small {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-top: 8px;
+}
+
+.cd-colon {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(30px, 9vw, 44px);
+  color: var(--gold);
+  line-height: 1;
+  padding-top: 4px;
+}
+
+.cd-couple {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 4%;
+  transform: translateX(-50%);
+  width: 42%;
+  max-width: 240px;
+}
+
+/* ━━━━━━━━━━━━ АНКЕТА ГОСТЯ ━━━━━━━━━━━━ */
+.rsvp {
+  background: var(--bg);
+  padding: 30px var(--pad-x) 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.rsvp-heart {
+  width: 120px;
+  margin-bottom: 12px;
+  mix-blend-mode: multiply;
+}
+
+.rsvp-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(28px, 8vw, 38px);
+  color: var(--ink);
+  margin-bottom: 12px;
+}
+
+.rsvp-sub {
+  font-size: clamp(11px, 3vw, 13px);
+  font-weight: 300;
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  max-width: 340px;
+  margin-bottom: 30px;
+}
+
+.rsvp-form {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  text-align: left;
+}
+
+.rsvp-fieldset {
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.rsvp-legend {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.rsvp-name {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--ink-soft);
+  background: transparent;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  padding: 7px 2px;
+  outline: none;
+}
+
+.rsvp-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--ink);
+}
+
+.rsvp-option input {
+  accent-color: var(--gold);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.rsvp-submit {
+  align-self: center;
+  width: 200px;
+  margin-top: 6px;
+  padding: 13px 20px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .25s, color .25s;
+}
+
+.rsvp-submit:hover {
+  background: var(--ink);
+  color: #fff;
+}
+
+.rsvp-thanks {
+  padding: 26px 0 6px;
+}
+
+.thanks-script {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(24px, 7vw, 34px);
+  color: var(--ink);
+}
+
+/* ━━━━━━━━━━━━ ДРЕСС-КОД ━━━━━━━━━━━━ */
+.dresscode {
+  background: var(--bg);
+  padding: 30px var(--pad-x) 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dc-sub {
+  font-size: clamp(10px, 2.8vw, 12px);
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 12px 0 22px;
+}
+
+.dc-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 30px;
+  max-width: 252px;
+}
+
+.ga-swatch {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 3px 8px rgba(40, 50, 30, 0.18);
+}
+
+.dc-photos {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  width: 100%;
+}
+
+.dc-card {
+  position: relative;
+  width: 44%;
+  max-width: 200px;
+}
+
+.dc-photo {
+  width: 100%;
+  aspect-ratio: 3 / 4.5;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 3px;
+  box-shadow: 0 4px 16px rgba(40, 50, 30, 0.16);
+}
+
+.dc-flower {
+  position: absolute;
+  width: 64%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.dc-flower-tl {
+  top: -22px;
+  left: -22px;
+}
+
+.dc-flower-br {
+  bottom: -22px;
+  right: -22px;
+  transform: rotate(180deg);
+}
+
+.dc-divider {
+  width: 170px;
+  margin: 36px 0 10px;
+}
+
+.dc-doves {
+  width: 170px;
+  opacity: 1;
+}
+
+/* ━━━━━━━━━━━━ ПОЖЕЛАНИЯ (рамка из полевых цветов) ━━━━━━━━━━━━ */
+.wishes {
+  background: var(--bg);
+  padding: 6px 0 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* рамка СИЛЬНО больше — выходит за края карточки */
+.wishes-arch-wrap {
+  position: relative;
+  width: 132%;
+  max-width: 860px;
+  margin: 0 -16%;
+}
+
+.wishes-arch {
+  width: 100%;
+  display: block;
+}
+
+/* узкая колонка текста внутри арки, не касается цветочной рамки */
+.wishes-inner {
+  position: absolute;
+  left: 31%;
+  right: 31%;
+  top: 21%;
+  bottom: 10%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.wishes-inner .script-h {
+  font-size: clamp(16px, 4vw, 22px);
+  line-height: 1.15;
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
+.wishes-text {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  line-height: 2.0;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  width: 100%;
+}
+
+/* ━━━━━━━━━━━━ ФИНАЛ ━━━━━━━━━━━━ */
+.closing {
+  background: var(--bg);
+  padding: 20px var(--pad-x) 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.closing-h {
+  max-width: 360px;
+  margin-bottom: 14px;
+}
+
+/* финальный венок (полумесяц из лилий) + монограмма из двух букв внутри */
+.closing-wreath-wrap {
+  position: relative;
+  width: 300px;
+  max-width: 82%;
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closing-wreath {
+  width: 100%;
+  display: block;
+}
+
+.closing-wreath-wrap .monogram {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.monogram {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--gold);
+  line-height: 1;
+}
+
+/* Буквы вплотную друг к другу, крупные, на разной высоте */
+.mono-letters {
+  display: flex;
+  align-items: center;
+  font-size: clamp(50px, 15vw, 74px);
+  letter-spacing: -0.02em;
+}
+
+.mono-letters > span:first-child {
+  transform: translateY(-0.13em);
+}
+
+.mono-letters > span:last-child {
+  transform: translateY(0.13em);
+}
+
+/* Амперсанд по центру между буквами, полупрозрачный, поменьше */
+.mono-amp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(30px, 9vw, 46px);
+  color: var(--ink);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ━━━━━━━━━━━━ RESPONSIVE ━━━━━━━━━━━━ */
+@media (max-width: 480px) {
+  :root {
+    --pad-x: 22px;
+  }
+
+  .friends-frame {
+    padding: 52px 18px 42px;
+  }
+
+  .cd-cell {
+    min-width: 50px;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --pad-x: 15px;
+  }
+
+  .cd-cell {
+    min-width: 44px;
+  }
+
+  .tl-icon-node {
+    width: 72px;
+  }
+}

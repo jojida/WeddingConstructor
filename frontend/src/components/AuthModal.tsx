@@ -11,26 +11,36 @@ interface Props {
 }
 
 export default function AuthModal({ onSuccess, onClose }: Props) {
-  const [mode, setMode] = useState<'login' | 'register'>('register');
-  const [form, setForm] = useState({ email: '', password: '', name: '' });
+  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
-      const payload = mode === 'login'
-        ? { email: form.email, password: form.password }
-        : { email: form.email, password: form.password, name: form.name };
+      await api.post('/api/auth/send-code', { email });
+      setStep('code');
+      toast.success('Код отправлен!');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Ошибка отправки кода');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const res = await api.post(endpoint, payload);
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await api.post('/api/auth/verify-code', { email, code });
       setAuth(res.data.user, res.data.token);
-      toast.success(mode === 'login' ? 'Добро пожаловать!' : 'Аккаунт создан!');
+      toast.success('Добро пожаловать!');
       onSuccess();
     } catch (err: any) {
-      toast.error(err.response?.data?.error || 'Ошибка');
+      toast.error(err.response?.data?.error || 'Неверный код');
     } finally {
       setLoading(false);
     }
@@ -44,92 +54,84 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
 
         {/* Header */}
         <div className={styles.header}>
-          <div className={styles.logo}>✦ WeddingCraft</div>
+          <div className={styles.logo}>Eloquence</div>
           <h2 className={styles.title}>
-            {mode === 'register' ? 'Сохраните ваше приглашение' : 'Войдите в аккаунт'}
+            {step === 'email' ? 'Вход в аккаунт' : 'Введите код'}
           </h2>
           <p className={styles.subtitle}>
-            {mode === 'register'
-              ? 'Создайте аккаунт — мы сохраним все ваши данные'
-              : 'Войдите, чтобы сохранить приглашение'}
+            {step === 'email'
+              ? 'Введите email, чтобы войти и сохранить приглашение. Мы отправим вам код подтверждения.'
+              : `Код отправлен на ${email}`}
           </p>
         </div>
 
-        {/* Tab switcher */}
-        <div className={styles.tabs}>
-          <button
-            className={`${styles.tab} ${mode === 'register' ? styles.tabActive : ''}`}
-            onClick={() => setMode('register')}
-          >
-            Регистрация
-          </button>
-          <button
-            className={`${styles.tab} ${mode === 'login' ? styles.tabActive : ''}`}
-            onClick={() => setMode('login')}
-          >
-            Уже есть аккаунт
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {mode === 'register' && (
+        {step === 'email' ? (
+          <form onSubmit={handleSendCode} className={styles.form}>
             <div className={styles.field}>
-              <label className={styles.label}>Ваше имя</label>
+              <label className={styles.label}>Ваш Email</label>
               <input
-                id="modal-name"
+                id="modal-email"
                 className="input-field"
-                type="text"
-                placeholder="Анна Иванова"
-                value={form.name}
-                onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                type="email"
+                placeholder="anna@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 required
                 autoFocus
               />
             </div>
-          )}
-          <div className={styles.field}>
-            <label className={styles.label}>Email</label>
-            <input
-              id="modal-email"
-              className="input-field"
-              type="email"
-              placeholder="anna@example.com"
-              value={form.email}
-              onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-              required
-              autoFocus={mode === 'login'}
-            />
-          </div>
-          <div className={styles.field}>
-            <label className={styles.label}>Пароль</label>
-            <input
-              id="modal-password"
-              className="input-field"
-              type="password"
-              placeholder={mode === 'register' ? 'Минимум 6 символов' : '••••••••'}
-              value={form.password}
-              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              required
-            />
-          </div>
-
-          <button
-            id="modal-submit"
-            type="submit"
-            className="btn-primary"
-            disabled={loading}
-            style={{ width: '100%', marginTop: 4, fontSize: '16px', padding: '14px' }}
-          >
-            {loading
-              ? 'Сохранение...'
-              : mode === 'register'
-                ? '✦ Сохранить приглашение'
-                : '✦ Войти и сохранить'}
-          </button>
-        </form>
+            <button
+              id="modal-submit-email"
+              type="submit"
+              className="btn-primary"
+              disabled={loading || !email}
+              style={{ width: '100%', marginTop: 4, fontSize: '16px', padding: '14px' }}
+            >
+              {loading ? 'Отправка...' : 'Получить код'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyCode} className={styles.form}>
+            <div className={styles.field}>
+              <label className={styles.label}>Код подтверждения</label>
+              <input
+                id="modal-code"
+                className="input-field"
+                type="text"
+                placeholder="123456"
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                required
+                autoFocus
+                maxLength={6}
+                style={{ textAlign: 'center', fontSize: '20px', letterSpacing: '4px' }}
+              />
+            </div>
+            <button
+              id="modal-submit-code"
+              type="submit"
+              className="btn-primary"
+              disabled={loading || code.length < 6}
+              style={{ width: '100%', marginTop: 4, fontSize: '16px', padding: '14px' }}
+            >
+              {loading ? 'Проверка...' : '✦ Войти'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setStep('email')}
+              style={{
+                width: '100%', marginTop: '12px', background: 'none', border: 'none',
+                color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Изменить email
+            </button>
+          </form>
+        )}
 
         <p className={styles.privacy}>
-          Нажимая «Сохранить», вы соглашаетесь с условиями использования
+          Нажимая «Войти», вы соглашаетесь с условиями использования
         </p>
       </div>
     </div>

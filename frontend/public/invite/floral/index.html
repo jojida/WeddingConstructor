@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Свадебное приглашение</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Raleway:wght@200;300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="card">
+
+    <!-- ══════════════════════════════════════
+         СТРАНИЦА 1 — ОБЛОЖКА
+    ══════════════════════════════════════ -->
+    <section class="cover">
+
+      <!-- Угловые ветки: оба смотрят ВЛЕВО (flip TL), TR — нормальный -->
+      <img class="corner corner-tl" src="assets/decor/branch_corner.png" alt="">
+      <img class="corner corner-tr" src="assets/decor/branch_corner.png" alt="">
+
+      <div class="arch-block">
+        <div class="std-label">
+          <span>S</span><span>A</span><span>V</span><span>E</span>
+          <span class="std-spacer"></span>
+          <span>T</span><span>H</span><span>E</span>
+          <span class="std-spacer"></span>
+          <span>D</span><span>A</span><span>T</span><span>E</span>
+        </div>
+
+        <div class="arch-frame">
+          <!-- Фото с маской через SVG — самый надёжный способ обрезки по кривым -->
+          <svg class="arch-photo-svg" viewBox="0 0 572.25 900" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <clipPath id="arch-photo-clip">
+                <path d="M 15.675781 883.371094 L 15.675781 280.964844
+                         C 17.082031 169.953125 89.511719 69.601562 195.90625 31.277344
+                         C 196.367188 31.148438 197.132812 30.929688 198.042969 30.558594
+                         C 226.234375 21.089844 255.730469 16.265625 285.582031 16.265625
+                         L 285.890625 16.265625
+                         C 315.757812 16.265625 345.242188 21.089844 373.433594 30.558594
+                         C 374.34375 30.929688 375.109375 31.148438 375.570312 31.277344
+                         C 481.960938 69.589844 554.378906 169.941406 555.800781 280.964844
+                         L 555.800781 883.371094 Z"/>
+              </clipPath>
+            </defs>
+            <image href="assets/photos/couple1.jpg" data-edit="coverPhoto"
+                   x="0" y="0" width="572.25" height="900"
+                   preserveAspectRatio="xMidYMin slice"
+                   clip-path="url(#arch-photo-clip)"/>
+          </svg>
+          <!-- Золотая рамка поверх -->
+          <svg class="arch-border-svg" viewBox="0 0 572.25 900" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M 15.675781 883.371094 L 15.675781 280.964844
+                     C 17.082031 169.953125 89.511719 69.601562 195.90625 31.277344
+                     C 196.367188 31.148438 197.132812 30.929688 198.042969 30.558594
+                     C 226.234375 21.089844 255.730469 16.265625 285.582031 16.265625
+                     L 285.890625 16.265625
+                     C 315.757812 16.265625 345.242188 21.089844 373.433594 30.558594
+                     C 374.34375 30.929688 375.109375 31.148438 375.570312 31.277344
+                     C 481.960938 69.589844 554.378906 169.941406 555.800781 280.964844
+                     L 555.800781 883.371094 Z"
+                  fill="none" stroke="#947f57" stroke-width="5"/>
+          </svg>
+          <img class="arch-bouquet arch-bouquet-tl" src="assets/decor/bouquet_color.png" alt="">
+          <img class="arch-bouquet arch-bouquet-br" src="assets/decor/bouquet_color.png" alt="">
+        </div>
+      </div>
+
+      <p class="the-wedding-of">THE WEDDING OF</p>
+      <h1 class="couple-names" data-edit="names">Olivia &amp; Sebastian</h1>
+      <p class="invite-label">ПРИГЛАШЕНИЕ</p>
+    </section>
+
+    <!-- ══════════════════════════════════════
+         СЕКЦИЯ ПРИГЛАШЕНИЯ
+    ══════════════════════════════════════ -->
+    <section class="invite-section">
+
+      <h2 class="dear-guests" data-edit="dearGuests">Дорогие гости</h2>
+
+      <p class="invite-body" data-edit="inviteText">
+        СПЕШИМ СООБЩИТЬ РАДОСТНУЮ НОВОСТЬ —
+        МЫ ЖЕНИМСЯ! В ЭТОТ ДЕНЬ МЫ ХОТИМ,
+        ЧТОБЫ ВЫ ПРИСУТСТВОВАЛИ НА НАШЕМ ПРАЗДНИКЕ
+      </p>
+
+      <!-- Карточка "Мы ждём вас": peony позади даты -->
+      <div class="invite-card-wrap">
+        <p class="we-await" data-edit="weAwait">Мы ждём вас</p>
+        <div class="date-wrap">
+          <img class="invite-peony" src="assets/decor/peony.png" alt="">
+          <p class="date-line" data-edit="dateLine">26 / 06 / 26</p>
+        </div>
+      </div>
+
+      <img class="table-icon" src="assets/decor/decor(16).svg" alt="">
+
+      <!-- Таймер -->
+      <div class="countdown" id="countdown">
+        <span id="cd-days">00</span><span class="cd-sep">:</span><span id="cd-hours">00</span><span class="cd-sep">:</span><span id="cd-mins">00</span><span class="cd-sep">:</span><span id="cd-secs">00</span>
+      </div>
+      <p class="countdown-label">ДНИ : ЧАСЫ : МИНУТЫ : СЕКУНДЫ</p>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         ТЕМНЫЙ ФОН ДЛЯ ЛОКАЦИИ (РАЗДЕЛ 1)
+    ══════════════════════════════════════ -->
+    <div class="dark-section-wrapper dark-loc">
+      <img class="dark-peony-tl" src="assets/decor/peony.png" alt="">
+
+      <!-- ЛОКАЦИЯ -->
+      <section class="location-section">
+        <p class="loc-title">ЛОКАЦИЯ</p>
+        <p class="loc-sub" data-edit="venue">Дворец бракосочетания 12/8</p>
+
+        <!-- Рамка с кружевом + фото внутри -->
+        <div class="wishes-card-wrap">
+          <img class="wishes-lace" src="assets/decor/decor(12).svg" alt="">
+          <div class="wishes-card-inner">
+            <img class="loc-card-photo" data-edit="locationPhoto" src="assets/photos/couple2.jpg" alt="">
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         СТРАНИЦА 2 — РАСПИСАНИЕ
+    ══════════════════════════════════════ -->
+    <section class="program-section">
+
+      <!-- Ветки ТОЛЬКО снизу -->
+      <img class="corner corner-bl" src="assets/decor/branch_corner.png" alt="">
+      <img class="corner corner-br" src="assets/decor/branch_corner.png" alt="">
+
+      <h2 class="section-script">Расписание</h2>
+
+      <div class="schedule-wrap">
+        <!-- Левая колонка -->
+        <div class="sched-col sched-col-left">
+          <div class="sched-item-left">
+            <div class="sched-meta">
+              <span class="sched-time">14 : 00</span>
+              <span class="sched-name">РЕГИСТРАЦИЯ</span>
+            </div>
+            <img class="sched-icon" src="assets/icons/icon(6).svg" alt="">
+          </div>
+          <div class="sched-item-left">
+            <div class="sched-meta">
+              <span class="sched-time">17 : 00</span>
+              <span class="sched-name">ФУРШЕТ</span>
+            </div>
+            <img class="sched-icon" src="assets/icons/icon(5).svg" alt="">
+          </div>
+          <div class="sched-item-left">
+            <div class="sched-meta">
+              <span class="sched-time">22 : 00</span>
+              <span class="sched-name">ТАНЦЫ</span>
+            </div>
+            <img class="sched-icon" src="assets/icons/icon(7).svg" alt="">
+          </div>
+        </div>
+
+        <!-- Центральная линия -->
+        <div class="sched-timeline">
+          <span class="tl-dot"></span>
+          <span class="tl-dot"></span>
+          <span class="tl-dot"></span>
+          <span class="tl-dot"></span>
+          <span class="tl-dot"></span>
+        </div>
+
+        <!-- Правая колонка -->
+        <div class="sched-col sched-col-right">
+          <div class="sched-item-right">
+            <img class="sched-icon" src="assets/icons/photo.svg" alt="">
+            <div class="sched-meta">
+              <span class="sched-time">15 : 00</span>
+              <span class="sched-name">ФОТОСЕССИЯ</span>
+            </div>
+          </div>
+          <div class="sched-item-right">
+            <img class="sched-icon" src="assets/icons/table.svg" alt="">
+            <div class="sched-meta">
+              <span class="sched-time">19 : 00</span>
+              <span class="sched-name">БАНКЕТ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         СТРАНИЦА 3 — ДРЕСС-КОД
+    ══════════════════════════════════════ -->
+    <section class="dresscode-section">
+
+      <h2 class="section-script">Дресс код</h2>
+
+      <div class="dc-genders">
+        <span>ЖЕНЩИНЫ</span>
+        <span class="dc-divider">|</span>
+        <span>МУЖЧИНЫ</span>
+      </div>
+
+      <!-- 4 цветных свотча: один oval-swatch, 4 варианта через CSS filter -->
+      <div class="dc-swatches" data-edit="swatches">
+        <img class="dc-swatch dc-s1" src="assets/icons/dresscode.svg" alt="блаш">
+        <img class="dc-swatch dc-s2" src="assets/icons/dresscode.svg" alt="пудра">
+        <img class="dc-swatch dc-s3" src="assets/icons/dresscode.svg" alt="шампань">
+        <img class="dc-swatch dc-s4" src="assets/icons/dresscode.svg" alt="тауп">
+      </div>
+
+      <!-- Два фото -->
+      <div class="dc-photos">
+        <img class="dc-photo" src="assets/photos/dress1.jpg" alt="" data-edit="dressCodePhoto">
+        <img class="dc-photo" src="assets/photos/dress2.jpg" alt="" data-edit="dressPhoto2">
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         ПИРАМИДА ШАМПАНСКОГО
+    ══════════════════════════════════════ -->
+    <div class="champagne-wrap">
+      <img class="champagne-tower" src="assets/decor/decor(11).svg" alt="">
+    </div>
+
+    <!-- ══════════════════════════════════════
+         ТЕМНЫЙ ФОН ДЛЯ ПОЖЕЛАНИЙ (РАЗДЕЛ 2)
+    ══════════════════════════════════════ -->
+    <div class="dark-section-wrapper dark-wish">
+      <img class="dark-peony-br" src="assets/decor/peony.png" alt="">
+
+      <!-- ══════════════════════════════════════
+           ПОЖЕЛАНИЯ И ДЕТАЛИ
+      ══════════════════════════════════════ -->
+      <section class="wishes-section">
+
+      <p class="wishes-heading">ПОЖЕЛАНИЯ И ДЕТАЛИ</p>
+
+      <!-- Текст внутри кружевной рамки (decor(12).svg) -->
+      <div class="wishes-card-wrap">
+        <img class="wishes-lace" src="assets/decor/decor(12).svg" alt="">
+        <div class="wishes-card-inner">
+          <p class="wishes-text" data-edit="story">
+            ДОРОГИЕ ГОСТИ, ВАШ ВЕЧЕР<br>
+            БУДЕТ ОСОБЕННЫМ.<br>
+            НАША ПРОСЬБА — НЕ ДАРИТЬ<br>
+            ЦВЕТЫ, МЫ НЕ УСПЕЕМ<br>
+            НАСЛАДИТЬСЯ ИХ КРАСОТОЙ
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         АНКЕТА ГОСТЯ (RSVP)
+    ══════════════════════════════════════ -->
+    <section class="rsvp-section">
+
+      <img class="rsvp-bird-icon" src="assets/icons/icon(2).svg" alt="">
+      <h2 class="rsvp-title">АНКЕТА ГОСТЯ</h2>
+      <p class="rsvp-subtitle" data-edit="surveyText">
+        Чтобы мы знали сколько стульев и бокалов готовить,<br>
+        заполните анкету до 01.08.26
+      </p>
+
+      <img class="rsvp-bouquet" src="assets/decor/bouquet_color.png" alt="">
+
+      <form class="rsvp-form" id="rsvpForm">
+        <fieldset class="rsvp-fieldset">
+          <legend class="rsvp-legend">Как вас зовут?</legend>
+          <input type="text" name="guestName" class="rsvp-name" placeholder="Ваше имя"
+                 style="width:100%;border:none;border-bottom:1px solid var(--text);background:transparent;
+                        font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:300;color:var(--text);
+                        padding:6px 2px;outline:none;">
+        </fieldset>
+
+        <fieldset class="rsvp-fieldset">
+          <legend class="rsvp-legend">Будете ли вы на мероприятии?</legend>
+          <label class="rsvp-option">
+            <input type="radio" name="attend" value="yes" checked>
+            <span>Да, буду!</span>
+          </label>
+          <label class="rsvp-option">
+            <input type="radio" name="attend" value="no">
+            <span>К сожалению не смогу прийти</span>
+          </label>
+        </fieldset>
+
+        <fieldset class="rsvp-fieldset">
+          <legend class="rsvp-legend">Что предпочитаете из напитков?</legend>
+          <div data-edit="drinks">
+            <label class="rsvp-option">
+              <input type="checkbox" name="drink" value="sparkling">
+              <span>Игристое</span>
+            </label>
+            <label class="rsvp-option">
+              <input type="checkbox" name="drink" value="red">
+              <span>Красное Вино</span>
+            </label>
+            <label class="rsvp-option">
+              <input type="checkbox" name="drink" value="white">
+              <span>Белое Вино</span>
+            </label>
+            <label class="rsvp-option">
+              <input type="checkbox" name="drink" value="cognac">
+              <span>Коньяк</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="rsvp-submit">Отправить</button>
+      </form>
+
+      <div class="rsvp-thanks" id="rsvpThanks" hidden>
+        <p class="closing-script">Будем рады видеть вас</p>
+      </div>
+
+      <!-- Поляроиды -->
+      <div class="polaroids">
+        <div class="polaroid polaroid-left">
+          <img src="assets/photos/couple3.jpg" alt="" data-edit="polaroid1">
+        </div>
+        <div class="polaroid polaroid-right">
+          <img src="assets/photos/bouquet.jpg" alt="" data-edit="polaroid2">
+        </div>
+      </div>
+
+      <p class="closing-script" data-edit="closing">Будем рады видеть вас</p>
+
+      <img class="rsvp-bottom-decor" src="assets/decor/decor(16).svg" alt="">
+
+    </section>
+
+  </div>
+
+  <script>
+    /* ── FADE-UP ── */
+    (function () {
+      /* Селекторы элементов для анимации и их задержки */
+      var items = [
+        /* Обложка */
+        ['.the-wedding-of',    0],
+        ['.couple-names',      0.1],
+        ['.invite-label',      0.2],
+        /* Приглашение */
+        ['.dear-guests',       0],
+        ['.invite-body',       0.12],
+        ['.invite-card-wrap',  0.22],
+        ['.table-icon',        0.10],
+        ['.countdown',         0.18],
+        ['.countdown-label',   0.24],
+        /* Расписание */
+        ['.section-script',    0],
+        ['.sched-item-left',   0],
+        ['.sched-item-right',  0.14],
+        /* Дресс-код */
+        ['.dc-genders',        0],
+        ['.dc-swatches',       0.12],
+        ['.dc-photos',         0.22],
+        /* Детали */
+        ['.details-section .section-script', 0],
+        ['.detail-item',       0],
+        /* Пожелания */
+        ['.wishes-heading',    0],
+        ['.wishes-card-wrap',  0.14],
+        /* Локация */
+        ['.loc-title',         0],
+        ['.loc-sub',           0.10],
+        ['.loc-frame-wrap',    0.18],
+        /* RSVP */
+        ['.rsvp-bird-icon',    0],
+        ['.rsvp-title',        0.10],
+        ['.rsvp-subtitle',     0.18],
+        ['.rsvp-form',         0.26],
+      ];
+
+      items.forEach(function (pair) {
+        var sel = pair[0], delay = pair[1];
+        document.querySelectorAll(sel).forEach(function (el, i) {
+          el.classList.add('fu');
+          el.style.transitionDelay = (delay + i * 0.08) + 's';
+        });
+      });
+
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll('.fu').forEach(function (el) { io.observe(el); });
+    })();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

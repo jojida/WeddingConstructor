@@ -126,8 +126,8 @@ export default function DashboardPage() {
                           Редактировать
                         </Link>
                       ) : (
-                        <Link href={`/invite/${invite.slug}`} target="_blank" className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '14px', textAlign: 'center' }}>
-                          Открыть сайт
+                        <Link href={`/dashboard/${invite.id}`} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '14px', textAlign: 'center' }}>
+                          Управление
                         </Link>
                       )}
                       <button

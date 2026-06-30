@@ -1,26 +1,17 @@
 .page {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: 24px;
-  background: linear-gradient(160deg, #fdf6ec, #f0e4cc);
-  position: relative;
-  overflow: hidden;
+  background: linear-gradient(160deg, var(--primary-container), #f0e0c8);
+  position: relative; overflow: hidden;
 }
 
-.confetti {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
+.confetti { position: absolute; inset: 0; pointer-events: none; }
 .emoji {
-  position: absolute;
-  font-size: 28px;
+  position: absolute; font-size: 28px;
   animation: confettiFall 3s ease-in-out infinite;
   animation-delay: calc(var(--i) * 0.4s);
-  left: calc(var(--i) * 12.5%);
-  top: -40px;
+  left: calc(var(--i) * 12.5%); top: -40px;
 }
 @keyframes confettiFall {
   0%   { transform: translateY(-40px) rotate(0deg); opacity: 1; }
@@ -29,57 +20,49 @@
 }
 
 .card {
-  position: relative;
-  width: 100%;
-  max-width: 460px;
-  background: rgba(255,255,255,0.9);
+  position: relative; width: 100%; max-width: 460px;
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(201,169,110,0.3);
-  border-radius: 28px;
-  padding: 48px 40px;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.08);
+  border: 0.5px solid rgba(206, 197, 186, 0.5);
+  border-radius: 28px; padding: 48px 40px;
+  box-shadow: 0 24px 80px rgba(14,29,38,0.08);
   text-align: center;
 }
 
 .check {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold-light), var(--gold));
-  color: #fff;
-  font-size: 32px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-fixed-dim), var(--primary));
+  color: #fff; font-size: 32px;
+  display: flex; align-items: center; justify-content: center;
   margin: 0 auto 24px;
-  animation: pulse-gold 2s infinite;
+  box-shadow: 0 8px 24px rgba(104,93,74,0.25);
 }
 
-.title { font-family: var(--font-playfair); font-size: 32px; color: var(--dark); margin-bottom: 12px; }
-.subtitle { font-size: 16px; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6; }
+.title { font-family: var(--font-playfair); font-size: 32px; font-weight: 400; color: var(--on-surface); margin-bottom: 12px; }
+.subtitle { font-size: 16px; color: var(--on-surface-variant); margin-bottom: 32px; line-height: 1.6; font-family: var(--font-inter); }
 
 .linkBox {
-  background: rgba(201,169,110,0.08);
-  border: 1px solid rgba(201,169,110,0.25);
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 24px;
+  background: rgba(247, 231, 206, 0.3);
+  border: 1px solid rgba(206, 197, 186, 0.4);
+  border-radius: 16px; padding: 20px; margin-bottom: 24px;
 }
-.linkLabel { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-.link { font-size: 14px; color: var(--gold-dark); font-weight: 500; word-break: break-all; }
+.linkLabel {
+  font-size: 11px; font-weight: 700; color: var(--on-surface-variant);
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+  font-family: var(--font-inter);
+}
+.link { font-size: 14px; color: var(--primary); font-weight: 500; word-break: break-all; font-family: var(--font-inter); }
 
 .actions { display: flex; flex-direction: column; gap: 12px; align-items: center; }
-.dashLink { font-size: 14px; color: var(--text-secondary); text-decoration: none; }
-.dashLink:hover { color: var(--dark); }
+.dashLink { font-size: 14px; color: var(--on-surface-variant); text-decoration: none; font-family: var(--font-inter); }
+.dashLink:hover { color: var(--on-surface); }
 
 .loading { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 24px; }
-.loading p { color: var(--text-secondary); font-size: 14px; }
+.loading p { color: var(--on-surface-variant); font-size: 14px; font-family: var(--font-inter); }
 .spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid rgba(201,169,110,0.3);
-  border-top-color: var(--gold);
+  width: 36px; height: 36px;
+  border: 2px solid rgba(206,197,186,0.4);
+  border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }

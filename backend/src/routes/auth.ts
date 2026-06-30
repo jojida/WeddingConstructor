@@ -5,54 +5,83 @@ import prisma from '../lib/prisma';
 
 const router = Router();
 
-// POST /api/auth/register
-router.post('/register', async (req: Request, res: Response) => {
+import nodemailer from 'nodemailer';
+
+// Настройка почты (если данные пустые, письма не отправятся, но код будет в консоли)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.yandex.ru',
+  port: parseInt(process.env.SMTP_PORT || '465'),
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+  },
+});
+
+// POST /api/auth/send-code
+router.post('/send-code', async (req: Request, res: Response) => {
   try {
-    const { email, password, name } = req.body;
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Укажите email' });
 
-    if (!email || !password || !name) {
-      return res.status(400).json({ error: 'Заполните все поля' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Пароль должен быть минимум 6 символов' });
-    }
+    // Генерируем 6-значный код
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 минут
 
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
-      return res.status(400).json({ error: 'Email уже используется' });
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: { email, passwordHash, name },
+    // Сохраняем код в БД
+    await prisma.verificationCode.upsert({
+      where: { email },
+      update: { code, expiresAt },
+      create: { email, code, expiresAt },
     });
 
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '30d' });
+    // Всегда выводим код в консоль для разработки и тестов
+    console.log(`\n🔑 [AUTH CODE] Код для входа ${email}: ${code}\n`);
 
-    return res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
+    // Пытаемся отправить письмо, если настроен SMTP
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      await transporter.sendMail({
+        from: `"WeddingCraft" <${process.env.SMTP_USER}>`,
+        to: email,
+        subject: 'Код для входа',
+        text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.`,
+      });
+    }
+
+    return res.json({ success: true, message: 'Код отправлен' });
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ error: 'Ошибка сервера' });
+    return res.status(500).json({ error: 'Ошибка отправки кода' });
   }
 });
 
-// POST /api/auth/login
-router.post('/login', async (req: Request, res: Response) => {
+// POST /api/auth/verify-code
+router.post('/verify-code', async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, code } = req.body;
+    if (!email || !code) return res.status(400).json({ error: 'Укажите email и код' });
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Введите email и пароль' });
+    const verification = await prisma.verificationCode.findUnique({ where: { email } });
+    
+    if (!verification || verification.code !== code) {
+      return res.status(401).json({ error: 'Неверный код' });
+    }
+    if (verification.expiresAt < new Date()) {
+      return res.status(401).json({ error: 'Срок действия кода истек' });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    // Удаляем использованный код
+    await prisma.verificationCode.delete({ where: { email } });
+
+    // Ищем или создаем пользователя
+    let user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(401).json({ error: 'Неверный email или пароль' });
-    }
-
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) {
-      return res.status(401).json({ error: 'Неверный email или пароль' });
+      user = await prisma.user.create({
+        data: { 
+          email,
+          name: email.split('@')[0], // Имя по умолчанию
+        },
+      });
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET || 'secret', { expiresIn: '30d' });

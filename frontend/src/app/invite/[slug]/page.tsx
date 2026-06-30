@@ -1,33 +1,56 @@
 import { notFound } from 'next/navigation';
 import TemplatePreview from '@/components/TemplatePreview';
+import { TEMPLATE_GREETING_KEY } from '@/lib/constants';
 
 interface Props {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ g?: string }>;
 }
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 async function getInvite(slug: string) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/api/invites/by-slug/${slug}`, {
-      cache: 'no-store',
-    });
+    const res = await fetch(`${API}/api/invites/by-slug/${slug}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return res.json();
   } catch { return null; }
 }
 
-export default async function InvitePage({ params }: Props) {
+// Персональная ссылка: ?g=<token> → личное обращение и имя гостя
+async function getGuest(token: string) {
+  try {
+    const res = await fetch(`${API}/api/guests/resolve/${token}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return res.json() as Promise<{ greeting: string; names: string; attending: boolean | null }>;
+  } catch { return null; }
+}
+
+export default async function InvitePage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { g } = await searchParams;
   const invite = await getInvite(slug);
 
   if (!invite) {
     notFound();
   }
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  // Внедряем персональные данные гостя в customData — они дойдут до script.js
+  // через существующий postMessage-spread (обёртки шаблонов не меняются).
+  if (g) {
+    const guest = await getGuest(g);
+    if (guest) {
+      const greetingKey = TEMPLATE_GREETING_KEY[invite.templateId];
+      invite.customData = { ...(invite.customData || {}) };
+      if (greetingKey) invite.customData[greetingKey] = guest.greeting;
+      invite.customData.guestName = guest.names;
+      invite.customData.guestToken = g;
+    }
+  }
 
   return (
     <div style={{ minHeight: '100vh' }}>
-      <TemplatePreview data={invite} apiBase={apiBase} fullPage slug={slug} />
+      <TemplatePreview data={invite} apiBase={API} fullPage slug={slug} />
     </div>
   );
 }

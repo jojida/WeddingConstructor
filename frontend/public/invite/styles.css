@@ -1,0 +1,1191 @@
+/* ════════════════════════════════════════════════════
+   BASE
+════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #e8ecef;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  color: #354366;
+  -webkit-font-smoothing: antialiased;
+}
+
+.invitation {
+  max-width: 520px;
+  margin: 0 auto;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+/* ════════════════════════════════════════════════════
+   INTRO VIDEO SPLASH
+════════════════════════════════════════════════════ */
+.intro-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a1522;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity .85s ease;
+}
+
+.intro-wrap.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-vid {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.intro-skip {
+  position: absolute;
+  bottom: 32px;
+  right: 24px;
+  background: rgba(255,255,255,.15);
+  border: 1px solid rgba(255,255,255,.35);
+  color: rgba(255,255,255,.9);
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: .08em;
+  padding: 8px 18px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.intro-skip:hover { background: rgba(255,255,255,.25); }
+
+/* ════════════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════════════ */
+.hero { position: relative; }
+
+.hero-image-wrap {
+  position: relative;
+  overflow: hidden;
+  /* 3-D stage for shutters */
+  perspective: 900px;
+  perspective-origin: 50% 40%;
+}
+
+.hero-img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center top;
+}
+
+/* ══════════════════════════════════════════════════
+   WINDOW-OPENING ANIMATION
+══════════════════════════════════════════════════ */
+
+/* ── Shutter panels ─────────────────────────── */
+.win-shutters {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Stone sill at bottom (golden strip) */
+.win-shutters::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 5%;
+  background: linear-gradient(to bottom, #cfc0a0, #b8a07a);
+  z-index: 2;
+  display: none;
+}
+
+/* Centre latch – fades out just before shutters move */
+.win-shutters::after {
+  content: '';
+  position: absolute;
+  top: 46%; left: 50%;
+  transform: translateX(-50%);
+  width: 26px; height: 10px;
+  background: #6c7e96;
+  border: 1px solid #4a5a70;
+  border-radius: 2px;
+  z-index: 22;
+  animation: latch-out .15s ease .45s forwards;
+}
+@keyframes latch-out { to { opacity: 0; } }
+
+/* Shared shutter style – painted blue slats */
+.win-sl, .win-sr {
+  width: 50%;
+  height: 100%;
+  will-change: transform, opacity;
+  background: repeating-linear-gradient(
+    to bottom,
+    #1a6ecb 0px,  #1e75d8 14px,
+    #0e50aa 14px, #1055b0 17px,
+    #1a6ecb 17px
+  );
+  box-shadow: inset 0 0 50px rgba(0,0,0,.22);
+}
+
+/* Shutters animate instantly (video intro already shows the reveal) */
+.win-sl {
+  border-right: 3px solid #0a3d88;
+  transform-origin: 0% 50%;
+  animation: shutter-l 1.8s cubic-bezier(.55,.05,.28,1) 0s forwards;
+}
+.win-sr {
+  border-left: 3px solid #0a3d88;
+  transform-origin: 100% 50%;
+  animation: shutter-r 1.8s cubic-bezier(.55,.05,.28,1) 0s forwards;
+}
+
+@keyframes shutter-l {
+  0%   { transform: rotateY(0deg);   opacity: 1; }
+  70%  {                             opacity: 1; }
+  100% { transform: rotateY(-88deg); opacity: 0; }
+}
+@keyframes shutter-r {
+  0%   { transform: rotateY(0deg);  opacity: 1; }
+  70%  {                            opacity: 1; }
+  100% { transform: rotateY(88deg); opacity: 0; }
+}
+
+/* ── Seagulls ────────────────────────────────── */
+.win-birds {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bird { position: absolute; opacity: 0; }
+
+/* Large leading bird */
+.b1 { width: 58px; top: 20%;
+      animation: bf1 5.2s ease-out 2.25s forwards; }
+/* Medium mid birds */
+.b2 { width: 42px; top: 32%;
+      animation: bf2 6.0s ease-out 2.55s forwards; }
+.b3 { width: 31px; top: 14%;
+      animation: bf3 4.6s ease-out 2.85s forwards; }
+/* Small far birds */
+.b4 { width: 25px; top: 41%;
+      animation: bf4 6.6s ease-out 2.40s forwards; }
+.b5 { width: 21px; top: 25%;
+      animation: bf5 5.5s ease-out 3.20s forwards; }
+
+/* Each gets a gentle sinusoidal path (translateX + varying Y offsets) */
+@keyframes bf1 {
+  0%   { opacity:0; transform:translate(-70px, 0);   }
+  6%   { opacity:1; }
+  25%  {            transform:translate(85px,  -9px); }
+  50%  {            transform:translate(220px,  0);   }
+  75%  {            transform:translate(370px, -8px); }
+  94%  { opacity:1; }
+  100% { opacity:0; transform:translate(570px,  0);  }
+}
+@keyframes bf2 {
+  0%   { opacity:0; transform:translate(-60px, 0);   }
+  6%   { opacity:1; }
+  30%  {            transform:translate(105px,-11px); }
+  55%  {            transform:translate(250px,  0);   }
+  80%  {            transform:translate(410px, -9px); }
+  94%  { opacity:1; }
+  100% { opacity:0; transform:translate(600px,  0);  }
+}
+@keyframes bf3 {
+  0%   { opacity:0; transform:translate(-50px, 0);   }
+  7%   { opacity:1; }
+  20%  {            transform:translate(62px,  -7px); }
+  45%  {            transform:translate(185px,  0);   }
+  70%  {            transform:translate(318px, -6px); }
+  93%  { opacity:1; }
+  100% { opacity:0; transform:translate(520px,  0);  }
+}
+@keyframes bf4 {
+  0%   { opacity:0; transform:translate(-55px, 0);   }
+  5%   { opacity:1; }
+  35%  {            transform:translate(135px,-10px); }
+  60%  {            transform:translate(285px,  0);   }
+  85%  {            transform:translate(450px, -8px); }
+  95%  { opacity:1; }
+  100% { opacity:0; transform:translate(620px,  0);  }
+}
+@keyframes bf5 {
+  0%   { opacity:0; transform:translate(-45px, 0);   }
+  8%   { opacity:1; }
+  25%  {            transform:translate(72px,  -7px); }
+  50%  {            transform:translate(205px,  0);   }
+  75%  {            transform:translate(345px, -6px); }
+  92%  { opacity:1; }
+  100% { opacity:0; transform:translate(550px,  0);  }
+}
+
+/* ── Name-card appears after shutters open ───── */
+.name-card { animation: card-reveal .9s ease 2.1s both; }
+@keyframes card-reveal {
+  from { opacity:0; transform:translate(-50%,-50%) translateY(12px) scale(.97); }
+  to   { opacity:1; transform:translate(-50%,-50%) translateY(0)    scale(1);   }
+}
+
+/* Accessibility: skip animations for reduced-motion users */
+@media (prefers-reduced-motion: reduce) {
+  .win-sl, .win-sr, .bird { animation: none !important; }
+  .win-shutters { display: none !important; }
+  .name-card { animation: none !important; opacity:1 !important; }
+}
+
+/* ══════════════════════════════════════════════════
+   END WINDOW ANIMATION
+══════════════════════════════════════════════════ */
+
+.name-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 52%;
+  background: rgba(255, 255, 255, 0.93);
+  border: 1px solid rgba(53, 67, 102, 0.28);
+  padding: 18px 20px 16px;
+  text-align: center;
+}
+
+.name-card-heart {
+  display: block;
+  font-size: 12px;
+  color: #354366;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.couple-names {
+  font-family: 'Marck Script', cursive;
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: 400;
+  color: #354366;
+  line-height: 1.25;
+}
+
+.names-and {
+  font-size: 0.7em;
+  display: inline-block;
+  margin: 2px 0;
+}
+
+.name-flourish {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-deco {
+  position: absolute;
+  width: clamp(40px, 10vw, 55px);
+  top: 51%;
+  filter: url(#remove-black);
+}
+.hero-deco-left  { left:  calc(50% - 52% / 2 - 36px); transform: rotate(-25deg); }
+.hero-deco-right { right: calc(50% - 52% / 2 - 36px); transform: rotate(25deg) scaleX(-1); }
+
+/* ════════════════════════════════════════════════════
+   GREETING
+════════════════════════════════════════════════════ */
+.greeting {
+  padding: 48px 36px 36px;
+  text-align: center;
+  background: #fff;
+}
+
+.greeting-label {
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 300;
+  letter-spacing: 3px;
+  color: #354366;
+  margin-bottom: 4px;
+}
+
+.greeting-title {
+  font-family: 'Marck Script', cursive;
+  font-size: clamp(36px, 9vw, 44px);
+  font-weight: 400;
+  color: #354366;
+  line-height: 1.1;
+  margin-bottom: 18px;
+}
+
+.greeting-sub {
+  font-style: italic;
+  font-size: 15px;
+  font-weight: 300;
+  letter-spacing: 1.5px;
+  color: #354366;
+}
+
+/* ════════════════════════════════════════════════════
+   DATE CIRCLES
+════════════════════════════════════════════════════ */
+.date-section {
+  padding: 8px 20px 52px;
+  background: #fff;
+}
+
+.date-circles {
+  display: flex;
+  justify-content: center;
+  gap: clamp(16px, 5vw, 32px);
+}
+
+.date-circle {
+  width: clamp(76px, 18vw, 92px);
+  height: clamp(76px, 18vw, 92px);
+  border: 1.5px solid #114e88;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.date-num {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
+  font-size: clamp(18px, 5vw, 26px);
+  color: #354366;
+  line-height: 1;
+}
+
+.date-lbl {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10px;
+  color: #114e88;
+  letter-spacing: 1px;
+  text-transform: lowercase;
+}
+
+/* ── Scratch-off layer over each date circle ── */
+.scratch-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  z-index: 3;
+  cursor: grab;
+  touch-action: none;          /* scratching must not scroll the page */
+  transition: opacity .55s ease;
+}
+.scratch-canvas:active { cursor: grabbing; }
+.date-circle.revealed .scratch-canvas { opacity: 0; pointer-events: none; }
+.date-circle.revealed .date-num { animation: datePop .5s ease both; }
+
+@keyframes datePop {
+  0%   { transform: scale(.6);  opacity: 0; }
+  60%  { transform: scale(1.12); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.scratch-hint {
+  margin-top: 20px;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: #114e88;
+  letter-spacing: .5px;
+  transition: opacity .45s ease;
+  animation: hintPulse 1.8s ease-in-out infinite;
+}
+.scratch-hint.done { opacity: 0; animation: none; }
+
+@keyframes hintPulse {
+  0%, 100% { opacity: .6; }
+  50%      { opacity: 1; }
+}
+
+/* ════════════════════════════════════════════════════
+   VENUE
+════════════════════════════════════════════════════ */
+.venue-section { background: #fff; }
+
+.venue-stripes {
+  position: relative;
+  padding: 56px 24px 76px;
+  background: repeating-linear-gradient(
+    90deg,
+    #d0e2f0 0px,
+    #d0e2f0 13px,
+    #e2eff8 13px,
+    #e2eff8 26px
+  );
+  overflow: hidden;
+  min-height: 440px;
+}
+
+.venue-branch {
+  position: absolute;
+  width: clamp(100px, 28vw, 145px);
+  opacity: 0.92;
+  filter: url(#remove-black);
+}
+.venue-branch-tl {
+  top: -4%;
+  left: -4%;
+  transform: rotate(15deg);
+}
+.venue-branch-br {
+  bottom: -4%;
+  right: -4%;
+  transform: rotate(195deg);
+}
+
+.venue-chair-wrap {
+  position: absolute;
+  bottom: 4%;
+  left: 3%;
+  width: clamp(55px, 14vw, 76px);
+  opacity: 0.85;
+}
+.chair-svg { width: 100%; height: auto; }
+
+.venue-oval-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.venue-oval {
+  position: relative;
+  width: 82%;
+  max-width: 340px;
+  min-height: 300px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 2px solid rgba(53, 67, 102, 0.22);
+  border-radius: 50% / 15%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 44px 28px;
+}
+
+.venue-oval::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border: 1.5px dashed rgba(53, 67, 102, 0.18);
+  border-radius: 50% / 18%;
+  pointer-events: none;
+}
+
+.venue-title {
+  font-family: 'Marck Script', cursive;
+  font-size: clamp(22px, 5.5vw, 28px);
+  font-weight: 400;
+  color: #354366;
+  margin-bottom: 22px;
+}
+
+.venue-name {
+  font-style: italic;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 3px;
+  color: #354366;
+  margin-bottom: 10px;
+}
+
+.venue-date {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
+  font-size: clamp(20px, 5vw, 26px);
+  letter-spacing: 5px;
+  color: #354366;
+}
+
+.venue-divider {
+  width: 56px;
+  height: 1.5px;
+  background: #354366;
+  margin: 12px auto;
+}
+
+.anchor-icon {
+  width: 36px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ════════════════════════════════════════════════════
+   TIMELINE  (icon-on-path + heart follower)
+════════════════════════════════════════════════════ */
+.timeline-section { background: #fff; padding: 60px 20px 50px; }
+
+.timeline-inner {
+  position: relative;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* The SVG is the layout skeleton — its height drives the container */
+.tl-svg { width: 100%; display: block; overflow: visible; }
+
+/* ── Heart image inside SVG ── */
+#tl-heart {
+  filter: drop-shadow(0 2px 5px rgba(17,78,136,.35));
+  transition: none; /* position updated by JS, no CSS transition */
+}
+
+/* ── Node base: column layout (icon top, text bottom) ── */
+.tl-node {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/*
+ * Path runs x=130 → x=310.
+ * Icon right-edge (left node) ≈ 8+48=56px   →  130−56 = 74px clear
+ * Icon left-edge  (right node) ≈ 440−56=384px → 384−310 = 74px clear
+ */
+.tl-nl {
+  left: 8px;
+  align-items: flex-start;
+}
+.tl-nr {
+  right: 8px;
+  align-items: flex-end;
+}
+
+/* Vertical positions: top = waypoint_y / 740 * 100% */
+.tl-n1 { top: calc( 60 / 740 * 100%); }
+.tl-n2 { top: calc(220 / 740 * 100%); }
+.tl-n3 { top: calc(380 / 740 * 100%); }
+.tl-n4 { top: calc(540 / 740 * 100%); }
+.tl-n5 { top: calc(680 / 740 * 100%); }
+
+.tl-icon-node { width: 72px; height: auto; flex-shrink: 0; }
+
+.tl-node-info { max-width: 108px; }
+.tl-nl .tl-node-info { text-align: left;  }
+.tl-nr .tl-node-info { text-align: right; }
+
+.tl-time {
+  font-style: italic;
+  font-size: 13px;
+  color: #114e88;
+  display: block;
+  margin-bottom: 2px;
+}
+.tl-text {
+  font-size: 12px;
+  font-weight: 400;
+  color: #354366;
+  line-height: 1.35;
+  margin: 0;
+}
+
+/* ════════════════════════════════════════════════════
+   FADE-UP
+════════════════════════════════════════════════════ */
+.fade-up {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.fade-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* stagger siblings inside a section via --i custom prop */
+.fade-up:nth-child(2) { transition-delay: .10s; }
+.fade-up:nth-child(3) { transition-delay: .18s; }
+.fade-up:nth-child(4) { transition-delay: .26s; }
+.fade-up:nth-child(5) { transition-delay: .34s; }
+/* timeline nodes get individual stagger */
+.tl-n1.fade-up { transition-delay: .00s; }
+.tl-n2.fade-up { transition-delay: .12s; }
+.tl-n3.fade-up { transition-delay: .24s; }
+.tl-n4.fade-up { transition-delay: .36s; }
+.tl-n5.fade-up { transition-delay: .48s; }
+
+/* ════════════════════════════════════════════════════
+   COUNTDOWN
+════════════════════════════════════════════════════ */
+.countdown-section {
+  padding: 52px 20px 56px;
+  background: #fff;
+}
+
+.countdown {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+}
+
+.cd-unit {
+  text-align: center;
+  min-width: 68px;
+}
+
+.cd-unit span {
+  display: block;
+  font-family: 'Raleway', sans-serif;
+  font-weight: 100;
+  font-size: clamp(44px, 12vw, 66px);
+  color: #354366;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.cd-unit label {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: #354366;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.cd-sep {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 100;
+  font-size: clamp(44px, 12vw, 66px);
+  color: #354366;
+  line-height: 1;
+  padding-top: 0;
+  align-self: flex-start;
+}
+
+.cd-today {
+  text-align: center;
+  font-family: 'Marck Script', cursive;
+  font-size: 28px;
+  color: #354366;
+}
+
+/* ════════════════════════════════════════════════════
+   DRESS CODE
+════════════════════════════════════════════════════ */
+.dresscode-section {
+  padding: 52px 24px 48px;
+  background: #fff;
+  text-align: center;
+}
+
+.dresscode-title {
+  font-family: 'Marck Script', cursive;
+  font-size: clamp(32px, 8vw, 40px);
+  font-weight: 400;
+  color: #354366;
+  margin-bottom: 36px;
+}
+
+.dresscode-photos {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+}
+
+.dresscode-frame-wrap {
+  position: relative;
+  width: 43%;
+  max-width: 180px;
+  aspect-ratio: 100 / 140;   /* gives the wrap height so layers can stack */
+  /* Float animation */
+  will-change: translate;
+  transition: box-shadow .35s ease, translate .35s ease;
+}
+
+/* Hover: lift + shadow + quick pop */
+.dresscode-frame-wrap:hover {
+  translate: 0 -8px;
+  z-index: 5;
+}
+.dresscode-frame-wrap:hover .dresscode-photo-inner {
+  box-shadow: 0 20px 44px rgba(17,78,136,.2);
+}
+
+/* ── FRAME layer — separate decorative border, sits on top, around the photo ── */
+.dc-frame-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  overflow: visible;   /* let the wavy bumps render fully, not clip at edges */
+}
+
+/* ── PHOTO layer — independent rectangle nested INSIDE the frame with a gap,
+      so the two read as separate elements. Swap .dc-photo[src] to change it. ── */
+.dresscode-photo-inner {
+  position: absolute;
+  inset: 11%;          /* the gap between photo and the wavy frame */
+  overflow: hidden;
+  border-radius: 3px;
+  z-index: 1;
+  background: #eef4fa;
+}
+
+.dc-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.dc-photo-placeholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #d5e6f5 0%, #c8daf0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dc-photo-placeholder span {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 13px;
+  color: #354366;
+  opacity: 0.7;
+  text-align: center;
+  padding: 10px;
+}
+
+
+/* ════════════════════════════════════════════════════
+   WISHES
+════════════════════════════════════════════════════ */
+.wishes-section {
+  padding: 40px 36px 44px;
+  background: #fff;
+  text-align: center;
+}
+
+.gift-icon {
+  width: 80px;
+  height: auto;
+  display: block;
+  margin: 0 auto 16px;
+}
+
+.wishes-title {
+  font-family: 'Marck Script', cursive;
+  font-size: clamp(28px, 7vw, 34px);
+  font-weight: 400;
+  color: #354366;
+  margin-bottom: 20px;
+}
+
+.wishes-text {
+  font-style: italic;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.75;
+  color: #354366;
+  margin-bottom: 12px;
+}
+
+.rings-deco {
+  width: 200px;
+  height: auto;
+  display: block;
+  margin: 24px auto 0;
+}
+
+/* ════════════════════════════════════════════════════
+   ORGANIZER
+════════════════════════════════════════════════════ */
+.organizer-section {
+  padding: 16px 24px 56px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+}
+
+.wavy-box-wrap {
+  position: relative;
+  width: 84%;
+  max-width: 320px;
+}
+
+.wavy-box-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.wavy-box-content {
+  position: relative;
+  z-index: 1;
+  padding: 36px 24px 36px;
+  text-align: center;
+  aspect-ratio: 300 / 240;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.organizer-text {
+  font-style: italic;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.7;
+  color: #354366;
+}
+
+.organizer-phone {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+  letter-spacing: 2px;
+  color: #354366;
+}
+
+/* ════════════════════════════════════════════════════
+   RSVP
+════════════════════════════════════════════════════ */
+.rsvp-section {
+  padding: 28px 36px 48px;
+  background: #fff;
+}
+
+.rsvp-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(24px, 6vw, 30px);
+  font-weight: 400;
+  color: #354366;
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.rsvp-sub {
+  font-style: italic;
+  font-size: 13px;
+  font-weight: 300;
+  color: #354366;
+  text-align: center;
+  margin-bottom: 32px;
+  line-height: 1.65;
+}
+
+.rsvp-form fieldset {
+  border: none;
+  padding: 0;
+  margin-bottom: 28px;
+}
+
+.rsvp-form legend {
+  font-style: italic;
+  font-size: 16px;
+  color: #354366;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.form-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 15px;
+  color: #354366;
+  margin-bottom: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.form-option input[type="radio"],
+.form-option input[type="checkbox"] {
+  display: none;
+}
+
+.custom-radio,
+.custom-check {
+  width: 22px;
+  height: 22px;
+  border: 1.5px solid #114e88;
+  border-radius: 50%;
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.custom-check {
+  border-radius: 3px;
+}
+
+.custom-radio.checked,
+.custom-check.checked {
+  background: #114e88;
+}
+
+.custom-radio.checked::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.custom-check.checked::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+}
+
+/* ════════════════════════════════════════════════════
+   CLOSING
+════════════════════════════════════════════════════ */
+.closing-section {
+  padding: 40px 20px 64px;
+  background: #fff;
+  text-align: center;
+}
+
+.closing-title {
+  font-family: 'Marck Script', cursive;
+  font-size: clamp(28px, 7.5vw, 36px);
+  font-weight: 400;
+  color: #354366;
+  line-height: 1.35;
+  margin-bottom: 40px;
+}
+
+/* Photo collage */
+.photo-collage {
+  position: relative;
+  max-width: 380px;
+  height: 400px;
+  margin: 0 auto 44px;
+}
+
+/* Organic blob backgrounds */
+.collage-blob {
+  position: absolute;
+  border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+}
+
+.blob-1 {
+  width: 170px; height: 160px;
+  top: 12px; left: 4%;
+  background: #c8dff0;
+  border-radius: 58% 42% 62% 38% / 52% 58% 42% 48%;
+}
+
+.blob-4 {
+  width: 150px; height: 140px;
+  bottom: 16px; right: 4%;
+  background: #c8dff0;
+  border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%;
+}
+
+.collage-photo {
+  position: absolute;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.collage-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Collage reveal: photos pop in with stagger when section enters view ── */
+.closing-section .collage-photo {
+  opacity: 0;
+  scale: 0.82;
+}
+.closing-section.in-view .photo-1 {
+  animation: photo-pop .65s cubic-bezier(.18,.68,.32,1.28) .05s both;
+}
+.closing-section.in-view .photo-2 {
+  animation: photo-pop .65s cubic-bezier(.18,.68,.32,1.28) .20s both;
+}
+.closing-section.in-view .photo-3 {
+  animation: photo-pop .65s cubic-bezier(.18,.68,.32,1.28) .35s both;
+}
+.closing-section.in-view .photo-4 {
+  animation: photo-pop .65s cubic-bezier(.18,.68,.32,1.28) .50s both;
+}
+
+@keyframes photo-pop {
+  from { opacity: 0; scale: 0.78; }
+  to   { opacity: 1; scale: 1;    }
+}
+
+/* ── Hover: each photo lifts up with its own tilt intact ── */
+.photo-1:hover { transform: rotate(-3deg) scale(1.07); box-shadow: 0 14px 32px rgba(17,78,136,.22); z-index: 10; }
+.photo-2:hover { transform: rotate(4deg)  scale(1.07); box-shadow: 0 14px 32px rgba(17,78,136,.22); z-index: 10; }
+.photo-3:hover { transform: rotate(2deg)  scale(1.07); box-shadow: 0 14px 32px rgba(17,78,136,.22); z-index: 10; }
+.photo-4:hover { transform: rotate(-4deg) scale(1.07); box-shadow: 0 14px 32px rgba(17,78,136,.22); z-index: 10; }
+
+.photo-placeholder-bg {
+  background: linear-gradient(135deg, #d0e4f5 0%, #c0d8ee 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-placeholder-bg span {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 12px;
+  color: #354366;
+  opacity: 0.6;
+}
+
+.photo-1 {
+  width: 160px; height: 190px;
+  top: 8px; left: 5%;
+  transform: rotate(-3deg);
+  z-index: 2;
+}
+
+.photo-2 {
+  width: 148px; height: 160px;
+  top: 18px; right: 5%;
+  transform: rotate(4deg);
+  border-radius: 8px;
+}
+
+.photo-3 {
+  width: 164px; height: 186px;
+  bottom: 8px; left: 8%;
+  transform: rotate(2deg);
+  z-index: 2;
+}
+
+.photo-4 {
+  width: 150px; height: 158px;
+  bottom: 12px; right: 5%;
+  transform: rotate(-4deg);
+  border-radius: 50% 50% 48% 52% / 52% 50% 50% 48%;
+}
+
+/* Blue brushstroke behind photo 3 */
+.collage-brush {
+  position: absolute;
+  z-index: 1;
+}
+.brush-3 {
+  width: 180px; height: 80px;
+  bottom: 46px; left: 4%;
+}
+
+/* Hearts decoration */
+.collage-hearts {
+  position: absolute;
+  bottom: 60px;
+  right: 3%;
+  width: 50px;
+  height: 60px;
+  z-index: 3;
+}
+
+/* Monogram */
+.monogram {
+  width: 160px;
+  height: 160px;
+  margin: 0 auto;
+}
+.monogram-wreath {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.wreath-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.monogram-initials {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+.mono-letter {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 34px;
+  font-style: italic;
+  color: #354366;
+  line-height: 1;
+}
+.mono-amp {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-style: italic;
+  color: #89a2b0;
+  line-height: 1;
+  margin: 0 3px;
+  align-self: center;
+  padding-bottom: 2px;
+}
+
+/* ════════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════════ */
+@media (max-width: 400px) {
+  .date-circles { gap: 14px; }
+  .date-circle { width: 70px; height: 70px; }
+  .date-num { font-size: 20px; }
+
+  .tl-item { width: 46%; }
+
+  .dresscode-photos { gap: 16px; }
+
+  .countdown { gap: 2px; }
+  .cd-unit { min-width: 56px; }
+
+  .venue-oval { width: 90%; }
+
+  .photo-collage { height: 340px; }
+  .photo-1 { width: 130px; height: 155px; }
+  .photo-2 { width: 120px; height: 130px; }
+  .photo-3 { width: 134px; height: 152px; }
+  .photo-4 { width: 120px; height: 130px; }
+  .blob-1  { width: 140px; height: 130px; }
+  .blob-4  { width: 120px; height: 115px; }
+}
+
+@media (min-width: 521px) {
+  .invitation { border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; }
+}

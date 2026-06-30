@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { notifyOwner } from '../lib/notify';
 
 const router = Router();
 
@@ -21,18 +22,41 @@ router.post('/:slug', async (req: Request, res: Response) => {
     if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
     if (invite.status === 'draft') return res.status(403).json({ error: 'Приглашение ещё не активно' });
 
-    const { guestName, attending, drinkChoice, wishes } = req.body;
-    if (!guestName) return res.status(400).json({ error: 'Укажите ваше имя' });
+    const { guestName, attending, drinkChoice, wishes, guestToken } = req.body;
+
+    // Персональная ссылка (продвинутый тариф): связываем ответ с гостем.
+    let guest = null as Awaited<ReturnType<typeof prisma.guest.findUnique>> | null;
+    if (guestToken) {
+      guest = await prisma.guest.findUnique({ where: { token: String(guestToken) } });
+      if (guest && guest.invitationId !== invite.id) guest = null; // токен от другого приглашения
+    }
+
+    const finalName = (guestName && String(guestName).trim()) || (guest ? guest.names : '');
+    if (!finalName) return res.status(400).json({ error: 'Укажите ваше имя' });
 
     const response = await prisma.guestResponse.create({
       data: {
         invitationId: invite.id,
-        guestName: guestName.trim(),
+        guestId: guest ? guest.id : null,
+        guestName: finalName,
         attending: attending !== false,
         drinkChoice: drinkChoice || '',
         wishes: wishes || '',
       },
     });
+
+    if (guest) {
+      await prisma.guest.update({ where: { id: guest.id }, data: { responseId: response.id } });
+    }
+
+    // Уведомление владельцу по выбранному каналу (best-effort, не блокирует ответ)
+    notifyOwner(invite as any, {
+      guestName: finalName,
+      attending: attending !== false,
+      drinkChoice: drinkChoice || '',
+      wishes: wishes || '',
+    });
+
     return res.json({ success: true, id: response.id });
   } catch (e) {
     console.error(e);

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Eloquence | Редактор Приглашений</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#d5e5f1",
+                    "outline-variant": "#cec5ba",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed": "#221b0b",
+                    "on-secondary-container": "#7b5353",
+                    "surface-bright": "#f5faff",
+                    "surface": "#f5faff",
+                    "on-tertiary-fixed-variant": "#3e4c16",
+                    "on-surface-variant": "#4b463d",
+                    "inverse-on-surface": "#e4f3ff",
+                    "on-tertiary-container": "#606e34",
+                    "secondary-fixed": "#ffdad9",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#7d766c",
+                    "secondary": "#7c5454",
+                    "surface-variant": "#d5e5f1",
+                    "on-tertiary-fixed": "#161f00",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-container": "#726753",
+                    "on-primary-fixed-variant": "#4f4533",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#e9f5ff",
+                    "inverse-primary": "#d3c5ad",
+                    "tertiary-fixed-dim": "#bdce89",
+                    "tertiary": "#56642b",
+                    "surface-dim": "#ccdce9",
+                    "on-error": "#ffffff",
+                    "tertiary-container": "#dff1a9",
+                    "primary-container": "#f7e7ce",
+                    "primary": "#685d4a",
+                    "surface-tint": "#685d4a",
+                    "on-surface": "#0e1d26",
+                    "surface-container-high": "#daeaf7",
+                    "on-background": "#0e1d26",
+                    "secondary-container": "#ffcaca",
+                    "secondary-fixed-dim": "#edbaba",
+                    "primary-fixed": "#f0e0c8",
+                    "surface-container": "#e0f0fd",
+                    "tertiary-fixed": "#d9eaa3",
+                    "on-secondary-fixed": "#2f1314",
+                    "on-error-container": "#93000a",
+                    "primary-fixed-dim": "#d3c5ad",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed-variant": "#613d3d",
+                    "background": "#f5faff",
+                    "inverse-surface": "#23323c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "margin-mobile": "20px",
+                    "margin-desktop": "80px",
+                    "section-gap": "120px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Playfair Display"],
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "display-lg": ["Playfair Display"],
+                    "label-sm": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Playfair Display"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                    "display-lg": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .vellum-effect {
+            backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+        .grid-bg {
+            background-image: radial-gradient(circle, #7d766c 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.05;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-dot::after {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 4px;
+            background: currentColor;
+            border-radius: 50%;
+            margin: 4px auto 0;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface/70 backdrop-blur-md border-b border-outline-variant/30 flex justify-between items-center px-margin-desktop w-full h-20 z-50">
+<div class="flex items-center gap-6">
+<h1 class="font-headline-md text-headline-md text-on-surface tracking-tight">Eloquence</h1>
+<nav class="hidden md:flex items-center gap-6 ml-10">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-sm text-label-sm">
+<span class="hover:text-primary cursor-pointer transition-colors">Шаблоны</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="hover:text-primary cursor-pointer transition-colors">Коллекция Vellum</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+<span class="text-primary font-bold border-b border-primary">Сара и Джеймс</span>
+</div>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:opacity-80 transition-opacity">save</button>
+<button class="px-6 py-2 border border-secondary text-secondary font-label-sm text-label-sm rounded-lg hover:bg-secondary/5 transition-colors">
+                Предпросмотр
+            </button>
+<button class="px-6 py-2 bg-on-surface text-surface-bright font-label-sm text-label-sm rounded-lg hover:opacity-90 transition-opacity active:scale-95 duration-300 shadow-sm">
+                Поделиться
+            </button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar (Left) -->
+<aside class="bg-surface-bright border-r border-outline-variant/30 h-full w-[280px] flex flex-col py-base px-4 space-y-6 z-40">
+<div class="px-2">
+<h2 class="font-headline-md text-headline-md text-primary">Редактор</h2>
+<p class="font-body-md text-body-md text-outline">Vellum Collection</p>
+</div>
+<nav class="space-y-1">
+<button class="w-full flex items-center gap-4 p-3 rounded-xl text-outline hover:bg-surface-container-low transition-colors group">
+<span class="material-symbols-outlined">auto_awesome_motion</span>
+<span class="font-label-sm text-label-sm">Контент</span>
+</button>
+<!-- Active Design Tab -->
+<button class="w-full flex items-center gap-4 p-3 rounded-xl bg-secondary-container text-on-secondary-container font-bold translate-x-1 transition-transform">
+<span class="material-symbols-outlined">match_case</span>
+<span class="font-label-sm text-label-sm">Дизайн</span>
+</button>
+<button class="w-full flex items-center gap-4 p-3 rounded-xl text-outline hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">local_florist</span>
+<span class="font-label-sm text-label-sm">Интерактив</span>
+</button>
+<button class="w-full flex items-center gap-4 p-3 rounded-xl text-outline hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="font-label-sm text-label-sm">Макет</span>
+</button>
+</nav>
+<div class="pt-4 space-y-8 overflow-y-auto">
+<!-- Typography Section -->
+<div>
+<label class="font-label-sm text-label-sm text-outline-variant uppercase tracking-widest mb-4 block">Типографика</label>
+<div class="space-y-3">
+<div class="p-3 bg-surface-container-lowest border border-primary/20 rounded-xl flex items-center justify-between cursor-pointer hover:border-primary transition-all">
+<span class="font-headline-md text-headline-md text-on-surface !text-lg">Playfair Display</span>
+<span class="material-symbols-outlined text-primary">check_circle</span>
+</div>
+<div class="p-3 bg-surface-container-lowest border border-outline-variant/20 rounded-xl flex items-center justify-between cursor-pointer hover:border-primary transition-all">
+<span class="font-body-md text-body-md text-on-surface">Montserrat</span>
+</div>
+</div>
+</div>
+<!-- Palette Section -->
+<div>
+<label class="font-label-sm text-label-sm text-outline-variant uppercase tracking-widest mb-4 block">Цветовая палитра</label>
+<div class="flex gap-3">
+<div class="group relative">
+<div class="w-10 h-10 rounded-full bg-primary-container border border-outline-variant/30 cursor-pointer transition-transform hover:scale-110 active-dot"></div>
+<span class="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] text-outline transition-opacity">Champagne</span>
+</div>
+<div class="group relative">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed-dim border border-outline-variant/30 cursor-pointer transition-transform hover:scale-110"></div>
+<span class="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] text-outline transition-opacity">Sage</span>
+</div>
+<div class="group relative">
+<div class="w-10 h-10 rounded-full bg-surface-dim border border-outline-variant/30 cursor-pointer transition-transform hover:scale-110"></div>
+<span class="absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 text-[10px] text-outline transition-opacity">Slate</span>
+</div>
+</div>
+</div>
+<!-- Spacing Section -->
+<div>
+<label class="font-label-sm text-label-sm text-outline-variant uppercase tracking-widest mb-4 block">Отступы</label>
+<input class="w-full accent-secondary h-1 bg-surface-container-high rounded-full appearance-none cursor-pointer" max="100" min="0" type="range" value="45"/>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-outline">Compact</span>
+<span class="text-[10px] text-outline">Expansive</span>
+</div>
+</div>
+</div>
+<div class="mt-auto pt-6 border-t border-outline-variant/30">
+<button class="w-full py-4 bg-secondary text-on-secondary rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="font-label-sm text-label-sm uppercase tracking-widest">Завершить дизайн</span>
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+</button>
+</div>
+</aside>
+<!-- Central Canvas -->
+<main class="flex-1 relative overflow-hidden flex items-center justify-center p-12">
+<div class="absolute inset-0 grid-bg"></div>
+<!-- Canvas Controls Overlay -->
+<div class="absolute top-6 left-6 flex gap-4">
+<div class="bg-surface-bright/80 backdrop-blur shadow-sm p-1 rounded-full border border-outline-variant/20 flex gap-1">
+<button class="p-2 hover:bg-surface-container-low rounded-full material-symbols-outlined text-on-surface-variant transition-colors">zoom_in</button>
+<button class="p-2 hover:bg-surface-container-low rounded-full material-symbols-outlined text-on-surface-variant transition-colors">zoom_out</button>
+<div class="w-px h-6 bg-outline-variant/30 self-center mx-1"></div>
+<button class="p-2 hover:bg-surface-container-low rounded-full material-symbols-outlined text-on-surface-variant transition-colors">center_focus_strong</button>
+</div>
+</div>
+<!-- Mobile Frame Container -->
+<div class="relative z-10 group">
+<!-- Phone Mockup Container -->
+<div class="relative w-[340px] h-[680px] bg-on-surface rounded-[50px] p-3 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.15)] ring-8 ring-surface-container-high/50 border border-outline-variant/30 overflow-hidden">
+<img alt="Mobile Preview" class="w-full h-full object-cover rounded-[40px]" data-alt="A close-up of a high-end digital wedding invitation displayed on a sleek modern smartphone. The invitation features delicate serif typography in Russian for Sarah and James, accented with minimalist botanical line art. The background of the invite is a warm champagne tone. The phone sits on a pristine surface, with soft morning light casting gentle shadows across the interface, creating an atmosphere of refined intimacy." src="https://lh3.googleusercontent.com/aida/ADBb0uhWzAfiLplFNycyqY8cjj9DvVzOlg55IsOFI04bWjDX8mKnXSOMjuexAAVjto6nKFI1nOkOuO5zqP5wKbZjZn6t_X5jj9qEVET1Xaj2VSkAG2W5c3F44431RufNw5H7G9V55lEWue5QVOS4v8uIxhRNeEGUYCJe3gh90fk-DnTSpoRT9OwsDJMIylq62fTjl5AmHmcPnRIayJnhvy5JMXPDuLB68h0ldHb4b28zck_jv6WSwXzOS5iIo_k"/>
+<!-- Contextual Editing UI Layer -->
+<div class="absolute inset-0 pointer-events-none p-8 flex flex-col items-center">
+<!-- Direct Edit Handles (Visual only) -->
+<div class="mt-40 pointer-events-auto cursor-text border border-dashed border-primary/50 bg-white/40 backdrop-blur-[2px] px-2 py-1 rounded relative group/edit">
+<span class="font-headline-md text-transparent select-none">Сара &amp; Джеймс</span>
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-3 py-1.5 rounded-full whitespace-nowrap opacity-0 group-hover/edit:opacity-100 transition-opacity shadow-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">edit</span> Редактировать текст
+                            </div>
+<!-- Selection Corners -->
+<div class="absolute -top-1 -left-1 w-2 h-2 bg-white border border-primary"></div>
+<div class="absolute -top-1 -right-1 w-2 h-2 bg-white border border-primary"></div>
+<div class="absolute -bottom-1 -left-1 w-2 h-2 bg-white border border-primary"></div>
+<div class="absolute -bottom-1 -right-1 w-2 h-2 bg-white border border-primary"></div>
+</div>
+</div>
+</div>
+<!-- Floating Toolbar for Mobile Mockup -->
+<div class="absolute -right-24 top-1/2 -translate-y-1/2 flex flex-col gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-4 group-hover:translate-x-0">
+<div class="bg-surface-bright/90 backdrop-blur p-2 rounded-2xl shadow-xl border border-outline-variant/30 flex flex-col gap-2">
+<button class="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-primary-container text-on-surface-variant transition-colors material-symbols-outlined" title="Layers">layers</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-primary-container text-on-surface-variant transition-colors material-symbols-outlined" title="History">history</button>
+<button class="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-primary-container text-on-surface-variant transition-colors material-symbols-outlined" title="Devices">devices</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Panel (Collapsed) -->
+<aside class="w-14 bg-surface-bright border-l border-outline-variant/30 flex flex-col items-center py-6 gap-8">
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">history</button>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">layers</button>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">comment</button>
+<div class="mt-auto material-symbols-outlined text-outline-variant">help_outline</div>
+</aside>
+</div>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const ripple = document.createElement('span');
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: 0;
+                    height: 0;
+                    background: rgba(0,0,0,0.05);
+                    border-radius: 50%;
+                    transform: translate(-50%, -50%);
+                    left: ${x}px;
+                    top: ${y}px;
+                    transition: width 0.4s ease-out, height 0.4s ease-out, opacity 0.4s ease-out;
+                `;
+                btn.style.position = 'relative';
+                btn.style.overflow = 'hidden';
+                btn.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.style.width = '300px';
+                    ripple.style.height = '300px';
+                    ripple.style.opacity = '0';
+                }, 0);
+                
+                setTimeout(() => ripple.remove(), 400);
+            });
+        });
+
+        // Simple parallax effect for phone mockup
+        const canvas = document.querySelector('main');
+        const frame = document.querySelector('.group');
+        canvas.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 45;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 45;
+            frame.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            frame.style.transform = `rotateY(0deg) rotateX(0deg)`;
+            frame.style.transition = 'all 0.5s ease';
+        });
+
+        canvas.addEventListener('mouseenter', () => {
+            frame.style.transition = 'none';
+        });
+    </script>
+</body></html>

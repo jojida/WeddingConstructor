@@ -1,25 +1,53 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import TemplatePreview from '@/components/TemplatePreview';
 import { TEMPLATES } from '@/lib/constants';
 import styles from './page.module.css';
 
-const FILTERS = ['Все', 'Классика', 'Минимализм', 'Бохо', 'Люкс', 'Пастель'];
+function useScrollReveal(count: number) {
+  const refs = useRef<(HTMLDivElement | null)[]>([]);
+  const [visible, setVisible] = useState<boolean[]>(() => new Array(count).fill(false));
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    refs.current.forEach((el, i) => {
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setVisible(prev => { const next = [...prev]; next[i] = true; return next; });
+            obs.disconnect();
+          }
+        },
+        { threshold: 0.12 }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach(o => o.disconnect());
+  }, [count]);
+
+  return { refs, visible };
+}
+
+const FILTERS = ['Все', 'Море', 'Классика', 'Минимализм', 'Бохо', 'Люкс', 'Пастель', 'Конверт'];
 
 const FILTER_MAP: Record<string, string[]> = {
   'Все': [],
+  'Море': ['mediterranean'],
   'Классика': ['classic'],
-  'Минимализм': ['modern'],
+  'Минимализм': ['modern', 'mediterranean'],
   'Бохо': ['bohemian'],
   'Люкс': ['luxury'],
   'Пастель': ['pastel'],
+  'Конверт': ['envelope'],
 };
 
 const SAMPLE_DATA = {
-  brideName: 'Анна',
-  groomName: 'Михаил',
+  brideName: 'Дарья',
+  groomName: 'Вадим',
   weddingDate: '2025-09-20',
   weddingTime: '16:00',
   venue: 'Усадьба «Белый сад»',
@@ -27,6 +55,8 @@ const SAMPLE_DATA = {
   inviteText: 'С радостью приглашаем вас разделить с нами один из самых счастливых дней нашей жизни',
   story: 'Мы встретились пять лет назад и с тех пор не расставались. Наш путь был полон приключений и любви.',
   dressCode: 'White Tie',
+  dressCodeColors: [],
+  dressCodePhoto: '',
   coverPhoto: '',
   galleryPhotos: [],
   mapLink: 'https://maps.google.com',
@@ -47,20 +77,20 @@ export default function TemplatesPage() {
     return ids.length === 0 || ids.includes(t.id);
   });
 
+  const { refs, visible } = useScrollReveal(filtered.length);
+
   return (
     <div className={styles.page}>
       <Navbar />
 
-      {/* Hero */}
       <div className={styles.hero}>
         <div className={styles.heroBg} />
         <div className={styles.heroContent}>
           <h1 className={styles.title}>Выберите шаблон</h1>
           <p className={styles.subtitle}>
-            5 уникальных дизайнов. Каждый включает hero-фото, дресс-код, карту и анкету для гостей.
+            {TEMPLATES.length} уникальных дизайнов. Каждый включает hero-фото, дресс-код, карту и анкету для гостей.
           </p>
 
-          {/* Filters */}
           <div className={styles.filters}>
             {FILTERS.map(f => (
               <button
@@ -75,60 +105,50 @@ export default function TemplatesPage() {
         </div>
       </div>
 
-      {/* Grid */}
       <div className={styles.grid}>
         {filtered.map((tpl, i) => (
-          <div key={tpl.id} className={styles.card} style={{ animationDelay: `${i * 0.07}s` }}>
-            {/* Browser chrome mockup */}
-            <div className={styles.browser}>
-              <div className={styles.browserBar}>
-                <div className={styles.browserDots}>
-                  <span style={{ background: '#ff5f57' }} />
-                  <span style={{ background: '#ffbd2e' }} />
-                  <span style={{ background: '#28c840' }} />
-                </div>
-                <div className={styles.browserUrl}>weddingcraft.ru/invite/anna-i-mikhail</div>
-              </div>
-              {/* Live preview — compact phone-size mode */}
-              <div className={styles.browserContent}>
-                <div className={styles.previewScale}>
-                  <TemplatePreview
-                    data={{ ...SAMPLE_DATA, templateId: tpl.id }}
-                    apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                  />
-                </div>
+          <div
+            key={tpl.id}
+            ref={el => { refs.current[i] = el; }}
+            className={styles.card}
+            style={{
+              opacity: visible[i] ? 1 : 0,
+              transform: visible[i] ? 'translateY(0)' : 'translateY(36px)',
+              transition: `opacity 0.55s ease ${i * 0.1}s, transform 0.55s ease ${i * 0.1}s`,
+            }}
+          >
+            <div className={styles.cardImageWrapper}>
+              <div className={styles.previewScale}>
+                <TemplatePreview
+                  data={{
+                    ...SAMPLE_DATA,
+                    brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
+                    groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
+                    templateId: tpl.id,
+                    coverPhoto: tpl.defaultCover,
+                    galleryPhotos: tpl.defaultGallery
+                  }}
+                  apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+                />
               </div>
             </div>
 
-            {/* Card footer */}
-            <div className={styles.cardFooter}>
-              <div className={styles.cardMeta}>
-                <div className={styles.colorDots}>
-                  {tpl.colors.map((c, ci) => (
-                    <span key={ci} className={styles.colorDot} style={{ background: c }} />
-                  ))}
-                </div>
-                <h2 className={styles.cardName}>{tpl.name}</h2>
-                <p className={styles.cardDesc}>{tpl.description}</p>
-                <div className={styles.tags}>
-                  {tpl.tags.map(tag => (
-                    <span key={tag} className={styles.tag}>{tag}</span>
-                  ))}
-                </div>
-              </div>
-              <Link href={`/editor?template=${tpl.id}`} className={styles.useBtn}>
-                Выбрать и редактировать →
+            <div className={styles.cardActions}>
+              <Link href={`/demo/${tpl.id}`} target="_blank" className={styles.actionBtnOutline}>
+                Посмотреть
+              </Link>
+              <Link href={`/editor?template=${tpl.id}`} className={styles.actionBtnPrimary}>
+                Выбрать
               </Link>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Bottom CTA */}
       <div className={styles.cta}>
         <p className={styles.ctaText}>Не знаете что выбрать? Начните с любого — всё можно изменить в редакторе</p>
-        <Link href="/editor?template=classic" className="btn-primary" style={{ fontSize: 16, padding: '14px 40px' }}>
-          Начать бесплатно ✦
+        <Link href="/editor?template=classic" className="btn-primary">
+          Начать бесплатно
         </Link>
       </div>
     </div>

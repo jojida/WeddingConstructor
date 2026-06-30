@@ -10,10 +10,18 @@ datasource db {
 model User {
   id            String     @id @default(uuid())
   email         String     @unique
-  passwordHash  String
-  name          String
+  passwordHash  String?
+  name          String?
   createdAt     DateTime   @default(now())
   invitations   Invitation[]
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model Invitation {
@@ -36,33 +44,67 @@ model Invitation {
   story         String   @default("")
   inviteText    String   @default("")
   dressCode     String   @default("")
+  dressCodeColors String @default("[]") // JSON: ["#hex",...]
+  dressCodePhoto  String @default("")
   schedule      String   @default("[]") // JSON: [{time,title,icon}]
 
   // Media
   coverPhoto    String   @default("")  // path to uploaded file
+  coverVideo    String   @default("")  // path to uploaded video
   galleryPhotos String   @default("[]") // JSON array of paths
 
   // Appearance
   colorScheme   String   @default("classic")
   musicUrl      String   @default("")
+  enabledSections String @default("{\"couple\":true,\"event\":true,\"schedule\":true,\"style\":true,\"gallery\":true}")
+
+  // Template-specific editable fields (JSON object keyed by field id)
+  customData    String   @default("{}")
 
   // Payment
   paymentId     String   @default("")
   paidAt        DateTime?
   plan          String   @default("basic") // basic | standard | premium
 
+  // Custom domain (MVP — хранится домен + показывается DNS-инструкция)
+  customDomain  String   @default("")
+
+  // Notifications (пара выбирает один канал: telegram | email | none)
+  notifyChannel         String @default("none")
+  notifyEmail           String @default("")
+  notifyTelegramChatId  String @default("")
+  telegramConnectToken  String @default("")
+
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   guestResponses GuestResponse[]
+  guests        Guest[]
+}
+
+// Гости продвинутого тарифа (ручной список с персональными ссылками)
+model Guest {
+  id            String   @id @default(uuid())
+  invitationId  String
+  invitation    Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  token         String   @unique               // короткий токен для персональной ссылки ?g=
+  salutation    String   @default("дорогие")   // дорогой | дорогая | дорогие | семья
+  names         String                          // «Денис и Мария» / «Кореловых»
+  responseId    String?                         // связь с ответом (GuestResponse)
+  createdAt     DateTime @default(now())
+
+  @@index([invitationId])
 }
 
 model GuestResponse {
   id            String   @id @default(uuid())
   invitationId  String
   invitation    Invitation @relation(fields: [invitationId], references: [id])
+  guestId       String?                    // связь с гостем (продвинутый тариф)
   guestName     String
   attending     Boolean
   drinkChoice   String   @default("")   // wine | champagne | juice | water | no_alcohol | other
   wishes        String   @default("")
   createdAt     DateTime @default(now())
+
+  @@index([guestId])
 }

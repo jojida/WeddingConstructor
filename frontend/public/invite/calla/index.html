@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Дарья &amp; Вадим — Приглашение</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Marck+Script&family=Pinyon+Script&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="invite">
+
+    <!-- 1 — ОБЛОЖКА -->
+    <section class="panel">
+      <div class="canvas hero reveal">
+        <img class="deco hero__pearls-tl fade-soft" src="assets/pearls-string.svg" alt="" />
+        <img class="deco hero__callas fade-soft" src="assets/callas-pair.svg" alt="" />
+        <img class="deco hero__pearls-br fade-soft" src="assets/pearls-string.svg" alt="" />
+        <div class="hero__text">
+          <span class="script-name fade-up" data-name="bride">Дарья</span>
+          <span class="amp fade-up">&amp;</span>
+          <span class="script-name fade-up" data-name="groom">Вадим</span>
+          <span class="hero__date fade-up" data-edit="heroDate">22 | 05 | 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 — ДОРОГИЕ ГОСТИ -->
+    <section class="panel">
+      <div class="canvas guests reveal">
+        <img class="deco guests__pearls-tl fade-soft" src="assets/pearls-string.svg" alt="" />
+        <img class="deco guests__callas-tr fade-soft" src="assets/callas-cluster.svg" alt="" />
+        <img class="deco guests__callas-bl fade-soft" src="assets/callas-corner.svg" alt="" />
+        <img class="deco guests__pearls-br fade-soft" src="assets/pearls-string.svg" alt="" />
+
+        <h2 class="title title--light guests__title fade-up" data-edit="greetingTitle">Дорогие гости</h2>
+        <p class="guests__lead fade-up" data-edit="inviteText">
+          Мы безмерно рады пригласить вас разделить с нами одно из самых
+          значимых и счастливых событий в нашей жизни — торжество нашей любви
+        </p>
+
+        <div class="guests__cal fade-up">
+          <div class="cal__head">
+            <span class="fancy" data-cal="month">May</span>
+            <span class="cal__year" data-cal="year">2026</span>
+          </div>
+          <div class="cal__grid" data-cal="grid">
+            <span class="cal__dow">Sun</span><span class="cal__dow">Mon</span><span class="cal__dow">Tue</span><span class="cal__dow">Wed</span><span class="cal__dow">Thu</span><span class="cal__dow">Fri</span><span class="cal__dow">Sat</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 — МЕСТО ПРОВЕДЕНИЯ -->
+    <section class="panel">
+      <div class="canvas venue reveal">
+        <h2 class="title title--light venue__title fade-up" data-edit="venueTitle">Место проведения</h2>
+        <img class="venue__img fade-soft" src="assets/mansion.svg" alt="Место проведения" />
+        <p class="venue__place fade-up" data-edit="venue">Дворцовая усадьба 12</p>
+      </div>
+    </section>
+
+    <!-- 4 — ПРОГРАММА ДНЯ -->
+    <section class="panel">
+      <div class="canvas program reveal">
+        <h2 class="title title--light program__title fade-up" data-edit="programTitle">Программа дня</h2>
+        <div class="timeline-section">
+          <div class="timeline-inner">
+            <svg id="tl-svg" class="tl-svg" viewBox="0 0 440 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+              <path id="tl-path" class="tl-path" d="" fill="none" />
+              <image id="tl-heart" class="tl-heart" href="assets/pearl-bead.png" width="30" height="30" />
+            </svg>
+            <!-- .tl-node элементы строятся скриптом из расписания -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 — ДРЕСС КОД -->
+    <section class="panel">
+      <div class="canvas dresscode reveal">
+        <h2 class="title title--light dresscode__title fade-up" data-edit="dressTitle">Дресс код</h2>
+        <div class="palette fade-up" data-edit="palette">
+          <span style="--c:#d7bca4"></span><span style="--c:#e1d5c6"></span><span style="--c:#8c967b"></span><span style="--c:#7b9365"></span>
+          <span style="--c:#c9985e"></span><span style="--c:#eccb90"></span><span style="--c:#916743"></span><span style="--c:#bec9d0"></span>
+        </div>
+
+        <div class="carousel fade-up">
+          <button class="carousel__nav carousel__nav--prev" type="button" aria-label="Назад">&#8249;</button>
+          <div class="carousel__track" id="dressTrack">
+            <div class="carousel__slide"><img class="zoomable" src="assets/dress1.jpg" data-edit="dressCodePhoto" alt="Образ 1" /></div>
+            <div class="carousel__slide"><img class="zoomable" src="assets/dress2.jpg" data-edit="dressPhoto2" alt="Образ 2" /></div>
+            <div class="carousel__slide"><img class="zoomable" src="assets/dress3.jpg" data-edit="dressPhoto3" alt="Образ 3" /></div>
+          </div>
+          <button class="carousel__nav carousel__nav--next" type="button" aria-label="Вперёд">&#8250;</button>
+          <div class="carousel__dots" id="dressDots"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 — СВАДЬБА ЧЕРЕЗ -->
+    <section class="panel">
+      <div class="canvas countdown reveal">
+        <img class="deco cd__pearls-tl fade-soft" src="assets/pearls-string.svg" alt="" />
+        <img class="deco cd__callas-tr fade-soft" src="assets/callas-cluster.svg" alt="" />
+        <img class="deco cd__callas-bl fade-soft" src="assets/callas-corner.svg" alt="" />
+        <img class="deco cd__doves fade-soft" src="assets/doves.svg" alt="" />
+        <h2 class="title title--light cd__title fade-up" data-edit="countdownTitle">Свадьба через</h2>
+        <div class="cd__timer fade-up">
+          <span class="cd__num" id="cd-days">112</span><span class="cd__sep">:</span><span class="cd__num" id="cd-hours">13</span><span class="cd__sep">:</span><span class="cd__num" id="cd-mins">14</span><span class="cd__sep">:</span><span class="cd__num" id="cd-secs">15</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 — ПОЖЕЛАНИЯ И ДЕТАЛИ -->
+    <section class="panel">
+      <div class="canvas wishes reveal">
+        <div class="plaque fade-up">
+          <img class="plaque__frame" src="assets/frame-plaque.svg" alt="" />
+          <div class="plaque__body">
+            <img class="plaque__rings" src="assets/rings.svg" alt="" />
+            <h2 class="title title--brown plaque__title" data-edit="wishesTitle">Пожелания и детали</h2>
+            <div class="plaque__text" data-edit="story">
+              <p>Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.</p>
+              <p>Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 — АНКЕТА ГОСТЯ -->
+    <section class="panel">
+      <div class="canvas rsvp reveal">
+        <h2 class="title title--light rsvp__title fade-up" data-edit="surveyTitle">Анкета гостя</h2>
+        <p class="rsvp__lead fade-up" data-edit="surveyText">Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до 01.08.26</p>
+        <form class="rsvp__form fade-up" id="rsvpForm">
+          <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя" />
+          <fieldset class="rsvp__group">
+            <legend>Будете ли вы на мероприятии?</legend>
+            <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, буду!</label>
+            <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению не смогу придти</label>
+          </fieldset>
+          <fieldset class="rsvp__group" data-edit="drinks">
+            <legend>Что предпочитаете из напитков?</legend>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="Игристое" />Игристое</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="Красное Вино" />Красное Вино</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="Белое Вино" />Белое Вино</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="Коньяк" />Коньяк</label>
+          </fieldset>
+          <button class="rsvp__submit" type="submit">Отправить</button>
+        </form>
+        <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ записан &#10084;</p>
+      </div>
+    </section>
+
+    <!-- 9 — ФИНАЛ -->
+    <section class="panel">
+      <div class="canvas farewell reveal">
+        <div class="polaroid fade-soft">
+          <img class="zoomable" src="assets/couple-photo.jpg" data-edit="finalPhoto" alt="Жених и невеста" />
+        </div>
+        <h2 class="title title--light farewell__title fade-up" data-edit="closingTitle">Будем ждать вас с нетерпением!</h2>
+        <p class="farewell__sign fade-up" data-edit="closingSign">Ваши Дарья и Вадим</p>
+        <div class="monogram fade-soft">
+          <img src="assets/heart-lace.svg" alt="" />
+          <span class="monogram__letters fancy"><span class="mono-letter">Д</span>&nbsp;<span class="mono-letter">В</span></span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

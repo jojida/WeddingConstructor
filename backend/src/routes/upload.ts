@@ -29,7 +29,7 @@ const upload = multer({
 });
 
 // POST /api/upload/image
-router.post('/image', authMiddleware, upload.single('image'), (req: Request, res: Response) => {
+router.post('/image', upload.single('image'), (req: Request, res: Response) => {
   if (!req.file) return res.status(400).json({ error: 'Файл не загружен' });
   const url = `/uploads/${req.file.filename}`;
   return res.json({ url });

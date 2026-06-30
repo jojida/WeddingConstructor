@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Артем и Екатерина — Свадебное приглашение</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Alice&family=Life+Savers:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <main class="card">
+
+    <!-- ══════════════ ОБЛОЖКА ══════════════ -->
+    <section class="section cover">
+      <div class="cover-head">
+        <img class="cf cf-yellow1" src="assets/confetti-yellow.svg" alt="">
+        <img class="cf cf-blue1"   src="assets/confetti-blue.svg" alt="">
+        <img class="cf cf-yellow2" src="assets/confetti-yellow.svg" alt="">
+
+        <div class="badge-wrap fu">
+          <img class="badge-brush" src="assets/brush-pink.svg" alt="">
+          <span class="badge-text">Наконец-то!</span>
+        </div>
+
+        <h1 class="title fu fu-d1">МЫ<span class="l2">женимся!</span></h1>
+
+        <div class="title-hearts fu fu-d1">
+          <img class="hb hb1" src="assets/heart-pink.svg" alt="">
+          <img class="hb hb2" src="assets/heart-pink.svg" alt="">
+        </div>
+
+        <div class="names-wrap fu fu-d2">
+          <span class="names" data-edit="names">Артем и Екатерина</span>
+        </div>
+      </div>
+
+      <div class="polaroids fu fu-d2">
+        <div class="pol pol-l">
+          <img class="photo" src="assets/polaroid-groom.png" alt="Жених" data-edit="groomPhoto">
+          <img class="frame" src="assets/polaroid-frame-l.svg" alt="">
+        </div>
+        <div class="pol pol-r">
+          <img class="photo" src="assets/polaroid-bride.png" alt="Невеста" data-edit="bridePhoto">
+          <img class="frame" src="assets/polaroid-frame-r.svg" alt="">
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ ДОРОГИЕ ГОСТИ ══════════════ -->
+    <section class="section guests">
+      <div class="guests-head fu">
+        <img src="assets/cake-tiered.svg" alt="">
+        <h2 class="h-script" data-edit="guestsTitle">Дорогие гости</h2>
+      </div>
+      <p class="lead fu fu-d1" data-edit="inviteText">
+        Если вы читаете это приглашение — значит, вы часть нашей истории.
+        Спасибо, что были с нами всё это время — рядом, мысленно,
+        в воспоминаниях. Спасибо за тепло, за слова, за молчание,
+        за просто быть.<br><br>
+        Мы с радостью приглашаем вас стать частью нового
+        воспоминания — нашей свадьбы.
+      </p>
+    </section>
+
+    <!-- ══════════════ НАШ ДЕНЬ ══════════════ -->
+    <section class="section ourday">
+      <img class="confetti" style="top:-10px;left:-8px;width:90px" src="assets/confetti-blue.svg" alt="">
+      <h2 class="h-script fu">Наш день</h2>
+      <div class="dates fu fu-d1" id="dateRow">
+        <span class="d" data-day>06</span>
+        <span class="d" data-day>07</span>
+        <span class="date-hl">
+          <img src="assets/heart-pink.svg" alt="">
+          <span id="dayHl">08</span>
+        </span>
+        <span class="d" data-day>09</span>
+        <span class="d" data-day>10</span>
+      </div>
+      <div class="month fu fu-d1" id="monthName">август</div>
+    </section>
+
+    <!-- ══════════════ ЛОКАЦИЯ ══════════════ -->
+    <section class="section location">
+      <img class="confetti" style="top:8px; right:-10px; width:110px" src="assets/confetti-yellow.svg" alt="">
+      <img class="loc-heart fu" src="assets/heart-location.png" alt="">
+      <h2 class="h-marker fu">Локация</h2>
+      <p class="lead fu fu-d1" data-edit="locationText">Праздник пройдёт на базе отдыха «Барвиха»</p>
+      <img class="car fu fu-d2" src="assets/car.svg" alt="">
+    </section>
+
+    <!-- ══════════════ ПРОГРАММА ДНЯ ══════════════ -->
+    <section class="section program">
+      <h2 class="h-marker fu">Программа дня</h2>
+
+      <div class="timeline">
+        <!-- серпантинная линия — вьётся РЯДОМ с иконками, не задевая их -->
+        <svg class="track" viewBox="0 0 420 1500" preserveAspectRatio="none" fill="none"
+             stroke="#1c1c1c" stroke-width="1.6" stroke-linecap="round">
+          <path d="M168,110
+                   C 235,165 246,245 246,360
+                   C 246,470 168,520 168,660
+                   C 168,785 246,820 246,960
+                   C 246,1075 168,1120 168,1260" vector-effect="non-scaling-stroke"/>
+        </svg>
+
+        <!-- 15:30 -->
+        <div class="stop left s1 fu">
+          <img class="ic" src="assets/glasses-cheers.svg" alt="">
+          <span class="time">15:30</span>
+          <span class="lab">Сбор гостей</span>
+        </div>
+        <!-- 16:00 -->
+        <div class="stop right s2 fu">
+          <img class="ic" src="assets/rings.svg" alt="" style="height:82px">
+          <span class="time">16:00</span>
+          <span class="lab">Церемония</span>
+        </div>
+        <!-- 17:00 -->
+        <div class="stop left s3 fu">
+          <img class="ic" src="assets/polaroids-deco.svg" alt="">
+          <span class="time">17:00</span>
+          <span class="lab">Церемония</span>
+        </div>
+        <!-- 18:00 -->
+        <div class="stop right s4 fu">
+          <img class="ic" src="assets/cake-slice.png" alt="" style="height:84px">
+          <span class="time">18:00</span>
+          <span class="lab">Банкет</span>
+        </div>
+        <!-- 20:00 -->
+        <div class="stop left s5 fu">
+          <img class="ic" src="assets/disco-ball.svg" alt="" style="height:92px">
+          <span class="time">20:00</span>
+          <span class="lab">Дискотека</span>
+        </div>
+
+        <!-- конфетти у дискотеки -->
+        <img class="confetti" style="left:-12px; bottom:70px; width:128px" src="assets/confetti-yellow.svg" alt="">
+        <img class="confetti" style="right:-12px; bottom:20px; width:120px" src="assets/confetti-blue.svg" alt="">
+      </div>
+    </section>
+
+    <!-- ══════════════ DRESS CODE ══════════════ -->
+    <section class="section dress">
+      <h2 class="h-script fu">Дресс код</h2>
+      <p class="lead fu fu-d1" data-edit="dressText">
+        Одевайтесь в пастельных тонах, пожалуйста,
+        избегайте ярких насыщенных цветов
+      </p>
+      <div class="swatches fu fu-d1" data-edit="swatches">
+        <i style="background:var(--sw-lilac)"></i>
+        <i style="background:var(--sw-tan)"></i>
+        <i style="background:var(--sw-red)"></i>
+        <i style="background:var(--sw-pink)"></i>
+        <i style="background:var(--sw-cream)"></i>
+      </div>
+      <div class="photos fu fu-d2">
+        <div class="dress-pic ph-l">
+          <img class="photo" src="assets/dress1.png" alt="" data-edit="dressCodePhoto">
+          <img class="frame" src="assets/frame-red.svg" alt="">
+        </div>
+        <div class="dress-pic ph-r">
+          <img class="photo" src="assets/dress2.png" alt="" data-edit="dressPhoto2">
+          <img class="frame" src="assets/frame-red.svg" alt="">
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ АНКЕТА ══════════════ -->
+    <section class="section survey">
+      <img class="confetti" style="top:-30px; right:-8px; width:130px" src="assets/confetti-yellow.svg" alt="">
+      <h2 class="h-marker fu">Анкета</h2>
+      <p class="lead fu fu-d1" data-edit="surveyText">
+        Чтобы мы знали, сколько стульев и бокалов готовить,
+        заполните анкету до 01.08.26
+      </p>
+
+      <form class="rsvp-form fu fu-d1" id="rsvpForm">
+        <p class="q">Как вас зовут?</p>
+        <input type="text" name="guestName" class="rsvp-name" placeholder="Ваше имя"
+               style="display:block;width:100%;max-width:320px;margin:0 auto;border:none;border-bottom:2px solid var(--ink);
+                      background:transparent;font-family:var(--font-form);font-size:18px;color:var(--ink);
+                      text-align:center;padding:6px 4px;outline:none;">
+
+        <p class="q">Будете ли вы на мероприятии?</p>
+        <label class="opt radio"><input type="radio" name="attend" value="yes" checked><span class="box"></span>Да, буду!</label>
+        <label class="opt radio"><input type="radio" name="attend" value="no"><span class="box"></span>К сожалению, не смогу прийти</label>
+
+        <p class="q">Что предпочитаете из напитков?</p>
+        <div data-edit="drinks">
+          <label class="opt"><input type="checkbox" name="drink" value="sparkling"><span class="box"></span>Игристое</label>
+          <label class="opt"><input type="checkbox" name="drink" value="red"><span class="box"></span>Красное вино</label>
+          <label class="opt"><input type="checkbox" name="drink" value="white"><span class="box"></span>Белое вино</label>
+          <label class="opt"><input type="checkbox" name="drink" value="cognac"><span class="box"></span>Коньяк</label>
+        </div>
+
+        <button type="submit" class="rsvp-submit">Отправить</button>
+      </form>
+      <div class="rsvp-thanks" id="rsvpThanks" hidden>
+        <p class="month">Спасибо! Будем рады видеть вас</p>
+      </div>
+    </section>
+
+    <!-- ══════════════ ПОЖЕЛАНИЯ ══════════════ -->
+    <section class="section wishes">
+      <img class="confetti confetti-bl" src="assets/confetti-blue.svg" alt="">
+      <h2 class="h-marker fu">Пожелания</h2>
+      <p class="lead fu fu-d1" data-edit="wishesText">
+        Будем рады вашим тёплым словам и пожеланиям —
+        они для нас самый дорогой подарок
+      </p>
+      <div class="wishes-icons fu fu-d2">
+        <img class="candle" src="assets/candle.svg" alt="">
+        <img class="cam" src="assets/camera.png" alt="">
+      </div>
+    </section>
+
+    <!-- ══════════════ ДО НОВЫХ ВСТРЕЧ ══════════════ -->
+    <section class="section outro">
+      <h2 class="h-script fu">До новых встреч!</h2>
+
+      <div class="framed fu fu-d1">
+        <img class="hearts" src="assets/hearts-navy.png" alt="">
+        <img class="photo" id="couplePhoto" data-edit="finalPhoto" src="assets/couple.png" alt="Артем и Екатерина">
+        <img class="frame" src="assets/frame-blue.svg" alt="">
+      </div>
+
+      <div class="monogram fu fu-d2">
+        <img src="assets/heart-pink.svg" alt="">
+        <span id="monogram">АЕ</span>
+      </div>
+      <div class="sign fu fu-d2" id="signNames" data-edit="names">Артем и Екатерина</div>
+    </section>
+
+  </main>
+
+  <script>
+    // Появление секций при скролле
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.1, rootMargin: '0px 0px 0px 0px' });
+    document.querySelectorAll('.fu').forEach(el => io.observe(el));
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

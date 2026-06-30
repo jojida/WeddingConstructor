@@ -1,0 +1,771 @@
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FADE-UP ANIMATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.fu {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.72s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.72s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.fu.in {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Задержки для дочерних элементов */
+.fu-d1 { transition-delay: 0.10s; }
+.fu-d2 { transition-delay: 0.20s; }
+.fu-d3 { transition-delay: 0.30s; }
+.fu-d4 { transition-delay: 0.40s; }
+.fu-d5 { transition-delay: 0.50s; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PALETTE
+   Main bg:       #d5d0c8  (light warm grey)
+   Section bg:    #a29b88  (from section_bg.svg file (4))
+   Text dark:     #3d3d3d
+   Text light:    #eaeae8
+   Gold:          #947f57
+   Cream:         #f8f9f0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --bg:       #d5d0c8;
+  --bg-sec:   #a29b88;
+  --text:     #3d3d3d;
+  --text-lt:  #eaeae8;
+  --gold:     #947f57;
+  --cream:    #f8f9f0;
+  --pad-x:    32px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #b0ab9f;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+
+.card {
+  width: 100%;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* ─── Corner branches ───────────────────────────── */
+img.corner {
+  position: absolute;
+  pointer-events: none;
+  z-index: 8;
+  width: 200px;
+  height: auto;
+}
+/* TL: перевёрнут по горизонтали (смотрит вправо → влево) */
+img.corner-tl { top: 0; left: 0;  transform: scaleX(-1); }
+/* TR: нормальный (смотрит влево) */
+img.corner-tr { top: 0; right: 0; transform: none; }
+img.corner-bl { bottom: 0; left: 0;  transform: scaleY(-1); }
+img.corner-br { bottom: 0; right: 0; transform: scale(-1,-1); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ОБЛОЖКА
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.cover {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 70px var(--pad-x) 50px;
+  min-height: 95vh;
+  background: var(--bg);
+}
+
+.arch-block {
+  position: relative;
+  width: 72%;
+  max-width: 300px;
+  z-index: 3;
+}
+
+.arch-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 572.25 / 900;
+  overflow: visible;
+}
+
+.arch-photo-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.arch-border-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.arch-bouquet { position: absolute; pointer-events: none; height: auto; }
+.arch-bouquet-tl { width: 57%; left: -15%; top: -4%; z-index: 5; }
+.arch-bouquet-br { width: 60%; right: -20%; bottom: -10%; transform: scale(-1,-1); z-index: 5; }
+
+.std-label {
+  position: absolute;
+  right: -22px; top: 28%;
+  transform: translateY(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px; z-index: 6;
+}
+.std-label span {
+  font-family: 'Raleway', sans-serif;
+  font-size: 9px; font-weight: 300;
+  letter-spacing: 0.25em; color: var(--text); line-height: 1;
+}
+.std-spacer { height: 5px !important; }
+
+.the-wedding-of {
+  font-family: 'Raleway', sans-serif; font-size: 12px; font-weight: 300;
+  letter-spacing: 0.38em; text-transform: uppercase;
+  color: var(--text); margin-top: 120px; margin-bottom: 4px;
+  position: relative; z-index: 2;
+}
+.couple-names {
+  font-family: 'Great Vibes', cursive; font-size: 64px; font-weight: 400;
+  color: var(--text); line-height: 1.1; margin-bottom: 12px;
+  position: relative; z-index: 2;
+}
+.invite-label {
+  font-family: 'Raleway', sans-serif; font-size: 11px; font-weight: 300;
+  letter-spacing: 0.5em; text-transform: uppercase;
+  color: var(--text); position: relative; z-index: 2;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ПОЛОСА С ВЕТКАМИ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.branch-band-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+}
+.branch-band {
+  width: 100%; max-height: 130px; object-fit: cover; display: block;
+  mix-blend-mode: multiply;   /* убирает белый фон SVG */
+}
+.band-inner {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 2;
+}
+.band-names {
+  font-family: 'Raleway', sans-serif; font-size: 8.5px; font-weight: 300;
+  letter-spacing: 0.22em; color: var(--text); white-space: nowrap;
+}
+.band-icon {
+  width: 32px; height: auto;
+  /* Убрать белый фон у иконки */
+  mix-blend-mode: multiply;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   СЕКЦИЯ ПРИГЛАШЕНИЯ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.invite-section {
+  background: var(--bg);
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+  padding: 40px var(--pad-x) 48px;
+}
+
+.dear-guests {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 44px; font-weight: 400; font-style: italic;
+  color: var(--text); margin-bottom: 20px; line-height: 1.15;
+}
+
+.invite-body {
+  font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 300;
+  letter-spacing: 0.12em; line-height: 2.1;
+  color: var(--text); max-width: 320px; margin-bottom: 30px;
+}
+
+/* ── Карточка "Мы ждём вас": peony позади даты ── */
+.invite-card-wrap {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.we-await {
+  font-family: 'Great Vibes', cursive; font-size: 30px; font-weight: 400;
+  color: var(--text); line-height: 1.1; margin-bottom: 6px;
+  position: relative; z-index: 4;
+}
+.date-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.invite-peony {
+  display: none;
+}
+.date-line {
+  font-family: 'Raleway', sans-serif; font-size: 16px; font-weight: 300;
+  letter-spacing: 0.2em; color: var(--text);
+}
+
+.table-icon {
+  width: 220px; height: auto; margin-bottom: 24px;
+  opacity: 0.85;
+  mix-blend-mode: multiply;
+}
+
+.countdown {
+  font-family: 'Raleway', sans-serif; font-size: 38px; font-weight: 200;
+  letter-spacing: 0.05em; color: var(--text);
+  display: flex; align-items: center; gap: 0;
+}
+.cd-sep { margin: 0 6px; opacity: 0.5; }
+.countdown-label {
+  font-family: 'Raleway', sans-serif; font-size: 10px; font-weight: 300;
+  letter-spacing: 0.22em; color: var(--text); opacity: 0.65;
+  margin-top: 6px; text-transform: uppercase;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   РАСПИСАНИЕ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.program-section {
+  position: relative;
+  background: var(--bg);
+  padding: 50px var(--pad-x) 60px;
+  display: flex; flex-direction: column; align-items: center;
+  overflow: visible;
+}
+/* Угловые ветки внизу расписания */
+.program-section > img.corner {
+  z-index: 1;
+  position: absolute;
+  bottom: -70px; /* сдвинуты ниже нижнего края секции */
+}
+
+.section-script {
+  font-family: 'Great Vibes', cursive;
+  font-size: 58px; font-weight: 400;
+  color: var(--text); margin-bottom: 40px;
+  position: relative; z-index: 2;
+}
+
+/* ── Двухколоночное расписание ── */
+.schedule-wrap {
+  display: grid;
+  grid-template-columns: 1fr 20px 1fr;
+  width: 100%;
+  max-width: 440px;
+  position: relative;
+  z-index: 2;
+}
+
+.sched-timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  padding: 24px 0;
+  border-left: 1.5px dashed rgba(61,61,61,0.35);
+  margin-left: 50%;
+}
+.tl-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--gold); flex-shrink: 0;
+  margin-left: -5.75px;
+}
+
+.sched-col { display: flex; flex-direction: column; }
+
+/* Левый элемент: мета (текст) справа, иконка слева от центра */
+.sched-item-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 22px 14px 22px 4px;
+}
+.sched-item-left .sched-meta { text-align: right; }
+
+/* Правый элемент: иконка слева от центра, мета справа */
+.sched-item-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 22px 4px 22px 14px;
+}
+.sched-item-right .sched-meta { text-align: left; }
+
+.sched-meta { display: flex; flex-direction: column; gap: 3px; }
+
+.sched-time {
+  font-family: 'Raleway', sans-serif; font-size: 16px; font-weight: 300;
+  letter-spacing: 0.15em; color: var(--gold);
+}
+.sched-name {
+  font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 300;
+  letter-spacing: 0.1em; color: var(--text); line-height: 1.3;
+}
+
+/* Иконки расписания — убираем белый фон через mix-blend-mode.
+   background: var(--bg) нужен, чтобы multiply работал внутри
+   stacking context (transform от .fu даёт прозрачный фон). */
+.sched-icon {
+  width: 58px; height: 58px; object-fit: contain; flex-shrink: 0;
+  background: var(--bg);
+  mix-blend-mode: multiply;
+}
+/* Эмодзи-иконка (демо-данные) — тот же размер, без multiply */
+span.sched-emoji {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; line-height: 1; background: transparent;
+  mix-blend-mode: normal;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ДРЕСС-КОД
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.dresscode-section {
+  position: relative;
+  background: var(--bg);
+  padding: 110px var(--pad-x) 60px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+
+.dc-peony {
+  width: 50%; max-width: 190px;
+  margin-top: -20px; margin-bottom: 10px;
+  position: relative; z-index: 3;
+}
+
+.dc-genders {
+  font-family: 'Raleway', sans-serif; font-size: 9px; font-weight: 300;
+  letter-spacing: 0.25em; text-transform: uppercase; color: var(--text);
+  display: flex; align-items: center; gap: 10px; margin-bottom: 22px;
+}
+.dc-divider { color: var(--gold); font-size: 14px; }
+
+/* ── 4 свотча дресс-кода (dresscode.svg × 4, разные цвета через CSS filter) ── */
+.dc-swatches {
+  display: flex; gap: 12px; margin-bottom: 28px;
+  align-items: center; justify-content: center; flex-wrap: wrap;
+}
+.dc-swatch {
+  display: block;
+  width: 120px;
+  height: auto;
+  object-fit: contain;
+}
+/* Блаш — оригинальный */
+.dc-s1 { filter: none; }
+/* Пудровая лаванда */
+.dc-s2 { filter: hue-rotate(260deg) saturate(0.55) brightness(1.05); }
+/* Шампань / айвори */
+.dc-s3 { filter: sepia(0.45) saturate(0.4) brightness(1.1); }
+/* Тауп / тёплый серо-бежевый */
+.dc-s4 { filter: sepia(0.65) saturate(0.35) brightness(0.82) hue-rotate(5deg); }
+
+/* ── Два фото рядом — в своём масштабе, без растяжки ── */
+.dc-photos {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+}
+.dc-photo {
+  width: 42%;
+  max-width: 180px;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  border-radius: 3px;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ПИРАМИДА ШАМПАНСКОГО
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.champagne-wrap {
+  background: var(--bg);
+  padding: 20px var(--pad-x) 60px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.champagne-tower {
+  width: 220px; height: auto;
+  mix-blend-mode: multiply;
+  opacity: 0.85;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ТЕМНЫЙ ФОН
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.dark-section-wrapper {
+  background-image: url('assets/decor/section_bg.svg');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  padding: 30px 0;
+  margin: 0;
+  position: relative;
+  z-index: 2;
+}
+
+/* Пионы, перекрывающие края рваной бумаги */
+.dark-peony-tl {
+  position: absolute;
+  top: -30px;
+  left: -15px;
+  width: 130px;
+  z-index: 5;
+}
+
+.dark-peony-br {
+  position: absolute;
+  bottom: -30px;
+  right: -15px;
+  width: 120px;
+  z-index: 5;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ДЕТАЛИ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.details-section {
+  background: var(--bg);
+  padding: 50px 0 56px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.details-list {
+  display: flex; flex-direction: row;
+  width: 100%;
+  margin-top: 28px;
+  border-top: 1px solid rgba(148,127,87,0.25);
+  border-bottom: 1px solid rgba(148,127,87,0.25);
+}
+.detail-item {
+  display: flex; flex-direction: column; align-items: center;
+  flex: 1; padding: 28px 12px; gap: 14px;
+  border-right: 1px solid rgba(148,127,87,0.25);
+}
+.detail-item:last-child { border-right: none; }
+.detail-icon {
+  width: 62px; height: auto;
+  mix-blend-mode: multiply;
+}
+.detail-text { text-align: center; }
+.detail-label {
+  font-family: 'Raleway', sans-serif; font-size: 10px; font-weight: 300;
+  letter-spacing: 0.25em; color: var(--gold); text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.detail-value {
+  font-family: 'Cormorant Garamond', serif; font-size: 20px;
+  font-weight: 300; color: var(--text); letter-spacing: 0.06em;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ПОЖЕЛАНИЯ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.wishes-section {
+  background: transparent;
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center;
+}
+.wishes-heading {
+  font-family: 'Raleway', sans-serif; font-size: 14px; font-weight: 300;
+  letter-spacing: 0.35em; color: var(--cream); text-transform: uppercase;
+  padding: 32px var(--pad-x) 16px; margin: 0;
+}
+/* Карточка: рамка задаёт размер, текст позиционируется поверх */
+.wishes-card-wrap {
+  position: relative;
+  width: 92%;
+  max-width: 520px;
+  margin-bottom: 32px;
+}
+.wishes-lace {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* inset рассчитан по реальным координатам SVG viewBox 930.75×664.5:
+   X: 88→842 (9.5% слева/справа), Y: 87→571 (13% сверху, 14% снизу) */
+.wishes-card-inner {
+  position: absolute;
+  top: 13%;
+  bottom: 14%;
+  left: 9.5%;
+  right: 9.5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.wishes-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(12px, 3.2vw, 18px);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  line-height: 1.9;
+  color: var(--text);
+  text-align: center;
+  width: 100%;
+  padding: 0 4%;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ЛОКАЦИЯ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.location-section {
+  background: transparent;
+  padding: 50px var(--pad-x) 56px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.loc-title {
+  font-family: 'Raleway', sans-serif; font-size: 28px; font-weight: 300;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--cream); margin-bottom: 6px;
+}
+.loc-sub {
+  font-family: 'Raleway', sans-serif; font-size: 12px; font-weight: 300;
+  letter-spacing: 0.2em; color: var(--text-lt); margin-bottom: 28px;
+}
+/* Фото внутри frame.svg */
+.loc-frame-wrap {
+  position: relative;
+  width: 94%;
+  max-width: 520px;
+  background: white;
+}
+/* Фото заполняет внутреннюю область рамки */
+.loc-photo {
+  position: absolute;
+  top: 12%;
+  left: 8%;
+  width: 84%;
+  height: 76%;
+  object-fit: cover;
+  z-index: 1;
+}
+/* frame.svg поверх фото */
+.loc-frame-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 2;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RSVP / АНКЕТА ГОСТЯ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.rsvp-section {
+  position: relative;
+  background: var(--bg);
+  padding: 50px var(--pad-x) 20px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+
+.rsvp-bird-icon {
+  width: 80px; height: auto; margin-bottom: 16px;
+  mix-blend-mode: multiply;
+}
+
+.rsvp-title {
+  font-family: 'Raleway', sans-serif; font-size: 22px; font-weight: 300;
+  letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--text); margin-bottom: 16px;
+}
+.rsvp-subtitle {
+  font-family: 'Cormorant Garamond', serif; font-size: 17px;
+  font-weight: 300; line-height: 1.7; color: var(--text);
+  max-width: 340px; margin-bottom: 32px;
+}
+
+.rsvp-bouquet {
+  display: none;
+}
+
+.rsvp-form {
+  width: 100%;
+  max-width: 340px;
+  display: flex; flex-direction: column; gap: 28px;
+  text-align: left;
+}
+.rsvp-fieldset { border: none; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.rsvp-legend {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; font-weight: 400; color: var(--text);
+  margin-bottom: 12px; display: block; width: 100%;
+}
+.rsvp-option {
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; font-weight: 300; color: var(--text);
+}
+.rsvp-option input[type="radio"],
+.rsvp-option input[type="checkbox"] {
+  accent-color: var(--gold); width: 16px; height: 16px;
+  flex-shrink: 0; cursor: pointer;
+}
+
+.rsvp-submit {
+  padding: 13px 20px;
+  border: 1px solid var(--text); background: transparent; color: var(--text);
+  font-family: 'Raleway', sans-serif; font-size: 9px; font-weight: 300;
+  letter-spacing: 0.38em; text-transform: uppercase;
+  cursor: pointer; border-radius: 0;
+  transition: background 0.25s, color 0.25s;
+  align-self: center; width: 180px;
+}
+.rsvp-submit:hover { background: var(--text); color: var(--bg); }
+
+.rsvp-thanks { padding: 20px; }
+
+/* Поляроиды */
+.polaroids {
+  display: flex; justify-content: center; align-items: flex-end;
+  margin: 36px 0 10px; width: 100%; max-width: 420px;
+}
+.polaroid {
+  background: #fff;
+  padding: 8px 8px 24px 8px;
+  box-shadow: 2px 3px 12px rgba(0,0,0,0.18);
+  width: 52%; flex-shrink: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.38s cubic-bezier(0.22,1,0.36,1),
+              box-shadow 0.38s cubic-bezier(0.22,1,0.36,1),
+              z-index 0s;
+}
+.polaroid img {
+  width: 100%; height: 210px; object-fit: cover; display: block;
+  overflow: hidden;
+  transition: transform 0.55s cubic-bezier(0.22,1,0.36,1);
+}
+.polaroid:hover img { transform: scale(1.07); }
+
+.polaroid-left  { transform: rotate(-4deg); margin-right: -18px; z-index: 1; }
+.polaroid-right { transform: rotate(3deg); z-index: 2; }
+
+.polaroid-left:hover  {
+  transform: rotate(-1.5deg) translateY(-10px) scale(1.04);
+  box-shadow: 5px 16px 28px rgba(0,0,0,0.28);
+  z-index: 10;
+}
+.polaroid-right:hover {
+  transform: rotate(1deg) translateY(-10px) scale(1.04);
+  box-shadow: 5px 16px 28px rgba(0,0,0,0.28);
+  z-index: 10;
+}
+
+.closing-script {
+  font-family: 'Great Vibes', cursive;
+  font-size: 46px; font-weight: 400; color: var(--text);
+  margin: 32px 0 18px;
+}
+
+/* Нижний декор — уменьшен */
+.rsvp-bottom-decor {
+  width: 75%;
+  max-width: 300px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media (max-width: 480px) {
+  body { background: var(--bg); }
+  .card { box-shadow: none; }
+  :root { --pad-x: 24px; }
+  .couple-names { font-size: 44px; }
+  img.corner { width: 165px; }
+}
+@media (max-width: 390px) {
+  :root { --pad-x: 18px; }
+  .couple-names { font-size: 38px; }
+  img.corner { width: 140px; }
+  .arch-block { width: 74%; }
+  .the-wedding-of { margin-top: 95px; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   РАСПИСАНИЕ — каждый пункт строго напротив точки
+   (структура, выстраиваемая script.js; стиль точек/текста/иконок
+    переиспользует исходные классы .tl-dot/.sched-*)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.sched-row {
+  display: grid;
+  grid-template-columns: 1fr 24px 1fr;
+  align-items: center;
+}
+.sched-row .sched-center {
+  position: relative;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sched-row .sched-center::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  border-left: 1.5px dashed rgba(61,61,61,0.35);
+}
+.sched-row .sched-center .tl-dot {
+  position: relative; z-index: 1; margin: 0;
+}
+.sched-row .sched-side { display: flex; min-width: 0; }
+.sched-row .sched-side.left  { justify-content: flex-end; }
+.sched-row .sched-side.right { justify-content: flex-start; }
+/* Не дать длинным словам вылезать за край карточки (узкие экраны) */
+.sched-row .sched-item-left,
+.sched-row .sched-item-right { padding: 14px 2px; gap: 5px; min-width: 0; max-width: 100%; }
+.sched-row .sched-meta { min-width: 0; }
+.sched-row .sched-time { font-size: 14px; }
+.sched-row .sched-name { font-size: 10px; letter-spacing: 0.02em; line-height: 1.25; overflow-wrap: anywhere; }
+.sched-row .sched-icon { width: 42px; height: 42px; background: var(--bg); }
+
+/* Цветной свотч дресс-кода: силуэт dresscode.svg + текстура (luminosity) + выбранный цвет.
+   background-color (задаётся из редактора) даёт оттенок, svg-картинка — фактуру ткани. */
+.dc-swatch-color {
+  display: block;
+  width: 120px;
+  aspect-ratio: 159 / 197.25;
+  background-image: url('assets/icons/dresscode.svg');
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-blend-mode: luminosity;
+  -webkit-mask: url('assets/icons/dresscode.svg') center / 100% 100% no-repeat;
+          mask: url('assets/icons/dresscode.svg') center / 100% 100% no-repeat;
+}
+
+/* Фото в кружевной рамке секции Локация */
+.location-section .wishes-card-inner { overflow: hidden; }
+.loc-card-photo { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 2px; }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -38,7 +38,7 @@ export default function AuthPage() {
     <div className={styles.page}>
       <div className={styles.bg} />
       <div className={styles.card}>
-        <Link href="/" className={styles.logo}>✦ WeddingCraft</Link>
+        <Link href="/" className={styles.logo}>✦ Eloquence</Link>
         
         <div className={styles.tabs}>
           <button

@@ -5,14 +5,13 @@
   justify-content: center;
   padding: 24px;
   position: relative;
-  background: linear-gradient(160deg, #fdf6ec, #f0e4cc);
+  background: linear-gradient(160deg, var(--primary-container), #f0e0c8);
 }
 .bg {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(201,169,110,0.15) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(107,143,92,0.1) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(247, 231, 206, 0.6) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(255, 202, 202, 0.25) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -20,89 +19,84 @@
   position: relative;
   width: 100%;
   max-width: 440px;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(201,169,110,0.3);
+  border: 0.5px solid rgba(206, 197, 186, 0.5);
   border-radius: 28px;
   padding: 44px 40px;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.08);
+  box-shadow: 0 24px 80px rgba(14, 29, 38, 0.08);
 }
 
 .logo {
   display: block;
   font-family: var(--font-playfair);
-  font-size: 20px;
-  color: var(--gold);
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--on-surface);
   text-decoration: none;
   text-align: center;
   margin-bottom: 28px;
+  letter-spacing: -0.01em;
 }
 
 .tabs {
   display: flex;
-  background: rgba(201,169,110,0.08);
+  background: rgba(247, 231, 206, 0.4);
   border-radius: 12px;
   padding: 4px;
   margin-bottom: 28px;
 }
 .tab {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  border-radius: 9px;
+  flex: 1; padding: 10px;
+  border: none; border-radius: 9px;
   background: transparent;
   font-family: var(--font-inter);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--on-surface-variant);
+  cursor: pointer; transition: all 0.2s;
 }
 .tabActive {
   background: #fff;
-  color: var(--dark);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  color: var(--on-surface);
+  box-shadow: 0 2px 8px rgba(14,29,38,0.08);
 }
 
 .title {
   font-family: var(--font-playfair);
-  font-size: 26px;
-  color: var(--dark);
+  font-size: 26px; font-weight: 400;
+  color: var(--on-surface);
   margin-bottom: 8px;
   text-align: center;
 }
 .subtitle {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--on-surface-variant);
   text-align: center;
   margin-bottom: 28px;
   line-height: 1.5;
+  font-family: var(--font-inter);
 }
 
 .form { display: flex; flex-direction: column; gap: 16px; }
 
 .field { display: flex; flex-direction: column; gap: 6px; }
 .label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0.2px;
+  font-size: 11px; font-weight: 700;
+  color: var(--on-surface-variant);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  font-family: var(--font-inter);
 }
 
 .switch {
-  margin-top: 20px;
-  text-align: center;
-  font-size: 14px;
-  color: var(--text-secondary);
+  margin-top: 20px; text-align: center;
+  font-size: 14px; color: var(--on-surface-variant);
+  font-family: var(--font-inter);
 }
 .switchBtn {
-  background: none;
-  border: none;
-  color: var(--gold-dark);
-  font-weight: 600;
-  cursor: pointer;
-  font-family: var(--font-inter);
-  font-size: 14px;
-  text-decoration: underline;
+  background: none; border: none;
+  color: var(--primary); font-weight: 700;
+  cursor: pointer; font-family: var(--font-inter);
+  font-size: 14px; text-decoration: underline;
   text-underline-offset: 3px;
 }

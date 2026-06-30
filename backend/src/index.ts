@@ -10,6 +10,8 @@ import inviteRouter from './routes/invites';
 import uploadRouter from './routes/upload';
 import paymentRouter from './routes/payment';
 import rsvpRouter from './routes/rsvp';
+import guestsRouter from './routes/guests';
+import telegramRouter from './routes/telegram';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -28,6 +30,8 @@ app.use('/api/invites', inviteRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/payment', paymentRouter);
 app.use('/api/rsvp', rsvpRouter);
+app.use('/api/guests', guestsRouter);
+app.use('/api/telegram', telegramRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

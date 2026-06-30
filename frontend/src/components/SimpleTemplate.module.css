@@ -1,0 +1,188 @@
+.wrapper {
+  background: #ffffff;
+  color: #0e1d26;
+  min-height: 100%;
+  font-family: var(--font-inter, 'Plus Jakarta Sans', sans-serif);
+  width: 100%;
+}
+
+/* Cover photo */
+.coverPhoto {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: #f0ede7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coverPlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  color: #b0a898;
+  font-size: 12px;
+  font-family: var(--font-inter, sans-serif);
+}
+.coverPlaceholderIcon { font-size: 28px; }
+
+/* Header */
+.header {
+  padding: 32px 24px 28px;
+  text-align: center;
+}
+.headerTag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #7d766c;
+  margin-bottom: 20px;
+}
+.names {
+  font-family: var(--font-playfair, 'Playfair Display', serif);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #0e1d26;
+  margin-bottom: 16px;
+}
+.amp {
+  display: block;
+  font-style: italic;
+  font-size: 22px;
+  color: #7d766c;
+  margin: 6px 0;
+  font-family: var(--font-playfair, 'Playfair Display', serif);
+}
+.dateLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4b463d;
+  font-weight: 500;
+}
+.dateSep { color: #cec5ba; }
+
+/* Divider */
+.divider {
+  height: 1px;
+  background: #ece8e2;
+  margin: 0 24px;
+}
+
+/* Sections */
+.section {
+  padding: 22px 24px;
+}
+.sectionTitle {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7d766c;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* Invite text */
+.inviteText {
+  font-size: 14px;
+  line-height: 1.75;
+  text-align: center;
+  color: #4b463d;
+}
+
+/* Venue */
+.venueName {
+  font-family: var(--font-playfair, 'Playfair Display', serif);
+  font-size: 18px;
+  font-weight: 400;
+  color: #0e1d26;
+  margin-bottom: 4px;
+}
+.venueAddress {
+  font-size: 13px;
+  color: #7d766c;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+.mapLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #685d4a;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(104,93,74,0.3);
+  padding-bottom: 1px;
+}
+
+/* Schedule */
+.scheduleList { display: flex; flex-direction: column; gap: 0; }
+.scheduleItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0ede7;
+}
+.scheduleItem:last-child { border-bottom: none; }
+.scheduleIcon { font-size: 16px; flex-shrink: 0; width: 22px; text-align: center; }
+.scheduleTime {
+  font-size: 12px;
+  font-weight: 700;
+  color: #685d4a;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+.scheduleTitle { font-size: 13px; color: #0e1d26; line-height: 1.3; }
+
+/* Story */
+.storyText {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #4b463d;
+}
+
+/* Dress code */
+.dressCodeBadge {
+  display: inline-block;
+  padding: 6px 16px;
+  border: 1px solid #cec5ba;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0e1d26;
+}
+
+/* Gallery */
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.galleryItem {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background-size: cover;
+  background-position: center;
+  background-color: #f0ede7;
+}
+
+/* Footer */
+.footer {
+  padding: 24px;
+  text-align: center;
+  border-top: 1px solid #ece8e2;
+}
+.footerText {
+  font-size: 11px;
+  color: #b0a898;
+  letter-spacing: 0.08em;
+}

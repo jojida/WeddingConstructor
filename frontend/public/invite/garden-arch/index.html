@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Свадебное приглашение</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Montserrat:wght@300;400;500&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+
+  <div class="card">
+
+    <!-- ═══════════════ ОБЛОЖКА — ЦВЕТУЩАЯ АРКА (целый PNG) ═══════════════ -->
+    <section class="cover reveal">
+      <div class="cover-art">
+        <img class="cover-img" src="assets/decor/arch.svg" alt="">
+        <img class="cover-venue" src="assets/decor/gazebo.png" alt="">
+        <img class="cover-couple" src="assets/decor/couple_walk.png" alt="">
+        <div class="cover-inner">
+          <h1 class="cover-names">
+            <span class="cn-line" data-edit="groomLine">Елис</span>
+            <span class="cn-amp">&amp;</span>
+            <span class="cn-line" data-edit="brideLine">Маргарита</span>
+          </h1>
+          <p class="cover-date" id="coverDate">15 · 08 · 2026</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ ДОРОГИЕ ДРУЗЬЯ ═══════════════ -->
+    <section class="friends reveal">
+      <div class="friends-frame">
+        <img class="friends-goldframe" src="assets/icons/frame_gold.svg" alt="">
+        <img class="friends-bouquet" src="assets/decor/bouquet2.png" alt="">
+        <img class="friends-olive friends-olive-tr" src="assets/decor/olive.png" alt="">
+        <img class="friends-olive friends-olive-bl" src="assets/decor/olive.png" alt="">
+
+        <div class="friends-inner">
+          <h2 class="script-h" data-edit="dearGuests">Дорогие друзья</h2>
+          <p class="friends-text" data-edit="inviteText">
+            Приглашаем вас разделить с нами это чудесное событие. Очень ждём вас на нашей свадьбе!
+          </p>
+          <div class="friends-photos">
+            <div class="polaroid polaroid-l"><img src="assets/photos/couple1.jpg" alt="" data-edit="polaroid1"></div>
+            <div class="polaroid polaroid-r"><img src="assets/photos/couple2.jpg" alt="" data-edit="polaroid2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ WEDDING DAY — ИНТЕРАКТИВНОЕ СЕРДЦЕ С ДАТОЙ ═══════════════ -->
+    <section class="wedday reveal">
+      <img class="wedday-script" src="assets/icons/wedding_day.svg" alt="Wedding day">
+      <img class="wedday-divider" src="assets/icons/divider_gold.svg" alt="">
+      <p class="wedday-hint" id="weddayHint">проведите по цветам — и они разлетятся</p>
+
+      <div class="heart-wrap" id="heartWrap">
+        <span class="heart-day" id="heartDay">15</span>
+        <!-- сердце из цветов целиком рисуется на canvas (скрипт) -->
+      </div>
+    </section>
+
+    <!-- ═══════════════ МЕСТО ПРОВЕДЕНИЯ ═══════════════ -->
+    <section class="venue reveal">
+      <img class="venue-sprig" src="assets/decor/sprig.png" alt="">
+      <h2 class="script-h">Место проведения</h2>
+      <p class="venue-name" data-edit="venue">Хвойный 17</p>
+      <img class="venue-illustration" src="assets/decor/venue.png" alt="">
+      <img class="venue-laurel" src="assets/decor/bouquet2.png" alt="">
+    </section>
+
+    <!-- ═══════════════ ПРОГРАММА ДНЯ ═══════════════ -->
+    <section class="program reveal">
+      <h2 class="script-h">Программа дня</h2>
+
+      <div class="timeline-inner">
+        <svg id="tl-svg" class="tl-svg" viewBox="0 0 440 610" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path id="tl-path" d="M 158 60 C 158 140 282 140 282 220 C 282 300 158 300 158 380 C 158 460 282 460 282 540"
+            stroke="#9aab84" stroke-width="2" stroke-dasharray="1 12" stroke-linecap="round" />
+          <image id="tl-heart" href="assets/icons/heart_green.svg" x="145" y="48" width="26" height="24" />
+        </svg>
+
+        <div class="tl-node tl-nl">
+          <img src="assets/icons/ic_cake.png" class="tl-icon-node" alt="">
+          <div class="tl-node-info"><time class="tl-time">12:00</time>
+            <p class="tl-text">встреча</p>
+          </div>
+        </div>
+        <div class="tl-node tl-nr">
+          <img src="assets/icons/ic_rings.png" class="tl-icon-node" alt="">
+          <div class="tl-node-info"><time class="tl-time">14:00</time>
+            <p class="tl-text">церемония</p>
+          </div>
+        </div>
+        <div class="tl-node tl-nl">
+          <img src="assets/icons/ic_arch.png" class="tl-icon-node" alt="">
+          <div class="tl-node-info"><time class="tl-time">16:00</time>
+            <p class="tl-text">банкет</p>
+          </div>
+        </div>
+        <div class="tl-node tl-nr">
+          <img src="assets/icons/ic_bikes.png" class="tl-icon-node" alt="">
+          <div class="tl-node-info"><time class="tl-time">18:00</time>
+            <p class="tl-text">торт</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ ДО СВАДЬБЫ ОСТАЛОСЬ ═══════════════ -->
+    <section class="countdown-sec reveal">
+      <div class="cd-scene">
+        <img class="cd-scene-img" src="assets/decor/cd_scene.svg" alt="">
+        <div class="cd-plashka">
+          <h2 class="script-h cd-title">До свадьбы осталось</h2>
+          <div class="countdown" id="countdown">
+            <div class="cd-cell"><span id="cd-days">00</span><small>дней</small></div>
+            <span class="cd-colon">:</span>
+            <div class="cd-cell"><span id="cd-hours">00</span><small>часов</small></div>
+            <span class="cd-colon">:</span>
+            <div class="cd-cell"><span id="cd-mins">00</span><small>минут</small></div>
+            <span class="cd-colon">:</span>
+            <div class="cd-cell"><span id="cd-secs">00</span><small>секунд</small></div>
+          </div>
+        </div>
+        <img class="cd-couple" src="assets/decor/couple_bouquet.png" alt="">
+      </div>
+    </section>
+
+    <!-- ═══════════════ АНКЕТА ГОСТЯ (RSVP) ═══════════════ -->
+    <section class="rsvp reveal">
+      <img class="rsvp-heart" src="assets/icons/divider_heart.svg" alt="">
+      <h2 class="rsvp-title">Анкета гостя</h2>
+      <p class="rsvp-sub" data-edit="surveyText">
+        Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до 01.08.26
+      </p>
+
+      <form class="rsvp-form" id="rsvpForm">
+        <fieldset class="rsvp-fieldset">
+          <legend class="rsvp-legend">Как вас зовут?</legend>
+          <input type="text" name="guestName" class="rsvp-name" placeholder="Ваше имя">
+        </fieldset>
+        <fieldset class="rsvp-fieldset">
+          <legend class="rsvp-legend">Будете ли вы на мероприятии?</legend>
+          <label class="rsvp-option"><input type="radio" name="attend" value="yes" checked><span>Да,
+              буду!</span></label>
+          <label class="rsvp-option"><input type="radio" name="attend" value="no"><span>К сожалению, не смогу
+              прийти</span></label>
+        </fieldset>
+        <fieldset class="rsvp-fieldset">
+          <legend class="rsvp-legend">Что предпочитаете из напитков?</legend>
+          <div data-edit="drinks">
+            <label class="rsvp-option"><input type="checkbox" name="drink"
+                value="sparkling"><span>Игристое</span></label>
+            <label class="rsvp-option"><input type="checkbox" name="drink" value="red"><span>Красное Вино</span></label>
+            <label class="rsvp-option"><input type="checkbox" name="drink" value="white"><span>Белое Вино</span></label>
+            <label class="rsvp-option"><input type="checkbox" name="drink" value="cognac"><span>Коньяк</span></label>
+          </div>
+        </fieldset>
+        <button type="submit" class="rsvp-submit">Отправить</button>
+      </form>
+      <div class="rsvp-thanks" id="rsvpThanks" hidden>
+        <p class="thanks-script">Спасибо! Будем рады видеть вас</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════ ДРЕСС-КОД ═══════════════ -->
+    <section class="dresscode reveal">
+      <h2 class="script-h">Дресс&nbsp;код</h2>
+      <p class="dc-sub">поддержите палитру нашего торжества</p>
+
+      <div class="dc-swatches" data-edit="dressCodeColors">
+        <span class="ga-swatch" style="background:#d6c0a0"></span>
+        <span class="ga-swatch" style="background:#e6dcc6"></span>
+        <span class="ga-swatch" style="background:#8e9c70"></span>
+        <span class="ga-swatch" style="background:#5d7242"></span>
+        <span class="ga-swatch" style="background:#cf9a57"></span>
+        <span class="ga-swatch" style="background:#e7c97e"></span>
+        <span class="ga-swatch" style="background:#97683c"></span>
+        <span class="ga-swatch" style="background:#bcd2dd"></span>
+      </div>
+
+      <div class="dc-photos">
+        <div class="dc-card">
+          <img class="dc-photo" src="assets/photos/dress1.jpg" alt="" data-edit="dressCodePhoto">
+          <img class="dc-flower dc-flower-tl" src="assets/decor/peony.png" alt="">
+        </div>
+        <div class="dc-card">
+          <img class="dc-photo" src="assets/photos/dress2.jpg" alt="" data-edit="dressPhoto2">
+          <img class="dc-flower dc-flower-br" src="assets/decor/peony.png" alt="">
+        </div>
+      </div>
+
+      <img class="dc-divider" src="assets/icons/divider_gold.svg" alt="">
+      <img class="dc-doves" src="assets/icons/doves.svg" alt="">
+    </section>
+
+    <!-- ═══════════════ ПОЖЕЛАНИЯ И ДЕТАЛИ ═══════════════ -->
+    <section class="wishes reveal">
+      <div class="wishes-arch-wrap">
+        <img class="wishes-arch" src="assets/decor/wildflower_arch.png" alt="">
+        <div class="wishes-inner">
+          <h2 class="script-h">Пожелания<br>и&nbsp;детали</h2>
+          <p class="wishes-text" data-edit="story">
+            Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей
+            молодой семьи. Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ ФИНАЛ ═══════════════ -->
+    <section class="closing reveal">
+      <h2 class="script-h closing-h" data-edit="closing">Ждём вас на нашей свадьбе!</h2>
+      <div class="closing-wreath-wrap">
+        <img class="closing-wreath" src="assets/decor/lily_laurel.png" alt="">
+        <div class="monogram" id="monogram"><span class="mono-letters"><span>Е</span><span>М</span></span><span class="mono-amp">&amp;</span></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

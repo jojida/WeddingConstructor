@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Свадьба Катерины и Максима</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Marck+Script&family=Raleway:wght@100;200;300;400&display=swap" rel="stylesheet">
+
+  <!-- SVG defs: black-bg removal filter + wavy clip-path -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <!-- Removes black backgrounds from PNG assets (branches, flowers) -->
+      <!-- Luminance-to-alpha: black→transparent, colored pixels→opaque -->
+      <filter id="remove-black" color-interpolation-filters="sRGB" x="0%" y="0%" width="100%" height="100%">
+        <feColorMatrix type="matrix"
+          values="1 0 0 0 0
+                  0 1 0 0 0
+                  0 0 1 0 0
+                  1 1 1 0 0"/>
+      </filter>
+      <clipPath id="wavy-clip" clipPathUnits="objectBoundingBox">
+        <path d="
+          M 0.13 0.04
+          Q 0.21 -0.01 0.29 0.04 Q 0.37 0.09 0.45 0.04 Q 0.53 -0.01 0.61 0.04
+          Q 0.69 0.09 0.77 0.04 Q 0.85 -0.01 0.88 0.04
+          L 0.97 0.10
+          Q 1.02 0.17 0.97 0.24 Q 0.92 0.31 0.97 0.38
+          Q 1.02 0.45 0.97 0.52 Q 0.92 0.59 0.97 0.66
+          Q 1.02 0.73 0.97 0.80 Q 0.92 0.87 0.97 0.90
+          L 0.88 0.96
+          Q 0.80 1.01 0.72 0.96 Q 0.64 0.91 0.56 0.96
+          Q 0.48 1.01 0.40 0.96 Q 0.32 0.91 0.24 0.96
+          Q 0.16 1.01 0.12 0.96
+          L 0.03 0.90
+          Q -0.02 0.83 0.03 0.76 Q 0.08 0.69 0.03 0.62
+          Q -0.02 0.55 0.03 0.48 Q 0.08 0.41 0.03 0.34
+          Q -0.02 0.27 0.03 0.20 Q 0.08 0.13 0.03 0.10
+          Z
+        "/>
+      </clipPath>
+    </defs>
+  </svg>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════
+       INTRO VIDEO SPLASH (plays once)
+  ════════════════════════════════════ -->
+  <div id="intro-wrap" class="intro-wrap">
+    <video id="intro-vid" class="intro-vid"
+           autoplay muted playsinline preload="auto">
+      <source src="assets/intro.mp4" type="video/mp4">
+    </video>
+    <button class="intro-skip" id="intro-skip">пропустить ›</button>
+  </div>
+
+  <div class="invitation">
+
+    <!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
+    <section class="hero">
+      <div class="hero-image-wrap">
+        <img src="assets/window.jpg" alt="Средиземноморское окно с видом на море" class="hero-img">
+
+        <!-- ── Blue shutters (close→open on page load) ── -->
+        <div class="win-shutters" aria-hidden="true">
+          <div class="win-sl"></div>
+          <div class="win-sr"></div>
+        </div>
+
+        <!-- ── Seagulls appear after shutters open ── -->
+        <div class="win-birds" aria-hidden="true">
+          <svg class="bird b1" viewBox="0 0 56 22" fill="none"><path d="M2 14 C8 3 20 3 28 14 C36 3 48 3 54 14" stroke="rgba(255,255,255,.92)" stroke-width="2.6" stroke-linecap="round"/></svg>
+          <svg class="bird b2" viewBox="0 0 42 18" fill="none"><path d="M2 11 C6 2 15 2 21 11 C27 2 36 2 40 11" stroke="rgba(255,255,255,.88)" stroke-width="2.1" stroke-linecap="round"/></svg>
+          <svg class="bird b3" viewBox="0 0 32 14" fill="none"><path d="M1 8  C4 1 10 1 16 8  C22 1 28 1 31 8"  stroke="rgba(255,255,255,.85)" stroke-width="1.9" stroke-linecap="round"/></svg>
+          <svg class="bird b4" viewBox="0 0 26 11" fill="none"><path d="M1 6  C4 1  9 1  13 6  C17 1 22 1 25 6"  stroke="rgba(255,255,255,.80)" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <svg class="bird b5" viewBox="0 0 20 9"  fill="none"><path d="M1 5  C3 1  7 1  10 5  C13 1 17 1 19 5"  stroke="rgba(255,255,255,.75)" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+
+        <div class="name-card">
+          <span class="name-card-heart">♥</span>
+          <h1 class="couple-names">
+            Катерина<br>
+            <span class="names-and">и</span><br>
+            Максим
+          </h1>
+          <div class="name-flourish">
+            <svg width="90" height="18" viewBox="0 0 90 18" fill="none">
+              <path d="M5 9 Q15 3 25 9 Q35 15 45 9 Q55 3 65 9 Q75 15 85 9" stroke="#354366" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+            </svg>
+          </div>
+        </div>
+        <img src="assets/flower-single.png" class="hero-deco hero-deco-left" alt="">
+        <img src="assets/flower-single.png" class="hero-deco hero-deco-right" alt="">
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ GREETING ═══════════════════════════════════════ -->
+    <section class="greeting fade-up">
+      <p class="greeting-label">Дорогие</p>
+      <h2 class="greeting-title" data-edit="greetingTitle">Любимые друзья!</h2>
+      <p class="greeting-sub" data-edit="greetingSub">приглашаем вас на нашу свадьбу</p>
+    </section>
+
+    <!-- ═══════════════════════════════════════ DATE CIRCLES ═══════════════════════════════════════ -->
+    <section class="date-section fade-up">
+      <div class="date-circles">
+        <div class="date-circle">
+          <span class="date-num">30</span>
+          <span class="date-lbl">день</span>
+        </div>
+        <div class="date-circle">
+          <span class="date-num">02</span>
+          <span class="date-lbl">месяц</span>
+        </div>
+        <div class="date-circle">
+          <span class="date-num">2030</span>
+          <span class="date-lbl" style="font-size:9px">год</span>
+        </div>
+      </div>
+      <p class="scratch-hint" id="scratch-hint">Сотрите кружки, чтобы узнать дату 👆</p>
+    </section>
+
+    <!-- ═══════════════════════════════════════ VENUE ═══════════════════════════════════════ -->
+    <section class="venue-section fade-up">
+      <div class="venue-stripes">
+        <img src="assets/branch.png" class="venue-branch venue-branch-tl" alt="">
+        <img src="assets/branch.png" class="venue-branch venue-branch-br" alt="">
+
+        <div class="venue-chair-wrap">
+          <img src="assets/icons/chair.svg" class="chair-svg" alt="">
+        </div>
+
+        <div class="venue-oval-wrap">
+          <div class="venue-oval">
+            <h3 class="venue-title">Место проведения</h3>
+            <div class="venue-details">
+              <p class="venue-name" data-edit="venue">СПА Отель</p>
+              <p class="venue-date" data-edit="venueDate">30. 02. 2030</p>
+              <div class="venue-divider"></div>
+              <img src="assets/icons/anchor.svg" class="anchor-icon" alt="">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ TIMELINE ═══════════════════════════════════════ -->
+    <section class="timeline-section">
+      <div class="timeline-inner">
+
+        <!-- Dashed S-path  +  heart follower (in SVG coordinate space) -->
+        <!-- Path runs x=130..310 — icons sit at x≈32 (left) and x≈408 (right), 74px clear each side -->
+        <svg id="tl-svg" class="tl-svg" viewBox="0 0 440 740" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path id="tl-path"
+            d="M 130 60
+               C 130 140 310 140 310 220
+               C 310 300 130 300 130 380
+               C 130 460 310 460 310 540
+               C 310 620 130 620 130 680"
+            stroke="#114e88" stroke-width="1.5" stroke-dasharray="6 5" stroke-linecap="round"/>
+          <!-- Heart: starts at path start (130,60); JS updates x/y on scroll -->
+          <image id="tl-heart" href="assets/icons/heart.svg"
+                 x="118" y="49" width="24" height="22"/>
+        </svg>
+
+        <!-- Node 1 – church – LEFT  WP(110, 60) -->
+        <div class="tl-node tl-nl tl-n1 fade-up">
+          <img src="assets/icons/church.svg" class="tl-icon-node" alt="">
+          <div class="tl-node-info">
+            <time class="tl-time">11:00 AM</time>
+            <p class="tl-text">Ceremony at the church</p>
+          </div>
+        </div>
+
+        <!-- Node 2 – rings  – RIGHT WP(330,220) -->
+        <div class="tl-node tl-nr tl-n2 fade-up">
+          <img src="assets/icons/rings.svg" class="tl-icon-node" alt="">
+          <div class="tl-node-info">
+            <time class="tl-time">12:00 AM</time>
+            <p class="tl-text">Say yes, I do!</p>
+          </div>
+        </div>
+
+        <!-- Node 3 – plate  – LEFT  WP(110,380) -->
+        <div class="tl-node tl-nl tl-n3 fade-up">
+          <img src="assets/icons/plate.svg" class="tl-icon-node" alt="">
+          <div class="tl-node-info">
+            <time class="tl-time">13:00 AM</time>
+            <p class="tl-text">Wedding lunch</p>
+          </div>
+        </div>
+
+        <!-- Node 4 – bottles – RIGHT WP(330,540) -->
+        <div class="tl-node tl-nr tl-n4 fade-up">
+          <img src="assets/icons/botles.svg" class="tl-icon-node" alt="">
+          <div class="tl-node-info">
+            <time class="tl-time">14:00 AM</time>
+            <p class="tl-text">Cheer for the couple</p>
+          </div>
+        </div>
+
+        <!-- Node 5 – globe  – LEFT  WP(110,680) -->
+        <div class="tl-node tl-nl tl-n5 fade-up">
+          <img src="assets/icons/globe.svg" class="tl-icon-node" alt="">
+          <div class="tl-node-info">
+            <time class="tl-time">6:00 PM</time>
+            <p class="tl-text">Evening party</p>
+          </div>
+        </div>
+
+      </div><!-- .timeline-inner -->
+    </section>
+
+    <!-- ═══════════════════════════════════════ COUNTDOWN ═══════════════════════════════════════ -->
+    <section class="countdown-section fade-up">
+      <div class="countdown">
+        <div class="cd-unit">
+          <span id="cd-days">00</span>
+          <label>Дней</label>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <span id="cd-hours">00</span>
+          <label>Часов</label>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <span id="cd-mins">00</span>
+          <label>Минут</label>
+        </div>
+        <div class="cd-sep">:</div>
+        <div class="cd-unit">
+          <span id="cd-secs">00</span>
+          <label>Секунд</label>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ DRESS CODE ═══════════════════════════════════════ -->
+    <section class="dresscode-section fade-up">
+      <h2 class="dresscode-title">Дресс код</h2>
+      <div class="dresscode-photos">
+
+        <!-- Each card = replaceable PHOTO layer (.dc-photo-inner) + a separate
+             decorative FRAME layer (.dc-frame-svg) on top, both bound to the
+             same .dresscode-frame-wrap so the frame always tracks the photo.
+             To swap a photo, change only the <img src> (or its slot via JS). -->
+        <div class="dresscode-frame-wrap">
+          <div class="dresscode-photo-inner">
+            <img id="dc-photo-bride" data-photo-slot="bride" data-edit="dressCodePhoto" src="assets/dresscode-bride.jpg" class="dc-photo" alt="Образ невесты">
+          </div>
+          <!-- Decorative frame — separate overlay layer, not part of the photo -->
+          <svg class="dc-frame-svg" viewBox="-4 -4 108 149" preserveAspectRatio="none" aria-hidden="true">
+            <path d="
+              M 13 5 Q 21 -1 29 5 Q 37 11 45 5 Q 53 -1 61 5 Q 69 11 77 5 Q 85 -1 90 4
+              L 96 11 Q 102 19 96 27 Q 90 35 96 43 Q 102 51 96 59 Q 90 67 96 75
+              Q 102 83 96 91 Q 90 99 96 107 Q 102 115 96 123 Q 90 131 96 133
+              L 90 137 Q 82 143 74 137 Q 66 131 58 137 Q 50 143 42 137 Q 34 131 26 137
+              Q 18 143 13 138
+              L 4 131 Q -2 123 4 115 Q 10 107 4 99 Q -2 91 4 83 Q 10 75 4 67
+              Q -2 59 4 51 Q 10 43 4 35 Q -2 27 4 19 Q 10 11 4 9
+              Z
+            " fill="none" stroke="#114e88" stroke-width="2.2"/>
+          </svg>
+        </div>
+
+        <div class="dresscode-frame-wrap">
+          <div class="dresscode-photo-inner">
+            <img id="dc-photo-guest" data-photo-slot="guest" data-edit="dressPhoto2" src="assets/dresscode-guest.jpg" class="dc-photo" alt="Образ гостей">
+          </div>
+          <!-- Decorative frame — separate overlay layer, not part of the photo -->
+          <svg class="dc-frame-svg" viewBox="-4 -4 108 149" preserveAspectRatio="none" aria-hidden="true">
+            <path d="
+              M 13 5 Q 21 -1 29 5 Q 37 11 45 5 Q 53 -1 61 5 Q 69 11 77 5 Q 85 -1 90 4
+              L 96 11 Q 102 19 96 27 Q 90 35 96 43 Q 102 51 96 59 Q 90 67 96 75
+              Q 102 83 96 91 Q 90 99 96 107 Q 102 115 96 123 Q 90 131 96 133
+              L 90 137 Q 82 143 74 137 Q 66 131 58 137 Q 50 143 42 137 Q 34 131 26 137
+              Q 18 143 13 138
+              L 4 131 Q -2 123 4 115 Q 10 107 4 99 Q -2 91 4 83 Q 10 75 4 67
+              Q -2 59 4 51 Q 10 43 4 35 Q -2 27 4 19 Q 10 11 4 9
+              Z
+            " fill="none" stroke="#114e88" stroke-width="2.2"/>
+          </svg>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ WISHES ═══════════════════════════════════════ -->
+    <section class="wishes-section fade-up">
+      <img src="assets/icons/gift.svg" class="gift-icon" alt="">
+
+      <h2 class="wishes-title">Пожелания и детали</h2>
+      <div data-edit="story">
+        <p class="wishes-text">Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.</p>
+        <p class="wishes-text">Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.</p>
+      </div>
+
+      <img src="assets/icons/two-rings.svg" class="rings-deco" alt="">
+    </section>
+
+    <!-- ═══════════════════════════════════════ ORGANIZER ═══════════════════════════════════════ -->
+    <section class="organizer-section fade-up">
+      <div class="wavy-box-wrap">
+        <svg class="wavy-box-svg" viewBox="0 0 300 240" preserveAspectRatio="none">
+          <path d="
+            M 25 12 Q 38 4 51 12 Q 64 20 77 12 Q 90 4 103 12 Q 116 20 129 12
+            Q 142 4 155 12 Q 168 20 181 12 Q 194 4 207 12 Q 220 20 233 12
+            Q 246 4 259 12 Q 272 20 275 14
+            L 288 26 Q 297 39 288 52 Q 279 65 288 78 Q 297 91 288 104
+            Q 279 117 288 130 Q 297 143 288 156 Q 279 169 288 182
+            Q 297 195 288 207 Q 279 219 288 225
+            L 275 230 Q 262 238 249 230 Q 236 222 223 230 Q 210 238 197 230
+            Q 184 222 171 230 Q 158 238 145 230 Q 132 222 119 230 Q 106 238 93 230
+            Q 80 222 67 230 Q 54 238 41 230 Q 28 222 25 228
+            L 12 218 Q 3 205 12 192 Q 21 179 12 166 Q 3 153 12 140
+            Q 21 127 12 114 Q 3 101 12 88 Q 21 75 12 62 Q 3 49 12 36 Q 21 23 12 22
+            Z
+          " fill="none" stroke="#114e88" stroke-width="2.2"/>
+        </svg>
+        <div class="wavy-box-content">
+          <p class="organizer-text" data-edit="organizerText">По всем вопросам обращайтесь к нашему организатору</p>
+          <p class="organizer-phone" data-edit="organizerPhone">+7922 222 22 22</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ RSVP ═══════════════════════════════════════ -->
+    <section class="rsvp-section fade-up">
+      <h2 class="rsvp-title">Анкета Гостя</h2>
+      <p class="rsvp-sub" data-edit="surveyText">Чтобы мы знали сколько стульев и бокалов готовить,<br>заполните анкету до 01.08.26</p>
+
+      <form class="rsvp-form" id="rsvpForm">
+
+        <fieldset>
+          <legend>Как вас зовут?</legend>
+          <input type="text" name="guestName" placeholder="Ваше имя"
+                 style="width:100%;border:none;border-bottom:1.5px solid #114e88;background:transparent;
+                        font-family:inherit;font-size:15px;color:#354366;padding:6px 2px;outline:none;">
+        </fieldset>
+
+        <fieldset>
+          <legend>Будете ли вы на мероприятии?</legend>
+          <label class="form-option">
+            <span class="custom-radio"></span>
+            <input type="radio" name="attend" value="yes"> Да, буду!
+          </label>
+          <label class="form-option">
+            <span class="custom-radio"></span>
+            <input type="radio" name="attend" value="no"> К сожалению не смогу придти
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Что предпочитаете из напитков?</legend>
+          <div data-edit="drinks">
+            <label class="form-option">
+              <span class="custom-check"></span>
+              <input type="checkbox" name="drink" value="sparkling"> Игристое
+            </label>
+            <label class="form-option">
+              <span class="custom-check"></span>
+              <input type="checkbox" name="drink" value="red"> Красное Вино
+            </label>
+            <label class="form-option">
+              <span class="custom-check"></span>
+              <input type="checkbox" name="drink" value="white"> Белое Вино
+            </label>
+            <label class="form-option">
+              <span class="custom-check"></span>
+              <input type="checkbox" name="drink" value="cognac"> Коньяк
+            </label>
+          </div>
+        </fieldset>
+
+        <button type="submit" class="rsvp-submit-med"
+                style="display:block;margin:8px auto 0;padding:12px 36px;border:1.5px solid #114e88;
+                       background:#114e88;color:#fff;font-family:inherit;font-size:13px;letter-spacing:1px;
+                       border-radius:24px;cursor:pointer;">Отправить</button>
+      </form>
+
+      <div class="rsvp-thanks" id="rsvpThanks" hidden style="text-align:center;padding:20px;color:#114e88;font-size:18px;">
+        Спасибо! Будем рады видеть вас 💙
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ CLOSING ═══════════════════════════════════════ -->
+    <section class="closing-section fade-up">
+      <h2 class="closing-title" data-edit="closingTitle">Ждем вас на нашей<br>свадьбе!</h2>
+
+      <div class="photo-collage">
+        <!-- Blue blob background for photo 1 -->
+        <div class="collage-blob blob-1"></div>
+        <div class="collage-photo photo-1">
+          <img src="assets/wedding-1.jpg" alt="Наша свадьба" data-edit="photo1">
+        </div>
+
+        <!-- Blue brushstrokes behind photo 3 -->
+        <div class="collage-brush brush-3">
+          <svg viewBox="0 0 80 60" fill="none">
+            <line x1="5" y1="10" x2="75" y2="8" stroke="#354366" stroke-width="3.5" stroke-linecap="round" opacity="0.4"/>
+            <line x1="8" y1="22" x2="72" y2="20" stroke="#354366" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+            <line x1="6" y1="34" x2="70" y2="32" stroke="#354366" stroke-width="3.5" stroke-linecap="round" opacity="0.4"/>
+            <line x1="10" y1="46" x2="68" y2="44" stroke="#354366" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+          </svg>
+        </div>
+        <div class="collage-photo photo-3">
+          <img src="assets/wedding-2.jpg" alt="Мы ждём вас" data-edit="photo3">
+        </div>
+
+        <div class="collage-photo photo-2">
+          <img src="assets/wedding-3.jpg" alt="Мы ждём вас" data-edit="photo2">
+        </div>
+
+        <div class="collage-blob blob-4"></div>
+        <div class="collage-photo photo-4">
+          <img src="assets/wedding-4.jpg" alt="Наша свадьба" data-edit="photo4">
+        </div>
+
+        <!-- Heart decorations near photo 4 -->
+        <div class="collage-hearts">
+          <svg viewBox="0 0 50 60" fill="none">
+            <path d="M25 15 C25 12 21 10 21 13.5 C21 17 25 20 25 20 C25 20 29 17 29 13.5 C29 10 25 12 25 15Z" fill="#114e88"/>
+            <path d="M35 30 C35 27.5 32 26 32 28.5 C32 31 35 33 35 33 C35 33 38 31 38 28.5 C38 26 35 27.5 35 30Z" fill="#114e88"/>
+            <path d="M18 38 C18 36 15.5 35 15.5 37 C15.5 39 18 41 18 41 C18 41 20.5 39 20.5 37 C20.5 35 18 36 18 38Z" fill="#114e88"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Monogram with wreath -->
+      <div class="monogram">
+        <div class="monogram-wreath">
+          <img src="assets/wreath.svg" alt="" class="wreath-img">
+          <div class="monogram-initials">
+            <span class="mono-letter">К</span>
+            <span class="mono-amp">&amp;</span>
+            <span class="mono-letter">М</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </div><!-- .invitation -->
+
+  <script>
+    /* ── 0. Intro video splash ── */
+    (function () {
+      var wrap  = document.getElementById('intro-wrap');
+      var vid   = document.getElementById('intro-vid');
+      var btn   = document.getElementById('intro-skip');
+
+      function dismiss() {
+        wrap.classList.add('fade-out');
+        // remove from DOM after fade so it doesn't block interaction
+        setTimeout(function () { wrap.remove(); }, 900);
+      }
+
+      // Dismiss when video ends
+      vid.addEventListener('ended', dismiss);
+      // Dismiss on skip button
+      btn.addEventListener('click', dismiss);
+      // Safety: dismiss after 12 s max even if video stalls
+      var safety = setTimeout(dismiss, 12000);
+      vid.addEventListener('ended', function () { clearTimeout(safety); });
+      // If video can't load at all — hide immediately
+      vid.addEventListener('error', function () { wrap.remove(); });
+    })();
+
+    /* ── 1. Countdown и 2. Custom radio/checkbox перенесены в script.js
+       (таймер считается от даты конструктора, а кастомные переключатели
+        переинициализируются после перестроения списка напитков). ── */
+
+    /* ── 3. Fade-up IntersectionObserver ── */
+    (function () {
+      const io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('in-view');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.fade-up').forEach(function (el) {
+        io.observe(el);
+      });
+    })();
+
+    /* ── 4. Heart path follower перенесён в script.js
+       (там пересчитывается длина пути при добавлении пунктов программы). ── */
+
+    /* ── 5. Dress-code photo swap ──
+       The photo is a separate layer from the wavy frame. Replace just the
+       image and the frame stays in place, bound to the same wrapper.
+       Usage: setDressPhoto('bride', '/path/to.jpg')  // slot: 'bride' | 'guest'
+    */
+    window.setDressPhoto = function (slot, url) {
+      var img = document.querySelector('.dc-photo[data-photo-slot="' + slot + '"]');
+      if (img && url) img.src = url;
+      return !!img;
+    };
+
+    /* ── 6. Scratch-off date reveal + scroll gate ──
+       Each date circle gets a Canvas overlay painted with a blue texture.
+       The user erases it (mouse on desktop, finger on touch). When >50% of a
+       circle is scratched it auto-reveals. Until all three are revealed the
+       page is gated — any scroll past the section snaps back. */
+    (function () {
+      // В режиме редактора стирание/скролл-гейт отключены: дата видна, страница прокручивается.
+      if (new URLSearchParams(location.search).get('editing') === '1') return;
+      var section = document.querySelector('.date-section');
+      if (!section) return;
+      var circlesWrap = section.querySelector('.date-circles');
+      var circles = Array.prototype.slice.call(section.querySelectorAll('.date-circle'));
+      var hint = document.getElementById('scratch-hint');
+      if (!circles.length) return;
+
+      var total = circles.length;
+      var doneCount = 0;
+      var revealed = false;
+      var active = false;
+
+      /* Paint the erasable blue layer with an "interesting" texture:
+         gradient + diagonal sheen + Mediterranean wavy lines + sparkles */
+      function drawTexture(ctx, w, h) {
+        var g = ctx.createLinearGradient(0, 0, w, h);
+        g.addColorStop(0,   '#2a79bf');
+        g.addColorStop(0.5, '#114e88');
+        g.addColorStop(1,   '#0b3358');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.save();
+        ctx.globalAlpha = 0.10;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = w * 0.06;
+        for (var x = -h; x < w; x += w * 0.24) {
+          ctx.beginPath(); ctx.moveTo(x, h); ctx.lineTo(x + h, 0); ctx.stroke();
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.globalAlpha = 0.20;
+        ctx.strokeStyle = '#bfe0ff';
+        ctx.lineWidth = Math.max(1, w * 0.02);
+        for (var yy = h * 0.30; yy < h; yy += h * 0.22) {
+          ctx.beginPath();
+          for (var xx = 0; xx <= w; xx += 2) {
+            var oy = Math.sin(xx / (w * 0.09)) * (h * 0.03);
+            if (xx === 0) ctx.moveTo(xx, yy + oy); else ctx.lineTo(xx, yy + oy);
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        ctx.save();
+        ctx.fillStyle = '#ffffff';
+        var pts = [[0.26, 0.30], [0.70, 0.26], [0.56, 0.60], [0.34, 0.72], [0.78, 0.70]];
+        for (var i = 0; i < pts.length; i++) {
+          ctx.globalAlpha = 0.5;
+          ctx.beginPath();
+          ctx.arc(pts[i][0] * w, pts[i][1] * h, w * 0.022, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function setupCircle(circle) {
+        var size = Math.round(circle.getBoundingClientRect().width);
+        if (!size) { setTimeout(function () { setupCircle(circle); }, 120); return; }
+
+        var dpr = Math.min(window.devicePixelRatio || 1, 3);
+        var canvas = document.createElement('canvas');
+        canvas.className = 'scratch-canvas';
+        canvas.width  = Math.round(size * dpr);
+        canvas.height = Math.round(size * dpr);
+        var ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+        drawTexture(ctx, size, size);
+        circle.appendChild(canvas);
+        active = true;
+
+        var drawing = false, finished = false, lastCheck = 0;
+        var brush = size * 0.17;
+
+        function rel(e) {
+          var r = canvas.getBoundingClientRect();
+          return { x: e.clientX - r.left, y: e.clientY - r.top };
+        }
+        function scratch(x, y) {
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.beginPath();
+          ctx.arc(x, y, brush, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        function progress() {
+          var img;
+          try { img = ctx.getImageData(0, 0, canvas.width, canvas.height); }
+          catch (err) { return 0; }
+          var d = img.data, cleared = 0, n = 0;
+          for (var i = 3; i < d.length; i += 24) { n++; if (d[i] < 128) cleared++; }
+          return n ? cleared / n : 0;
+        }
+        function maybeFinish() {
+          if (finished) return;
+          if (progress() > 0.5) {
+            finished = true;
+            circle.classList.add('revealed');
+            doneCount++;
+            if (doneCount >= total) revealAll();
+          }
+        }
+        function down(e) {
+          if (finished) return;
+          drawing = true;
+          if (canvas.setPointerCapture) { try { canvas.setPointerCapture(e.pointerId); } catch (x) {} }
+          var p = rel(e); scratch(p.x, p.y);
+          e.preventDefault();
+        }
+        function move(e) {
+          if (!drawing || finished) return;
+          var p = rel(e); scratch(p.x, p.y);
+          e.preventDefault();
+          var now = Date.now();
+          if (now - lastCheck > 180) { lastCheck = now; maybeFinish(); }
+        }
+        function up() {
+          if (!drawing) return;
+          drawing = false;
+          maybeFinish();
+        }
+        canvas.addEventListener('pointerdown', down);
+        canvas.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        canvas.addEventListener('pointercancel', up);
+      }
+
+      function revealAll() {
+        revealed = true;
+        if (hint) {
+          hint.textContent = 'Дата открыта 💙';
+          setTimeout(function () { hint.classList.add('done'); }, 900);
+        }
+      }
+
+      /* ── Scroll gate: pin the page at the circles until all are revealed ── */
+      /* Scroll position at which the circles sit centred in the viewport */
+      function lockTarget() {
+        var r = circlesWrap.getBoundingClientRect();
+        var docTop = r.top + window.scrollY;
+        return Math.max(0, Math.round(docTop + circlesWrap.offsetHeight / 2 - window.innerHeight * 0.5));
+      }
+      function gateActive() { return active && !revealed; }
+
+      /* rAF loop snaps the page back — reliable even when 'scroll' events are
+         coalesced/not fired for programmatic scrolls. Stops once revealed. */
+      function enforce() {
+        if (revealed) return;
+        if (active && window.scrollY > lockTarget() + 2) window.scrollTo(0, lockTarget());
+        requestAnimationFrame(enforce);
+      }
+
+      /* Block the scroll input itself so the wall is solid (avoids flicker) */
+      window.addEventListener('wheel', function (e) {
+        if (gateActive() && e.deltaY > 0 && window.scrollY >= lockTarget() - 2) e.preventDefault();
+      }, { passive: false });
+
+      var touchY = 0;
+      window.addEventListener('touchstart', function (e) {
+        if (e.touches && e.touches.length) touchY = e.touches[0].clientY;
+      }, { passive: true });
+      window.addEventListener('touchmove', function (e) {
+        if (!gateActive() || !e.touches.length) return;
+        if (e.target && e.target.classList && e.target.classList.contains('scratch-canvas')) return;
+        var dy = touchY - e.touches[0].clientY;   /* >0 = trying to scroll down */
+        if (dy > 0 && window.scrollY >= lockTarget() - 2) e.preventDefault();
+      }, { passive: false });
+
+      window.addEventListener('keydown', function (e) {
+        if (!gateActive()) return;
+        var k = e.key;
+        if ((k === 'ArrowDown' || k === 'PageDown' || k === 'End' || k === ' ' || k === 'Spacebar') &&
+            window.scrollY >= lockTarget() - 2) e.preventDefault();
+      });
+
+      circles.forEach(setupCircle);
+      requestAnimationFrame(enforce);
+    })();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
