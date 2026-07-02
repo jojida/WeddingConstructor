@@ -1,14 +1,7 @@
 // Уведомления владельцу приглашения о новом ответе гостя.
 // Пара выбирает ОДИН канал: telegram | email | none.
-import nodemailer from 'nodemailer';
 import prisma from './prisma';
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.yandex.ru',
-  port: parseInt(process.env.SMTP_PORT || '465'),
-  secure: parseInt(process.env.SMTP_PORT || '465') === 465,
-  auth: { user: process.env.SMTP_USER || '', pass: process.env.SMTP_PASS || '' },
-});
+import { sendEmail, isEmailConfigured } from './email';
 
 const TG_API = (method: string) =>
   `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN || ''}/${method}`;
@@ -79,14 +72,8 @@ export async function notifyOwner(invite: InviteLike, r: ResponseLike): Promise<
       }
       if (!to) return;
       console.log(`\n📧 [RSVP NOTIFY] → ${to}\n${msg.text}\n`);
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        await transporter.sendMail({
-          from: process.env.SMTP_FROM || `"WeddingCraft" <${process.env.SMTP_USER}>`,
-          to,
-          subject: msg.subject,
-          text: msg.text,
-          html: msg.html,
-        });
+      if (isEmailConfigured()) {
+        await sendEmail({ to, subject: msg.subject, text: msg.text, html: msg.html });
       }
     }
   } catch (e) {

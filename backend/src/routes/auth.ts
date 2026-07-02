@@ -5,23 +5,7 @@ import prisma from '../lib/prisma';
 
 const router = Router();
 
-import nodemailer from 'nodemailer';
-
-// Настройка почты (если данные пустые, письма не отправятся, но код будет в консоли)
-const SMTP_PORT = parseInt(process.env.SMTP_PORT || '465');
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.yandex.ru',
-  port: SMTP_PORT,
-  secure: SMTP_PORT === 465, // 465 → SSL, 587 → STARTTLS (secure:false)
-  auth: {
-    user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-  },
-  // Чтобы недоступный/заблокированный SMTP не висел минутами
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-});
+import { sendEmail, isEmailConfigured } from '../lib/email';
 
 // POST /api/auth/send-code
 router.post('/send-code', async (req: Request, res: Response) => {
@@ -47,15 +31,15 @@ router.post('/send-code', async (req: Request, res: Response) => {
     // чтобы медленный/заблокированный SMTP не подвешивал HTTP-запрос.
     res.json({ success: true, message: 'Код отправлен' });
 
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      transporter.sendMail({
-        from: process.env.SMTP_FROM || `"WeddingCraft" <${process.env.SMTP_USER}>`,
+    if (isEmailConfigured()) {
+      sendEmail({
         to: email,
         subject: 'Код для входа — WeddingCraft',
         text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.`,
+        html: `<p>Ваш код подтверждения:</p><p style="font-size:24px;font-weight:700;letter-spacing:4px">${code}</p><p style="color:#777">Он действителен 10 минут.</p>`,
       })
         .then(() => console.log(`✉️  [AUTH CODE] письмо отправлено на ${email}`))
-        .catch((mailErr) => console.error('[AUTH CODE] Не удалось отправить письмо:', (mailErr && mailErr.message) || mailErr));
+        .catch((err) => console.error('[AUTH CODE] Не удалось отправить письмо:', (err && err.message) || err));
     }
     return;
   } catch (e) {
