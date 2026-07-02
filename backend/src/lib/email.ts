@@ -1,7 +1,8 @@
 // Единая точка отправки писем.
-// Приоритет — Brevo HTTP API (https, порт 443): хостер блокирует исходящий SMTP,
-// поэтому обычный nodemailer/SMTP с этого сервера не работает. Если BREVO_API_KEY
-// не задан (напр. локальная разработка) — падаем обратно на SMTP.
+// Хостер блокирует исходящий SMTP (порты 465/587), поэтому шлём через HTTP API
+// почтового сервиса (порт 443). Поддержаны Resend и Brevo — задайте ключ того,
+// который используете. Если ни один не задан — фолбэк на SMTP (локальная разработка).
+// Приоритет: RESEND_API_KEY → BREVO_API_KEY → SMTP.
 import nodemailer from 'nodemailer';
 
 const FROM_EMAIL = process.env.MAIL_FROM || process.env.SMTP_USER || 'noreply@weddingcraft.ru';
@@ -27,13 +28,33 @@ export interface Mail {
 
 /** true, если хоть какой-то способ отправки настроен. */
 export function isEmailConfigured(): boolean {
-  return !!process.env.BREVO_API_KEY || !!(process.env.SMTP_USER && process.env.SMTP_PASS);
+  return !!process.env.RESEND_API_KEY || !!process.env.BREVO_API_KEY
+    || !!(process.env.SMTP_USER && process.env.SMTP_PASS);
 }
 
 /** Отправляет письмо. Бросает исключение при ошибке — вызывающий код обрабатывает best-effort. */
 export async function sendEmail(mail: Mail): Promise<void> {
-  const key = process.env.BREVO_API_KEY;
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        to: [mail.to],
+        subject: mail.subject,
+        text: mail.text,
+        ...(mail.html ? { html: mail.html } : {}),
+      }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => '');
+      throw new Error(`Resend API ${res.status}: ${body.slice(0, 300)}`);
+    }
+    return;
+  }
 
+  const key = process.env.BREVO_API_KEY;
   if (key) {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
