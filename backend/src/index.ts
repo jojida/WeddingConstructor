@@ -17,7 +17,22 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // Middleware
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
+// CORS: разрешаем основной домен, www-вариант и localhost (для разработки).
+// Один жёсткий origin ломал вход при заходе на www.weddingcraft.ru.
+const allowedOrigins = new Set([
+  process.env.FRONTEND_URL || 'http://localhost:3000',
+  'https://weddingcraft.ru',
+  'https://www.weddingcraft.ru',
+  'http://localhost:3000',
+]);
+app.use(cors({
+  origin(origin, cb) {
+    // Запросы без Origin (curl, серверные) и из белого списка — разрешаем
+    if (!origin || allowedOrigins.has(origin)) return cb(null, true);
+    return cb(null, false);
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
