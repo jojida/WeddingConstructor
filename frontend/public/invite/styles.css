@@ -1189,3 +1189,10 @@ body {
 @media (min-width: 521px) {
   .invitation { border-left: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; }
 }
+
+
+/* ── Скрыть полосу прокрутки страницы (просмотр приглашения) ──────────────
+   Вертикальная прокрутка колёсиком/тачем работает, видимый ползунок скрыт;
+   горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
+html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }

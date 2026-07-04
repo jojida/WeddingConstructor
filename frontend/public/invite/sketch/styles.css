@@ -414,3 +414,10 @@ img, svg { display: block; max-width: 100%; }
   .title { font-size: 80px; }
   .title-hearts { width: 116px; top: 48px; }
 }
+
+
+/* ── Скрыть полосу прокрутки страницы (просмотр приглашения) ──────────────
+   Вертикальная прокрутка колёсиком/тачем работает, видимый ползунок скрыт;
+   горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
+html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }

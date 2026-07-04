@@ -363,3 +363,10 @@ body {
   body { padding: 24px 0; }
   .invite { box-shadow: 0 10px 40px rgba(90,84,74,.18); border-radius: 2px; overflow: hidden; }
 }
+
+
+/* ── Скрыть полосу прокрутки страницы (просмотр приглашения) ──────────────
+   Вертикальная прокрутка колёсиком/тачем работает, видимый ползунок скрыт;
+   горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
+html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
