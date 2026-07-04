@@ -20,7 +20,9 @@ router.post('/:slug', async (req: Request, res: Response) => {
   try {
     const invite = await prisma.invitation.findUnique({ where: { slug } });
     if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
-    if (invite.status === 'draft') return res.status(403).json({ error: 'Приглашение ещё не активно' });
+    // Оплата временно отключена: сайт доступен по slug сразу (см. by-slug),
+    // поэтому и анкета должна работать для draft — иначе гости видят сайт,
+    // но получают «Ошибка» при отправке ответа.
 
     const { guestName, attending, drinkChoice, wishes, guestToken } = req.body;
 
