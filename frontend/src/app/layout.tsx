@@ -1,40 +1,16 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans, Cormorant_Garamond, Great_Vibes, Raleway } from "next/font/google";
+// Шрифты — локально из пакетов @fontsource (не тянутся с Google при сборке;
+// иначе `next build` падает на VPS без доступа к Google Fonts). Имена семейств
+// проброшены в CSS-переменные --font-* в globals.css. Подтягивают все субсеты,
+// включая кириллицу, через unicode-range.
+import "@fontsource-variable/playfair-display";
+import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/raleway";
+import "@fontsource/great-vibes";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import AuthProvider from "@/components/AuthProvider";
 import AnimationObserver from "@/components/AnimationObserver";
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin", "cyrillic"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-});
-
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
-
-const greatVibes = Great_Vibes({
-  variable: "--font-great-vibes",
-  subsets: ["latin"],
-  weight: ["400"],
-});
-
-const raleway = Raleway({
-  variable: "--font-raleway",
-  subsets: ["latin", "cyrillic"],
-  weight: ["200", "300", "400"],
-});
 
 export const metadata: Metadata = {
   title: "WeddingCraft — Цифровые свадебные приглашения",
@@ -49,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&display=swap" />
       </head>
-      <body className={`${playfair.variable} ${jakarta.variable} ${cormorant.variable} ${greatVibes.variable} ${raleway.variable}`} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <AuthProvider>
           {children}
         </AuthProvider>

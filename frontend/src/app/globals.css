@@ -9,8 +9,10 @@
 }
 
 :root {
-  --font-playfair: 'Playfair Display', serif;
-  --font-inter: 'Plus Jakarta Sans', sans-serif; /* mapped to Jakarta for compat */
+  --font-playfair: 'Playfair Display Variable', Georgia, serif;
+  --font-inter: 'Plus Jakarta Sans Variable', system-ui, sans-serif; /* mapped to Jakarta for compat */
+  --font-great-vibes: 'Great Vibes', cursive;
+  --font-raleway: 'Raleway Variable', sans-serif;
 
   /* ── WeddingCraft Design System ──────────────────────────────────────────── */
   --primary: #685d4a;

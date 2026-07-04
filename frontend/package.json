@@ -9,6 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource-variable/playfair-display": "^5.2.8",
+    "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
+    "@fontsource-variable/raleway": "^5.2.8",
+    "@fontsource/great-vibes": "^5.2.8",
     "axios": "^1.15.1",
     "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",
