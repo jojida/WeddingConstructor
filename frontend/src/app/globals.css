@@ -8,6 +8,14 @@
   font-weight: normal; font-style: normal; font-display: swap;
 }
 
+/* Anaktoria — имена на карточке «Скетч» (совпадение с самим шаблоном). */
+@font-face {
+  font-family: 'Anaktoria';
+  src: url('/invite/sketch/assets/fonts/Anaktoria.woff2') format('woff2'),
+       url('/invite/sketch/assets/fonts/Anaktoria.ttf') format('truetype');
+  font-weight: normal; font-style: normal; font-display: swap;
+}
+
 :root {
   --font-playfair: 'Playfair Display Variable', Georgia, serif;
   --font-inter: 'Plus Jakarta Sans Variable', system-ui, sans-serif; /* mapped to Jakarta for compat */

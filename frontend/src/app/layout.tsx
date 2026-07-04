@@ -7,6 +7,15 @@ import "@fontsource-variable/playfair-display";
 import "@fontsource-variable/plus-jakarta-sans";
 import "@fontsource-variable/raleway";
 import "@fontsource/great-vibes";
+// Шрифты карточек-превью шаблонов (чтобы миниатюра совпадала с самим
+// приглашением): Cormorant Garamond — «Цветущая арка»/«Флоральный»,
+// Montserrat — дата, Pinyon Script — амперсанд «Каллы». Локально, incl. кириллица.
+import "@fontsource/cormorant-garamond/400.css";
+import "@fontsource/cormorant-garamond/600.css";
+import "@fontsource/cormorant-garamond/400-italic.css";
+import "@fontsource/cormorant-garamond/600-italic.css";
+import "@fontsource/montserrat/400.css";
+import "@fontsource/pinyon-script/400.css";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import AuthProvider from "@/components/AuthProvider";
