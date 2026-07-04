@@ -274,7 +274,14 @@ function EditorContent() {
     if (!defs) return;
     setData(prev => {
       const cd = (prev.customData || {}) as any;
-      if (cd.__seededTemplate === prev.templateId) return prev;
+      if (cd.__seededTemplate === prev.templateId) {
+        // Уже засеяно, но «Программа дня» не должна оставаться пустой
+        // (битые/старые данные в БД) — добираем дефолты дизайна шаблона.
+        if ((!Array.isArray(prev.schedule) || prev.schedule.length === 0) && defs.schedule?.length) {
+          return { ...prev, schedule: defs.schedule };
+        }
+        return prev;
+      }
       // wasOther — данные пришли от ДРУГОГО шаблона → сбрасываем на дефолты текущего
       const wasOther = !!cd.__seededTemplate && cd.__seededTemplate !== prev.templateId;
       const keepStr = (cur: string, def?: string) =>
@@ -814,13 +821,15 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc }: {
 }) {
   const items = Array.isArray(value) ? value : [];
   const icons = (iconSet && ICON_SETS[iconSet]) || [];
+  // Программа не может остаться пустой: последний пункт удалить нельзя.
+  const lastOne = items.length <= 1;
   const update = (i: number, patch: Partial<ScheduleItem>) =>
     onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
   const move = (i: number, dir: number) => {
     const j = i + dir; if (j < 0 || j >= items.length) return;
     const s = [...items]; const t = s[i]; s[i] = s[j]; s[j] = t; onChange(s);
   };
-  const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
+  const remove = (i: number) => { if (lastOne) return; onChange(items.filter((_, j) => j !== i)); };
   const add = () => onChange([...items, { time: '', title: '', icon: icons[0] || '', ...(withDesc ? { desc: '' } : {}) }]);
   return (
     <div style={{ marginBottom: 4 }}>
@@ -846,7 +855,9 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc }: {
               <div style={{ display: 'flex', gap: 2 }}>
                 <button type="button" onClick={() => move(i, -1)} disabled={i === 0} style={iconBtn(i === 0)}>↑</button>
                 <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} style={iconBtn(i === items.length - 1)}>↓</button>
-                <button type="button" onClick={() => remove(i)} style={{ ...iconBtn(false), color: '#e74c3c' }}>×</button>
+                <button type="button" onClick={() => remove(i)} disabled={lastOne}
+                  title={lastOne ? 'Программа не может быть пустой — сначала добавьте другой пункт' : 'Удалить пункт'}
+                  style={{ ...iconBtn(lastOne), color: lastOne ? '#ccc' : '#e74c3c' }}>×</button>
               </div>
             </div>
             {withDesc && (

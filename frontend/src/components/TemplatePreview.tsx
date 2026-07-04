@@ -1,4 +1,5 @@
 'use client';
+import { TEMPLATE_DEFAULTS } from '@/lib/constants';
 import SimpleTemplate from './SimpleTemplate';
 import VadimDaryaTemplate from './VadimDaryaTemplate';
 import MediterraneanTemplate from './MediterraneanTemplate';
@@ -43,6 +44,12 @@ interface Props {
 }
 
 export default function TemplatePreview({ data, apiBase, fullPage, slug, editing }: Props) {
+  // «Программа дня» не должна оказаться пустой ни у гостей, ни в превью:
+  // пустые/битые данные (старые записи в БД) подменяем дефолтами дизайна.
+  if (!Array.isArray(data.schedule) || data.schedule.length === 0) {
+    const defSchedule = TEMPLATE_DEFAULTS[data.templateId]?.schedule;
+    if (defSchedule?.length) data = { ...data, schedule: defSchedule };
+  }
   if (data.templateId === 'sketch') {
     return <SketchTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
   }
