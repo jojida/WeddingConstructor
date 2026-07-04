@@ -98,19 +98,41 @@ function SetupStep({ templateId, onComplete, initialData }: {
   const [venueAddress,setVenueAddress]= useState(initialData?.venueAddress || '');
   const [mapLink,     setMapLink]     = useState(initialData?.mapLink || '');
 
+  // Границы даты: свадьба не может быть в прошлом и не дальше 3 лет вперёд.
+  const fmtDate = (dt: Date) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+  const todayStr = fmtDate(new Date());
+  const maxDateObj = new Date(); maxDateObj.setFullYear(maxDateObj.getFullYear() + 3);
+  const maxDateStr = fmtDate(maxDateObj);
+
   const handleSubmit = () => {
-    if (!groomName.trim() && !brideName.trim()) {
-      toast.error('Введите хотя бы одно имя');
-      return;
+    // Все поля обязательны, кроме ссылки на карту.
+    const required: [string, string][] = [
+      [groomName.trim(),    'Введите имя жениха'],
+      [brideName.trim(),    'Введите имя невесты'],
+      [weddingDate,         'Укажите дату свадьбы'],
+      [weddingTime,         'Укажите время начала'],
+      [venue.trim(),        'Укажите название места'],
+      [venueAddress.trim(), 'Укажите адрес'],
+    ];
+    for (const [val, msg] of required) {
+      if (!val) { toast.error(msg); return; }
     }
-    onComplete({ 
-      groomName: groomName.trim(), 
-      brideName: brideName.trim(), 
-      weddingDate, 
+    // Дата должна быть корректной: не в прошлом и не слишком далеко.
+    // Сравнение ISO-строк (YYYY-MM-DD) хронологично и не зависит от таймзоны.
+    if (Number.isNaN(new Date(weddingDate + 'T00:00:00').getTime())) {
+      toast.error('Неверная дата свадьбы'); return;
+    }
+    if (weddingDate < todayStr) { toast.error('Дата свадьбы не может быть в прошлом'); return; }
+    if (weddingDate > maxDateStr) { toast.error('Дата свадьбы слишком далеко — проверьте год'); return; }
+
+    onComplete({
+      groomName: groomName.trim(),
+      brideName: brideName.trim(),
+      weddingDate,
       weddingTime,
-      venue,
-      venueAddress,
-      mapLink
+      venue: venue.trim(),
+      venueAddress: venueAddress.trim(),
+      mapLink: mapLink.trim(),
     });
   };
 
@@ -138,13 +160,13 @@ function SetupStep({ templateId, onComplete, initialData }: {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             {/* Names */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <SetupField label="Имя жениха">
-                <input className="input-field" placeholder="Вадим" value={groomName}
+              <SetupField label="Имя жениха" required>
+                <input className="input-field" placeholder="Вадим" value={groomName} maxLength={24}
                   onChange={e => setGroomName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSubmit()} autoFocus />
               </SetupField>
               <SetupField label="Имя невесты" required>
-                <input className="input-field" placeholder="Дарья" value={brideName}
+                <input className="input-field" placeholder="Дарья" value={brideName} maxLength={24}
                   onChange={e => setBrideName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
               </SetupField>
@@ -153,21 +175,22 @@ function SetupStep({ templateId, onComplete, initialData }: {
             {/* Date and Time */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <SetupField label="Дата свадьбы" required>
-                <input type="date" className="input-field" value={weddingDate} onChange={e => setWeddingDate(e.target.value)} />
+                <input type="date" className="input-field" value={weddingDate} min={todayStr} max={maxDateStr}
+                  onChange={e => setWeddingDate(e.target.value)} />
               </SetupField>
-              <SetupField label="Время начала">
+              <SetupField label="Время начала" required>
                 <input type="time" className="input-field" value={weddingTime} onChange={e => setWeddingTime(e.target.value)} />
               </SetupField>
             </div>
 
             {/* Venue */}
-            <SetupField label="Название места">
-              <input className="input-field" placeholder="«Артурс Спа Отель»" value={venue} onChange={e => setVenue(e.target.value)} />
+            <SetupField label="Название места" required>
+              <input className="input-field" placeholder="«Артурс Спа Отель»" value={venue} maxLength={50} onChange={e => setVenue(e.target.value)} />
             </SetupField>
-            <SetupField label="Адрес">
-              <input className="input-field" placeholder="Московская обл., Мытищи..." value={venueAddress} onChange={e => setVenueAddress(e.target.value)} />
+            <SetupField label="Адрес" required>
+              <input className="input-field" placeholder="Московская обл., Мытищи..." value={venueAddress} maxLength={90} onChange={e => setVenueAddress(e.target.value)} />
             </SetupField>
-            <SetupField label="Ссылка на карту">
+            <SetupField label="Ссылка на карту (необязательно)">
               <input className="input-field" placeholder="https://yandex.ru/maps/..." value={mapLink} onChange={e => setMapLink(e.target.value)} />
             </SetupField>
           </div>
@@ -685,21 +708,26 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage }: {
   apiBase: string;
   uploadImage: (f: File) => Promise<string | null>;
 }) {
+  // Лимиты символов, чтобы длинный текст не ломал вёрстку шаблона.
+  // Явный field.maxLength имеет приоритет; ссылки (URL) без лимита.
+  const isLink = /link$/i.test(field.id);
+  const textMax = field.maxLength ?? (isLink ? undefined : 70);
+  const areaMax = field.maxLength ?? 300;
   switch (field.type) {
     case 'text':
       return (
         <Field label={field.label}>
-          <input className="input-field" placeholder={field.hint || ''} maxLength={field.maxLength}
+          <input className="input-field" placeholder={field.hint || ''} maxLength={textMax}
             value={value || ''} onChange={e => onChange(e.target.value)} />
-          {field.maxLength ? <CharCounter value={value} max={field.maxLength} /> : null}
+          {textMax ? <CharCounter value={value} max={textMax} /> : null}
         </Field>
       );
     case 'textarea':
       return (
         <Field label={field.label}>
-          <textarea className="input-field" rows={4} placeholder={field.hint || ''} maxLength={field.maxLength}
+          <textarea className="input-field" rows={4} placeholder={field.hint || ''} maxLength={areaMax}
             value={value || ''} onChange={e => onChange(e.target.value)} />
-          {field.maxLength ? <CharCounter value={value} max={field.maxLength} /> : null}
+          <CharCounter value={value} max={areaMax} />
         </Field>
       );
     case 'image':

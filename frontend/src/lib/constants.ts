@@ -707,9 +707,9 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Локация', icon: '📍',
       fields: [
-        { id: 'venue',        type: 'text', label: 'Название места', hint: '«Артурс Спа Отель»', scope: 'data' },
-        { id: 'venueAddress', type: 'text', label: 'Адрес',          scope: 'data' },
-        { id: 'mapLink',      type: 'text', label: 'Ссылка на карту', scope: 'data' },
+        { id: 'venue',        type: 'text', label: 'Название места', hint: '«Артурс Спа Отель»', scope: 'data', maxLength: 50 },
+        { id: 'venueAddress', type: 'text', label: 'Адрес',          scope: 'data', maxLength: 90 },
+        { id: 'mapLink',      type: 'text', label: 'Ссылка на карту (необязательно)', scope: 'data' },
       ],
     },
     {
