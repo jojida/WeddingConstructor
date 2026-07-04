@@ -6,6 +6,16 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Безопасный разбор JSON-колонок. Гарантирует ожидаемый тип (массив/объект),
+// даже если в БД лежит битый JSON или значение не того типа — иначе фронтенд
+// падает на `.map` (schedule/dressCodeColors/galleryPhotos не массив).
+const parseArr = (s: any): any[] => {
+  try { const v = JSON.parse(s || '[]'); return Array.isArray(v) ? v : []; } catch { return []; }
+};
+const parseObj = (s: any): Record<string, any> => {
+  try { const v = JSON.parse(s || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch { return {}; }
+};
+
 // Слова, которые нельзя использовать как slug, чтобы не конфликтовать
 // с маршрутами фронтенда (weddingcraft.ru/<slug>).
 const RESERVED_SLUGS = new Set([
@@ -23,11 +33,11 @@ function stripPrivate(invite: any) {
 function publicInvite(invite: any) {
   return {
     ...stripPrivate(invite),
-    galleryPhotos: JSON.parse(invite.galleryPhotos || '[]'),
-    schedule: JSON.parse(invite.schedule || '[]'),
-    dressCodeColors: JSON.parse(invite.dressCodeColors || '[]'),
-    enabledSections: JSON.parse(invite.enabledSections || '{}'),
-    customData: JSON.parse(invite.customData || '{}'),
+    galleryPhotos: parseArr(invite.galleryPhotos),
+    schedule: parseArr(invite.schedule),
+    dressCodeColors: parseArr(invite.dressCodeColors),
+    enabledSections: parseObj(invite.enabledSections),
+    customData: parseObj(invite.customData),
   };
 }
 
@@ -199,11 +209,11 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   }
   return res.json({
     ...invite,
-    galleryPhotos: JSON.parse(invite.galleryPhotos || '[]'),
-    schedule: JSON.parse((invite as any).schedule || '[]'),
-    dressCodeColors: JSON.parse((invite as any).dressCodeColors || '[]'),
-    enabledSections: JSON.parse((invite as any).enabledSections || '{}'),
-    customData: JSON.parse((invite as any).customData || '{}'),
+    galleryPhotos: parseArr(invite.galleryPhotos),
+    schedule: parseArr((invite as any).schedule),
+    dressCodeColors: parseArr((invite as any).dressCodeColors),
+    enabledSections: parseObj((invite as any).enabledSections),
+    customData: parseObj((invite as any).customData),
   });
 });
 

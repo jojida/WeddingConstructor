@@ -231,7 +231,7 @@ function EditorContent() {
     if (idFromUrl && user) {
       api.get(`/api/invites/${idFromUrl}`)
         .then(res => {
-          setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: res.data.dressCodeColors || [], customData: res.data.customData || {} }));
+          setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: Array.isArray(res.data.dressCodeColors) ? res.data.dressCodeColors : [], schedule: Array.isArray(res.data.schedule) ? res.data.schedule : [], galleryPhotos: Array.isArray(res.data.galleryPhotos) ? res.data.galleryPhotos : [], customData: res.data.customData || {} }));
           sessionStorage.setItem('wc_draft_id', idFromUrl);
         })
         .catch(() => toast.error('Не удалось загрузить приглашение'));
@@ -245,7 +245,7 @@ function EditorContent() {
       const mergedGuest = { ...guestData, ...(setup || {}) };
       if (savedId) {
         api.get(`/api/invites/${savedId}`)
-          .then(res => setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: res.data.dressCodeColors || [], customData: res.data.customData || {} })))
+          .then(res => setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: Array.isArray(res.data.dressCodeColors) ? res.data.dressCodeColors : [], schedule: Array.isArray(res.data.schedule) ? res.data.schedule : [], galleryPhotos: Array.isArray(res.data.galleryPhotos) ? res.data.galleryPhotos : [], customData: res.data.customData || {} })))
           .catch(() => { sessionStorage.removeItem('wc_draft_id'); createDraft(templateIdFromUrl, mergedGuest); });
       } else {
         createDraft(templateIdFromUrl, mergedGuest);
@@ -786,7 +786,7 @@ function GalleryModal({ onPick, onClose }: { onPick: (u: string) => void; onClos
 }
 
 function ColorListEditor({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
-  const colors = value || [];
+  const colors = Array.isArray(value) ? value : [];
   const [hex, setHex] = useState('#c79bd6');
   return (
     <div style={{ marginBottom: 4 }}>
@@ -812,7 +812,7 @@ function ColorListEditor({ value, onChange }: { value: string[]; onChange: (v: s
 function ScheduleEditor({ value, onChange, iconSet, withDesc }: {
   value: ScheduleItem[]; onChange: (v: ScheduleItem[]) => void; iconSet?: string; withDesc?: boolean;
 }) {
-  const items = value || [];
+  const items = Array.isArray(value) ? value : [];
   const icons = (iconSet && ICON_SETS[iconSet]) || [];
   const update = (i: number, patch: Partial<ScheduleItem>) =>
     onChange(items.map((it, j) => (j === i ? { ...it, ...patch } : it)));
@@ -867,7 +867,7 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc }: {
 function DrinksEditor({ value, onChange }: {
   value: DrinkOption[]; onChange: (v: DrinkOption[]) => void;
 }) {
-  const items = value || [];
+  const items = Array.isArray(value) ? value : [];
   const update = (i: number, lbl: string) =>
     onChange(items.map((it, j) => (j === i ? { value: it.value, label: lbl } : it)));
   const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
