@@ -80,7 +80,16 @@ export default async function DemoPage({ params }: Props) {
 export async function generateMetadata({ params }: Props) {
   const { templateId } = await params;
   const template = TEMPLATES.find(t => t.id === templateId);
+  if (!template) return { title: 'Превью шаблона' };
   return {
-    title: template ? `Превью шаблона: ${template.name}` : 'Превью шаблона',
+    title: `Шаблон «${template.name}» — сайт-приглашение на свадьбу`,
+    description: `${template.description} Живое демо шаблона свадебного сайта-приглашения с RSVP-анкетой.`,
+    alternates: { canonical: `/demo/${template.id}` },
+    openGraph: {
+      title: `Шаблон «${template.name}» — сайт-приглашение на свадьбу`,
+      description: template.description,
+      url: `/demo/${template.id}`,
+      images: [{ url: template.preview, alt: `Шаблон свадебного приглашения «${template.name}»` }],
+    },
   };
 }

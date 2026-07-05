@@ -20,11 +20,49 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import AuthProvider from "@/components/AuthProvider";
 import AnimationObserver from "@/components/AnimationObserver";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "WeddingCraft — Цифровые свадебные приглашения",
-  description: "Создайте изысканное цифровое приглашение на свадьбу. Выберите шаблон, персонализируйте и отправьте гостям одной ссылкой.",
-  keywords: "свадьба, приглашение, цифровое, конструктор, онлайн, электронное",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Сайт-приглашение на свадьбу с RSVP-анкетой — WeddingCraft",
+    template: "%s — WeddingCraft",
+  },
+  description:
+    "Создайте электронное свадебное приглашение за 5 минут: изящные шаблоны, RSVP-анкета, " +
+    "уведомления об ответах гостей в Telegram и на Email, персональные ссылки и свой домен.",
+  keywords: [
+    "сайт-приглашение на свадьбу",
+    "электронное приглашение на свадьбу",
+    "свадебное приглашение онлайн",
+    "пригласительные на свадьбу",
+    "RSVP анкета для гостей",
+    "конструктор свадебных приглашений",
+  ],
+  applicationName: "WeddingCraft",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "WeddingCraft",
+    locale: "ru_RU",
+    url: "/",
+    title: "Сайт-приглашение на свадьбу с RSVP-анкетой — WeddingCraft",
+    description:
+      "Электронные свадебные приглашения: изящные шаблоны, RSVP-анкета, уведомления в Telegram, " +
+      "персональные ссылки для гостей и свой домен.",
+    images: [{ url: "/invite/calla/assets/couple-photo.jpg", width: 1200, height: 630, alt: "Пример свадебного сайта-приглашения WeddingCraft" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Сайт-приглашение на свадьбу с RSVP-анкетой — WeddingCraft",
+    description: "Электронные свадебные приглашения: шаблоны, RSVP-анкета, уведомления в Telegram.",
+    images: ["/invite/calla/assets/couple-photo.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

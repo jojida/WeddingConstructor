@@ -64,12 +64,21 @@ export async function generateMetadata({ params }: Props) {
     ? `Свадьба ${invite.groomName} & ${invite.brideName}`
     : 'Свадебное приглашение';
 
+  // Загруженные фото живут на бэкенде (/uploads/…), ассеты шаблонов — в public
+  // фронтенда (резолвятся через metadataBase), внешние URL остаются как есть.
+  const ogImage = !invite.coverPhoto ? undefined
+    : invite.coverPhoto.startsWith('http') ? invite.coverPhoto
+    : invite.coverPhoto.startsWith('/uploads') ? `${API}${invite.coverPhoto}`
+    : invite.coverPhoto;
+
   return {
     title,
     description: invite.inviteText || `Вас приглашают на свадьбу! ${invite.weddingDate ? new Date(invite.weddingDate).toLocaleDateString('ru-RU') : ''}`,
+    // Личные страницы пар не должны индексироваться поисковиками.
+    robots: { index: false, follow: false },
     openGraph: {
       title,
-      images: invite.coverPhoto ? [`${process.env.NEXT_PUBLIC_API_URL}${invite.coverPhoto}`] : [],
+      images: ogImage ? [ogImage] : [],
     },
   };
 }
