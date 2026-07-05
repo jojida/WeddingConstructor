@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { isAdvancedPlan, SALUTATIONS, previewGreeting } from '@/lib/constants';
+import { isAdvancedPlan, hasCustomDomain, SALUTATIONS, previewGreeting } from '@/lib/constants';
 
 interface Invite {
   id: string; slug: string; status: string; plan: string;
@@ -74,9 +74,7 @@ export default function ManageInvitePage() {
     <div style={{ minHeight: '100vh', background: '#faf8f5' }}>
       <Navbar />
       <div style={{ maxWidth: 880, margin: '0 auto', padding: '32px 20px 80px' }}>
-        <Link href="/dashboard" style={{ fontSize: 13, color: '#7d766c', textDecoration: 'none' }}>← Мои приглашения</Link>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginTop: 12, marginBottom: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
             <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>
@@ -105,7 +103,7 @@ export default function ManageInvitePage() {
         {tab === 'responses' && <ResponsesTab inviteId={invite.id} />}
         {tab === 'guests'    && <GuestsTab invite={invite} advanced={advanced} origin={origin} />}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
-        {tab === 'domain'    && <DomainTab invite={invite} advanced={advanced} onSaved={loadInvite} />}
+        {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}
       </div>
     </div>
   );
@@ -169,7 +167,7 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
   if (!advanced) return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>👥</div>
-      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Кабинет гостей — на тарифах Стандарт и Премиум</h3>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Кабинет гостей — на тарифе Премиум</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
         Добавляйте гостей вручную, получайте для каждого персональную ссылку с именным обращением
         («Дорогие Денис и Мария», «Семья Кореловых») и собирайте ответы по каждому гостю.
@@ -324,7 +322,7 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
   if (!advanced) return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>🌐</div>
-      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Свой домен — на тарифах Стандарт и Премиум</h3>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Свой домен — на тарифе Премиум</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
         Привяжите собственный домен (например, denis-i-maria.ru) к вашему сайту-приглашению.
       </p>

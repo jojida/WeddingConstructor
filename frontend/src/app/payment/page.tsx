@@ -14,7 +14,7 @@ function PaymentContent() {
   const { user } = useAuthStore();
   const inviteId = searchParams.get('id') || '';
 
-  const [selectedPlan, setSelectedPlan] = useState('standard');
+  const [selectedPlan, setSelectedPlan] = useState('premium');
   const [loading, setLoading] = useState(false);
   const [invite, setInvite] = useState<any>(null);
 

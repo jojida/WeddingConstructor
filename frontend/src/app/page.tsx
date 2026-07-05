@@ -2,8 +2,9 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
+import MediterraneanTemplate from '@/components/MediterraneanTemplate';
 import styles from './page.module.css';
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -74,6 +75,31 @@ function Header() {
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
+/* Данные для живого превью «Средиземноморья» в hero: реальные тексты, фото и
+   программа дня из TEMPLATE_DEFAULTS — как на странице /demo/mediterranean. */
+function heroMediterraneanData() {
+  const defs = TEMPLATE_DEFAULTS['mediterranean'] || {};
+  return {
+    templateId: 'mediterranean',
+    groomName: 'Максим',
+    brideName: 'Катерина',
+    weddingDate: '2026-09-19',
+    weddingTime: '16:00',
+    venue: defs.venue ?? 'СПА Отель',
+    venueAddress: '',
+    inviteText: '',
+    story: defs.story ?? '',
+    dressCode: '',
+    dressCodeColors: [],
+    dressCodePhoto: defs.dressCodePhoto ?? '',
+    coverPhoto: '',
+    galleryPhotos: [],
+    mapLink: '',
+    schedule: defs.schedule ?? [],
+    customData: { ...(defs.custom || {}), ...(defs.drinks ? { drinks: defs.drinks } : {}) },
+  };
+}
+
 function Hero() {
   return (
     <section className={styles.hero}>
@@ -110,11 +136,16 @@ function Hero() {
 
         <div className={styles.heroDevice}>
           <div className={styles.heroDeviceFrame}>
-            <img
-              src="https://images.unsplash.com/photo-1632610992723-82d7c212f6d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=800"
-              alt="Цифровое свадебное приглашение"
-              className={styles.heroDeviceImg}
-            />
+            {/* Живой шаблон «Средиземноморье» — прокручивается прямо в окошке.
+                editing=1 отключает скролл-гейт и «стирание даты» внутри шаблона. */}
+            <div className={styles.heroDeviceScreen}>
+              <MediterraneanTemplate
+                data={heroMediterraneanData()}
+                apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+                editing
+              />
+            </div>
+            <div className={styles.heroDeviceHint}>Живой пример — прокрутите приглашение</div>
           </div>
           <div className={styles.heroDeviceOrb} />
         </div>
@@ -336,24 +367,17 @@ function Features() {
 const PLANS = [
   {
     name: 'Базовый',
-    price: '990',
-    period: '6 месяцев',
-    features: ['Сайт-приглашение', 'Форма RSVP', 'Уведомления в Telegram или на Email', 'Ссылка на нашем домене'],
+    price: '3 990',
+    period: 'разовая оплата за один сайт',
+    features: ['Сайт-приглашение', 'Форма RSVP', 'Уведомления в Telegram или на Email', 'Музыкальный фон', 'Ссылка на нашем домене'],
     popular: false,
-  },
-  {
-    name: 'Стандарт',
-    price: '1 990',
-    period: '1 год',
-    features: ['Всё из Базового', 'Личный кабинет гостей', 'Персональные ссылки с обращением', 'Ответы по каждому гостю', 'Свой домен'],
-    popular: true,
   },
   {
     name: 'Премиум',
-    price: '3 490',
-    period: 'Бессрочно',
-    features: ['Всё из Стандарта', 'Неограниченно гостей и фото', 'Музыкальный фон', 'Приоритетная поддержка'],
-    popular: false,
+    price: '5 990',
+    period: 'разовая оплата за один сайт',
+    features: ['Всё из Базового', 'Личный кабинет гостей', 'Персональные ссылки с обращением', 'Ответы по каждому гостю', 'Свой домен', 'Неограниченно гостей и фото'],
+    popular: true,
   },
 ];
 
@@ -499,7 +523,6 @@ function RsvpSection() {
     'Добавляйте гостей вручную в личном кабинете',
     'Каждому — персональная ссылка с именным обращением: «Дорогие Денис и Мария», «Семья Кореловых»',
     'Видно, кто ответил и что выбрал — по каждому гостю',
-    'Привязка собственного домена',
   ];
   const card: React.CSSProperties = {
     background: '#fff', border: '1px solid rgba(206,197,186,0.5)', borderRadius: 18,
@@ -523,7 +546,7 @@ function RsvpSection() {
             {simple.map(t => <div key={t} style={item}>{check}<span>{t}</span></div>)}
           </div>
           <div style={{ ...card, borderColor: 'rgba(201,169,110,0.55)', boxShadow: '0 10px 40px rgba(201,169,110,0.12)' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 6 }}>Стандарт и Премиум</div>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 6 }}>Премиум</div>
             <h3 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22, color: '#0e1d26', margin: '0 0 16px' }}>Личный кабинет гостей</h3>
             {advanced.map(t => <div key={t} style={item}>{check}<span>{t}</span></div>)}
           </div>
@@ -539,10 +562,55 @@ function RsvpSection() {
   );
 }
 
+// ─── SEO: структурированные данные (Schema.org) ──────────────────────────────
+function JsonLd() {
+  const data = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${SITE_URL}/#organization`,
+        name: 'WeddingCraft',
+        url: SITE_URL,
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_URL}/#website`,
+        name: 'WeddingCraft — электронные свадебные приглашения',
+        url: SITE_URL,
+        publisher: { '@id': `${SITE_URL}/#organization` },
+        inLanguage: 'ru-RU',
+      },
+      {
+        '@type': 'Product',
+        name: 'Сайт-приглашение на свадьбу',
+        description:
+          'Электронное свадебное приглашение: готовые шаблоны, RSVP-анкета гостей, уведомления в Telegram и на Email, персональные ссылки и свой домен.',
+        brand: { '@id': `${SITE_URL}/#organization` },
+        offers: PLANS.map((plan) => ({
+          '@type': 'Offer',
+          name: `Тариф «${plan.name}»`,
+          price: plan.price.replace(/\s/g, ''),
+          priceCurrency: 'RUB',
+          url: `${SITE_URL}/#pricing`,
+          availability: 'https://schema.org/InStock',
+        })),
+      },
+    ],
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+    />
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
     <div className={styles.page}>
+      <JsonLd />
       <Header />
       <Hero />
       <TemplatesSection />

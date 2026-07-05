@@ -266,7 +266,21 @@
   box-shadow: 0 40px 80px -16px rgba(14,29,38,0.1);
   width: 100%;
 }
-.heroDeviceImg { width: 100%; height: auto; border-radius: 22px; display: block; }
+/* Окошко с живым шаблоном: фиксированная высота, контент прокручивается внутри iframe */
+.heroDeviceScreen {
+  height: clamp(420px, 64vh, 620px);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #dbeeff;
+}
+.heroDeviceHint {
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #7d766c;
+  padding-top: 10px;
+  font-family: var(--font-inter);
+}
 .heroDeviceOrb {
   position: absolute;
   top: -40px; right: -40px;
@@ -465,9 +479,9 @@
 .pricingSection { padding: 120px 0; }
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 28px;
-  max-width: 960px;
+  max-width: 700px;
   margin: 0 auto;
 }
 .pricingCard {

@@ -5,10 +5,10 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+// Цена — разовый платёж за один сайт (без срока действия).
 const PLANS = {
-  basic:    { price: 99000, label: 'Базовый', months: 6 },   // 990 руб в копейках
-  standard: { price: 199000, label: 'Стандарт', months: 12 },
-  premium:  { price: 349000, label: 'Премиум', months: 0 },  // 0 = бессрочно
+  basic:   { price: 399000, label: 'Базовый' },  // 3 990 руб в копейках
+  premium: { price: 599000, label: 'Премиум' },
 };
 
 // POST /api/payment/create — создать платёж ЮМани
