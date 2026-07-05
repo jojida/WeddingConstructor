@@ -7,6 +7,8 @@ import nodemailer from 'nodemailer';
 
 const FROM_EMAIL = process.env.MAIL_FROM || process.env.SMTP_USER || 'noreply@weddingcraft.ru';
 const FROM_NAME = process.env.MAIL_FROM_NAME || 'WeddingCraft';
+// Куда попадёт ответ пользователя на письмо (напр. на код). Ящик поддержки.
+const REPLY_TO_EMAIL = process.env.MAIL_REPLY_TO || 'support@weddingcraft.ru';
 
 const SMTP_PORT = parseInt(process.env.SMTP_PORT || '465');
 const smtpTransport = nodemailer.createTransport({
@@ -24,6 +26,8 @@ export interface Mail {
   subject: string;
   text: string;
   html?: string;
+  /** Куда уйдёт ответ. По умолчанию — MAIL_REPLY_TO (ящик поддержки). */
+  replyTo?: string;
 }
 
 /** true, если хоть какой-то способ отправки настроен. */
@@ -42,6 +46,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
       body: JSON.stringify({
         from: `${FROM_NAME} <${FROM_EMAIL}>`,
         to: [mail.to],
+        reply_to: mail.replyTo || REPLY_TO_EMAIL,
         subject: mail.subject,
         text: mail.text,
         ...(mail.html ? { html: mail.html } : {}),
@@ -66,6 +71,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
       body: JSON.stringify({
         sender: { name: FROM_NAME, email: FROM_EMAIL },
         to: [{ email: mail.to }],
+        replyTo: { email: mail.replyTo || REPLY_TO_EMAIL },
         subject: mail.subject,
         textContent: mail.text,
         ...(mail.html ? { htmlContent: mail.html } : {}),
@@ -83,6 +89,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
     await smtpTransport.sendMail({
       from: process.env.SMTP_FROM || `"${FROM_NAME}" <${process.env.SMTP_USER}>`,
       to: mail.to,
+      replyTo: mail.replyTo || REPLY_TO_EMAIL,
       subject: mail.subject,
       text: mail.text,
       html: mail.html,

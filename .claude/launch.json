@@ -8,6 +8,14 @@
       "cwd": "C:\\Users\\Asus\\OneDrive\\Рабочий стол\\WeddingConstructor\\frontend",
       "port": 3000,
       "autoPort": false
+    },
+    {
+      "name": "frontend-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["next", "start", "-p", "3000"],
+      "cwd": "C:\\Users\\Asus\\OneDrive\\Рабочий стол\\WeddingConstructor\\frontend",
+      "port": 3000,
+      "autoPort": false
     }
   ]
 }
