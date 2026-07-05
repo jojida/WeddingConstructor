@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { notifyOwner } from '../lib/notify';
+import { isPaid } from '../lib/plans';
 
 const router = Router();
 
@@ -20,9 +21,10 @@ router.post('/:slug', async (req: Request, res: Response) => {
   try {
     const invite = await prisma.invitation.findUnique({ where: { slug } });
     if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
-    // Оплата временно отключена: сайт доступен по slug сразу (см. by-slug),
-    // поэтому и анкета должна работать для draft — иначе гости видят сайт,
-    // но получают «Ошибка» при отправке ответа.
+    // Сайт (и анкета) доступны гостям только после оплаты — как и by-slug.
+    if (!isPaid(invite.status)) {
+      return res.status(402).json({ error: 'Сайт ещё не опубликован — анкета заработает после оплаты' });
+    }
 
     const { guestName, attending, drinkChoice, wishes, guestToken } = req.body;
 

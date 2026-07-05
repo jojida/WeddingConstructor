@@ -122,9 +122,14 @@ export default function DashboardPage() {
                     </div>
                     <div className={styles.cardActions}>
                       {invite.status === 'draft' ? (
-                        <Link href={`/editor?id=${invite.id}`} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '14px', textAlign: 'center' }}>
-                          Редактировать
-                        </Link>
+                        <>
+                          <Link href={`/editor?id=${invite.id}`} className="btn-outline" style={{ flex: 1, padding: '10px', fontSize: '14px', textAlign: 'center' }}>
+                            Редактировать
+                          </Link>
+                          <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '14px', textAlign: 'center' }}>
+                            Оплатить
+                          </Link>
+                        </>
                       ) : (
                         <Link href={`/dashboard/${invite.id}`} className="btn-primary" style={{ flex: 1, padding: '10px', fontSize: '14px', textAlign: 'center' }}>
                           Управление

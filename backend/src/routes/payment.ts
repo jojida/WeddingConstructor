@@ -31,6 +31,10 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
     const successUrl = `${process.env.FRONTEND_URL}/payment/success?id=${inviteId}`;
 
     if (!shopId || shopId === 'your_shop_id') {
+      // В проде без настроенной кассы оплату НЕ имитируем — иначе публикация бесплатна.
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(503).json({ error: 'Оплата временно недоступна. Напишите нам — поможем опубликовать сайт.' });
+      }
       // Dev mode: auto-approve for testing
       await prisma.invitation.update({
         where: { id: inviteId },

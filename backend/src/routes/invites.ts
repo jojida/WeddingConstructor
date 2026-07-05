@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { isPaid } from '../lib/plans';
 
 const router = Router();
 
@@ -130,7 +131,10 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
 router.get('/by-slug/:slug', async (req, res: Response) => {
   const invite = await prisma.invitation.findUnique({ where: { slug: req.params.slug } });
   if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
-  // Оплата временно отключена — сайт доступен сразу после создания.
+  // Черновики гостям не видны: сайт открывается после оплаты тарифа.
+  if (!isPaid(invite.status)) {
+    return res.status(402).json({ error: 'Сайт ещё не опубликован', reason: 'unpaid' });
+  }
   return res.json(publicInvite(invite));
 });
 
@@ -140,7 +144,10 @@ router.get('/by-domain/:host', async (req, res: Response) => {
   if (!host) return res.status(404).json({ error: 'Не найдено' });
   const invite = await prisma.invitation.findFirst({ where: { customDomain: host } });
   if (!invite) return res.status(404).json({ error: 'Домен не привязан' });
-  // Оплата временно отключена — сайт доступен сразу.
+  // Черновики гостям не видны: сайт открывается после оплаты тарифа.
+  if (!isPaid(invite.status)) {
+    return res.status(402).json({ error: 'Сайт ещё не опубликован', reason: 'unpaid' });
+  }
   return res.json(publicInvite(invite));
 });
 

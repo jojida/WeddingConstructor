@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import TemplatePreview from '@/components/TemplatePreview';
+import UnpublishedNotice from '@/components/UnpublishedNotice';
 import { TEMPLATE_GREETING_KEY } from '@/lib/constants';
 
 /* Корневой адрес сайта-приглашения: weddingcraft.ru/<slug>.
@@ -17,6 +18,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 async function getInvite(slug: string) {
   try {
     const res = await fetch(`${API}/api/invites/by-slug/${slug}`, { cache: 'no-store' });
+    if (res.status === 402) return { unpaid: true }; // сайт есть, но не оплачен
     if (!res.ok) return null;
     return res.json();
   } catch { return null; }
@@ -38,6 +40,7 @@ export default async function SiteBySlugPage({ params, searchParams }: Props) {
   if (!invite) {
     notFound();
   }
+  if (invite.unpaid) return <UnpublishedNotice />;
 
   if (g) {
     const guest = await getGuest(g);
@@ -61,6 +64,9 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const invite = await getInvite(slug);
   if (!invite) return {};
+  if (invite.unpaid) {
+    return { title: 'Сайт ещё не опубликован', robots: { index: false, follow: false } };
+  }
 
   const title = invite.groomName && invite.brideName
     ? `Свадьба ${invite.groomName} & ${invite.brideName}`
