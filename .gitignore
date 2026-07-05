@@ -2,3 +2,6 @@
 # Locofy MCP (содержит personal access token)
 .mcp.json
 DEPLOY.md
+
+# Продакшн-секреты живут только на сервере
+backend/.env.production
