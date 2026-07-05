@@ -144,6 +144,11 @@ function Hero() {
                 apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
                 editing
               />
+              {/* На мобильных прокрутка внутри окошка «съедает» свайпы —
+                  поэтому там iframe не интерактивен, а тап открывает демо. */}
+              <Link href="/demo/mediterranean" className={styles.heroDeviceTapLink} aria-label="Открыть демо шаблона «Средиземноморье»">
+                <span className={styles.heroDeviceTapPill}>Полистать приглашение ↗</span>
+              </Link>
             </div>
             <div className={styles.heroDeviceHint}>Живой пример — прокрутите приглашение</div>
           </div>

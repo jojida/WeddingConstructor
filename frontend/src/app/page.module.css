@@ -268,10 +268,23 @@
 }
 /* Окошко с живым шаблоном: фиксированная высота, контент прокручивается внутри iframe */
 .heroDeviceScreen {
+  position: relative;
   height: clamp(420px, 64vh, 620px);
   border-radius: 22px;
   overflow: hidden;
   background: #dbeeff;
+}
+/* Мобильный оверлей «тап — открыть демо»: на десктопе скрыт */
+.heroDeviceTapLink { display: none; }
+.heroDeviceTapPill {
+  background: rgba(14, 29, 38, 0.78);
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: var(--font-inter);
+  box-shadow: 0 6px 24px rgba(14, 29, 38, 0.25);
 }
 .heroDeviceHint {
   text-align: center;
@@ -667,7 +680,24 @@
   .sectionInner { padding: 0 20px; }
   .headerInner { padding: 14px 20px; }
   .heroGrid { grid-template-columns: 1fr; padding: 48px 20px; gap: 40px; }
-  .heroDevice { display: none; }
+  .heroDevice { margin-top: 36px; }
+  /* Свайп по iframe листал бы приглашение (5000+ px) и «запирал» страницу —
+     на тач-экранах виджет живой, но не скроллится: тап открывает демо. */
+  .heroDeviceScreen { height: clamp(360px, 56vh, 520px); }
+  .heroDeviceScreen iframe { pointer-events: none; }
+  .heroDeviceHint { display: none; }
+  .heroDeviceTapLink {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 18px;
+    text-decoration: none;
+  }
   .heroHeadline { font-size: 36px; }
   .sectionTitle { font-size: 30px; }
   .howSteps { display: flex; flex-direction: column; gap: 0; }
