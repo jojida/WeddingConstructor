@@ -442,9 +442,9 @@ function EditorContent() {
     <>
       {/* ── FULL PREVIEW OVERLAY ──────────────────────────────────────────── */}
       {showPreview && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#0d0b09', overflow: 'auto' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#ececec', overflow: 'auto' }}>
           <button onClick={() => setShowPreview(false)}
-            style={{ position: 'fixed', top: 16, right: 16, zIndex: 10000, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 8, color: '#fff', padding: '8px 20px', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-inter)', backdropFilter: 'blur(8px)' }}>
+            style={{ position: 'fixed', top: 16, right: 16, zIndex: 10000, background: 'rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.14)', borderRadius: 8, color: '#333', padding: '8px 20px', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-inter)', backdropFilter: 'blur(8px)' }}>
             ✕ Закрыть
           </button>
           <TemplatePreview data={data} apiBase={apiBase} fullPage />
@@ -476,8 +476,11 @@ function EditorContent() {
             <button className={styles.topBarBtnOutline} onClick={() => setShowPreview(true)}>
               Предпросмотр
             </button>
+            <Link href="/dashboard" className={styles.topBarBtnOutline} style={{ marginRight: 12 }}>
+              Личный кабинет
+            </Link>
             <button className={styles.topBarBtnPrimary} onClick={handleShare}>
-              Поделиться
+              Завершить дизайн
             </button>
           </div>
         </header>
@@ -663,7 +666,7 @@ function EditorContent() {
 
             {/* ── SIDEBAR FOOTER ──────────────────────────────────────────── */}
             <div className={styles.sidebarFooter}>
-              <button className={styles.finishBtn} onClick={handleSave}>
+              <button className={styles.finishBtn} onClick={handleShare}>
                 ЗАВЕРШИТЬ ДИЗАЙН ✓
               </button>
             </div>
