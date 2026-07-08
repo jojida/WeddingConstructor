@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+import prisma from './lib/prisma';
 import authRouter from './routes/auth';
 import inviteRouter from './routes/invites';
 import uploadRouter from './routes/upload';
@@ -27,9 +28,19 @@ const allowedOrigins = new Set([
   'http://localhost:3000',
 ]);
 app.use(cors({
-  origin(origin, cb) {
+  async origin(origin, cb) {
     // Запросы без Origin (curl, серверные) и из белого списка — разрешаем
     if (!origin || allowedOrigins.has(origin)) return cb(null, true);
+    // Привязанные клиентские домены: сайт-приглашение на своём домене шлёт
+    // RSVP/guest-запросы на api.weddingcraft.ru — это cross-origin. Разрешаем
+    // origin, если его хост привязан к какому-либо приглашению (customDomain).
+    try {
+      const host = new URL(origin).hostname.replace(/^www\./, '').toLowerCase();
+      if (host) {
+        const bound = await prisma.invitation.findFirst({ where: { customDomain: host }, select: { id: true } });
+        if (bound) return cb(null, true);
+      }
+    } catch { /* кривой Origin — просто не разрешаем */ }
     return cb(null, false);
   },
   credentials: true,
