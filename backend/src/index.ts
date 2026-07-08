@@ -12,6 +12,7 @@ import paymentRouter from './routes/payment';
 import rsvpRouter from './routes/rsvp';
 import guestsRouter from './routes/guests';
 import telegramRouter from './routes/telegram';
+import domainsRouter from './routes/domains';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -47,6 +48,7 @@ app.use('/api/payment', paymentRouter);
 app.use('/api/rsvp', rsvpRouter);
 app.use('/api/guests', guestsRouter);
 app.use('/api/telegram', telegramRouter);
+app.use('/api/domains', domainsRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

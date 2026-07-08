@@ -6,13 +6,14 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { isAdvancedPlan, hasCustomDomain, SALUTATIONS, previewGreeting } from '@/lib/constants';
+import { isAdvancedPlan, hasCustomDomain, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice } from '@/lib/constants';
 
 interface Invite {
   id: string; slug: string; status: string; plan: string;
   groomName: string; brideName: string; templateId: string;
   notifyChannel: string; notifyEmail: string; notifyTelegramChatId: string;
   customDomain: string;
+  customData?: Record<string, any>;
 }
 interface Guest {
   id: string; token: string; salutation: string; names: string;
@@ -143,7 +144,7 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
               <span style={{ fontWeight: 600, color: '#0e1d26' }}>{r.guestName}</span>
               <span style={{ fontSize: 13, color: r.attending ? '#2e8b57' : '#b85c5c' }}>{r.attending ? '✓ Придёт' : '✗ Не придёт'}</span>
             </div>
-            {r.drinkChoice && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>🥂 {r.drinkChoice}</div>}
+            {r.drinkChoice && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>🥂 {formatDrinkChoice(r.drinkChoice, data.drinkLabels)}</div>}
             {r.wishes && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4, fontStyle: 'italic' }}>«{r.wishes}»</div>}
           </div>
         ))}
@@ -158,6 +159,8 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
   const [salutation, setSalutation] = useState<string>('дорогие');
   const [names, setNames] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const drinkLabels = inviteDrinkLabels(invite.customData);
 
   const load = useCallback(() => {
     api.get(`/api/guests/${invite.id}`).then(res => setGuests(res.data.guests)).catch(() => {});
@@ -228,7 +231,7 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
               <div style={{ flex: 1, minWidth: 160 }}>
                 <div style={{ fontWeight: 600, color: '#0e1d26' }}>{g.greeting}</div>
                 <div style={{ fontSize: 12, marginTop: 3, color: g.responded ? (g.attending ? '#2e8b57' : '#b85c5c') : '#a39b8e' }}>
-                  {g.responded ? (g.attending ? `✓ Придёт${g.drinkChoice ? ' · ' + g.drinkChoice : ''}` : '✗ Не придёт') : '○ Не ответил(а)'}
+                  {g.responded ? (g.attending ? `✓ Придёт${g.drinkChoice ? ' · ' + formatDrinkChoice(g.drinkChoice, drinkLabels) : ''}` : '✗ Не придёт') : '○ Не ответил(а)'}
                 </div>
               </div>
               <button onClick={() => copyLink(g.token)} className="btn-outline" style={{ padding: '7px 12px', fontSize: 12 }}>🔗 Ссылка</button>
@@ -315,9 +318,18 @@ function NotifyTab({ invite, userEmail, onSaved }: { invite: Invite; userEmail: 
 }
 
 // ─── Вкладка «Домен» ───────────────────────────────────────────────────────
+const SERVER_IP = process.env.NEXT_PUBLIC_SERVER_IP || '89.191.226.237';
+
+interface DomainStatus {
+  domain: string; expectedIp: string; ips: string[]; wwwIps: string[];
+  dnsOk: boolean; wwwOk: boolean; paid: boolean;
+}
+
 function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: boolean; onSaved: () => void }) {
   const [domain, setDomain] = useState(invite.customDomain || '');
   const [saving, setSaving] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [status, setStatus] = useState<DomainStatus | null>(null);
 
   if (!advanced) return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
@@ -334,16 +346,37 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
     setSaving(true);
     try {
       await api.patch(`/api/invites/${invite.id}/settings`, { customDomain: domain });
-      toast.success('Домен сохранён');
+      toast.success(domain.trim() ? 'Домен сохранён' : 'Домен отвязан');
+      setStatus(null);
       onSaved();
-    } catch { toast.error('Ошибка сохранения'); }
+    } catch (e: any) { toast.error(e.response?.data?.error || 'Ошибка сохранения'); }
     finally { setSaving(false); }
   };
+
+  const check = async () => {
+    setChecking(true);
+    setStatus(null);
+    try {
+      const res = await api.get(`/api/domains/status/${invite.id}`);
+      setStatus(res.data);
+    } catch (e: any) { toast.error(e.response?.data?.error || 'Не удалось проверить домен'); }
+    finally { setChecking(false); }
+  };
+
+  const DnsRow = ({ label, ok, ips }: { label: string; ok: boolean; ips: string[] }) => (
+    <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', fontSize: 13, marginTop: 6 }}>
+      <span style={{ color: ok ? '#2e8b57' : '#b85c5c', fontWeight: 700, flexShrink: 0 }}>{ok ? '✓' : '✗'}</span>
+      <span style={{ fontFamily: 'monospace' }}>{label}</span>
+      <span style={{ color: '#7d766c' }}>
+        {ips.length ? `→ ${ips.join(', ')}` : '— запись не найдена'}
+      </span>
+    </div>
+  );
 
   return (
     <div style={{ maxWidth: 600 }}>
       <p style={{ fontSize: 14, color: '#5b554c', marginBottom: 16 }}>
-        По умолчанию сайт доступен на нашем домене. Можно привязать свой.
+        По умолчанию сайт доступен на нашем домене. Можно привязать свой — например, denis-i-maria.ru.
       </p>
       <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#7d766c', textTransform: 'uppercase', marginBottom: 6 }}>Ваш домен</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -355,19 +388,52 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
         <div style={{ fontWeight: 700, color: '#0e1d26', marginBottom: 10 }}>Как подключить</div>
         <ol style={{ margin: 0, paddingLeft: 18, fontSize: 14, color: '#5b554c', lineHeight: 1.7 }}>
           <li>Купите домен у любого регистратора (reg.ru, Timeweb и т.п.).</li>
-          <li>В DNS-настройках домена добавьте запись:
-            <div style={{ marginTop: 6, fontFamily: 'monospace', fontSize: 13, background: '#f5f2ec', borderRadius: 8, padding: '8px 12px' }}>
-              CNAME&nbsp;&nbsp;@ (или www)&nbsp;&nbsp;→&nbsp;&nbsp;weddingcraft.ru
+          <li>В DNS-настройках домена добавьте две A-записи:
+            <div style={{ marginTop: 6, fontFamily: 'monospace', fontSize: 13, background: '#f5f2ec', borderRadius: 8, padding: '8px 12px', lineHeight: 1.8 }}>
+              A&nbsp;&nbsp;@&nbsp;&nbsp;&nbsp;→&nbsp;&nbsp;{SERVER_IP}<br />
+              A&nbsp;&nbsp;www&nbsp;→&nbsp;&nbsp;{SERVER_IP}
             </div>
           </li>
-          <li>Сохраните домен в этом поле и напишите нам — мы выпустим SSL-сертификат и активируем привязку (обычно в течение суток).</li>
+          <li>Сохраните домен в поле выше и нажмите «Проверить подключение». DNS обычно
+            обновляется за 15 минут – 4 часа.</li>
+          <li>SSL-сертификат выпустится автоматически при первом открытии сайта — ничего
+            дополнительно делать не нужно.</li>
         </ol>
-        {invite.customDomain && (
-          <div style={{ marginTop: 12, fontSize: 13, color: '#2e8b57' }}>
-            Текущий домен: <b>{invite.customDomain}</b> (ожидает активации/проверки DNS).
-          </div>
-        )}
       </div>
+
+      {invite.customDomain && (
+        <div style={{ marginTop: 16, padding: 16, background: '#fff', border: BORDER, borderRadius: 12 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 14, color: '#0e1d26' }}>
+              Привязан: <b>{invite.customDomain}</b>
+            </div>
+            <button className="btn-outline" onClick={check} disabled={checking} style={{ padding: '8px 18px', fontSize: 13 }}>
+              {checking ? 'Проверяем…' : 'Проверить подключение'}
+            </button>
+          </div>
+
+          {status && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: BORDER }}>
+              <DnsRow label={status.domain} ok={status.dnsOk} ips={status.ips} />
+              <DnsRow label={`www.${status.domain}`} ok={status.wwwOk} ips={status.wwwIps} />
+              {status.dnsOk ? (
+                <div style={{ marginTop: 12, fontSize: 14, color: '#2e8b57' }}>
+                  ✓ DNS настроен. Сайт доступен по адресу{' '}
+                  <a href={`https://${status.domain}`} target="_blank" rel="noreferrer" style={{ color: '#2e8b57', fontWeight: 700 }}>
+                    https://{status.domain}
+                  </a>
+                  {' '}(при первом открытии выпуск SSL может занять до минуты).
+                </div>
+              ) : (
+                <div style={{ marginTop: 12, fontSize: 13, color: '#b85c5c' }}>
+                  A-запись ещё не указывает на {status.expectedIp}. Проверьте настройки DNS
+                  у регистратора и повторите — обновление занимает от 15 минут до 4 часов.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

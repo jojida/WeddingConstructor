@@ -275,6 +275,37 @@ export const previewGreeting = (salutation: string, names: string): string => {
   return `${cap} ${n}`.trim();
 };
 
+/* ── Напитки: метки для статистики RSVP ──────────────────────────────────────
+   Форма шаблона шлёт value ('sparkling'), а пара может переопределить список
+   напитков в редакторе. Метку берём из своего списка (customData.drinks) с
+   запасными значениями для стандартного набора. */
+export const DEFAULT_DRINK_LABELS: Record<string, string> = {
+  sparkling: 'Игристое',
+  red: 'Красное вино',
+  white: 'Белое вино',
+  cognac: 'Коньяк',
+  wine: 'Вино',
+  champagne: 'Шампанское',
+  juice: 'Сок',
+  water: 'Вода',
+  no_alcohol: 'Без алкоголя',
+  other: 'Другое',
+};
+
+/** Карта value→label для приглашения: дефолты + свой список из customData. */
+export const inviteDrinkLabels = (customData?: Record<string, any> | null): Record<string, string> => {
+  const labels: Record<string, string> = { ...DEFAULT_DRINK_LABELS };
+  const drinks = customData?.drinks;
+  if (Array.isArray(drinks)) {
+    for (const d of drinks) if (d && d.value) labels[String(d.value)] = String(d.label || d.value);
+  }
+  return labels;
+};
+
+/** "sparkling,red" → "Игристое, Красное вино" по карте меток. */
+export const formatDrinkChoice = (choice: string, labels: Record<string, string>): string =>
+  String(choice || '').split(',').map(s => s.trim()).filter(Boolean).map(v => labels[v] || v).join(', ');
+
 /** Ключ data-edit строки-приветствия в каждом шаблоне (для персонализации гостя). */
 export const TEMPLATE_GREETING_KEY: Record<string, string> = {
   calla: 'greetingTitle',

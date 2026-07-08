@@ -2,6 +2,7 @@
 // Пара выбирает ОДИН канал: telegram | email | none.
 import prisma from './prisma';
 import { sendEmail, isEmailConfigured } from './email';
+import { inviteDrinkLabels, formatDrinkChoice } from './drinks';
 
 const TG_API = (method: string) =>
   `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN || ''}/${method}`;
@@ -27,6 +28,7 @@ interface InviteLike {
   notifyChannel: string;
   notifyEmail: string;
   notifyTelegramChatId: string;
+  customData?: string | null;
 }
 
 interface ResponseLike {
@@ -45,7 +47,7 @@ function formatMessage(invite: InviteLike, r: ResponseLike): { subject: string; 
     `👤 Гость: ${r.guestName}`,
     `${attend}`,
   ];
-  if (r.drinkChoice) lines.push(`🥂 Напитки: ${r.drinkChoice}`);
+  if (r.drinkChoice) lines.push(`🥂 Напитки: ${formatDrinkChoice(r.drinkChoice, inviteDrinkLabels(invite.customData))}`);
   if (r.wishes) lines.push(`💌 Пожелания: ${r.wishes}`);
   const text = lines.join('\n');
   const html = lines.map((l) => (l ? `<div>${l}</div>` : '<br>')).join('');

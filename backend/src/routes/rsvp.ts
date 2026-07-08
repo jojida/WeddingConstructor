@@ -3,17 +3,9 @@ import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { notifyOwner } from '../lib/notify';
 import { isPaid } from '../lib/plans';
+import { inviteDrinkLabels } from '../lib/drinks';
 
 const router = Router();
-
-const DRINK_LABELS: Record<string, string> = {
-  wine: '🍷 Вино',
-  champagne: '🥂 Шампанское',
-  juice: '🧃 Сок',
-  water: '💧 Вода',
-  no_alcohol: '🚫 Без алкоголя',
-  other: '🍹 Другое',
-};
 
 // POST /api/rsvp/:slug — публичная отправка анкеты гостем
 router.post('/:slug', async (req: Request, res: Response) => {
@@ -85,15 +77,18 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
     total: responses.length,
     attending: responses.filter(r => r.attending).length,
     notAttending: responses.filter(r => !r.attending).length,
+    // drinkChoice может быть мультивыбором ("sparkling,red") — считаем каждый.
     drinks: responses.reduce((acc, r) => {
       if (r.attending && r.drinkChoice) {
-        acc[r.drinkChoice] = (acc[r.drinkChoice] || 0) + 1;
+        for (const choice of String(r.drinkChoice).split(',').map(s => s.trim()).filter(Boolean)) {
+          acc[choice] = (acc[choice] || 0) + 1;
+        }
       }
       return acc;
     }, {} as Record<string, number>),
   };
 
-  return res.json({ responses, stats, drinkLabels: DRINK_LABELS });
+  return res.json({ responses, stats, drinkLabels: inviteDrinkLabels(invite.customData) });
 });
 
 export default router;

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { isPaid } from '../lib/plans';
+import { isPaid, hasCustomDomain } from '../lib/plans';
 
 const router = Router();
 
@@ -164,8 +164,25 @@ router.patch('/:id/settings', authMiddleware, async (req: AuthRequest, res: Resp
   }
   if (req.body.notifyEmail != null) data.notifyEmail = String(req.body.notifyEmail).trim();
   if (req.body.customDomain != null) {
-    data.customDomain = String(req.body.customDomain).trim().toLowerCase()
-      .replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^www\./, '');
+    const domain = String(req.body.customDomain).trim().toLowerCase()
+      .replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/:\d+$/, '').replace(/^www\./, '');
+    if (domain) {
+      // Свой домен — фича тарифа «Премиум»; гейтим и на бэке, а не только в UI.
+      if (!hasCustomDomain(invite.plan)) {
+        return res.status(403).json({ error: 'Свой домен доступен на тарифе «Премиум»' });
+      }
+      if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/.test(domain) || domain.length > 253) {
+        return res.status(400).json({ error: 'Неверный формат домена (пример: denis-i-maria.ru)' });
+      }
+      if (domain === 'weddingcraft.ru' || domain.endsWith('.weddingcraft.ru')) {
+        return res.status(400).json({ error: 'Этот домен нельзя привязать' });
+      }
+      const taken = await prisma.invitation.findFirst({ where: { customDomain: domain } });
+      if (taken && taken.id !== invite.id) {
+        return res.status(409).json({ error: 'Этот домен уже привязан к другому сайту' });
+      }
+    }
+    data.customDomain = domain; // пустая строка = отвязать
   }
   const updated = await prisma.invitation.update({ where: { id: invite.id }, data });
   return res.json(stripPrivate(updated));
