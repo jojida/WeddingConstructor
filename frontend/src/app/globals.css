@@ -16,6 +16,15 @@
   font-weight: normal; font-style: normal; font-display: swap;
 }
 
+/* Gogol — имена на карточке «Средиземноморье» (совпадение с самим шаблоном).
+   Только кириллица: латиница/& подхватятся фоллбэком. */
+@font-face {
+  font-family: 'Gogol';
+  src: url('/invite/assets/fonts/Gogol.woff2') format('woff2'),
+       url('/invite/assets/fonts/Gogol.otf') format('opentype');
+  font-weight: normal; font-style: normal; font-display: swap;
+}
+
 :root {
   --font-playfair: 'Playfair Display Variable', Georgia, serif;
   --font-inter: 'Plus Jakarta Sans Variable', system-ui, sans-serif; /* mapped to Jakarta for compat */

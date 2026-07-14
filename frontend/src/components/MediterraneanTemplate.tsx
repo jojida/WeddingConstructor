@@ -141,42 +141,69 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
         }}
       />
 
-      {/* Name card — exactly as in the real invitation: Катерина и Максим */}
+      {/* Name card — повторяет плашку из реального приглашения: декоративная
+          рамка (вогнутые угловые вырезы + двойная обводка) и шрифт Gogol.
+          Держать в согласии с .name-card в /invite/styles.css. */}
       <div style={{
         position: 'absolute',
         top: '50%', left: '50%',
         transform: 'translate(-50%, -50%)',
-        background: 'rgba(255,255,255,0.88)',
-        backdropFilter: 'blur(6px)',
-        WebkitBackdropFilter: 'blur(6px)',
-        padding: '16px 24px',
+        padding: '11px 26px',
         textAlign: 'center',
         minWidth: '128px',
-        border: '1px solid rgba(17,78,136,.13)',
-        borderRadius: '2px',
         whiteSpace: 'nowrap',
       }}>
-        <span style={{ display: 'block', fontSize: '10px', color: '#114e88', marginBottom: 7 }}>♥</span>
-        <p style={{
-          fontFamily: "'Marck Script', cursive, Georgia, serif",
-          fontSize: '18px', color: '#114e88',
-          letterSpacing: '.04em', margin: 0, lineHeight: 1.2,
-        }}>
-          Катерина
-        </p>
-        <p style={{ fontSize: '11px', color: '#354366', margin: '4px 0', fontStyle: 'italic' }}>и</p>
-        <p style={{
-          fontFamily: "'Marck Script', cursive, Georgia, serif",
-          fontSize: '18px', color: '#114e88',
-          letterSpacing: '.04em', margin: 0, lineHeight: 1.2,
-        }}>
-          Максим
-        </p>
-        {/* Small wavy flourish */}
-        <svg width="60" height="12" viewBox="0 0 60 12" fill="none" style={{ marginTop: 8 }}>
-          <path d="M3 6 Q10 1 17 6 Q24 11 31 6 Q38 1 45 6 Q52 11 57 6"
-            stroke="#354366" strokeWidth="1" strokeLinecap="round" fill="none"/>
+        {/* Рамка — фоновый слой под именами */}
+        <svg
+          viewBox="0 0 300 176"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
+        >
+          <path
+            d="M 31 5 L 269 5 A 26 26 0 0 0 295 31 L 295 145 A 26 26 0 0 0 269 171 L 31 171 A 26 26 0 0 0 5 145 L 5 31 A 26 26 0 0 0 31 5 Z"
+            fill="rgba(233,242,252,0.94)"
+          />
+          <path
+            d="M 31 5 L 269 5 A 26 26 0 0 0 295 31 L 295 145 A 26 26 0 0 0 269 171 L 31 171 A 26 26 0 0 0 5 145 L 5 31 A 26 26 0 0 0 31 5 Z"
+            fill="none" stroke="#114e88" strokeWidth="2.4"
+            vectorEffect="non-scaling-stroke" strokeLinejoin="round"
+          />
+          <path
+            d="M 33 13 L 267 13 A 20 20 0 0 0 287 33 L 287 143 A 20 20 0 0 0 267 163 L 33 163 A 20 20 0 0 0 13 143 L 13 33 A 20 20 0 0 0 33 13 Z"
+            fill="none" stroke="#114e88" strokeWidth="1" opacity={0.85}
+            vectorEffect="non-scaling-stroke" strokeLinejoin="round"
+          />
         </svg>
+
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <span style={{ display: 'block', fontSize: '10px', color: '#114e88', marginBottom: 1 }}>♥</span>
+          <p style={{
+            fontFamily: "'Gogol', 'Marck Script', cursive, Georgia, serif",
+            fontSize: '18px', color: '#354366',
+            letterSpacing: '.04em', margin: 0, lineHeight: 1.02,
+          }}>
+            Катерина
+          </p>
+          <p style={{
+            fontFamily: "'Gogol', 'Marck Script', cursive, Georgia, serif",
+            fontSize: '13px', color: '#354366', margin: '-2px 0', lineHeight: 1.02,
+          }}>
+            и
+          </p>
+          <p style={{
+            fontFamily: "'Gogol', 'Marck Script', cursive, Georgia, serif",
+            fontSize: '18px', color: '#354366',
+            letterSpacing: '.04em', margin: 0, lineHeight: 1.02,
+          }}>
+            Максим
+          </p>
+          {/* Small wavy flourish */}
+          <svg width="60" height="12" viewBox="0 0 60 12" fill="none" style={{ marginTop: 3 }}>
+            <path d="M3 6 Q10 1 17 6 Q24 11 31 6 Q38 1 45 6 Q52 11 57 6"
+              stroke="#354366" strokeWidth="1" strokeLinecap="round" fill="none"/>
+          </svg>
+        </div>
       </div>
 
       {/* Flower cluster bottom-right */}
