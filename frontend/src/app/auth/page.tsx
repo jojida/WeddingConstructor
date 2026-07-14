@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -15,15 +15,23 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendIn, setResendIn] = useState(0); // секунд до повторной отправки
   const { setAuth } = useAuthStore();
   const router = useRouter();
 
-  const sendCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn(s => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  const sendCode = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setLoading(true);
     try {
       await api.post('/api/auth/send-code', { email });
       setStep('code');
+      setResendIn(60);
       toast.success('Код отправлен на почту');
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Не удалось отправить код');
@@ -59,7 +67,7 @@ export default function AuthPage() {
         <p className={styles.subtitle}>
           {step === 'email'
             ? 'Введите email — пришлём код для входа. Если аккаунта нет, он создастся автоматически.'
-            : `Код отправлен на ${email}`}
+            : `Код отправлен на ${email}. Если письма нет 1–2 минуты — проверьте папку «Спам».`}
         </p>
 
         {step === 'email' ? (
@@ -104,9 +112,18 @@ export default function AuthPage() {
             </button>
             <button
               type="button"
+              onClick={() => sendCode()}
+              disabled={loading || resendIn > 0}
+              className={styles.switchBtn}
+              style={{ marginTop: 14, background: 'none', border: 'none', cursor: resendIn > 0 ? 'default' : 'pointer', opacity: resendIn > 0 ? 0.5 : 1 }}
+            >
+              {resendIn > 0 ? `Отправить код повторно (${resendIn} с)` : 'Отправить код повторно'}
+            </button>
+            <button
+              type="button"
               onClick={() => { setStep('email'); setCode(''); }}
               className={styles.switchBtn}
-              style={{ marginTop: 14, background: 'none', border: 'none', cursor: 'pointer' }}
+              style={{ marginTop: 8, background: 'none', border: 'none', cursor: 'pointer' }}
             >
               Изменить email
             </button>
@@ -114,7 +131,9 @@ export default function AuthPage() {
         )}
 
         <p className={styles.subtitle} style={{ marginTop: 18, fontSize: 12 }}>
-          Нажимая «Войти», вы соглашаетесь с условиями использования.
+          Нажимая «Войти», вы соглашаетесь с{' '}
+          <Link href="/oferta" style={{ textDecoration: 'underline', color: 'inherit' }}>условиями оферты</Link> и{' '}
+          <Link href="/privacy" style={{ textDecoration: 'underline', color: 'inherit' }}>политикой конфиденциальности</Link>.
         </p>
       </div>
     </div>

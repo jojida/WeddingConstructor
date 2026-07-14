@@ -73,7 +73,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 // POST /api/invites — создать черновик
 router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { templateId = 'classic' } = req.body;
+    const { templateId = 'calla' } = req.body;
     const slug = generateSlug('', '');
     const invite = await prisma.invitation.create({
       data: { userId: req.userId!, templateId, slug },
@@ -92,6 +92,12 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
     const invite = await prisma.invitation.findUnique({ where: { id: id as string } });
     if (!invite || invite.userId !== req.userId) {
       return res.status(404).json({ error: 'Приглашение не найдено' });
+    }
+
+    // Оплата — за готовый сайт: после публикации контент фиксируется.
+    // Настройки уведомлений, слаг и домен меняются отдельными PATCH-роутами.
+    if (invite.status === 'paid' || invite.status === 'published') {
+      return res.status(403).json({ error: 'Сайт опубликован — редактирование недоступно' });
     }
 
     const {

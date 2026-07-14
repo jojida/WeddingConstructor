@@ -242,6 +242,9 @@ function EditorContent() {
 
   const template = TEMPLATES.find(t => t.id === data.templateId) || TEMPLATES[0];
   const apiBase  = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  // Оплата — за готовый сайт: опубликованное приглашение не редактируется
+  // (бэкенд тоже отклоняет PUT для paid/published — это только UX-слой).
+  const isPublished = data.status === 'paid' || data.status === 'published';
   // Схема полей для шаблона (если есть — рендерим движок полей, иначе старый сайдбар)
   const sections = TEMPLATE_FIELDS[data.templateId];
 
@@ -384,11 +387,13 @@ function EditorContent() {
   };
 
   const handleSave = async () => {
+    if (isPublished) { toast('Сайт опубликован — правки недоступны', { icon: '🔒' }); return; }
     if (!user) { setShowAuthModal(true); return; }
     if (await saveToServer()) toast.success('Сохранено!');
   };
 
   const handleShare = async () => {
+    if (isPublished) { router.push('/dashboard'); return; }
     if (!data.brideName && !data.groomName) { toast.error('Введите имена'); return; }
     if (!user) { setShowAuthModal(true); return; }
     if (await saveToServer()) router.push(`/payment?id=${data.id}`);
@@ -484,6 +489,13 @@ function EditorContent() {
             </button>
           </div>
         </header>
+
+        {isPublished && (
+          <div style={{ background: '#f6efe2', borderBottom: '1px solid #e3d5b8', color: '#6b5b35', padding: '10px 20px', textAlign: 'center', fontSize: 14 }}>
+            🔒 Сайт оплачен и опубликован — редактирование недоступно. Ссылка для гостей и ответы — в{' '}
+            <Link href="/dashboard" style={{ textDecoration: 'underline', color: 'inherit' }}>личном кабинете</Link>.
+          </div>
+        )}
 
         <div className={styles.editorBody}>
 

@@ -2,8 +2,9 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, sampleWeddingDate } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
+import LazyMount from '@/components/LazyMount';
 import MediterraneanTemplate from '@/components/MediterraneanTemplate';
 import styles from './page.module.css';
 
@@ -28,6 +29,7 @@ function Header() {
           <Link href="/templates" className={styles.navLink}>Шаблоны</Link>
           <a href="#features" className={styles.navLink}>Возможности</a>
           <a href="#rsvp" className={styles.navLink}>Управление RSVP</a>
+          <a href="#pricing" className={styles.navLink}>Цены</a>
         </nav>
 
         <div className={styles.headerActions}>
@@ -56,6 +58,7 @@ function Header() {
           <Link href="/templates" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Шаблоны</Link>
           <a href="#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</a>
           <a href="#rsvp" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Управление RSVP</a>
+          <a href="#pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Цены</a>
           <div className={styles.mobileDivider} />
           {user ? (
             <>
@@ -83,7 +86,7 @@ function heroMediterraneanData() {
     templateId: 'mediterranean',
     groomName: 'Максим',
     brideName: 'Катерина',
-    weddingDate: '2026-09-19',
+    weddingDate: sampleWeddingDate(120),
     weddingTime: '16:00',
     venue: defs.venue ?? 'СПА Отель',
     venueAddress: '',
@@ -104,11 +107,6 @@ function Hero() {
   return (
     <section className={styles.hero}>
       <div className={styles.heroBg}>
-        <img
-          src="https://images.unsplash.com/photo-1519741497674-611481863552?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1400"
-          alt=""
-          className={styles.heroBgImg}
-        />
         <div className={styles.heroBgOverlay} />
       </div>
 
@@ -116,21 +114,24 @@ function Hero() {
         <div className={styles.heroText}>
           <div className={styles.heroBadge} data-animate>
             <span className={styles.heroBadgeDot} />
-            <span>ЦИФРОВАЯ КОЛЛЕКЦИЯ 2025</span>
+            <span>КОЛЛЕКЦИЯ 2026</span>
           </div>
 
           <h1 className={styles.heroHeadline} data-animate data-delay="100">
-            Ваша идеальная{' '}
-            <em className={styles.heroItalic}>история любви</em>
-            {' '}в цифровом формате
+            Сайт-приглашение на свадьбу —{' '}
+            <em className={styles.heroItalic}>готов за один вечер</em>
           </h1>
 
           <p className={styles.heroSubtitle} data-animate data-delay="200">
-            Интерактивные приглашения с мгновенной доставкой, живой музыкой и умным RSVP-сервисом.
+            Дизайнерские шаблоны с RSVP-анкетой гостей, музыкой и картой проезда.
+            Разовая оплата от 3 990 ₽ — без подписок, сайт работает бессрочно.
           </p>
 
           <div className={styles.heroCtas} data-animate data-delay="300">
-            <Link href="/templates" className={styles.heroCtaPrimary}>Начать создание</Link>
+            <Link href="/templates" className={styles.heroCtaPrimary}>Создать бесплатно</Link>
+            <div style={{ marginTop: 10, fontSize: 13, color: '#8a8378', letterSpacing: '0.02em' }}>
+              Без регистрации · Оплата — только при публикации
+            </div>
           </div>
         </div>
 
@@ -163,7 +164,7 @@ function Hero() {
 const SAMPLE_DATA = {
   brideName: 'Дарья',
   groomName: 'Вадим',
-  weddingDate: '2025-09-20',
+  weddingDate: sampleWeddingDate(),
   weddingTime: '16:00',
   venue: 'Усадьба «Белый сад»',
   venueAddress: 'Москва, ул. Розовая, 1',
@@ -203,17 +204,19 @@ function TemplatesSection() {
             <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}>
               <div className={styles.mosaicCard}>
                 <div className={styles.previewScale}>
-                  <TemplatePreview
-                    data={{
-                      ...SAMPLE_DATA,
-                      brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                      groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                      templateId: tpl.id,
-                      coverPhoto: tpl.defaultCover,
-                      galleryPhotos: tpl.defaultGallery
-                    }}
-                    apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                  />
+                  <LazyMount>
+                    <TemplatePreview
+                      data={{
+                        ...SAMPLE_DATA,
+                        brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
+                        groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
+                        templateId: tpl.id,
+                        coverPhoto: tpl.defaultCover,
+                        galleryPhotos: tpl.defaultGallery
+                      }}
+                      apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+                    />
+                  </LazyMount>
                 </div>
                 <div className={styles.mosaicOverlay} />
                 <div className={styles.mosaicInfo}>
@@ -392,7 +395,9 @@ function Pricing() {
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
           <h2 className={styles.sectionTitle}>Простые и честные цены</h2>
-          <p className={styles.howSubtitle}>Выберите план, который подходит вам</p>
+          <p className={styles.howSubtitle}>
+            Создание и редактирование бесплатны. Платите один раз — когда сайт готов к публикации.
+          </p>
         </div>
 
         <div className={styles.pricingGrid}>
@@ -456,7 +461,7 @@ function Footer() {
           <div>
             <div className={styles.footerLogo}>WeddingCraft</div>
             <p className={styles.footerDesc}>
-              © 2025 Цифровая свадебная полиграфия WeddingCraft. Будущее ваших традиций.
+              © 2026 WeddingCraft — сайты-приглашения на свадьбу.
             </p>
           </div>
           <div>
@@ -480,30 +485,19 @@ function Footer() {
           <div>
             <h5 className={styles.footerHeading}>Поддержка</h5>
             <ul className={styles.footerLinks}>
-              <li><a href="#" className={styles.footerLink}>Политика конфиденциальности</a></li>
-              <li><a href="#" className={styles.footerLink}>Условия использования</a></li>
+              <li><Link href="/privacy" className={styles.footerLink}>Политика конфиденциальности</Link></li>
+              <li><Link href="/oferta" className={styles.footerLink}>Публичная оферта</Link></li>
               <li><Link href="/editor" className={styles.footerLink}>Помощь по редактору</Link></li>
-              <li><a href="#" className={styles.footerLink}>Частые вопросы</a></li>
+              <li><a href="mailto:support@weddingcraft.ru" className={styles.footerLink}>Написать в поддержку</a></li>
             </ul>
           </div>
         </div>
 
         <div className={styles.footerBottom}>
+          {/* Соцсети появятся после создания аккаунтов (VK/Telegram) — мёртвые
+              ссылки «#» убраны, чтобы не подрывать доверие. */}
           <div className={styles.footerSocials}>
-            <a href="#" className={styles.footerSocial} aria-label="share">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 18, height: 18 }}>
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-              </svg>
-            </a>
-            <a href="#" className={styles.footerSocial} aria-label="instagram">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 18, height: 18 }}>
-                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-              </svg>
-            </a>
-            <a href="#" className={styles.footerSocial} aria-label="mail">
+            <a href="mailto:support@weddingcraft.ru" className={styles.footerSocial} aria-label="mail">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 18, height: 18 }}>
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
@@ -567,6 +561,160 @@ function RsvpSection() {
   );
 }
 
+// ─── Сравнение с бумажными приглашениями ─────────────────────────────────────
+function CompareSection() {
+  const card: React.CSSProperties = {
+    background: '#fff', border: '1px solid rgba(206,197,186,0.5)', borderRadius: 18,
+    padding: '28px 26px', flex: '1 1 320px',
+  };
+  const item: React.CSSProperties = { display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 15, color: '#5b554c', lineHeight: 1.5, marginBottom: 12 };
+  const yes = <span style={{ color: '#c9a96e', fontWeight: 700, flexShrink: 0 }}>✓</span>;
+  const no = <span style={{ color: '#b3aca1', fontWeight: 700, flexShrink: 0 }}>✗</span>;
+
+  const paper = [
+    'Печать на 100 гостей — 10–15 тыс. ₽, плюс конверты и каллиграфия',
+    'Развозить лично или отправлять почтой',
+    'Ответы гостей собирать обзвоном',
+    'Ошибка в тексте — перепечатывать тираж',
+    'Приглашение легко потерять или забыть дома',
+  ];
+  const site = [
+    'От 3 990 ₽ один раз — на всех гостей сразу',
+    'Одна ссылка — отправьте её в любом мессенджере, по SMS или почте',
+    'RSVP-анкета сама собирает ответы и выбор напитков',
+    'До публикации правьте текст и фото сколько угодно',
+    'Карта, программа дня и таймер всегда под рукой у гостя',
+  ];
+
+  return (
+    <section className={styles.featuresSection}>
+      <div className={styles.sectionInner}>
+        <div className={styles.howHeader} data-animate>
+          <h2 className={styles.sectionTitle}>Дешевле и удобнее бумаги</h2>
+          <p className={styles.howSubtitle}>Сравните сами — до первого гостя, потерявшего открытку</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', maxWidth: 920, margin: '0 auto' }} data-animate>
+          <div style={card}>
+            <h3 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22, color: '#8a8378', margin: '0 0 16px' }}>Бумажные приглашения</h3>
+            {paper.map(t => <div key={t} style={item}>{no}<span>{t}</span></div>)}
+          </div>
+          <div style={{ ...card, borderColor: 'rgba(201,169,110,0.55)', boxShadow: '0 10px 40px rgba(201,169,110,0.12)' }}>
+            <h3 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22, color: '#0e1d26', margin: '0 0 16px' }}>Сайт-приглашение WeddingCraft</h3>
+            {site.map(t => <div key={t} style={item}>{yes}<span>{t}</span></div>)}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── Отзывы ──────────────────────────────────────────────────────────────────
+/* ⚠️ ЗАГЛУШКИ: заменить на реальные отзывы первых клиентов перед деплоем
+   (промо «−30% за отзыв»). Пустой массив — секция не показывается. */
+const REVIEWS = [
+  {
+    names: 'Анна и Александр',
+    template: 'Тёмная элегантность',
+    text: 'Собрали сайт за один вечер, а гости писали, что такого приглашения ещё не видели. Никого не пришлось обзванивать — ответы пришли сами, прямо в Telegram.',
+  },
+  {
+    names: 'Екатерина и Артём',
+    template: 'Скетч',
+    text: 'Хотели что-то небанальное — выбрали рисованный стиль и добавили свои полароиды. Бабушкам отправили ссылку по SMS, разобрались все.',
+  },
+  {
+    names: 'Маргарита и Елис',
+    template: 'Цветущая арка',
+    text: 'Удобно, что видно, кто из гостей уже открыл анкету и что выбрал. К банкету точно знали количество и напитки — банкетный менеджер был счастлив.',
+  },
+];
+
+function ReviewsSection() {
+  if (REVIEWS.length === 0) return null;
+  const card: React.CSSProperties = {
+    background: '#fff', border: '1px solid rgba(206,197,186,0.5)', borderRadius: 18,
+    padding: '26px 24px', flex: '1 1 280px', maxWidth: 360,
+  };
+  return (
+    <section id="reviews" className={styles.featuresSection}>
+      <div className={styles.sectionInner}>
+        <div className={styles.howHeader} data-animate>
+          <h2 className={styles.sectionTitle}>Пары о WeddingCraft</h2>
+          <p className={styles.howSubtitle}>Первые свадьбы уже прошли — вот что нам пишут</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }} data-animate>
+          {REVIEWS.map(r => (
+            <div key={r.names} style={card}>
+              <div style={{ color: '#c9a96e', fontSize: 15, letterSpacing: 2, marginBottom: 10 }}>★★★★★</div>
+              <p style={{ fontSize: 15, color: '#5b554c', lineHeight: 1.6, margin: '0 0 16px' }}>{r.text}</p>
+              <div style={{ fontWeight: 600, color: '#0e1d26', fontSize: 15 }}>{r.names}</div>
+              <div style={{ fontSize: 13, color: '#8a8378', marginTop: 2 }}>шаблон «{r.template}»</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ─── FAQ ─────────────────────────────────────────────────────────────────────
+const FAQ_ITEMS = [
+  {
+    q: 'Как гости получат приглашение?',
+    a: 'Вы отправляете обычную ссылку — любым удобным способом: в мессенджере, по SMS, на почту или QR-кодом на карточке. Сайт открывается на любом телефоне и компьютере, гостям не нужно ничего устанавливать и регистрироваться.',
+  },
+  {
+    q: 'Сколько это стоит? Есть ли подписка?',
+    a: 'Оплата разовая: 3 990 ₽ за тариф «Базовый» или 5 990 ₽ за «Премиум». Никаких подписок и продлений — опубликованный сайт работает бессрочно.',
+  },
+  {
+    q: 'Можно ли попробовать бесплатно?',
+    a: 'Да. Выберите шаблон и соберите сайт в редакторе — это бесплатно и не требует регистрации. Оплата нужна, только когда вы решите опубликовать сайт и отправить ссылку гостям.',
+  },
+  {
+    q: 'Можно ли редактировать сайт после оплаты?',
+    a: 'Нет — вы оплачиваете готовый сайт, после публикации он фиксируется. До оплаты меняйте текст, фото и дизайн сколько угодно, поэтому проверьте всё перед публикацией.',
+  },
+  {
+    q: 'Что умеет RSVP-анкета?',
+    a: 'Гость отвечает, придёт ли он, и выбирает напитки. Ответы мгновенно приходят вам в Telegram или на email и собираются в личном кабинете. В «Премиуме» — персональные ссылки с именным обращением и статус по каждому гостю.',
+  },
+  {
+    q: 'Можно ли подключить свой домен?',
+    a: 'Да, в тарифе «Премиум» можно привязать собственный домен вида ivan-i-anna.ru — в личном кабинете есть пошаговая инструкция.',
+  },
+];
+
+function FaqSection() {
+  return (
+    <section id="faq" className={styles.featuresSection}>
+      <div className={styles.sectionInner}>
+        <div className={styles.howHeader} data-animate>
+          <h2 className={styles.sectionTitle}>Частые вопросы</h2>
+        </div>
+        <div style={{ maxWidth: 760, margin: '0 auto' }} data-animate>
+          {FAQ_ITEMS.map(item => (
+            <details
+              key={item.q}
+              style={{
+                background: '#fff', border: '1px solid rgba(206,197,186,0.5)', borderRadius: 14,
+                padding: '16px 20px', marginBottom: 12,
+              }}
+            >
+              <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 16, color: '#0e1d26', listStyle: 'none' }}>
+                {item.q}
+              </summary>
+              <p style={{ fontSize: 15, color: '#5b554c', lineHeight: 1.6, margin: '12px 0 0' }}>{item.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── SEO: структурированные данные (Schema.org) ──────────────────────────────
 function JsonLd() {
   const data = {
@@ -601,6 +749,14 @@ function JsonLd() {
           availability: 'https://schema.org/InStock',
         })),
       },
+      {
+        '@type': 'FAQPage',
+        mainEntity: FAQ_ITEMS.map((item) => ({
+          '@type': 'Question',
+          name: item.q,
+          acceptedAnswer: { '@type': 'Answer', text: item.a },
+        })),
+      },
     ],
   };
   return (
@@ -620,9 +776,12 @@ export default function HomePage() {
       <Hero />
       <TemplatesSection />
       <HowItWorks />
+      <CompareSection />
       <Features />
       <RsvpSection />
+      <ReviewsSection />
       <Pricing />
+      <FaqSection />
       <Cta />
       <Footer />
     </div>

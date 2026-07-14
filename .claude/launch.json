@@ -10,6 +10,14 @@
       "autoPort": false
     },
     {
+      "name": "backend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "C:\\Users\\Asus\\OneDrive\\Рабочий стол\\WeddingConstructor\\backend",
+      "port": 4000,
+      "autoPort": false
+    },
+    {
       "name": "frontend-prod",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["next", "start", "-p", "3000"],

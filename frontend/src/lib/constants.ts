@@ -1,6 +1,23 @@
 /** Публичный адрес сайта (канонические URL, sitemap, OG). */
 export const SITE_URL = 'https://weddingcraft.ru';
 
+/* ── Реквизиты исполнителя для оферты и политики конфиденциальности ──────────
+   ВАЖНО: перед приёмом платежей заполнить реальными данными (ФИО, ИНН).
+   Это единственное место — страницы /oferta и /privacy читают отсюда. */
+export const LEGAL = {
+  sellerName: '[ФИО — заполнить]',
+  sellerStatus: 'самозанятый (плательщик налога на профессиональный доход)',
+  sellerInn: '[ИНН — заполнить]',
+  contactEmail: 'support@weddingcraft.ru',
+  effectiveDate: '13 июля 2026 г.',
+};
+
+/** Дата свадьбы для превью и демо: всегда впереди на ~3 месяца,
+    чтобы таймеры обратного отсчёта в шаблонах не показывали ноль. */
+export function sampleWeddingDate(daysAhead = 90): string {
+  return new Date(Date.now() + daysAhead * 86400000).toISOString().slice(0, 10);
+}
+
 export const TEMPLATES = [
   {
     id: 'calla',

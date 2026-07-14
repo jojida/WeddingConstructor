@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import TemplatePreview from '@/components/TemplatePreview';
-import { TEMPLATES } from '@/lib/constants';
+import LazyMount from '@/components/LazyMount';
+import { TEMPLATES, sampleWeddingDate } from '@/lib/constants';
 import styles from './page.module.css';
 
 function useScrollReveal(count: number) {
@@ -32,23 +33,10 @@ function useScrollReveal(count: number) {
   return { refs, visible };
 }
 
-const FILTERS = ['Все', 'Море', 'Классика', 'Минимализм', 'Бохо', 'Люкс', 'Пастель', 'Конверт'];
-
-const FILTER_MAP: Record<string, string[]> = {
-  'Все': [],
-  'Море': ['mediterranean'],
-  'Классика': ['classic'],
-  'Минимализм': ['modern', 'mediterranean'],
-  'Бохо': ['bohemian'],
-  'Люкс': ['luxury'],
-  'Пастель': ['pastel'],
-  'Конверт': ['envelope'],
-};
-
 const SAMPLE_DATA = {
   brideName: 'Дарья',
   groomName: 'Вадим',
-  weddingDate: '2025-09-20',
+  weddingDate: sampleWeddingDate(),
   weddingTime: '16:00',
   venue: 'Усадьба «Белый сад»',
   venueAddress: 'Москва, ул. Розовая, 1',
@@ -70,14 +58,7 @@ const SAMPLE_DATA = {
 };
 
 export default function TemplatesPage() {
-  const [activeFilter, setActiveFilter] = useState('Все');
-
-  const filtered = TEMPLATES.filter(t => {
-    const ids = FILTER_MAP[activeFilter];
-    return ids.length === 0 || ids.includes(t.id);
-  });
-
-  const { refs, visible } = useScrollReveal(filtered.length);
+  const { refs, visible } = useScrollReveal(TEMPLATES.length);
 
   return (
     <div className={styles.page}>
@@ -90,23 +71,14 @@ export default function TemplatesPage() {
           <p className={styles.subtitle}>
             {TEMPLATES.length} уникальных дизайнов. Каждый включает hero-фото, дресс-код, карту и анкету для гостей.
           </p>
-
-          <div className={styles.filters}>
-            {FILTERS.map(f => (
-              <button
-                key={f}
-                className={`${styles.filter} ${activeFilter === f ? styles.filterActive : ''}`}
-                onClick={() => setActiveFilter(f)}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
+          <p className={styles.subtitle} style={{ marginTop: 6, fontSize: 14, opacity: 0.85 }}>
+            Создание и редактирование — бесплатно и без регистрации. Оплата — только при публикации.
+          </p>
         </div>
       </div>
 
       <div className={styles.grid}>
-        {filtered.map((tpl, i) => (
+        {TEMPLATES.map((tpl, i) => (
           <div
             key={tpl.id}
             ref={el => { refs.current[i] = el; }}
@@ -119,17 +91,19 @@ export default function TemplatesPage() {
           >
             <div className={styles.cardImageWrapper}>
               <div className={styles.previewScale}>
-                <TemplatePreview
-                  data={{
-                    ...SAMPLE_DATA,
-                    brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                    groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                    templateId: tpl.id,
-                    coverPhoto: tpl.defaultCover,
-                    galleryPhotos: tpl.defaultGallery
-                  }}
-                  apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                />
+                <LazyMount>
+                  <TemplatePreview
+                    data={{
+                      ...SAMPLE_DATA,
+                      brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
+                      groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
+                      templateId: tpl.id,
+                      coverPhoto: tpl.defaultCover,
+                      galleryPhotos: tpl.defaultGallery
+                    }}
+                    apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+                  />
+                </LazyMount>
               </div>
             </div>
 
@@ -147,7 +121,7 @@ export default function TemplatesPage() {
 
       <div className={styles.cta}>
         <p className={styles.ctaText}>Не знаете что выбрать? Начните с любого — всё можно изменить в редакторе</p>
-        <Link href="/editor?template=classic" className="btn-primary">
+        <Link href={`/editor?template=${TEMPLATES[0].id}`} className="btn-primary">
           Начать бесплатно
         </Link>
       </div>

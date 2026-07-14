@@ -14,17 +14,23 @@ function SuccessContent() {
 
   useEffect(() => {
     if (!inviteId) return;
-    // Poll until paid
-    const poll = setInterval(async () => {
+    // Опрашиваем статус оплаты: этот роут сам дозапросит ЮKassa, если вебхук ещё не дошёл
+    let stopped = false;
+    const check = async () => {
       try {
-        const res = await api.get(`/api/invites/${inviteId}`);
-        if (res.data.status === 'paid' || res.data.status === 'published') {
-          setInvite(res.data);
-          clearInterval(poll);
+        const st = await api.get(`/api/payment/status/${inviteId}`);
+        if (st.data.status === 'paid' || st.data.status === 'published') {
+          const res = await api.get(`/api/invites/${inviteId}`);
+          if (!stopped) {
+            setInvite(res.data);
+            clearInterval(poll);
+          }
         }
       } catch {}
-    }, 1000);
-    return () => clearInterval(poll);
+    };
+    const poll = setInterval(check, 2500);
+    check();
+    return () => { stopped = true; clearInterval(poll); };
   }, [inviteId]);
 
   const siteUrl = invite ? `${window.location.origin}/invite/${invite.slug}` : '';
