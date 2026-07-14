@@ -668,7 +668,8 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Место проведения', icon: '📍',
       fields: [
-        { id: 'venue', type: 'text', label: 'Название места', hint: 'Например: СПА Отель', scope: 'data' },
+        { id: 'venue',        type: 'text', label: 'Название места', hint: 'Например: СПА Отель',            scope: 'data' },
+        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'Например: г. Сочи, ул. Приморская, 15', scope: 'data', maxLength: 90 },
       ],
     },
     {

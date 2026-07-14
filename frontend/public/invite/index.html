@@ -78,16 +78,26 @@
         </div>
 
         <div class="name-card">
-          <span class="name-card-heart">♥</span>
-          <h1 class="couple-names">
-            Катерина<br>
-            <span class="names-and">и</span><br>
-            Максим
-          </h1>
-          <div class="name-flourish">
-            <svg width="90" height="18" viewBox="0 0 90 18" fill="none">
-              <path d="M5 9 Q15 3 25 9 Q35 15 45 9 Q55 3 65 9 Q75 15 85 9" stroke="#354366" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-            </svg>
+          <!-- Декоративная рамка-плашка: прямоугольник с вогнутыми угловыми
+               вырезами и двойной синей обводкой (дизайн «Средиземноморье»).
+               Тянется под размер плашки (preserveAspectRatio="none"). -->
+          <svg class="name-card-frame" viewBox="0 0 300 176" preserveAspectRatio="none" aria-hidden="true">
+            <path class="ncf-fill" d="M 31 5 L 269 5 A 26 26 0 0 0 295 31 L 295 145 A 26 26 0 0 0 269 171 L 31 171 A 26 26 0 0 0 5 145 L 5 31 A 26 26 0 0 0 31 5 Z"/>
+            <path class="ncf-line ncf-line-outer" d="M 31 5 L 269 5 A 26 26 0 0 0 295 31 L 295 145 A 26 26 0 0 0 269 171 L 31 171 A 26 26 0 0 0 5 145 L 5 31 A 26 26 0 0 0 31 5 Z"/>
+            <path class="ncf-line ncf-line-inner" d="M 33 13 L 267 13 A 20 20 0 0 0 287 33 L 287 143 A 20 20 0 0 0 267 163 L 33 163 A 20 20 0 0 0 13 143 L 13 33 A 20 20 0 0 0 33 13 Z"/>
+          </svg>
+          <div class="name-card-inner">
+            <span class="name-card-heart">♥</span>
+            <h1 class="couple-names">
+              Катерина<br>
+              <span class="names-and">и</span><br>
+              Максим
+            </h1>
+            <div class="name-flourish">
+              <svg width="90" height="18" viewBox="0 0 90 18" fill="none">
+                <path d="M5 9 Q15 3 25 9 Q35 15 45 9 Q55 3 65 9 Q75 15 85 9" stroke="#354366" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
           </div>
         </div>
         <img src="assets/flower-single.png" class="hero-deco hero-deco-left" alt="">
@@ -136,7 +146,7 @@
             <h3 class="venue-title">Место проведения</h3>
             <div class="venue-details">
               <p class="venue-name" data-edit="venue">СПА Отель</p>
-              <p class="venue-date" data-edit="venueDate">30. 02. 2030</p>
+              <p class="venue-address" data-edit="venueAddress">г. Сочи, ул. Приморская, 15</p>
               <div class="venue-divider"></div>
               <img src="assets/icons/anchor.svg" class="anchor-icon" alt="">
             </div>

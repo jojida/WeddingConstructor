@@ -67,8 +67,8 @@
           nums[1].textContent = pad(m);
           nums[2].textContent = String(y);
         }
-        var vd = document.querySelector('[data-edit="venueDate"]');
-        if (vd) vd.textContent = pad(day) + '. ' + pad(m) + '. ' + y;
+        /* Дата в блоке «Место проведения» убрана — там теперь адрес
+           (venueAddress). Дата остаётся только в кружках выше. */
       }
     }
     restartCountdown(dateStr, timeStr);
@@ -236,6 +236,7 @@
     setRichText('greetingTitle', d.greetingTitle);
     setRichText('greetingSub', d.greetingSub);
     setRichText('venue', d.venue);
+    setRichText('venueAddress', d.venueAddress);
     setRichText('surveyText', d.surveyText);
     setRichText('closingTitle', d.closingTitle);
     setRichText('organizerText', d.organizerText);
