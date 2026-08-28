@@ -638,6 +638,10 @@
   margin-bottom: 16px;
 }
 .footerDesc { font-size: 14px; color: var(--on-surface-variant); line-height: 1.6; font-family: var(--font-inter); }
+.footerRequisites {
+  margin-top: 10px; font-size: 12px; line-height: 1.6;
+  color: var(--on-surface-variant); opacity: 0.75; font-family: var(--font-inter);
+}
 .footerHeading {
   font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--on-surface); margin-bottom: 24px;

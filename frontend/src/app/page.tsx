@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import MediterraneanTemplate from '@/components/MediterraneanTemplate';
@@ -463,6 +463,12 @@ function Footer() {
             <div className={styles.footerLogo}>WeddingCraft</div>
             <p className={styles.footerDesc}>
               © 2026 WeddingCraft — сайты-приглашения на свадьбу.
+            </p>
+            {/* Реквизиты продавца должны быть видны на сайте, а не только
+                внутри оферты — это проверяет модерация платёжного провайдера. */}
+            <p className={styles.footerRequisites}>
+              {LEGAL.sellerStatus} {LEGAL.sellerName}<br />
+              ИНН {LEGAL.sellerInn}{LEGAL.sellerOgrnip ? ` · ОГРНИП ${LEGAL.sellerOgrnip}` : ''}
             </p>
           </div>
           <div>

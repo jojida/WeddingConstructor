@@ -5,7 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
-import { PLANS } from '@/lib/constants';
+import { PLANS, LEGAL } from '@/lib/constants';
 import styles from './page.module.css';
 
 function PaymentContent() {
@@ -178,6 +178,11 @@ function PaymentContent() {
           <p className={styles.payNote} style={{ marginTop: 4 }}>
             Нажимая «Оплатить», вы принимаете <Link href="/oferta" style={{ textDecoration: 'underline' }}>условия оферты</Link> и{' '}
             <Link href="/privacy" style={{ textDecoration: 'underline' }}>политику конфиденциальности</Link>
+          </p>
+          {/* Покупатель должен видеть, кому платит, прямо на экране оплаты. */}
+          <p className={styles.payNote} style={{ marginTop: 10, opacity: 0.75 }}>
+            Получатель платежа: {LEGAL.sellerStatus} {LEGAL.sellerName},{' '}
+            ИНН {LEGAL.sellerInn}{LEGAL.sellerOgrnip ? `, ОГРНИП ${LEGAL.sellerOgrnip}` : ''}
           </p>
         </div>
       </div>
