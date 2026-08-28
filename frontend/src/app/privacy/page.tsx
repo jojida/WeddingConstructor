@@ -96,6 +96,7 @@ export default function PrivacyPage() {
           <p><strong>Оператор персональных данных</strong></p>
           <p>{LEGAL.sellerName}</p>
           <p>ИНН: {LEGAL.sellerInn}</p>
+          {LEGAL.sellerOgrnip && <p>ОГРНИП: {LEGAL.sellerOgrnip}</p>}
           <p>E-mail: {LEGAL.contactEmail}</p>
         </div>
       </div>

@@ -19,7 +19,7 @@ export default function OfertaPage() {
 
         <p>
           Настоящий документ является официальным предложением (публичной офертой) {LEGAL.sellerNameGenitive},{' '}
-          {LEGAL.sellerStatusGenitive}, ИНН {LEGAL.sellerInn} (далее — «Исполнитель»), адресованным любому дееспособному
+          {LEGAL.sellerStatusGenitive}, ИНН {LEGAL.sellerInn}{LEGAL.sellerOgrnip ? `, ОГРНИП ${LEGAL.sellerOgrnip}` : ''} (далее — «Исполнитель»), адресованным любому дееспособному
           физическому лицу (далее — «Заказчик»), заключить договор возмездного оказания услуг на условиях,
           изложенных ниже, в соответствии со ст. 435 и 437 Гражданского кодекса РФ.
         </p>
@@ -58,7 +58,7 @@ export default function OfertaPage() {
           3.1. Оплата производится разово, в российских рублях, через сервис приёма платежей ЮKassa (банковские
           карты, СБП и другие способы). Исполнитель не получает и не хранит данные банковских карт Заказчика.
         </p>
-        <p>3.2. Цены указаны окончательно и НДС не облагаются: Исполнитель — {LEGAL.sellerStatus}.</p>
+        <p>3.2. Цены указаны окончательно и включают все налоги и сборы.{LEGAL.vatNote ? ` НДС не облагается ${LEGAL.vatNote}.` : ''}</p>
 
         <h2>4. Порядок оказания услуг</h2>
         <p>
@@ -121,6 +121,7 @@ export default function OfertaPage() {
           <p>{LEGAL.sellerName}</p>
           <p>Статус: {LEGAL.sellerStatus}</p>
           <p>ИНН: {LEGAL.sellerInn}</p>
+          {LEGAL.sellerOgrnip && <p>ОГРНИП: {LEGAL.sellerOgrnip}</p>}
           <p>E-mail: {LEGAL.contactEmail}</p>
           <p>Сайт: {SITE_URL}</p>
         </div>
