@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, History, Layers, MessageSquare, Copy, Type, Sparkles, LayoutGrid, ZoomOut, ZoomIn, Maximize } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, TemplateField, ScheduleItem, DrinkOption } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, TemplateField, ScheduleItem, DrinkOption, templateCustomDefaults } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import AuthModal from '@/components/AuthModal';
 import styles from './page.module.css';
@@ -31,6 +31,7 @@ export interface InviteData {
   coverPhoto: string;
   galleryPhotos: string[];
   colorScheme: string;
+  musicUrl: string;
   slug: string;
   status: string;
   enabledSections: Record<string, boolean>;
@@ -48,7 +49,7 @@ const EMPTY: InviteData = {
   dressCodeColors: [], dressCodePhoto: '',
   schedule: [],
   coverPhoto: '', galleryPhotos: [],
-  colorScheme: 'warm', slug: '', status: 'draft',
+  colorScheme: 'warm', musicUrl: '', slug: '', status: 'draft',
   enabledSections: { couple: true, event: true, schedule: true, style: true, gallery: true },
   customData: {},
 };
@@ -315,8 +316,8 @@ function EditorContent() {
       const keepArr = <T,>(cur: T[], def?: T[]) =>
         wasOther ? (def ?? cur) : (cur && cur.length ? cur : (def ?? cur));
       const seededCustom = {
-        ...(defs.custom || {}),
-        ...(defs.drinks ? { drinks: defs.drinks } : {}),
+        // Дедлайн RSVP считается от даты свадьбы пары, а не берётся зашитой датой.
+        ...templateCustomDefaults(prev.templateId, prev.weddingDate),
         ...(wasOther ? {} : cd),       // в рамках того же/нового пустого — сохранённое имеет приоритет
         __seededTemplate: prev.templateId,
       };
@@ -325,6 +326,7 @@ function EditorContent() {
         inviteText: (!wasOther && prev.inviteText && prev.inviteText !== EMPTY.inviteText)
           ? prev.inviteText : (defs.inviteText ?? prev.inviteText),
         venue: wasOther ? (defs.venue ?? prev.venue) : (prev.venue || (defs.venue ?? prev.venue)),
+        venueAddress: prev.venueAddress || (defs.venueAddress ?? prev.venueAddress),
         story: keepStr(prev.story, defs.story),
         schedule: keepArr(prev.schedule, defs.schedule),
         dressCodeColors: keepArr(prev.dressCodeColors, defs.dressCodeColors),
@@ -373,6 +375,19 @@ function EditorContent() {
       return res.data.url as string;
     } catch { toast.error('Ошибка загрузки'); return null; }
     finally { setUploading(false); }
+  };
+
+  // Загрузка фоновой мелодии, возвращает URL (для AudioPicker)
+  const uploadAudio = async (file: File): Promise<string | null> => {
+    setUploading(true);
+    try {
+      const fd = new FormData(); fd.append('audio', file);
+      const res = await api.post('/api/upload/audio', fd);
+      return res.data.url as string;
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || 'Не удалось загрузить мелодию');
+      return null;
+    } finally { setUploading(false); }
   };
 
   const saveToServer = async (): Promise<boolean> => {
@@ -540,6 +555,7 @@ function EditorContent() {
                       onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
                       apiBase={apiBase}
                       uploadImage={uploadImage}
+                      uploadAudio={uploadAudio}
                     />
                   ))}
                 </div>
@@ -716,12 +732,13 @@ function CharCounter({ value, max }: { value: string; max: number }) {
   );
 }
 
-function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage }: {
+function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, uploadAudio }: {
   field: TemplateField;
   value: any;
   onChange: (v: any) => void;
   apiBase: string;
   uploadImage: (f: File) => Promise<string | null>;
+  uploadAudio: (f: File) => Promise<string | null>;
 }) {
   // Лимиты символов, чтобы длинный текст не ломал вёрстку шаблона.
   // Явный field.maxLength имеет приоритет; ссылки (URL) без лимита.
@@ -751,6 +768,12 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage }: {
           <ImagePicker value={value || ''} onChange={onChange} apiBase={apiBase} uploadImage={uploadImage} />
         </Field>
       );
+    case 'audio':
+      return (
+        <Field label={field.label}>
+          <AudioPicker value={value || ''} onChange={onChange} apiBase={apiBase} uploadAudio={uploadAudio} hint={field.hint} />
+        </Field>
+      );
     case 'colorList':
       return (
         <Field label={field.label}>
@@ -764,6 +787,53 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage }: {
     default:
       return null;
   }
+}
+
+function AudioPicker({ value, onChange, apiBase, uploadAudio, hint }: {
+  value: string; onChange: (v: string) => void; apiBase: string;
+  uploadAudio: (f: File) => Promise<string | null>; hint?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const src = !value ? ''
+    : /^https?:\/\//.test(value) ? value
+      : value.startsWith('/') ? apiBase + value : value;
+  const fileName = value ? decodeURIComponent(value.split('/').pop() || 'мелодия') : '';
+  return (
+    <div>
+      <input ref={inputRef} type="file" accept="audio/*" style={{ display: 'none' }}
+        onChange={async e => {
+          const f = e.target.files?.[0];
+          if (f) { const u = await uploadAudio(f); if (u) onChange(u); }
+          if (inputRef.current) inputRef.current.value = '';
+        }} />
+      {value ? (
+        <div style={{ border: '1px solid rgba(206,197,186,0.6)', borderRadius: 10, padding: 10 }}>
+          <div style={{ fontSize: 12, color: '#4b463d', fontFamily: 'var(--font-inter)', marginBottom: 8, wordBreak: 'break-all' }}>
+            🎵 {fileName}
+          </div>
+          <audio src={src} controls preload="none" style={{ width: '100%', height: 32 }} />
+          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+            <button type="button" onClick={() => inputRef.current?.click()}
+              style={{ flex: 1, padding: 7, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
+              Заменить
+            </button>
+            <button type="button" onClick={() => onChange('')}
+              style={{ flex: 1, padding: 7, border: '1px solid rgba(231,76,60,0.3)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#e74c3c', cursor: 'pointer' }}>
+              Удалить
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className={styles.dropzone} onClick={() => inputRef.current?.click()}>
+          <div className={styles.dropzoneInner}>
+            <span className={styles.dropzoneIcon}>🎵</span>
+            <span>Загрузить мелодию</span>
+            <span className={styles.dropzoneHint}>{hint || 'MP3 до 15 MB'}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ImagePicker({ value, onChange, apiBase, uploadImage }: {

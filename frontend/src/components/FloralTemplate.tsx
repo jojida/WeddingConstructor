@@ -29,6 +29,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
     const p = new URLSearchParams();
     p.set('apiBase', apiBase || '');
     if (slug) p.set('slug', slug);
+    if (editing) p.set('editing', '1');
     if (data.groomName) p.set('groom', data.groomName);
     if (data.brideName) p.set('bride', data.brideName);
     if (data.weddingDate) p.set('date', data.weddingDate);
@@ -58,6 +59,9 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
           story: d.story,
           dressCodeColors: d.dressCodeColors,
           dressCodePhoto: d.dressCodePhoto,
+          venueAddress: d.venueAddress,
+          mapLink: d.mapLink,
+          musicUrl: d.musicUrl,
           schedule: d.schedule,
         },
       },

@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, sampleWeddingDate } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import MediterraneanTemplate from '@/components/MediterraneanTemplate';
@@ -82,14 +82,15 @@ function Header() {
    программа дня из TEMPLATE_DEFAULTS — как на странице /demo/mediterranean. */
 function heroMediterraneanData() {
   const defs = TEMPLATE_DEFAULTS['mediterranean'] || {};
+  const weddingDate = sampleWeddingDate(120);
   return {
     templateId: 'mediterranean',
     groomName: 'Максим',
     brideName: 'Катерина',
-    weddingDate: sampleWeddingDate(120),
+    weddingDate,
     weddingTime: '16:00',
     venue: defs.venue ?? 'СПА Отель',
-    venueAddress: '',
+    venueAddress: defs.venueAddress ?? '',
     inviteText: '',
     story: defs.story ?? '',
     dressCode: '',
@@ -99,7 +100,7 @@ function heroMediterraneanData() {
     galleryPhotos: [],
     mapLink: '',
     schedule: defs.schedule ?? [],
-    customData: { ...(defs.custom || {}), ...(defs.drinks ? { drinks: defs.drinks } : {}) },
+    customData: templateCustomDefaults('mediterranean', weddingDate),
   };
 }
 

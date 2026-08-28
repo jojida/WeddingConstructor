@@ -26,6 +26,8 @@ export interface InviteData {
   coverPhoto: string;
   coverVideo?: string;
   galleryPhotos: string[];
+  /** Фоновая мелодия (кнопка включения появляется в углу приглашения). */
+  musicUrl?: string;
   mapLink: string;
   schedule: ScheduleItem[];
   slug?: string;
@@ -66,7 +68,7 @@ export default function TemplatePreview({ data, apiBase, fullPage, slug, editing
     return <MediterraneanTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
   }
   if (data.templateId === 'vadimdarya') {
-    return <VadimDaryaTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} />;
+    return <VadimDaryaTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
   }
   return (
     <SimpleTemplate data={data} apiBase={apiBase} />

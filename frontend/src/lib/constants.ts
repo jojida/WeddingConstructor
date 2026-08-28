@@ -18,6 +18,31 @@ export function sampleWeddingDate(daysAhead = 90): string {
   return new Date(Date.now() + daysAhead * 86400000).toISOString().slice(0, 10);
 }
 
+/** Дедлайн ответа гостей по умолчанию: за 3 недели до свадьбы, формат ДД.ММ.ГГ.
+    Никогда не отдаёт дату в прошлом — иначе шаблон просит ответить «до вчера». */
+export function rsvpDeadline(weddingDate?: string): string {
+  const wedding = weddingDate ? new Date(`${weddingDate}T00:00:00`) : null;
+  const valid = wedding && !Number.isNaN(wedding.getTime()) ? wedding : null;
+  const soon = new Date(Date.now() + 7 * 86400000);
+  const planned = valid ? new Date(valid.getTime() - 21 * 86400000) : new Date(Date.now() + 21 * 86400000);
+  const d = planned.getTime() < Date.now() ? soon : planned;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${String(d.getFullYear()).slice(2)}`;
+}
+
+/** Дефолты customData шаблона с подставленными токенами ({{rsvpDate}}) и напитками.
+    Единая точка для редактора, демо-страниц и превью — чтобы даты не расходились. */
+export function templateCustomDefaults(templateId: string, weddingDate?: string): Record<string, any> {
+  const defs = TEMPLATE_DEFAULTS[templateId];
+  const custom: Record<string, any> = { ...(defs?.custom || {}) };
+  const deadline = rsvpDeadline(weddingDate);
+  for (const key of Object.keys(custom)) {
+    if (typeof custom[key] === 'string') custom[key] = custom[key].replace(/\{\{rsvpDate\}\}/g, deadline);
+  }
+  if (defs?.drinks) custom.drinks = defs.drinks;
+  return custom;
+}
+
 export const TEMPLATES = [
   {
     id: 'calla',
@@ -346,7 +371,7 @@ export interface ScheduleItem { time: string; title: string; icon: string; desc?
 export interface DrinkOption  { value: string; label: string; }
 
 export type FieldType =
-  | 'text' | 'textarea' | 'image' | 'colorList' | 'schedule' | 'drinks';
+  | 'text' | 'textarea' | 'image' | 'audio' | 'colorList' | 'schedule' | 'drinks';
 
 export interface TemplateField {
   id: string;                 // data-edit ключ + ключ хранения
@@ -449,6 +474,14 @@ export const BUILTIN_GALLERY: string[] = [
 ];
 
 /* Схема полей по шаблонам (имена/дата/время правятся в отдельном окне) */
+/** Фоновая мелодия — секция одинаковая во всех шаблонах (тариф «Базовый» и выше). */
+const MUSIC_SECTION: TemplateSection = {
+  title: 'Музыка', icon: '🎵',
+  fields: [
+    { id: 'musicUrl', type: 'audio', label: 'Фоновая мелодия', hint: 'MP3 до 15 МБ. Гость включает её кнопкой в углу сайта', scope: 'data' },
+  ],
+};
+
 export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   calla: [
     {
@@ -499,6 +532,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
         { id: 'finalPhoto',   type: 'image', label: 'Фото в полароиде',     scope: 'custom' },
       ],
     },
+    MUSIC_SECTION,
   ],
 
   sketch: [
@@ -555,6 +589,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
         { id: 'finalPhoto', type: 'image', label: 'Фото в рамке (До новых встреч)', scope: 'custom' },
       ],
     },
+    MUSIC_SECTION,
   ],
 
   floral: [
@@ -618,6 +653,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
         { id: 'closing', type: 'text', label: 'Финальная подпись', scope: 'custom' },
       ],
     },
+    MUSIC_SECTION,
   ],
 
   'garden-arch': [
@@ -673,6 +709,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
         { id: 'closing', type: 'text', label: 'Финальная подпись', scope: 'custom' },
       ],
     },
+    MUSIC_SECTION,
   ],
 
   mediterranean: [
@@ -737,6 +774,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
         { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom' },
       ],
     },
+    MUSIC_SECTION,
   ],
 
   vadimdarya: [
@@ -780,6 +818,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
         { id: 'story', type: 'textarea', label: 'Текст (абзацы с новой строки)', scope: 'data' },
       ],
     },
+    MUSIC_SECTION,
   ],
 };
 
@@ -789,6 +828,7 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
 export interface TemplateDefaults {
   inviteText?: string;
   venue?: string;
+  venueAddress?: string;
   story?: string;
   schedule?: ScheduleItem[];
   dressCodeColors?: string[];
@@ -824,7 +864,7 @@ export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       greetingTitle: 'Дорогие гости',
-      surveyText:    'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до 01.08.26',
+      surveyText:    'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closingTitle:  'Будем ждать вас с нетерпением!',
       closingSign:   'Ваши Дарья и Вадим',
       dressPhoto2:   '/invite/calla/assets/dress2.jpg',
@@ -858,7 +898,7 @@ export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       guestsTitle:  'Дорогие гости',
       locationText: 'Праздник пройдёт на базе отдыха «Барвиха»',
       dressText:    'Одевайтесь в пастельных тонах, пожалуйста, избегайте ярких насыщенных цветов',
-      surveyText:   'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до 01.08.26',
+      surveyText:   'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       wishesText:   'Будем рады вашим тёплым словам и пожеланиям — они для нас самый дорогой подарок',
       dressPhoto2:  '/invite/sketch/assets/dress2.png',
       finalPhoto:   '/invite/sketch/assets/couple.png',
@@ -893,7 +933,7 @@ export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     custom: {
       dearGuests: 'Дорогие гости',
       weAwait:    'Мы ждём вас',
-      surveyText: 'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до 01.08.26',
+      surveyText: 'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closing:    'Будем рады видеть вас',
       dressPhoto2: '/invite/floral/assets/photos/dress2.jpg',
       polaroid1:   '/invite/floral/assets/photos/couple3.jpg',
@@ -925,7 +965,7 @@ export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       dearGuests: 'Дорогие друзья',
-      surveyText: 'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до 01.08.26',
+      surveyText: 'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closing:    'Ждём вас на нашей свадьбе!',
       dressPhoto2: '/invite/garden-arch/assets/photos/dress2.jpg',
       polaroid1:   '/invite/garden-arch/assets/photos/couple1.jpg',
@@ -935,6 +975,7 @@ export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   mediterranean: {
     venue: 'СПА Отель',
+    venueAddress: 'г. Сочи, ул. Приморская, 15',
     story:
       'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
       'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
@@ -955,7 +996,7 @@ export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     custom: {
       greetingTitle: 'Любимые друзья!',
       greetingSub:   'приглашаем вас на нашу свадьбу',
-      surveyText:    'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до 01.08.26',
+      surveyText:    'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closingTitle:  'Ждем вас на нашей\nсвадьбе!',
       organizerText: 'По всем вопросам обращайтесь к нашему организатору',
       organizerPhone: '+7 922 222 22 22',

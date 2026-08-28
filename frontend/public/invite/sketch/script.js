@@ -172,8 +172,38 @@
   }
 
   // ─── Применение всех данных ──────────────────────
+  /* ─── Карта проезда ──────────────────────────
+     Место/адрес становятся ссылкой, когда пара указала карту.
+     Вёрстка не меняется: только курсор и пунктирное подчёркивание. */
+  function applyMapLink(url) {
+    url = (url || '').trim();
+    if (!url) return;
+    document.querySelectorAll('[data-edit="venue"], [data-edit="venueAddress"]').forEach(function (el) {
+      if (el.tagName === 'A') {
+        el.setAttribute('href', url);
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'noopener');
+        return;
+      }
+      el.__wcMapUrl = url;
+      if (el.dataset.wcMap) return;
+      el.dataset.wcMap = '1';
+      el.style.cursor = 'pointer';
+      el.style.textDecoration = 'underline dotted';
+      el.style.textUnderlineOffset = '0.25em';
+      el.setAttribute('role', 'link');
+      el.setAttribute('tabindex', '0');
+      el.title = 'Открыть на карте';
+      var open = function () { window.open(el.__wcMapUrl, '_blank', 'noopener'); };
+      el.addEventListener('click', open);
+      el.addEventListener('keydown', function (e) { if (e.key === 'Enter') open(); });
+    });
+  }
+
   function applyData(d) {
     if (!d) return;
+    applyMapLink(d.mapLink);
+    if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
     if (typeof d.apiBase === 'string') STATE.apiBase = d.apiBase;
     if (typeof d.slug === 'string' && d.slug) STATE.slug = d.slug;
     if (typeof d.guestToken === 'string' && d.guestToken) STATE.guestToken = d.guestToken;

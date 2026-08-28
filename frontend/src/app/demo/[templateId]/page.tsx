@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import TemplatePreview from '@/components/TemplatePreview';
-import { TEMPLATES, TEMPLATE_DEFAULTS } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
 import DemoActions from './DemoActions';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 const SAMPLE_DATA = {
   brideName: 'Дарья',
   groomName: 'Вадим',
-  weddingDate: '2025-09-20',
+  weddingDate: sampleWeddingDate(),
   weddingTime: '16:00',
   venue: 'Усадьба «Белый сад»',
   venueAddress: 'Москва, ул. Розовая, 1',
@@ -61,11 +61,12 @@ export default async function DemoPage({ params }: Props) {
           galleryPhotos: template.defaultGallery,
           inviteText:      defs.inviteText      ?? SAMPLE_DATA.inviteText,
           venue:           defs.venue           ?? SAMPLE_DATA.venue,
+          venueAddress:    defs.venueAddress    ?? SAMPLE_DATA.venueAddress,
           story:           defs.story           ?? SAMPLE_DATA.story,
           schedule:        defs.schedule        ?? SAMPLE_DATA.schedule,
           dressCodeColors: defs.dressCodeColors ?? SAMPLE_DATA.dressCodeColors,
           dressCodePhoto:  defs.dressCodePhoto  ?? SAMPLE_DATA.dressCodePhoto,
-          customData: { ...(defs.custom || {}), ...(defs.drinks ? { drinks: defs.drinks } : {}) },
+          customData: templateCustomDefaults(template.id, SAMPLE_DATA.weddingDate),
         }}
         apiBase={apiBase}
         fullPage

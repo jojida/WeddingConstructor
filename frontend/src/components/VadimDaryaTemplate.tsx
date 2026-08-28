@@ -7,6 +7,7 @@ interface Props {
   apiBase: string;
   fullPage?: boolean;
   slug?: string;
+  editing?: boolean;
 }
 
 /* Полная страница и превью рендерятся через iframe со статичным
@@ -14,9 +15,10 @@ interface Props {
    Первичные данные передаются через URL-параметры (для SSR-страницы гостя),
    а живое редактирование — через postMessage (без перезагрузки iframe). */
 
-function buildParams(data: InviteData, apiBase: string): string {
+function buildParams(data: InviteData, apiBase: string, editing?: boolean): string {
   const p = new URLSearchParams();
   p.set('apiBase', apiBase || '');
+  if (editing) p.set('editing', '1');
   if (data.groomName) p.set('groom', data.groomName);
   if (data.brideName) p.set('bride', data.brideName);
   if (data.weddingDate) p.set('date', data.weddingDate);
@@ -38,14 +40,14 @@ function buildParams(data: InviteData, apiBase: string): string {
   return p.toString();
 }
 
-export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug }: Props) {
+export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, editing }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dataRef = useRef(data);
   dataRef.current = data;
 
   // src вычисляется один раз — чтобы изменения данных не перезагружали iframe
   const initialSrc = useMemo(() => {
-    const qs = buildParams(data, apiBase);
+    const qs = buildParams(data, apiBase, editing);
     return `/invite/vadimdarya/index.html?${qs}`;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -70,6 +72,7 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug }: Pr
           story: dataRef.current.story,
           dressCode: dataRef.current.dressCode,
           dressCodePhoto: dataRef.current.dressCodePhoto,
+          musicUrl: dataRef.current.musicUrl,
           schedule: dataRef.current.schedule,
           dressCodeColors: dataRef.current.dressCodeColors,
         },
@@ -107,19 +110,19 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug }: Pr
     );
   }
 
-  // Превью (мини) — заполняет контейнер, мобильная верстка
+  // Превью: в редакторе — живое и прокручиваемое, на карточке — статичная миниатюра
   return (
     <iframe
       ref={iframeRef}
       src={initialSrc}
-      scrolling="no"
+      scrolling={editing ? 'auto' : 'no'}
       style={{
         width: '100%',
         height: '100%',
         border: 'none',
         display: 'block',
         background: '#0f0d09',
-        pointerEvents: 'none',
+        ...(editing ? {} : { pointerEvents: 'none' as const }),
       }}
       title="Превью приглашения"
     />
