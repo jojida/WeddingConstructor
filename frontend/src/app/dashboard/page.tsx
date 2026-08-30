@@ -146,12 +146,12 @@ export default function DashboardPage() {
                     {invite.status !== 'draft' && (
                       <div className={styles.shareLink}>
                         <span className={styles.shareLinkText}>
-                          {`${window.location.origin}/invite/${invite.slug}`}
+                          {`${window.location.origin}/${invite.slug}`}
                         </span>
                         <button
                           className={styles.copyBtn}
                           onClick={() => {
-                            navigator.clipboard.writeText(`${window.location.origin}/invite/${invite.slug}`);
+                            navigator.clipboard.writeText(`${window.location.origin}/${invite.slug}`);
                             toast.success('Скопировано!');
                           }}
                         >

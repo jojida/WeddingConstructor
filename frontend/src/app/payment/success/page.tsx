@@ -1,39 +1,65 @@
 'use client';
-import { useEffect, useState, Suspense } from 'react';
+import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { isAdvancedPlan } from '@/lib/constants';
+import { isAdvancedPlan, LEGAL } from '@/lib/constants';
 import styles from './page.module.css';
+
+/* ЮKassa возвращает покупателя на return_url ЛЮБЫМ исходом — и после успешной
+   оплаты, и после отмены. Поэтому страница не имеет права поздравлять сразу:
+   сначала подтверждаем оплату (вебхук или дозапрос статуса), и только потом
+   показываем ссылку. Если за минуту подтверждения нет — честно об этом говорим. */
+
+const POLL_MS = 2500;
+const MAX_TRIES = 24; // ~60 секунд ожидания
+
+type PayState = 'checking' | 'paid' | 'stalled';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const inviteId = searchParams.get('id') || '';
   const [invite, setInvite] = useState<any>(null);
+  const [state, setState] = useState<PayState>('checking');
+  const [paymentStatus, setPaymentStatus] = useState('');
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const triesRef = useRef(0);
 
-  useEffect(() => {
+  const stop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
+
+  const startPolling = useCallback(() => {
     if (!inviteId) return;
-    // Опрашиваем статус оплаты: этот роут сам дозапросит ЮKassa, если вебхук ещё не дошёл
-    let stopped = false;
+    stop();
+    triesRef.current = 0;
+    setState('checking');
+
     const check = async () => {
+      triesRef.current += 1;
       try {
         const st = await api.get(`/api/payment/status/${inviteId}`);
+        if (st.data.paymentStatus) setPaymentStatus(st.data.paymentStatus);
         if (st.data.status === 'paid' || st.data.status === 'published') {
           const res = await api.get(`/api/invites/${inviteId}`);
-          if (!stopped) {
-            setInvite(res.data);
-            clearInterval(poll);
-          }
+          stop();
+          setInvite(res.data);
+          setState('paid');
+          return;
         }
-      } catch {}
+        // Платёж отменён — ждать больше нечего.
+        if (st.data.paymentStatus === 'canceled') { stop(); setState('stalled'); return; }
+      } catch { /* сеть моргнула — попробуем на следующем тике */ }
+      if (triesRef.current >= MAX_TRIES) { stop(); setState('stalled'); }
     };
-    const poll = setInterval(check, 2500);
+
+    timerRef.current = setInterval(check, POLL_MS);
     check();
-    return () => { stopped = true; clearInterval(poll); };
   }, [inviteId]);
 
-  const siteUrl = invite ? `${window.location.origin}/invite/${invite.slug}` : '';
+  useEffect(() => { startPolling(); return stop; }, [startPolling]);
+
+  // Канонический адрес сайта пары — короткий, без /invite (его же отдаёт кабинет).
+  const siteUrl = invite ? `${window.location.origin}/${invite.slug}` : '';
 
   const copyLink = () => {
     navigator.clipboard.writeText(siteUrl);
@@ -41,19 +67,30 @@ function SuccessContent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const title = state === 'paid' ? 'Оплата прошла!'
+    : state === 'checking' ? 'Проверяем оплату…'
+      : paymentStatus === 'canceled' ? 'Платёж не прошёл' : 'Оплата пока не подтверждена';
+
+  const subtitle = state === 'paid' ? 'Ваш сайт-приглашение готов к отправке гостям'
+    : state === 'checking' ? 'Это занимает несколько секунд — не закрывайте страницу'
+      : paymentStatus === 'canceled' ? 'Платёж был отменён, деньги не списаны'
+        : 'Банк ещё не подтвердил платёж. Если деньги списались, сайт активируется автоматически';
+
   return (
     <div className={styles.page}>
-      <div className={styles.confetti}>
-        {['🎊','✨','💍','🌸','🎉','💕','✦','🥂'].map((e, i) => (
-          <span key={i} className={styles.emoji} style={{ '--i': i } as React.CSSProperties}>{e}</span>
-        ))}
-      </div>
+      {state === 'paid' && (
+        <div className={styles.confetti}>
+          {['🎊','✨','💍','🌸','🎉','💕','✦','🥂'].map((e, i) => (
+            <span key={i} className={styles.emoji} style={{ '--i': i } as React.CSSProperties}>{e}</span>
+          ))}
+        </div>
+      )}
       <div className={styles.card}>
-        <div className={styles.check}>✓</div>
-        <h1 className={styles.title}>Оплата прошла!</h1>
-        <p className={styles.subtitle}>Ваш сайт-приглашение готов к отправке гостям</p>
+        {state === 'paid' && <div className={styles.check}>✓</div>}
+        <h1 className={styles.title}>{title}</h1>
+        <p className={styles.subtitle}>{subtitle}</p>
 
-        {invite ? (
+        {state === 'paid' && invite ? (
           <>
             <div className={styles.linkBox}>
               <div className={styles.linkLabel}>Ссылка для гостей</div>
@@ -63,7 +100,7 @@ function SuccessContent() {
               </button>
             </div>
             <div className={styles.actions}>
-              <Link href={`/invite/${invite.slug}`} target="_blank" className="btn-outline">
+              <Link href={`/${invite.slug}`} target="_blank" className="btn-outline">
                 Открыть сайт
               </Link>
               <Link href="/dashboard" className={styles.dashLink}>
@@ -83,10 +120,27 @@ function SuccessContent() {
               </div>
             )}
           </>
-        ) : (
+        ) : state === 'checking' ? (
           <div className={styles.loading}>
             <div className={styles.spinner} />
-            <p>Активируем ваш сайт...</p>
+            <p>Подтверждаем платёж…</p>
+          </div>
+        ) : (
+          <div style={{ marginTop: 18 }}>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <button className="btn-primary" onClick={startPolling}>Проверить ещё раз</button>
+              <Link href={inviteId ? `/payment?id=${inviteId}` : '/dashboard'} className="btn-outline">
+                {paymentStatus === 'canceled' ? 'Оплатить заново' : 'Вернуться к оплате'}
+              </Link>
+            </div>
+            <p style={{ marginTop: 16, fontSize: 13, color: '#7d766c', textAlign: 'center', lineHeight: 1.6 }}>
+              Деньги списались, а сайт не активировался? Напишите на{' '}
+              <a href={`mailto:${LEGAL.contactEmail}`} style={{ textDecoration: 'underline' }}>{LEGAL.contactEmail}</a>
+              {' '}— найдём платёж и включим сайт вручную.
+            </p>
+            <p style={{ marginTop: 10, textAlign: 'center' }}>
+              <Link href="/dashboard" className={styles.dashLink}>Мои приглашения →</Link>
+            </p>
           </div>
         )}
       </div>

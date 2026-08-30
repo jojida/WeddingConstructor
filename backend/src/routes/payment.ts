@@ -124,8 +124,9 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
       amount,
       capture: true, // одностадийный платёж — списываем сразу
       confirmation: { type: 'redirect', return_url: successUrl },
-      description: `Сайт-приглашение WeddingCraft — тариф «${planData.label}»`
-        + (promo ? ` (промокод ${promo.code}, −${promo.percent}%)` : ''),
+      // У ЮKassa description ограничен 128 символами — длинный промокод не должен ломать платёж.
+      description: (`Сайт-приглашение WeddingCraft — тариф «${planData.label}»`
+        + (promo ? ` (промокод ${promo.code}, −${promo.percent}%)` : '')).slice(0, 128),
       metadata: { inviteId, plan, ...(promo ? { promoCode: promo.code } : {}) },
     };
 
@@ -202,9 +203,13 @@ router.get('/status/:inviteId', authMiddleware, async (req: AuthRequest, res: Re
   if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
 
   const unpaid = invite.status !== 'paid' && invite.status !== 'published';
+  // Статус самого платежа (pending | waiting_for_capture | succeeded | canceled) —
+  // страница успеха по нему отличает «ещё ждём» от «отменён, платить заново».
+  let paymentStatus: string | undefined;
   if (unpaid && invite.paymentId && invite.paymentId !== 'dev_test' && kassaAuth().configured) {
     try {
       const payment = await kassaRequest('GET', `/payments/${invite.paymentId}`);
+      paymentStatus = payment.status;
       if (payment.status === 'succeeded' && payment.paid) {
         await markPaid(invite.id, payment.metadata?.plan || invite.plan, payment.id);
         invite = await prisma.invitation.findUnique({ where: { id: invite.id } });
@@ -212,7 +217,7 @@ router.get('/status/:inviteId', authMiddleware, async (req: AuthRequest, res: Re
     } catch { /* временная ошибка сети/кассы — вернём текущий статус */ }
   }
 
-  return res.json({ status: invite!.status, plan: invite!.plan, paidAt: invite!.paidAt });
+  return res.json({ status: invite!.status, plan: invite!.plan, paidAt: invite!.paidAt, paymentStatus });
 });
 
 export default router;
