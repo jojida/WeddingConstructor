@@ -37,12 +37,13 @@ function SuccessContent() {
     const check = async () => {
       triesRef.current += 1;
       try {
-        const st = await api.get(`/api/payment/status/${inviteId}`);
+        // Публичный роут: подтверждение работает, даже если покупатель вернулся
+        // с другого устройства или потерял сессию.
+        const st = await api.get(`/api/payment/public-status/${inviteId}`);
         if (st.data.paymentStatus) setPaymentStatus(st.data.paymentStatus);
-        if (st.data.status === 'paid' || st.data.status === 'published') {
-          const res = await api.get(`/api/invites/${inviteId}`);
+        if (st.data.paid) {
           stop();
-          setInvite(res.data);
+          setInvite({ id: inviteId, slug: st.data.slug, plan: st.data.plan });
           setState('paid');
           return;
         }

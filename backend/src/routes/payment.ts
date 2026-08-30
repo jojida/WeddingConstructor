@@ -196,6 +196,31 @@ router.post('/webhook', async (req: Request, res: Response) => {
   }
 });
 
+/* GET /api/payment/public-status/:inviteId — факт оплаты БЕЗ авторизации.
+   Покупатель может вернуться из ЮKassa на другом устройстве или с потерянной сессией —
+   тогда страница успеха не смогла бы узнать об оплате даже после вебхука. Отдаём только
+   то, что и так станет публичным: факт оплаты, адрес сайта и тариф. id — UUID, перебором не найти. */
+router.get('/public-status/:inviteId', async (req: Request, res: Response) => {
+  let invite = await prisma.invitation.findUnique({ where: { id: req.params.inviteId as string } });
+  if (!invite) return res.status(404).json({ error: 'Не найдено' });
+
+  let paymentStatus: string | undefined;
+  const unpaid = invite.status !== 'paid' && invite.status !== 'published';
+  if (unpaid && invite.paymentId && invite.paymentId !== 'dev_test' && kassaAuth().configured) {
+    try {
+      const payment = await kassaRequest('GET', `/payments/${invite.paymentId}`);
+      paymentStatus = payment.status;
+      if (payment.status === 'succeeded' && payment.paid) {
+        await markPaid(invite.id, payment.metadata?.plan || invite.plan, payment.id);
+        invite = await prisma.invitation.findUnique({ where: { id: invite.id } });
+      }
+    } catch { /* временная ошибка — вернём текущее состояние */ }
+  }
+
+  const paid = invite!.status === 'paid' || invite!.status === 'published';
+  return res.json({ paid, status: invite!.status, plan: invite!.plan, slug: invite!.slug, paymentStatus });
+});
+
 // GET /api/payment/status/:inviteId — статус оплаты; если вебхук ещё не дошёл,
 // дозапрашиваем платёж у ЮKassa напрямую (страница успеха опрашивает этот роут).
 router.get('/status/:inviteId', authMiddleware, async (req: AuthRequest, res: Response) => {
