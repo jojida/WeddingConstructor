@@ -14,6 +14,7 @@ import rsvpRouter from './routes/rsvp';
 import guestsRouter from './routes/guests';
 import telegramRouter from './routes/telegram';
 import domainsRouter from './routes/domains';
+import { initTelegram } from './lib/telegram';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -68,4 +69,7 @@ app.get('/api/health', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Wedding Constructor API running on http://localhost:${PORT}`);
+  // Бот сервиса настраивается сам, если задан TELEGRAM_BOT_TOKEN:
+  // имя берётся через getMe, вебхук ставится на BACKEND_URL.
+  initTelegram();
 });

@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isPaid, hasCustomDomain } from '../lib/plans';
+import { botUsername } from '../lib/telegram';
 
 const router = Router();
 
@@ -222,7 +223,7 @@ router.post('/:id/telegram-connect', authMiddleware, async (req: AuthRequest, re
     token = crypto.randomBytes(8).toString('base64url');
     await prisma.invitation.update({ where: { id: invite.id }, data: { telegramConnectToken: token } });
   }
-  const username = process.env.TELEGRAM_BOT_USERNAME || '';
+  const username = botUsername();
   return res.json({
     token,
     botUsername: username,

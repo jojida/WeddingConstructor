@@ -388,7 +388,8 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
         <div style={{ fontWeight: 700, color: '#0e1d26', marginBottom: 10 }}>Как подключить</div>
         <ol style={{ margin: 0, paddingLeft: 18, fontSize: 14, color: '#5b554c', lineHeight: 1.7 }}>
           <li>Купите домен у любого регистратора (reg.ru, Timeweb и т.п.).</li>
-          <li>В DNS-настройках домена добавьте две A-записи:
+          <li>В DNS-настройках домена <b>у регистратора</b> добавьте две A-записи —
+            они направят ваш домен на наш сервер:
             <div style={{ marginTop: 6, fontFamily: 'monospace', fontSize: 13, background: '#f5f2ec', borderRadius: 8, padding: '8px 12px', lineHeight: 1.8 }}>
               A&nbsp;&nbsp;@&nbsp;&nbsp;&nbsp;→&nbsp;&nbsp;{SERVER_IP}<br />
               A&nbsp;&nbsp;www&nbsp;→&nbsp;&nbsp;{SERVER_IP}
@@ -396,8 +397,10 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
           </li>
           <li>Сохраните домен в поле выше и нажмите «Проверить подключение». DNS обычно
             обновляется за 15 минут – 4 часа.</li>
-          <li>SSL-сертификат выпустится автоматически при первом открытии сайта — ничего
-            дополнительно делать не нужно.</li>
+          <li>Когда проверка покажет, что записи верные, <b>напишите нам</b> на{' '}
+            <a href="mailto:support@weddingcraft.ru" style={{ textDecoration: 'underline' }}>support@weddingcraft.ru</a> —
+            мы выпустим SSL-сертификат для вашего домена и включим его. Обычно в течение суток.
+            До этого шага домен будет открываться с предупреждением о сертификате.</li>
         </ol>
       </div>
 
