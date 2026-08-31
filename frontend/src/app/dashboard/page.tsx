@@ -51,13 +51,22 @@ export default function DashboardPage() {
     router.push('/templates');
   };
 
-  const deleteInvite = async (id: string) => {
-    if (!confirm('Удалить это приглашение?')) return;
+  /* Удаление необратимо, а для оплаченного сайта равносильно потере покупки:
+     вместо нативного confirm — диалог с названием сайта, а у оплаченных ещё и галочка. */
+  const [pendingDelete, setPendingDelete] = useState<Invite | null>(null);
+  const [ackPaid, setAckPaid] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
     try {
-      await api.delete(`/api/invites/${id}`);
-      setInvites(prev => prev.filter(i => i.id !== id));
-      toast.success('Удалено');
+      await api.delete(`/api/invites/${pendingDelete.id}`);
+      setInvites(prev => prev.filter(i => i.id !== pendingDelete.id));
+      toast.success('Сайт удалён');
+      setPendingDelete(null);
     } catch { toast.error('Ошибка удаления'); }
+    finally { setDeleting(false); }
   };
 
   const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('ru-RU') : '';
@@ -137,7 +146,7 @@ export default function DashboardPage() {
                       )}
                       <button
                         className={styles.deleteBtn}
-                        onClick={() => deleteInvite(invite.id)}
+                        onClick={() => { setPendingDelete(invite); setAckPaid(false); }}
                         title="Удалить"
                       >
                         🗑
@@ -165,6 +174,85 @@ export default function DashboardPage() {
             })}
           </div>
         )}
+      </div>
+
+      {pendingDelete && (
+        <DeleteDialog
+          invite={pendingDelete}
+          ack={ackPaid}
+          onAck={setAckPaid}
+          busy={deleting}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={confirmDelete}
+        />
+      )}
+    </div>
+  );
+}
+
+/* Диалог удаления. У оплаченного сайта кнопка заблокирована, пока не отмечено
+   согласие: гости потеряют доступ, а деньги сами собой не вернутся. */
+function DeleteDialog({ invite, ack, onAck, onCancel, onConfirm, busy }: {
+  invite: Invite;
+  ack: boolean;
+  onAck: (v: boolean) => void;
+  onCancel: () => void;
+  onConfirm: () => void;
+  busy: boolean;
+}) {
+  const paid = invite.status === 'paid' || invite.status === 'published';
+  const names = invite.groomName && invite.brideName
+    ? `${invite.groomName} & ${invite.brideName}`
+    : 'Без названия';
+  const blocked = busy || (paid && !ack);
+
+  return (
+    <div
+      onClick={onCancel}
+      style={{ position: 'fixed', inset: 0, zIndex: 10002, background: 'rgba(13,11,9,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
+    >
+      <div onClick={e => e.stopPropagation()}
+        style={{ width: '100%', maxWidth: 460, background: '#fff', borderRadius: 16, padding: '26px 26px 22px' }}>
+        <h3 style={{ margin: '0 0 10px', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22, color: '#0e1d26' }}>
+          Удалить сайт?
+        </h3>
+        <p style={{ margin: '0 0 4px', fontSize: 15, color: '#4b463d', lineHeight: 1.5 }}>
+          <strong>{names}</strong>
+        </p>
+        <p style={{ margin: '0 0 16px', fontSize: 13, color: '#8a8378', wordBreak: 'break-all' }}>
+          /{invite.slug}
+        </p>
+
+        {paid ? (
+          <div style={{ background: 'rgba(231,76,60,0.08)', border: '1px solid rgba(231,76,60,0.3)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+            <div style={{ fontWeight: 700, color: '#b03a2e', marginBottom: 6, fontSize: 14 }}>
+              Этот сайт оплачен
+            </div>
+            <p style={{ margin: '0 0 12px', fontSize: 13, color: '#7d5a52', lineHeight: 1.55 }}>
+              После удаления ссылка перестанет открываться у гостей, а ответы анкеты и список
+              гостей исчезнут. Восстановить сайт нельзя, оплата не возвращается автоматически.
+            </p>
+            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 13, color: '#5b554c', cursor: 'pointer' }}>
+              <input type="checkbox" checked={ack} onChange={e => onAck(e.target.checked)} style={{ marginTop: 2 }} />
+              <span>Понимаю, что сайт перестанет открываться у гостей</span>
+            </label>
+          </div>
+        ) : (
+          <p style={{ margin: '0 0 16px', fontSize: 13, color: '#7d766c', lineHeight: 1.55 }}>
+            Черновик будет удалён безвозвратно.
+          </p>
+        )}
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={onCancel} disabled={busy}
+            style={{ flex: 1, padding: '11px', borderRadius: 10, border: '1px solid rgba(206,197,186,0.7)', background: 'transparent', color: '#4b463d', fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
+            Отмена
+          </button>
+          <button onClick={onConfirm} disabled={blocked}
+            style={{ flex: 1, padding: '11px', borderRadius: 10, border: 'none', background: blocked ? '#e2b3ac' : '#c0392b', color: '#fff', fontSize: 14, fontWeight: 600, cursor: blocked ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-inter)' }}>
+            {busy ? 'Удаляем…' : 'Удалить'}
+          </button>
+        </div>
       </div>
     </div>
   );
