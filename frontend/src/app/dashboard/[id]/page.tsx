@@ -296,10 +296,30 @@ function NotifyTab({ invite, userEmail, onSaved }: { invite: Invite; userEmail: 
       {channel === 'telegram' && (
         <div style={{ marginTop: 14, padding: 14, background: '#f3f8ff', border: '1px solid #cfe0f5', borderRadius: 10, fontSize: 14, color: '#3a567d' }}>
           {invite.notifyTelegramChatId
-            ? '✅ Telegram подключён — ответы будут приходить в чат.'
+            ? '✅ Telegram подключён — ответы гостей будут приходить в этот чат.'
             : tg?.deepLink
-              ? <>Нажмите, чтобы подключить чат: <a href={tg.deepLink} target="_blank" rel="noreferrer" style={{ fontWeight: 700, color: '#2a4a78' }}>открыть бота →</a><div style={{ fontSize: 12, marginTop: 6, color: '#6b87b0' }}>В Telegram нажмите «Старт». Затем сохраните настройки.</div></>
-              : <>Бот не настроен. Укажите <code>TELEGRAM_BOT_USERNAME</code> в .env, чтобы появилась ссылка подключения.</>}
+              ? (
+                <>
+                  <div style={{ fontWeight: 600, marginBottom: 8 }}>Как подключить — три шага:</div>
+                  <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
+                    <li><a href={tg.deepLink} target="_blank" rel="noreferrer" style={{ fontWeight: 700, color: '#2a4a78' }}>Откройте нашего бота →</a></li>
+                    <li>Нажмите в Telegram кнопку «Старт» — бот ответит, что уведомления подключены.</li>
+                    <li>Вернитесь сюда и нажмите «Сохранить».</li>
+                  </ol>
+                  <div style={{ fontSize: 12, marginTop: 8, color: '#6b87b0' }}>
+                    Ссылка личная: она привязывает уведомления именно к вашему сайту.
+                    Гостям её отправлять не нужно — они просто заполняют анкету.
+                  </div>
+                </>
+              )
+              : (
+                <>
+                  Подключение Telegram сейчас недоступно. Выберите уведомления на email —
+                  или напишите нам на{' '}
+                  <a href="mailto:support@weddingcraft.ru" style={{ fontWeight: 600, color: '#2a4a78' }}>support@weddingcraft.ru</a>,
+                  поможем настроить.
+                </>
+              )}
         </div>
       )}
 
