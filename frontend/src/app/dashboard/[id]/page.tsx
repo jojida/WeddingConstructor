@@ -302,13 +302,27 @@ function NotifyTab({ invite, userEmail, onSaved }: { invite: Invite; userEmail: 
                 <>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>Как подключить — три шага:</div>
                   <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
-                    <li><a href={tg.deepLink} target="_blank" rel="noreferrer" style={{ fontWeight: 700, color: '#2a4a78' }}>Откройте нашего бота →</a></li>
+                    <li>
+                      Откройте нашего бота{tg.botUsername ? <> <b>@{tg.botUsername}</b></> : null}:{' '}
+                      <a href={tg.deepLink} target="_blank" rel="noreferrer" style={{ fontWeight: 700, color: '#2a4a78' }}>перейти в Telegram →</a>
+                    </li>
                     <li>Нажмите в Telegram кнопку «Старт» — бот ответит, что уведомления подключены.</li>
                     <li>Вернитесь сюда и нажмите «Сохранить».</li>
                   </ol>
+                  <div style={{ marginTop: 10, padding: '8px 10px', background: '#fff', border: '1px solid #cfe0f5', borderRadius: 8, fontSize: 12, color: '#3a567d', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ wordBreak: 'break-all', flex: 1 }}>{tg.deepLink}</span>
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(tg.deepLink); toast.success('Ссылка скопирована'); }}
+                      style={{ border: '1px solid #cfe0f5', background: 'transparent', borderRadius: 6, padding: '4px 8px', cursor: 'pointer', fontSize: 12, color: '#2a4a78', whiteSpace: 'nowrap' }}
+                    >
+                      Копировать
+                    </button>
+                  </div>
                   <div style={{ fontSize: 12, marginTop: 8, color: '#6b87b0' }}>
-                    Ссылка личная: она привязывает уведомления именно к вашему сайту.
-                    Гостям её отправлять не нужно — они просто заполняют анкету.
+                    Открываете с компьютера? Скопируйте ссылку и откройте её на телефоне,
+                    где установлен Telegram. Ссылка личная: она привязывает уведомления
+                    именно к вашему сайту — гостям её отправлять не нужно, они просто
+                    заполняют анкету.
                   </div>
                 </>
               )
