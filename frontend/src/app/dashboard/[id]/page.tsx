@@ -303,8 +303,10 @@ function NotifyTab({ invite, userEmail, onSaved }: { invite: Invite; userEmail: 
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>Как подключить — три шага:</div>
                   <ol style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>
                     <li>
-                      Откройте нашего бота{tg.botUsername ? <> <b>@{tg.botUsername}</b></> : null}:{' '}
-                      <a href={tg.deepLink} target="_blank" rel="noreferrer" style={{ fontWeight: 700, color: '#2a4a78' }}>перейти в Telegram →</a>
+                      Откройте нашего бота{' '}
+                      <a href={tg.deepLink} target="_blank" rel="noreferrer" style={{ fontWeight: 700, color: '#2a4a78' }}>
+                        {tg.botUsername ? `@${tg.botUsername}` : 'в Telegram'} →
+                      </a>
                     </li>
                     <li>Нажмите в Telegram кнопку «Старт» — бот ответит, что уведомления подключены.</li>
                     <li>Вернитесь сюда и нажмите «Сохранить».</li>
