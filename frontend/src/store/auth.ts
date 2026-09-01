@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
+import { reachGoal, GOAL } from '@/lib/metrika';
 
 interface User {
   id: string;
@@ -23,6 +24,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setAuth: (user, token) => {
     localStorage.setItem('wc_token', token);
+    reachGoal(GOAL.signup);
     set({ user, token, loading: false });
   },
 

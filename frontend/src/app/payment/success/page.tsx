@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { isAdvancedPlan, LEGAL } from '@/lib/constants';
+import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
 
 /* ЮKassa возвращает покупателя на return_url ЛЮБЫМ исходом — и после успешной
@@ -43,6 +44,7 @@ function SuccessContent() {
         if (st.data.paymentStatus) setPaymentStatus(st.data.paymentStatus);
         if (st.data.paid) {
           stop();
+          reachGoal(GOAL.paymentSuccess, { plan: st.data.plan });
           setInvite({ id: inviteId, slug: st.data.slug, plan: st.data.plan });
           setState('paid');
           return;

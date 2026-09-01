@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { PLANS, LEGAL } from '@/lib/constants';
+import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
 
 function PaymentContent() {
@@ -50,6 +51,7 @@ function PaymentContent() {
 
   const handlePay = async () => {
     if (!inviteId) return;
+    reachGoal(GOAL.paymentStart, { plan: selectedPlan });
     setLoading(true);
     try {
       const res = await api.post('/api/payment/create', {

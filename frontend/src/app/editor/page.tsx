@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, TemplateField, ScheduleItem, DrinkOption, templateCustomDefaults } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
+import { reachGoal, GOAL } from '@/lib/metrika';
 import AuthModal from '@/components/AuthModal';
 import styles from './page.module.css';
 
@@ -248,6 +249,16 @@ function EditorContent() {
   const isPublished = data.status === 'paid' || data.status === 'published';
   // Схема полей для шаблона (если есть — рендерим движок полей, иначе старый сайдбар)
   const sections = TEMPLATE_FIELDS[data.templateId];
+
+  // Вход в редактор — вторая ступень воронки после галереи шаблонов.
+  // Реф защищает от двойного вызова: в разработке StrictMode прогоняет
+  // эффекты дважды, и цель улетала бы два раза за один визит.
+  const goalSentRef = useRef(false);
+  useEffect(() => {
+    if (goalSentRef.current) return;
+    goalSentRef.current = true;
+    reachGoal(GOAL.editorOpen);
+  }, []);
 
   // ── Load draft ──────────────────────────────────────────────────────────────
   useEffect(() => {
