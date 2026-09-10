@@ -56,9 +56,10 @@ body {
   position: relative;
   width: 100%;
   container-type: inline-size;
-  background:
-    linear-gradient(rgba(255,255,255,.04), rgba(0,0,0,.03)),
-    var(--paper);
+  /* Ровный фон без подсветки: она была у каждой секции своя, и на стыке
+     тёмный низ одной встречался со светлым верхом следующей — страница
+     разлиновывалась полосами. Общая подсветка страницы осталась на body. */
+  background: var(--paper);
   overflow: hidden;
 }
 
