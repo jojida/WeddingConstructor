@@ -1,0 +1,275 @@
+/* ============================================================
+   STUDIO-BLOCKS.CSS — оформление блоков, которые разворачивает
+   studio-runtime.js. Общий файл на все шаблоны «Верстака».
+
+   Цвет, шрифт и кегль блок берёт из переменных, которые студия
+   выставляет на самом блоке: --wcb-ink, --wcb-accent, --wcb-font,
+   --wcb-size. Поэтому один и тот же блок выглядит по-разному в
+   разных шаблонах, а править CSS руками не нужно.
+   ============================================================ */
+
+[data-block] {
+  --wcb-ink: #3a3a3a;
+  --wcb-accent: #8c7a5e;
+  --wcb-font: inherit;
+  --wcb-size: 4cqw;
+  --wcb-gap: 3cqw;
+
+  font-family: var(--wcb-font);
+  color: var(--wcb-ink);
+  font-size: var(--wcb-size);
+  overflow: auto;
+}
+
+[data-block] * { box-sizing: border-box; }
+
+/* ---------- программа дня ---------- */
+
+.wcb-sch {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wcb-gap);
+}
+
+.wcb-sch__row {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 var(--wcb-gap);
+}
+
+.wcb-sch__icon {
+  width: 2.4em;
+  height: 2.4em;
+  object-fit: contain;
+  grid-row: span 2;
+}
+
+.wcb-sch__emoji {
+  font-size: 1.6em;
+  line-height: 1;
+  grid-row: span 2;
+}
+
+.wcb-sch__time {
+  font-variant-numeric: lining-nums tabular-nums;
+  color: var(--wcb-accent);
+  white-space: nowrap;
+}
+
+.wcb-sch__title {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.wcb-sch__desc {
+  grid-column: 2 / -1;
+  font-size: 0.82em;
+  opacity: 0.75;
+}
+
+/* ---------- календарь ---------- */
+
+.wcb-cal { text-align: center; }
+
+.wcb-cal__head {
+  color: var(--wcb-accent);
+  margin-bottom: 0.7em;
+  font-variant-numeric: lining-nums;
+}
+
+.wcb-cal__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.35em 0;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.wcb-cal__dow {
+  font-size: 0.78em;
+  opacity: 0.6;
+}
+
+.wcb-cal__day {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.wcb-cal__day.is-day {
+  background: var(--wcb-accent);
+  color: #fff;
+}
+
+/* ---------- отсчёт ---------- */
+
+.wcb-cd {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--wcb-gap);
+  text-align: center;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.wcb-cd__cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+}
+
+.wcb-cd__cell b {
+  font-weight: inherit;
+  font-size: 1.7em;
+  line-height: 1;
+  color: var(--wcb-accent);
+}
+
+.wcb-cd__cell i {
+  font-style: normal;
+  font-size: 0.7em;
+  opacity: 0.7;
+}
+
+/* ---------- дресс-код ---------- */
+
+.wcb-dc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wcb-gap);
+  align-items: center;
+}
+
+.wcb-dc__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6em;
+  justify-content: center;
+}
+
+.wcb-dc__swatch {
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.wcb-dc__photo {
+  width: 100%;
+  max-height: 70%;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+/* ---------- пожелания ---------- */
+
+.wcb-wishes {
+  margin: 0;
+  text-align: center;
+  line-height: 1.55;
+}
+
+/* ---------- анкета гостя ---------- */
+
+.wcb-rsvp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wcb-gap);
+}
+
+.wcb-rsvp__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+.wcb-rsvp__field > span {
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.wcb-rsvp input[type='text'] {
+  width: 100%;
+  padding: 0.6em 0.7em;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.wcb-rsvp__radio,
+.wcb-rsvp__check {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  cursor: pointer;
+}
+
+.wcb-rsvp__drinks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
+  gap: 0.4em 1em;
+}
+
+.wcb-rsvp input[type='radio'],
+.wcb-rsvp input[type='checkbox'] {
+  accent-color: var(--wcb-accent);
+}
+
+.wcb-rsvp__submit {
+  padding: 0.7em 1em;
+  border: none;
+  border-radius: 2px;
+  background: var(--wcb-accent);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.wcb-rsvp__submit:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.wcb-rsvp__done {
+  margin: 0;
+  text-align: center;
+  color: var(--wcb-accent);
+}
+
+/* ---------- появление при прокрутке ---------- */
+
+.wc-up {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-delay: var(--d, 0ms);
+}
+
+.wc-up.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Мягкий вариант — для слоёв со своим transform: обычный сбросил бы им
+   поворот и смещение, и элемент прыгнул бы на место из другой точки. */
+.wc-soft {
+  opacity: 0;
+  transition: opacity 0.85s ease;
+  transition-delay: var(--d, 0ms);
+}
+
+.wc-soft.in { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wc-up,
+  .wc-soft {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none;
+  }
+}

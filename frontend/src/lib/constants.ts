@@ -1,4 +1,6 @@
 /** Публичный адрес сайта (канонические URL, sitemap, OG). */
+import { STUDIO_TEMPLATES } from './studioTemplates';
+
 export const SITE_URL = 'https://weddingcraft.ru';
 
 /* ── Реквизиты исполнителя для оферты и политики конфиденциальности ──────────
@@ -51,7 +53,7 @@ export function templateCustomDefaults(templateId: string, weddingDate?: string)
   return custom;
 }
 
-export const TEMPLATES = [
+const HANDMADE_TEMPLATES = [
   {
     id: 'calla',
     name: 'Каллы',
@@ -122,6 +124,15 @@ export const TEMPLATES = [
     sampleBride: 'Анна',
     sampleGroom: 'Александр',
   }
+];
+
+/* Каталог = рукописные шаблоны + собранные в «Верстаке».
+   Второй список генерируется студией при экспорте, руками его не правят.
+   Одноимённый шаблон студии замещает рукописный: так открытый в студии
+   оригинал остаётся одной карточкой, а не двоится. */
+export const TEMPLATES = [
+  ...HANDMADE_TEMPLATES.filter((t) => !STUDIO_TEMPLATES.some((s) => s.id === t.id)),
+  ...STUDIO_TEMPLATES,
 ];
 
 export const _TEMPLATES_LEGACY = [
@@ -490,7 +501,7 @@ const MUSIC_SECTION: TemplateSection = {
   ],
 };
 
-export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
+const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   calla: [
     {
       title: 'Приветствие', icon: '✍️',
@@ -845,7 +856,16 @@ export interface TemplateDefaults {
   custom?: Record<string, any>;
 }
 
-export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
+/* Схема панели для шаблонов «Верстака» собирается студией из пометок на слоях.
+   Общий раздел с музыкой добавляется здесь, чтобы он был у всех одинаковый. */
+export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
+  ...HANDMADE_TEMPLATE_FIELDS,
+  ...Object.fromEntries(
+    STUDIO_TEMPLATES.map((t) => [t.id, [...(t.fields ?? []), MUSIC_SECTION]]),
+  ),
+};
+
+const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
   calla: {
     inviteText:
       'Мы безмерно рады пригласить вас разделить с нами одно из самых значимых и счастливых ' +
@@ -1030,4 +1050,11 @@ export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { time: '23:00', title: 'Завершение вечера',  icon: '', desc: 'Яркий финал праздника, тёплые слова и прощание с гостями.' },
     ],
   },
+};
+
+/* Значения по умолчанию для шаблонов «Верстака»: то, что стоит в дизайне.
+   Пара открывает кабинет и видит заполненные поля, а не пустые. */
+export const TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
+  ...HANDMADE_TEMPLATE_DEFAULTS,
+  ...Object.fromEntries(STUDIO_TEMPLATES.map((t) => [t.id, t.defaults ?? {}])),
 };

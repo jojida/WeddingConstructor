@@ -7,6 +7,8 @@ import FloralTemplate from './FloralTemplate';
 import GardenArchTemplate from './GardenArchTemplate';
 import SketchTemplate from './SketchTemplate';
 import CallaTemplate from './CallaTemplate';
+import StudioTemplate from './StudioTemplate';
+import { isStudioTemplate } from '@/lib/studioTemplates';
 
 export interface ScheduleItem { time: string; title: string; icon: string; }
 
@@ -51,6 +53,11 @@ export default function TemplatePreview({ data, apiBase, fullPage, slug, editing
   if (!Array.isArray(data.schedule) || data.schedule.length === 0) {
     const defSchedule = TEMPLATE_DEFAULTS[data.templateId]?.schedule;
     if (defSchedule?.length) data = { ...data, schedule: defSchedule };
+  }
+  // Шаблоны, собранные в «Верстаке», обслуживает одна общая обёртка:
+  // отдельный компонент на каждый новый шаблон писать не нужно.
+  if (isStudioTemplate(data.templateId)) {
+    return <StudioTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
   }
   if (data.templateId === 'sketch') {
     return <SketchTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;

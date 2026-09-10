@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "id": "calla-kopiya",
+      "name": "Каллы — копия",
+      "description": "",
+      "tags": [],
+      "colors": [],
+      "preview": "/invite/calla-kopiya/assets/cover.png",
+      "defaultCover": "/invite/calla-kopiya/assets/cover.png",
+      "defaultGallery": [],
+      "sampleBride": "Невеста",
+      "sampleGroom": "Жених",
+      "background": "rgb(215, 211, 203)",
+      "fields": [],
+      "defaults": {}
+    }
+  ]
+}
