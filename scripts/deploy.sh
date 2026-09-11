@@ -7,18 +7,23 @@
 # когда ничего не изменилось, выходит мгновенно и ничего не трогает.
 #
 # Ставится один раз:
-#   sudo cp /var/www/wedding/scripts/deploy.sh /usr/local/bin/wedding-deploy
-#   sudo chmod +x /usr/local/bin/wedding-deploy
-#   ( crontab -l 2>/dev/null; echo '* * * * * /usr/local/bin/wedding-deploy >> /var/log/wedding-deploy.log 2>&1' ) | crontab -
+#   chmod +x /var/www/wedding/scripts/deploy.sh
+#   ( crontab -l 2>/dev/null; echo '* * * * * /var/www/wedding/scripts/deploy.sh >> /var/log/wedding-deploy.log 2>&1' ) | crontab -
 #
-# Проверить руками:  /usr/local/bin/wedding-deploy
-# Посмотреть работу: tail -f /var/log/wedding-deploy.log
+# Запускать именно из репозитория, а не из копии в /usr/local/bin: копия
+# застынет на той версии, что была при установке, и правки этого файла до
+# сервера уже не доедут.
+#
+# Жив ли он:         cat /var/log/wedding-deploy.status
+# Что делал:         tail -f /var/log/wedding-deploy.log
+# Прогнать руками:   /var/www/wedding/scripts/deploy.sh
 
 set -euo pipefail
 
 REPO=/var/www/wedding
 BRANCH=main
 LOCK=/tmp/wedding-deploy.lock
+STATUS=/var/log/wedding-deploy.status
 
 # Сборка занимает минуты, а таймер тикает раз в минуту — без замка запуски
 # наложились бы друг на друга и добили 1 ГБ памяти.
@@ -32,6 +37,14 @@ cd "$REPO"
 git fetch --quiet origin "$BRANCH"
 local_rev=$(git rev-parse HEAD)
 remote_rev=$(git rev-parse "origin/$BRANCH")
+
+# Отметка живости. В лог писать нечего, когда ничего не изменилось, — иначе он
+# распухал бы на полторы тысячи строк в сутки. Но и молчание сбивает с толку:
+# по пустому логу не отличить «жду» от «не запускаюсь». Поэтому время
+# последней проверки кладём в отдельный файл, который всегда перезаписывается.
+printf '%s | HEAD %s | origin %s | %s
+'   "$(date '+%F %T')" "${local_rev:0:7}" "${remote_rev:0:7}"   "$([ "$local_rev" = "$remote_rev" ] && echo 'всё свежее' || echo 'есть что забрать')"   > "$STATUS" 2>/dev/null || true
+
 [ "$local_rev" = "$remote_rev" ] && exit 0
 
 log "новый коммит $remote_rev — обновляюсь"
