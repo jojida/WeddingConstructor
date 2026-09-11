@@ -21,20 +21,5 @@ export const STUDIO_TEMPLATES: StudioTemplateEntry[] = [
     "background": "rgb(215, 211, 203)",
     "fields": [],
     "defaults": {}
-  },
-  {
-    "id": "calla",
-    "name": "Каллы",
-    "description": "",
-    "tags": [],
-    "colors": [],
-    "preview": "/invite/calla/assets/cover.png",
-    "defaultCover": "/invite/calla/assets/cover.png",
-    "defaultGallery": [],
-    "sampleBride": "Невеста",
-    "sampleGroom": "Жених",
-    "background": "rgb(215, 211, 203)",
-    "fields": [],
-    "defaults": {}
   }
 ];
