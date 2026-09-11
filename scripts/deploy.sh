@@ -80,12 +80,38 @@ if ! git diff --quiet "$local_rev" "$remote_rev" -- frontend/package.json; then
   npm install --no-audit --no-fund
 fi
 
-# Без этого прод отдаёт старую сборку: проверено на этом сервере не раз.
-rm -rf .next
+# Старую сборку не удаляем, а отодвигаем.
+#
+# Удалять было опасно: на 1 ГБ памяти сборщик вполне может уйти в OOM, и тогда
+# .next уже стёрт, а новый не собран — сайт начинает отдавать ошибки, и никто
+# об этом не узнает до первого звонка от пары. Отодвинутая копия позволяет
+# вернуть рабочий сайт за секунду.
+#
+# Просто оставить .next на месте нельзя: прод тогда отдаёт старую сборку —
+# на этом сервере проверено не раз.
+rm -rf .next.old
+[ -d .next ] && mv .next .next.old
 
 # На 1 ГБ памяти сборщик уходит в OOM, если не ограничить кучу вручную;
 # swap есть, но по умолчанию Node о нём не догадывается.
-NODE_OPTIONS=--max-old-space-size=768 npm run build
+if NODE_OPTIONS=--max-old-space-size=768 npm run build; then
+  rm -rf .next.old
+  pm2 restart wedding-frontend --update-env
+  log "готово"
+else
+  log "СБОРКА УПАЛА на $remote_rev — возвращаю прежнюю, сайт продолжает работать"
+  rm -rf .next
+  [ -d .next.old ] && mv .next.old .next
 
-pm2 restart wedding-frontend --update-env
-log "готово"
+  # Про неудачу нужно узнать, не читая лог целиком.
+  {
+    echo "проверено:  $(date '+%F %T')"
+    echo "на сервере: ${remote_rev:0:7} (код обновлён)"
+    echo "состояние:  СБОРКА УПАЛА — сайт работает на прежней сборке"
+    echo "подробности: tail -50 /var/log/wedding-deploy.log"
+  } > "$STATUS" 2>/dev/null || true
+
+  # Коммит оставляем подтянутым: иначе таймер будет биться об один и тот же
+  # сломанный коммит каждую минуту. Чинить — руками.
+  exit 1
+fi
