@@ -42,8 +42,13 @@ remote_rev=$(git rev-parse "origin/$BRANCH")
 # распухал бы на полторы тысячи строк в сутки. Но и молчание сбивает с толку:
 # по пустому логу не отличить «жду» от «не запускаюсь». Поэтому время
 # последней проверки кладём в отдельный файл, который всегда перезаписывается.
-printf '%s | HEAD %s | origin %s | %s
-'   "$(date '+%F %T')" "${local_rev:0:7}" "${remote_rev:0:7}"   "$([ "$local_rev" = "$remote_rev" ] && echo 'всё свежее' || echo 'есть что забрать')"   > "$STATUS" 2>/dev/null || true
+if [ "$local_rev" = "$remote_rev" ]; then state='всё свежее'; else state='есть что забрать'; fi
+{
+  echo "проверено:  $(date '+%F %T')"
+  echo "на сервере: ${local_rev:0:7}"
+  echo "на GitHub:  ${remote_rev:0:7}"
+  echo "состояние:  $state"
+} > "$STATUS" 2>/dev/null || true
 
 [ "$local_rev" = "$remote_rev" ] && exit 0
 
