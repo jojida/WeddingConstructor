@@ -7,8 +7,12 @@
 # когда ничего не изменилось, выходит мгновенно и ничего не трогает.
 #
 # Ставится один раз:
-#   chmod +x /var/www/wedding/scripts/deploy.sh
-#   ( crontab -l 2>/dev/null; echo '* * * * * /var/www/wedding/scripts/deploy.sh >> /var/log/wedding-deploy.log 2>&1' ) | crontab -
+#   ( crontab -l 2>/dev/null; echo '* * * * * bash /var/www/wedding/scripts/deploy.sh >> /var/log/wedding-deploy.log 2>&1' ) | crontab -
+#
+# Именно `bash <путь>`, а не сам путь: тогда биту исполняемости неоткуда
+# разойтись с репозиторием. Один `chmod +x` на сервере уже оборачивался тем,
+# что git считал файл изменённым и отказывался делать merge — деплой вставал
+# намертво, повторяя одну и ту же ошибку каждую минуту.
 #
 # Запускать именно из репозитория, а не из копии в /usr/local/bin: копия
 # застынет на той версии, что была при установке, и правки этого файла до
