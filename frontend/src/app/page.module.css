@@ -52,6 +52,10 @@
 .headerScrolled .headerInner { padding: 10px 80px; }
 
 .logo {
+  /* Монограмма и слово — одной строкой, gap вместо отступов у картинки. */
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-family: var(--font-playfair);
   font-size: 20px;
   font-weight: 500;

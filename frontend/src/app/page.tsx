@@ -23,7 +23,10 @@ function Header() {
   return (
     <header className={`${styles.header} ${scrolled ? styles.headerScrolled : ''}`}>
       <div className={styles.headerInner}>
-        <Link href="/" className={styles.logo}>WeddingCraft</Link>
+        <Link href="/" className={styles.logo}>
+          <img src="/brand/logo-mark.svg" alt="" width="31" height="22" style={{ display: 'block' }} />
+          WeddingCraft
+        </Link>
 
         <nav className={styles.nav}>
           <Link href="/templates" className={styles.navLink}>Шаблоны</Link>
