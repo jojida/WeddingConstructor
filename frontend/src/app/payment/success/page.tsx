@@ -30,10 +30,11 @@ function SuccessContent() {
   const stop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
 
   const startPolling = useCallback(() => {
-    if (!inviteId) return;
+    if (!inviteId) { setState('stalled'); return; }
     stop();
     triesRef.current = 0;
     setState('checking');
+    setPaymentStatus('');
 
     const check = async () => {
       triesRef.current += 1;

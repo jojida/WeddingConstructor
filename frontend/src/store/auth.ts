@@ -42,9 +42,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const res = await api.get('/api/auth/me');
       set({ user: res.data, token, loading: false });
-    } catch {
-      localStorage.removeItem('wc_token');
-      set({ user: null, token: null, loading: false });
+    } catch (error) {
+      const status = (error as { response?: { status?: number } }).response?.status;
+      if (status === 401 || status === 403) {
+        localStorage.removeItem('wc_token');
+        set({ user: null, token: null, loading: false });
+      } else {
+        set({ token, loading: false });
+      }
     }
   },
 }));

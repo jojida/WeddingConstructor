@@ -15,8 +15,18 @@ import guestsRouter from './routes/guests';
 import telegramRouter from './routes/telegram';
 import domainsRouter from './routes/domains';
 import { initTelegram } from './lib/telegram';
+import { jwtSecret } from './lib/security';
+import { rateLimit } from './middleware/rateLimit';
 
 const app = express();
+jwtSecret(); // Fail closed before accepting requests with an insecure configuration.
+app.disable('x-powered-by');
+app.set('trust proxy', 'loopback');
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
 const PORT = process.env.PORT || 4000;
 
 // Middleware
@@ -46,17 +56,22 @@ app.use(cors({
   },
   credentials: true,
 }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false, limit: '64kb' }));
+app.use('/api', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
 
 // Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  setHeaders(res) {
+    res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+  },
+}));
 
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/invites', inviteRouter);
-app.use('/api/upload', uploadRouter);
-app.use('/api/payment', paymentRouter);
+app.use('/api/upload', rateLimit(40, 60 * 60_000), uploadRouter);
+app.use('/api/payment', rateLimit(120, 60_000), paymentRouter);
 app.use('/api/rsvp', rsvpRouter);
 app.use('/api/guests', guestsRouter);
 app.use('/api/telegram', telegramRouter);
@@ -67,9 +82,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  const status = err.type === 'entity.too.large' ? 413 : err instanceof SyntaxError ? 400 : 500;
+  console.error('API request failed:', err.code || err.name || 'Error');
+  res.status(status).json({ error: status === 413 ? 'Слишком большой запрос' : status === 400 ? 'Некорректный JSON' : 'Ошибка сервера' });
+});
+
+if (require.main === module) app.listen(PORT, () => {
   console.log(`🚀 Wedding Constructor API running on http://localhost:${PORT}`);
   // Бот сервиса настраивается сам, если задан TELEGRAM_BOT_TOKEN:
   // имя берётся через getMe, вебхук ставится на BACKEND_URL.
   initTelegram();
 });
+export default app;

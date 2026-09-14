@@ -22,7 +22,19 @@
 
   function pad(n) { return String(n).padStart(2, '0'); }
 
+
+  function safeHref(value) {
+    if (typeof value !== 'string') return '#';
+    try {
+      var parsed = new URL(value, window.location.href);
+      return /^(https?:|mailto:|tel:)$/.test(parsed.protocol) ? parsed.href : '#';
+    } catch (_) { return '#'; }
+  }
+
   function imageUrl(url) {
+    if (typeof url !== 'string' || /[<>"\x00-\x20]/.test(url)) return '';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:image\/(png|jpeg|gif|webp);base64,)/i.test(url)) return '';
+
     if (!url) return '';
     if (/^https?:\/\//.test(url) || url.indexOf('data:') === 0) return url;
     // Ассеты фронтенда (этот же origin) — без префикса apiBase
@@ -82,7 +94,7 @@
     var addrEl = document.querySelector('[data-edit="venueAddress"]');
     if (addrEl) {
       if (d.venueAddress) addrEl.textContent = d.venueAddress;
-      if (d.mapLink) addrEl.setAttribute('href', d.mapLink);
+      if (d.mapLink) addrEl.setAttribute('href', safeHref(d.mapLink));
     }
 
     // Тексты
@@ -129,7 +141,7 @@
     if (d.dressCodePhoto) {
       var slot = document.getElementById('dc-custom-photo');
       if (slot) {
-        slot.innerHTML = '<img src="' + imageUrl(d.dressCodePhoto) + '" alt="Образ" class="dc-custom-img" />';
+        slot.innerHTML = '<img src="' + escapeHtml(imageUrl(d.dressCodePhoto)) + '" alt="Образ" class="dc-custom-img" />';
         slot.removeAttribute('hidden');
       }
     }
@@ -351,6 +363,7 @@
 
   // ─── postMessage от редактора (живое превью) ─────
   window.addEventListener('message', function (e) {
+    if (e.origin !== window.location.origin || e.source !== window.parent) return;
     var msg = e.data;
     if (msg && msg.type === 'wc:data' && msg.payload) {
       applyData(msg.payload);
@@ -366,7 +379,7 @@
     // Сообщить родителю (редактору), что iframe готов принимать данные
     try {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'wc:ready' }, '*');
+        window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);
       }
     } catch (e) {}
   }

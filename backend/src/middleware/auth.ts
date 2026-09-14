@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { jwtSecret } from '../lib/security';
 
 export interface AuthRequest extends Request {
   userId?: string;
@@ -14,7 +15,8 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
 
   const token = authHeader.slice(7);
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { userId: string };
+    const payload = jwt.verify(token, jwtSecret(), { algorithms: ['HS256'] });
+    if (typeof payload === 'string' || typeof payload.userId !== 'string' || !payload.userId) throw new Error('Invalid subject');
     req.userId = payload.userId;
     next();
   } catch {

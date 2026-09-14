@@ -17,7 +17,19 @@
     });
   }
 
+
+  function safeHref(value) {
+    if (typeof value !== 'string') return '#';
+    try {
+      var parsed = new URL(value, window.location.href);
+      return /^(https?:|mailto:|tel:)$/.test(parsed.protocol) ? parsed.href : '#';
+    } catch (_) { return '#'; }
+  }
+
   function imageUrl(url) {
+    if (typeof url !== 'string' || /[<>"\x00-\x20]/.test(url)) return '';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:image\/(png|jpeg|gif|webp);base64,)/i.test(url)) return '';
+
     if (!url) return '';
     if (/^https?:\/\//.test(url) || url.indexOf('data:') === 0) return url;
     if (url.indexOf('/invite/') === 0) return url;
@@ -44,7 +56,7 @@
     if (!url) return;
     var u = imageUrl(url);
     document.querySelectorAll('image[data-edit="' + key + '"]').forEach(function (el) {
-      el.setAttribute('href', u);
+      el.setAttribute('href', safeHref(u));
       el.setAttributeNS('http://www.w3.org/1999/xlink', 'href', u);
     });
   }
@@ -133,7 +145,7 @@
   function iconHtml(raw) {
     raw = raw || '';
     if (!raw) return '';
-    if (isImageIcon(raw)) return '<img class="sched-icon" src="' + imageUrl(raw) + '" alt="">';
+    if (isImageIcon(raw)) return '<img class="sched-icon" src="' + escapeHtml(imageUrl(raw)) + '" alt="">';
     return '<span class="sched-icon sched-emoji">' + escapeHtml(raw) + '</span>';
   }
 
@@ -171,7 +183,7 @@
     if (!url) return;
     document.querySelectorAll('[data-edit="venue"], [data-edit="venueAddress"]').forEach(function (el) {
       if (el.tagName === 'A') {
-        el.setAttribute('href', url);
+        el.setAttribute('href', safeHref(url));
         el.setAttribute('target', '_blank');
         el.setAttribute('rel', 'noopener');
         return;
@@ -272,6 +284,7 @@
   }
 
   window.addEventListener('message', function (e) {
+    if (e.origin !== window.location.origin || e.source !== window.parent) return;
     var msg = e.data;
     if (msg && msg.type === 'wc:data' && msg.payload) applyData(msg.payload);
   });
@@ -282,7 +295,7 @@
     initRsvp();
     try {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'wc:ready' }, '*');
+        window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);
       }
     } catch (e) {}
   }

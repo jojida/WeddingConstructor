@@ -1,16 +1,15 @@
 module.exports = {
   apps: [
     {
-      name: 'wedding-backend',
+      name: 'wedding-api',
       cwd: './backend',
-      script: 'npx',
-      args: 'ts-node-dev --respawn --transpile-only src/index.ts',
+      script: 'dist/index.js',
       shell: true,
       watch: false,
       autorestart: true,
       restart_delay: 3000,
       env: {
-        NODE_ENV: 'development',
+        NODE_ENV: 'production',
         PORT: '4000',
       },
     },
@@ -18,13 +17,13 @@ module.exports = {
       name: 'wedding-frontend',
       cwd: './frontend',
       script: 'npx',
-      args: 'next dev',
+      args: 'next start',
       shell: true,
       watch: false,
       autorestart: true,
       restart_delay: 3000,
       env: {
-        NODE_ENV: 'development',
+        NODE_ENV: 'production',
         PORT: '3000',
       },
     },

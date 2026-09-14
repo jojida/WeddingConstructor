@@ -1,0 +1,939 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Верстак — оболочка инструмента.
+   Тёмная хромировка, как у настольных редакторов: панели не спорят с холстом.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.shell {
+  --s-bg: #1b1b20;
+  --s-panel: #232329;
+  --s-panel-2: #2a2a32;
+  --s-line: #35353f;
+  --s-line-soft: #2e2e37;
+  --s-text: #e8e6ed;
+  --s-text-dim: #9b98a6;
+  --s-text-faint: #6f6c7b;
+  --s-accent: #e0457b;
+  --s-accent-dim: #b8305f;
+  --s-canvas: #121215;
+
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-rows: 46px minmax(0, 1fr);
+  grid-template-columns: 252px minmax(0, 1fr) 276px;
+  grid-template-areas:
+    'top  top    top'
+    'left canvas right';
+  background: var(--s-bg);
+  color: var(--s-text);
+  font-family: ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell *,
+.shell *::before,
+.shell *::after {
+  box-sizing: border-box;
+}
+
+/* ─── верхняя панель ──────────────────────────────────────────────────────── */
+
+.top {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--s-line);
+  background: var(--s-panel);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-right: 6px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.brandMark {
+  color: var(--s-accent);
+  font-size: 15px;
+}
+
+.projectName {
+  color: var(--s-text);
+  font-weight: 500;
+}
+
+.projectSlug {
+  color: var(--s-text-faint);
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 11px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0 8px;
+  border-left: 1px solid var(--s-line);
+  border-right: 1px solid var(--s-line);
+}
+
+.dirtyDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--s-accent);
+  flex: none;
+}
+
+/* ─── кнопки ──────────────────────────────────────────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--s-line);
+  border-radius: 5px;
+  background: var(--s-panel-2);
+  color: var(--s-text);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: #43434f;
+  background: #31313a;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btn:focus-visible,
+.iconBtn:focus-visible,
+.input:focus-visible,
+.secRow:focus-visible {
+  outline: 2px solid var(--s-accent);
+  outline-offset: 1px;
+}
+
+.btnPrimary {
+  border-color: var(--s-accent-dim);
+  background: var(--s-accent);
+  color: #fff;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  border-color: var(--s-accent);
+  background: #ea5187;
+}
+
+.iconBtn {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--s-text-dim);
+  cursor: pointer;
+}
+
+.iconBtn:hover:not(:disabled) {
+  background: var(--s-panel-2);
+  color: var(--s-text);
+}
+
+.iconBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.iconBtnOn {
+  background: var(--s-panel-2);
+  border-color: var(--s-line);
+  color: var(--s-accent);
+}
+
+.zoomLabel {
+  min-width: 52px;
+  text-align: center;
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 11.5px;
+  color: var(--s-text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── боковые панели ──────────────────────────────────────────────────────── */
+
+.left {
+  grid-area: left;
+  border-right: 1px solid var(--s-line);
+  background: var(--s-panel);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.right {
+  grid-area: right;
+  border-left: 1px solid var(--s-line);
+  background: var(--s-panel);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px 0 12px;
+  border-bottom: 1px solid var(--s-line-soft);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--s-text-faint);
+  position: sticky;
+  top: 0;
+  background: var(--s-panel);
+  z-index: 2;
+}
+
+.panelBody {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ─── список секций ───────────────────────────────────────────────────────── */
+
+.secRow {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--s-text-dim);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.secRow:hover {
+  background: var(--s-panel-2);
+  color: var(--s-text);
+}
+
+.secRowActive {
+  background: var(--s-panel-2);
+  border-color: var(--s-line);
+  color: var(--s-text);
+}
+
+.secIndex {
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 10.5px;
+  color: var(--s-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.secName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.secMeta {
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 10.5px;
+  color: var(--s-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- список слоёв ---------- */
+
+.layerList {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 2px 0 6px 10px;
+  padding-left: 8px;
+  border-left: 1px solid var(--s-line-soft);
+}
+
+.layerRow {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr) 18px 20px 20px;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--s-text-dim);
+  cursor: pointer;
+  user-select: none;
+}
+
+.layerRow:hover {
+  background: var(--s-panel-2);
+  color: var(--s-text);
+}
+
+.layerRowActive {
+  background: var(--s-panel-2);
+  border-color: var(--s-accent);
+  color: var(--s-text);
+}
+
+.layerIcon {
+  color: var(--s-text-faint);
+}
+
+.layerRename {
+  height: 22px;
+  font-size: 12px;
+}
+
+.rowBtn {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--s-text-faint);
+  cursor: pointer;
+}
+
+.rowBtn:hover {
+  background: var(--s-line);
+  color: var(--s-text);
+}
+
+.emptyHint {
+  padding: 10px 12px 14px;
+  color: var(--s-text-faint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* ─── инспектор ───────────────────────────────────────────────────────────── */
+
+.tabs {
+  display: grid;
+  grid-auto-flow: column;
+  border-bottom: 1px solid var(--s-line-soft);
+  position: sticky;
+  top: 0;
+  background: var(--s-panel);
+  z-index: 2;
+}
+
+.tab {
+  height: 32px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--s-text-faint);
+  font: inherit;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.tab:hover {
+  color: var(--s-text-dim);
+}
+
+.tabOn {
+  color: var(--s-text);
+  border-bottom-color: var(--s-accent);
+}
+
+.group {
+  padding: 12px;
+  border-bottom: 1px solid var(--s-line-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupTitle {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--s-text-faint);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--s-text-dim);
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--s-line);
+  border-radius: 5px;
+  background: #1d1d22;
+  color: var(--s-text);
+  font: inherit;
+  font-size: 12.5px;
+}
+
+.textarea {
+  height: auto;
+  min-height: 66px;
+  padding: 7px 8px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.input:disabled {
+  color: var(--s-text-faint);
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- проверка ---------- */
+
+.issueRow {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--s-line-soft);
+  border-radius: 5px;
+  background: #1d1d22;
+  color: var(--s-text-dim);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+
+.issueRow:hover {
+  border-color: var(--s-line);
+  color: var(--s-text);
+}
+
+.issueRow svg {
+  margin-top: 2px;
+  color: #d3a34a;
+}
+
+.issueError svg {
+  color: var(--s-accent);
+}
+
+/* ---------- файлы шаблона ---------- */
+
+.assetRow {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 20px;
+  gap: 9px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid var(--s-line-soft);
+  border-radius: 5px;
+  background: #1d1d22;
+}
+
+.assetThumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: var(--s-panel-2);
+  color: var(--s-text-dim);
+}
+
+.assetInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.fontAdd {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.fileBtn {
+  justify-content: center;
+  cursor: pointer;
+}
+
+.alignRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--s-text-dim);
+  cursor: pointer;
+}
+
+.checkRow input {
+  accent-color: var(--s-accent);
+}
+
+.colorRow {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.colorWell {
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--s-line);
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.hint {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--s-text-faint);
+}
+
+/* ─── холст ───────────────────────────────────────────────────────────────── */
+
+.canvasArea {
+  grid-area: canvas;
+  position: relative;
+  overflow: hidden;
+  background: var(--s-canvas);
+  touch-action: none;
+}
+
+.canvasArea[data-panning='true'] {
+  cursor: grabbing;
+}
+
+.canvasArea[data-panready='true'] {
+  cursor: grab;
+}
+
+.rulerCorner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 22px;
+  height: 22px;
+  background: var(--s-panel);
+  border-right: 1px solid var(--s-line);
+  border-bottom: 1px solid var(--s-line);
+  z-index: 3;
+}
+
+.rulerX,
+.rulerY {
+  position: absolute;
+  background: var(--s-panel);
+  z-index: 2;
+}
+
+.rulerX {
+  left: 22px;
+  top: 0;
+  right: 0;
+  height: 22px;
+  border-bottom: 1px solid var(--s-line);
+}
+
+.rulerY {
+  left: 0;
+  top: 22px;
+  bottom: 0;
+  width: 22px;
+  border-right: 1px solid var(--s-line);
+}
+
+.viewport {
+  position: absolute;
+  left: 22px;
+  top: 22px;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* Композиторный слой — только на время протяжки.
+   Постоянный will-change заставлял браузер растрировать холст один раз и
+   дальше растягивать готовый битмап: при увеличении расплывалось всё, включая
+   вектор и текст. Во время протяжки масштаб не меняется, растр там уместен —
+   он и делает её плавной. */
+[data-panning='true'] .world {
+  will-change: transform;
+}
+
+/* container-type обязателен: слои позиционируются в cqw, и без контейнера
+   они считались бы от окна, а не от холста — то есть от другого числа, чем
+   в экспортированном шаблоне. */
+.sectionBox {
+  position: absolute;
+  left: 0;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+/* Слой живёт по размерам из документа.
+
+   В приложении действует общий сброс Tailwind — img, video { max-width: 100% } —
+   и он молча ужимал декор, нарочно выходящий за края секции, до её ширины:
+   рамка «Пожеланий» рисовалась 430px вместо 533px, теряла пропорции и уезжала
+   влево. На готовой странице такого сброса нет, поэтому здесь его снимаем —
+   иначе холст показывает не то, что получится. */
+.sectionBox [data-layer] {
+  max-width: none;
+  max-height: none;
+}
+
+/* Страница на тёмном поле — одна тень на всю стопку секций. */
+.pageShade {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+/* Полоса на стыке секций.
+   Постоянная линия делила бы макет на куски, которых на странице нет, поэтому
+   стык проявляется только под курсором — там, где его собираются потянуть. */
+.sectionGrip {
+  position: absolute;
+  left: 0;
+  cursor: ns-resize;
+  background: transparent;
+  z-index: 4;
+}
+
+.sectionGrip:hover {
+  background: var(--s-accent);
+}
+
+/* ---------- выделение и жесты ---------- */
+
+.selBox {
+  position: absolute;
+  outline: 1px solid var(--s-accent);
+  pointer-events: none;
+}
+
+.handle,
+.rotateHandle {
+  position: absolute;
+  display: block;
+  background: var(--s-panel);
+  border: 1px solid var(--s-accent);
+  pointer-events: auto;
+}
+
+.rotateHandle {
+  left: 50%;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+
+.guideV,
+.guideH {
+  position: absolute;
+  background: var(--s-accent);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.sectionBoxActive {
+  outline: 1px solid var(--s-accent);
+  outline-offset: 0;
+}
+
+/* Секции стыкуются вплотную, поэтому подпись уходит в поле слева от холста
+   и не ложится на макет. */
+.sectionTag {
+  position: absolute;
+  transform: translateX(-100%);
+  padding: 1px 6px 2px;
+  border-radius: 3px 0 0 3px;
+  background: var(--s-canvas);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--s-text-dim);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.sectionTagActive {
+  color: var(--s-accent);
+}
+
+.sectionPlaceholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(0, 0, 0, 0.22);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.dropHint {
+  position: absolute;
+  inset: 22px 0 0 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(224, 69, 123, 0.08);
+  border: 1px dashed var(--s-accent);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.dropHint span {
+  padding: 7px 14px;
+  border-radius: 6px;
+  background: var(--s-panel);
+  border: 1px solid var(--s-accent);
+  color: var(--s-text);
+  font-size: 12.5px;
+}
+
+.secRowDrop {
+  border-color: var(--s-accent) !important;
+  background: rgba(224, 69, 123, 0.12) !important;
+}
+
+.statusBar {
+  position: absolute;
+  left: 30px;
+  bottom: 10px;
+  display: flex;
+  gap: 14px;
+  padding: 5px 10px;
+  border: 1px solid var(--s-line);
+  border-radius: 6px;
+  background: rgba(35, 35, 41, 0.92);
+  color: var(--s-text-faint);
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ─── стартовый экран ─────────────────────────────────────────────────────── */
+
+.start {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: var(--s-bg, #1b1b20);
+  color: #e8e6ed;
+  font-family: ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  overflow: auto;
+}
+
+.startInner {
+  width: 100%;
+  max-width: 760px;
+  display: grid;
+  gap: 26px;
+}
+
+.startTitle {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.startSub {
+  margin: 6px 0 0;
+  color: #9b98a6;
+  max-width: 54ch;
+  line-height: 1.55;
+}
+
+.startCols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 720px) {
+  .startCols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.card {
+  border: 1px solid #35353f;
+  border-radius: 8px;
+  background: #232329;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardTitle {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6f6c7b;
+}
+
+.projectList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.projectItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: #2a2a32;
+  color: #e8e6ed;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.projectItem:hover {
+  border-color: #43434f;
+}
+
+.projectItemMeta {
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  font-size: 11px;
+  color: #6f6c7b;
+  font-variant-numeric: tabular-nums;
+}
+
+.galleryRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 10px;
+  border: 1px solid #35353f;
+  border-radius: 6px;
+  background: #2a2a32;
+}
+
+.widthChoice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  height: 28px;
+  padding: 0 11px;
+  border: 1px solid #35353f;
+  border-radius: 5px;
+  background: #2a2a32;
+  color: #9b98a6;
+  font: inherit;
+  font-size: 12.5px;
+  font-family: ui-monospace, 'Cascadia Mono', monospace;
+  cursor: pointer;
+}
+
+.chipOn {
+  border-color: #b8305f;
+  background: #e0457b;
+  color: #fff;
+}
+
+.error {
+  padding: 8px 10px;
+  border: 1px solid #7a2340;
+  border-radius: 5px;
+  background: rgba(224, 69, 123, 0.12);
+  color: #ff9dbe;
+  font-size: 12px;
+  line-height: 1.45;
+}

@@ -41,6 +41,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
     const res = await fetch('https://api.resend.com/emails', {
+      signal: AbortSignal.timeout(15_000),
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -62,6 +63,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
   const key = process.env.BREVO_API_KEY;
   if (key) {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      signal: AbortSignal.timeout(15_000),
       method: 'POST',
       headers: {
         'api-key': key,

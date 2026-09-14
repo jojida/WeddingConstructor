@@ -35,7 +35,19 @@
   }
 
   /** Путь к картинке: из конструктора приходит и абсолютный, и относительный. */
+
+  function safeHref(value) {
+    if (typeof value !== 'string') return '#';
+    try {
+      var parsed = new URL(value, window.location.href);
+      return /^(https?:|mailto:|tel:)$/.test(parsed.protocol) ? parsed.href : '#';
+    } catch (_) { return '#'; }
+  }
+
   function imageUrl(url) {
+    if (typeof url !== 'string' || /[<>"\x00-\x20]/.test(url)) return '';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:image\/(png|jpeg|gif|webp);base64,)/i.test(url)) return '';
+
     if (!url) return '';
     if (/^https?:\/\//.test(url) || url.indexOf('data:') === 0) return url;
     if (url.indexOf('/invite/') === 0) return url;
@@ -76,14 +88,14 @@
 
   /** Ссылка на карту: у <a> ставим href, остальным — клик и пунктир. */
   function applyMapLink(link) {
-    if (!link) return;
     each('[data-edit="venue"], [data-edit="venueAddress"]', function (el) {
-      if (el.tagName === 'A') { el.href = link; el.target = '_blank'; return; }
+      if (el.tagName === 'A') { el.href = safeHref(link); el.target = '_blank'; return; }
+      el.dataset.wcMapLink = safeHref(link);
       if (el.dataset.wcMapBound) return;
       el.dataset.wcMapBound = '1';
       el.style.cursor = 'pointer';
       el.style.textDecoration = 'underline dotted';
-      el.addEventListener('click', function () { window.open(link, '_blank'); });
+      el.addEventListener('click', function () { window.open(el.dataset.wcMapLink, '_blank', 'noopener,noreferrer'); });
     });
   }
 
@@ -359,11 +371,12 @@
     setInterval(tickCountdown, 1000);
 
     window.addEventListener('message', function (e) {
+    if (e.origin !== window.location.origin || e.source !== window.parent) return;
       var msg = e.data;
       if (msg && msg.type === 'wc:data' && msg.payload) applyData(msg.payload);
     });
     // Кабинет ждёт этот сигнал, чтобы прислать данные сразу после загрузки.
-    try { window.parent.postMessage({ type: 'wc:ready' }, '*'); } catch (err) { /* не в iframe */ }
+    try { window.parent.postMessage({ type: 'wc:ready' }, window.location.origin); } catch (err) { /* не в iframe */ }
   }
 
   window.WCStudio = { start: start, applyData: applyData };

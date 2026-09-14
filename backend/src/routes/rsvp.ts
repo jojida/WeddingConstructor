@@ -4,11 +4,12 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { notifyOwner } from '../lib/notify';
 import { isPaid } from '../lib/plans';
 import { inviteDrinkLabels } from '../lib/drinks';
+import { rateLimit } from '../middleware/rateLimit';
 
 const router = Router();
 
 // POST /api/rsvp/:slug — публичная отправка анкеты гостем
-router.post('/:slug', async (req: Request, res: Response) => {
+router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Response) => {
   const slug = req.params.slug as string;
   try {
     const invite = await prisma.invitation.findUnique({ where: { slug } });
@@ -19,18 +20,29 @@ router.post('/:slug', async (req: Request, res: Response) => {
     }
 
     const { guestName, attending, drinkChoice, wishes, guestToken } = req.body;
+    if (typeof attending !== 'boolean' ||
+        (guestName != null && (typeof guestName !== 'string' || guestName.length > 200)) ||
+        (drinkChoice != null && (typeof drinkChoice !== 'string' || drinkChoice.length > 500)) ||
+        (wishes != null && (typeof wishes !== 'string' || wishes.length > 4000)) ||
+        (guestToken != null && (typeof guestToken !== 'string' || guestToken.length > 100))) {
+      return res.status(400).json({ error: 'Проверьте поля анкеты' });
+    }
 
     // Персональная ссылка (продвинутый тариф): связываем ответ с гостем.
     let guest = null as Awaited<ReturnType<typeof prisma.guest.findUnique>> | null;
     if (guestToken) {
       guest = await prisma.guest.findUnique({ where: { token: String(guestToken) } });
       if (guest && guest.invitationId !== invite.id) guest = null; // токен от другого приглашения
+      if (!guest) return res.status(400).json({ error: 'Персональная ссылка недействительна' });
     }
 
     const finalName = (guestName && String(guestName).trim()) || (guest ? guest.names : '');
     if (!finalName) return res.status(400).json({ error: 'Укажите ваше имя' });
 
-    const response = await prisma.guestResponse.create({
+    const response = await prisma.$transaction(async tx => {
+      // A personal link represents one answer, including after resubmission.
+      if (guest) await tx.guestResponse.deleteMany({ where: { invitationId: invite.id, guestId: guest.id } });
+      const saved = await tx.guestResponse.create({
       data: {
         invitationId: invite.id,
         guestId: guest ? guest.id : null,
@@ -39,11 +51,10 @@ router.post('/:slug', async (req: Request, res: Response) => {
         drinkChoice: drinkChoice || '',
         wishes: wishes || '',
       },
+      });
+      if (guest) await tx.guest.update({ where: { id: guest.id }, data: { responseId: saved.id } });
+      return saved;
     });
-
-    if (guest) {
-      await prisma.guest.update({ where: { id: guest.id }, data: { responseId: response.id } });
-    }
 
     // Уведомление владельцу по выбранному каналу (best-effort, не блокирует ответ)
     notifyOwner(invite as any, {
@@ -85,7 +96,7 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
         }
       }
       return acc;
-    }, {} as Record<string, number>),
+    }, Object.create(null) as Record<string, number>),
   };
 
   return res.json({ responses, stats, drinkLabels: inviteDrinkLabels(invite.customData) });

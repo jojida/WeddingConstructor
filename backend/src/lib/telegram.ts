@@ -5,6 +5,7 @@
 // Владельцу достаточно положить в .env один TELEGRAM_BOT_TOKEN: имя бота
 // определяется через getMe, а вебхук ставится сам при старте сервера.
 
+import { telegramWebhookSecret } from './security';
 let cachedUsername = '';
 
 /** Имя бота для deep-link. Берётся из Telegram, env — запасной вариант. */
@@ -43,7 +44,7 @@ export async function initTelegram(): Promise<void> {
     const res: any = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, allowed_updates: ['message'] }),
+      body: JSON.stringify({ url, secret_token: telegramWebhookSecret(), allowed_updates: ['message'] }),
     }).then(r => r.json());
     if (res?.ok) console.log(`🤖 Telegram: вебхук установлен на ${url}`);
     else console.error('🤖 Telegram setWebhook:', res?.description || res);

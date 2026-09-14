@@ -355,7 +355,7 @@ function EditorContent() {
       const res    = await api.post('/api/invites', { templateId });
       const newId  = res.data.id;
       sessionStorage.setItem('wc_draft_id', newId);
-      const merged = { ...res.data, ...guestData, id: newId, dressCodeColors: guestData.dressCodeColors || [] };
+      const merged = { ...EMPTY, ...res.data, ...guestData, id: newId, dressCodeColors: guestData.dressCodeColors || [] };
       if (Object.keys(guestData).length > 0) {
         await api.put(`/api/invites/${newId}`, merged);
         localStorage.removeItem(GUEST_DRAFT_KEY);

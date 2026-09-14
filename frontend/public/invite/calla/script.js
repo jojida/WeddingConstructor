@@ -27,7 +27,19 @@
     });
   }
 
+
+  function safeHref(value) {
+    if (typeof value !== 'string') return '#';
+    try {
+      var parsed = new URL(value, window.location.href);
+      return /^(https?:|mailto:|tel:)$/.test(parsed.protocol) ? parsed.href : '#';
+    } catch (_) { return '#'; }
+  }
+
   function imageUrl(url) {
+    if (typeof url !== 'string' || /[<>"\x00-\x20]/.test(url)) return '';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:image\/(png|jpeg|gif|webp);base64,)/i.test(url)) return '';
+
     if (!url) return '';
     if (/^https?:\/\//.test(url) || url.indexOf('data:') === 0) return url;
     if (url.indexOf('/invite/') === 0) return url;
@@ -69,7 +81,7 @@
     }
     var sign = document.querySelector('[data-edit="closingSign"]');
     if (sign && !sign.dataset.userset && (bride || groom)) {
-      sign.textContent = 'Ваши ' + (bride || '') + ' и ' + (groom || '');
+      sign.textContent = 'Ваши ' + [bride, groom].filter(Boolean).join(' и ');
     }
   }
 
@@ -174,7 +186,7 @@
       div.className = 'tl-node ' + (idx % 2 === 0 ? 'tl-nl' : 'tl-nr') + ' fade-soft';
       div.style.top = (ys[idx] / H * 100).toFixed(2) + '%';
       div.innerHTML =
-        '<img class="tl-icon-node zoomable" src="' + imageUrl(it.icon || '') + '" alt="">' +
+        '<img class="tl-icon-node zoomable" src="' + escapeHtml(imageUrl(it.icon || '')) + '" alt="">' +
         '<div class="tl-node-info"><time class="tl-time">' + escapeHtml(it.time || '') +
         '</time><p class="tl-text">' + escapeHtml(it.title || '') + '</p></div>';
       inner.appendChild(div);
@@ -353,7 +365,7 @@
     if (!url) return;
     document.querySelectorAll('[data-edit="venue"], [data-edit="venueAddress"]').forEach(function (el) {
       if (el.tagName === 'A') {
-        el.setAttribute('href', url);
+        el.setAttribute('href', safeHref(url));
         el.setAttribute('target', '_blank');
         el.setAttribute('rel', 'noopener');
         return;
@@ -394,9 +406,13 @@
     setRichText('venue', d.venue);
     setRichText('surveyText', d.surveyText);
     setRichText('closingTitle', d.closingTitle);
-    if (d.closingSign) {
+    if (d.closingSign && d.closingSign !== 'Ваши Дарья и Вадим') {
       var sign = document.querySelector('[data-edit="closingSign"]');
       if (sign) { sign.textContent = d.closingSign; sign.dataset.userset = '1'; }
+    } else if (typeof d.closingSign === 'string') {
+      var autoSign = document.querySelector('[data-edit="closingSign"]');
+      if (autoSign) delete autoSign.dataset.userset;
+      applyNames(d.groomName, d.brideName);
     }
 
     setImg('dressCodePhoto', d.dressCodePhoto);
@@ -455,6 +471,7 @@
   }
 
   window.addEventListener('message', function (e) {
+    if (e.origin !== window.location.origin || e.source !== window.parent) return;
     var msg = e.data;
     if (msg && msg.type === 'wc:data' && msg.payload) applyData(msg.payload);
   });
@@ -471,7 +488,7 @@
     restartCountdown();
     try {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'wc:ready' }, '*');
+        window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);
       }
     } catch (e) {}
   }

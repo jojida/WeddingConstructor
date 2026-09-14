@@ -26,9 +26,7 @@ export default function StudioTemplate({ data, apiBase, fullPage, slug, editing 
   // Свежие данные нужны обработчику wc:ready, который живёт вне рендера.
   // Обновляем ссылку в эффекте, а не по ходу отрисовки.
   const dataRef = useRef(data);
-  useEffect(() => {
-    dataRef.current = data;
-  });
+  useEffect(() => { dataRef.current = data; }, [data]);
 
   const entry = studioTemplate(data.templateId);
   const background = entry?.background || '#ffffff';
@@ -76,21 +74,21 @@ export default function StudioTemplate({ data, apiBase, fullPage, slug, editing 
           schedule: d.schedule,
         },
       },
-      '*'
+      window.location.origin
     );
   };
 
   useEffect(() => {
-    const onMsg = (e: MessageEvent) => { if (e.data && e.data.type === 'wc:ready') postData(); };
+    const onMsg = (e: MessageEvent) => { if (e.origin !== window.location.origin || e.source !== iframeRef.current?.contentWindow) return; if (e.data && e.data.type === 'wc:ready') postData(); };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiBase]);
+  }, [apiBase, slug]);
 
   useEffect(() => {
     postData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, apiBase]);
+  }, [data, apiBase, slug]);
 
   if (live) {
     if (fullPage) {

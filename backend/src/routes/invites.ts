@@ -5,6 +5,9 @@ import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isPaid, hasCustomDomain } from '../lib/plans';
 import { botUsername } from '../lib/telegram';
+import { validInviteInput } from '../lib/inviteValidation';
+import { normalizeEmail } from '../lib/security';
+import { rateLimit } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -23,12 +26,12 @@ const parseObj = (s: any): Record<string, any> => {
 const RESERVED_SLUGS = new Set([
   'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment',
   'templates', 'admin', 'login', 'register', 'signup', 'about', 'pricing', 'help',
-  'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads',
+  'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads', 'studio', 'privacy', 'oferta',
 ]);
 
 // Приватные поля приглашения — не отдавать в публичных ответах (by-slug/by-domain).
 function stripPrivate(invite: any) {
-  const { notifyChannel, notifyEmail, notifyTelegramChatId, telegramConnectToken, paymentId, ...pub } = invite;
+  const { userId, notifyChannel, notifyEmail, notifyTelegramChatId, telegramConnectToken, paymentId, ...pub } = invite;
   return pub;
 }
 
@@ -72,14 +75,16 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/invites — создать черновик
-router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/', authMiddleware, rateLimit(20, 60 * 60_000, req => (req as AuthRequest).userId!), async (req: AuthRequest, res: Response) => {
   try {
+    if (!validInviteInput(req.body)) return res.status(400).json({ error: 'Некорректные данные приглашения' });
     const { templateId = 'calla' } = req.body;
     const slug = generateSlug('', '');
     const invite = await prisma.invitation.create({
       data: { userId: req.userId!, templateId, slug },
     });
-    res.json(invite);
+    res.json({ ...invite, galleryPhotos: parseArr(invite.galleryPhotos), schedule: parseArr(invite.schedule),
+      dressCodeColors: parseArr(invite.dressCodeColors), enabledSections: parseObj(invite.enabledSections), customData: parseObj(invite.customData) });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: 'Ошибка создания приглашения' });
@@ -89,6 +94,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 // PUT /api/invites/:id — обновить данные
 router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
+    if (!validInviteInput(req.body)) return res.status(400).json({ error: 'Некорректные данные приглашения' });
     const { id } = req.params;
     const invite = await prisma.invitation.findUnique({ where: { id: id as string } });
     if (!invite || invite.userId !== req.userId) {
@@ -169,7 +175,10 @@ router.patch('/:id/settings', authMiddleware, async (req: AuthRequest, res: Resp
     if (!['none', 'telegram', 'email'].includes(ch)) return res.status(400).json({ error: 'Неверный канал' });
     data.notifyChannel = ch;
   }
-  if (req.body.notifyEmail != null) data.notifyEmail = String(req.body.notifyEmail).trim();
+  if (req.body.notifyEmail != null) {
+    if (req.body.notifyEmail !== '' && !normalizeEmail(req.body.notifyEmail)) return res.status(400).json({ error: 'Некорректный email' });
+    data.notifyEmail = normalizeEmail(req.body.notifyEmail) || '';
+  }
   if (req.body.customDomain != null) {
     const domain = String(req.body.customDomain).trim().toLowerCase()
       .replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/:\d+$/, '').replace(/^www\./, '');
@@ -254,7 +263,11 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
   if (!invite || invite.userId !== req.userId) {
     return res.status(404).json({ error: 'Приглашение не найдено' });
   }
-  await prisma.invitation.delete({ where: { id: req.params.id as string } });
+  await prisma.$transaction(async tx => {
+    await tx.guestResponse.deleteMany({ where: { invitationId: invite.id } });
+    await tx.guest.deleteMany({ where: { invitationId: invite.id } });
+    await tx.invitation.delete({ where: { id: invite.id } });
+  });
   return res.json({ success: true });
 });
 

@@ -2,13 +2,13 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { isAdvanced, isSalutation, computeGreeting } from '../lib/plans';
+import { isAdvanced, isSalutation, computeGreeting, isPaid } from '../lib/plans';
 
 const router = Router();
 
 function genToken(): string {
   // короткий URL-безопасный токен для персональной ссылки ?g=
-  return crypto.randomBytes(6).toString('base64url');
+  return crypto.randomBytes(16).toString('base64url');
 }
 
 async function loadOwnedInvite(inviteId: string, userId?: string) {
@@ -22,6 +22,8 @@ async function loadOwnedInvite(inviteId: string, userId?: string) {
 router.get('/resolve/:token', async (req: Request, res: Response) => {
   const guest = await prisma.guest.findUnique({ where: { token: req.params.token as string } });
   if (!guest) return res.status(404).json({ error: 'Гость не найден' });
+  const invitation = await prisma.invitation.findUnique({ where: { id: guest.invitationId } });
+  if (!invitation || !isPaid(invitation.status)) return res.status(404).json({ error: 'Гость не найден' });
   let attending: boolean | null = null;
   if (guest.responseId) {
     const r = await prisma.guestResponse.findUnique({ where: { id: guest.responseId } });
@@ -45,6 +47,7 @@ router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response)
   });
   const responses = await prisma.guestResponse.findMany({
     where: { invitationId: invite.id, guestId: { not: null } },
+    orderBy: { createdAt: 'asc' },
   });
   const byGuest = new Map(responses.map((r) => [r.guestId as string, r]));
 
@@ -75,7 +78,7 @@ router.post('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response
 
   const salutation = String(req.body.salutation || 'дорогие');
   const names = String(req.body.names || '').trim();
-  if (!names) return res.status(400).json({ error: 'Укажите имя гостя' });
+  if (!names || names.length > 200) return res.status(400).json({ error: 'Имя гостя: от 1 до 200 символов' });
   if (!isSalutation(salutation)) return res.status(400).json({ error: 'Неверное обращение' });
 
   const guest = await prisma.guest.create({
@@ -94,7 +97,7 @@ router.put('/:guestId', authMiddleware, async (req: AuthRequest, res: Response) 
   const salutation = req.body.salutation != null ? String(req.body.salutation) : guest.salutation;
   const names = req.body.names != null ? String(req.body.names).trim() : guest.names;
   if (!isSalutation(salutation)) return res.status(400).json({ error: 'Неверное обращение' });
-  if (!names) return res.status(400).json({ error: 'Укажите имя гостя' });
+  if (!names || names.length > 200) return res.status(400).json({ error: 'Имя гостя: от 1 до 200 символов' });
 
   const updated = await prisma.guest.update({
     where: { id: guest.id },

@@ -26,7 +26,9 @@ cd backend  && npm run dev     # http://localhost:4000
 cd frontend && npm run dev     # http://localhost:3000
 ```
 
-БД создаётся автоматически: `backend/prisma/dev.db`.
+Для новой БД сначала выполните `cd backend && npx prisma migrate deploy && npx prisma generate`.
+Не применяйте миграции к существующей БД без резервной копии и проверки расхождения схемы.
+Результаты проверки проекта и порядок обновления существующей установки: [AUDIT.md](AUDIT.md).
 
 ## Как устроены шаблоны (главное)
 
@@ -86,7 +88,8 @@ cd frontend && npm run dev     # http://localhost:3000
 ЮKassa API v3. Уведомления не подписаны, поэтому вебхук берёт из тела только id
 и **перечитывает платёж из API**; страница успеха дополнительно опрашивает
 `/api/payment/status/:id`. Ключи — в `backend/.env` (`YOOKASSA_SHOP_ID`,
-`YOOKASSA_SECRET_KEY`). Без ключей: в проде — 503, в dev — авто-approve.
+`YOOKASSA_SECRET_KEY`). Без ключей — 503. Имитация доступна только при
+`NODE_ENV=development` и явном `ALLOW_TEST_PAYMENTS=true`.
 
 Промокоды задаются переменной окружения без деплоя:
 `PROMO_CODES="СВАДЬБА10:10,PARTNER-IRA:15"`.

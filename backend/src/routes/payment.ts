@@ -52,6 +52,7 @@ async function kassaRequest(method: 'GET' | 'POST', path: string, body?: unknown
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(15_000),
   });
   const data: any = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -63,10 +64,11 @@ async function kassaRequest(method: 'GET' | 'POST', path: string, body?: unknown
 
 /** Отметить приглашение оплаченным. Уже оплаченное не трогаем (идемпотентно). */
 async function markPaid(inviteId: string, plan: string, paymentId: string) {
+  if (!['basic', 'premium', 'standard'].includes(plan)) throw new Error('Invalid payment plan');
   const invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
   if (!invite || invite.status === 'paid' || invite.status === 'published') return;
-  await prisma.invitation.update({
-    where: { id: inviteId },
+  await prisma.invitation.updateMany({
+    where: { id: inviteId, status: { notIn: ['paid', 'published'] } },
     data: { status: 'paid', plan, paidAt: new Date(), paymentId },
   });
   console.log(`✅ Payment received for invite ${inviteId}, plan: ${plan}`);
@@ -82,10 +84,10 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
       return res.status(404).json({ error: 'Приглашение не найдено' });
     }
 
-    const planData = PLANS[plan as keyof typeof PLANS];
+    const planData = typeof plan === 'string' && Object.prototype.hasOwnProperty.call(PLANS, plan) ? PLANS[plan as keyof typeof PLANS] : undefined;
     if (!planData) return res.status(400).json({ error: 'Неверный тариф' });
 
-    const successUrl = `${process.env.FRONTEND_URL}/payment/success?id=${inviteId}`;
+    const successUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/success?id=${encodeURIComponent(inviteId)}`;
 
     // Уже оплачен — второй платёж не создаём, просто ведём на страницу успеха.
     if (invite.status === 'paid' || invite.status === 'published') {
@@ -94,7 +96,7 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
 
     if (!kassaAuth().configured) {
       // В проде без настроенной кассы оплату НЕ имитируем — иначе публикация бесплатна.
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV !== 'development' || process.env.ALLOW_TEST_PAYMENTS !== 'true') {
         return res.status(503).json({ error: 'Оплата временно недоступна. Напишите нам — поможем опубликовать сайт.' });
       }
       // Dev mode: auto-approve for testing
@@ -175,7 +177,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
   try {
     const { event, object } = req.body || {};
     const paymentId = object?.id;
-    if (!event || !paymentId) return res.status(400).send('Bad notification');
+    if (!event || typeof paymentId !== 'string' || !/^[a-zA-Z0-9-]{1,64}$/.test(paymentId)) return res.status(400).send('Bad notification');
 
     // Прочие события (waiting_for_capture, canceled, refund.*) нам не важны.
     if (event !== 'payment.succeeded') return res.status(200).send('OK');

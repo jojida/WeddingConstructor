@@ -43,7 +43,7 @@ function buildParams(data: InviteData, apiBase: string, editing?: boolean): stri
 export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, editing }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dataRef = useRef(data);
-  dataRef.current = data;
+  useEffect(() => { dataRef.current = data; }, [data]);
 
   // src вычисляется один раз — чтобы изменения данных не перезагружали iframe
   const initialSrc = useMemo(() => {
@@ -77,25 +77,25 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
           dressCodeColors: dataRef.current.dressCodeColors,
         },
       },
-      '*'
+      window.location.origin
     );
   };
 
   // Когда iframe сообщает о готовности — отправляем актуальные данные
   useEffect(() => {
-    const onMsg = (e: MessageEvent) => {
+    const onMsg = (e: MessageEvent) => { if (e.origin !== window.location.origin || e.source !== iframeRef.current?.contentWindow) return;
       if (e.data && e.data.type === 'wc:ready') postData();
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiBase]);
+  }, [apiBase, slug]);
 
   // Живое обновление при изменении данных
   useEffect(() => {
     postData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, apiBase]);
+  }, [data, apiBase, slug]);
 
   if (fullPage) {
     return (

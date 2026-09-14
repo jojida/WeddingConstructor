@@ -1,0 +1,145 @@
+/* Эталон — место проведения — собрано Верстаком.
+   Правки руками не потеряются: рядом лежит _studio.json, откройте его в студии.
+   Эталонная ширина проектирования — 430px. */
+
+:root {
+  --font-script: "Anastasia Script", "Marck Script", cursive;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: #d7d3cb;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.invite { width: 100%; max-width: 680px; margin: 0 auto; }
+.panel { width: 100%; }
+
+.canvas {
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+  overflow: hidden;
+}
+
+/* ---------- секции и слои ---------- */
+
+.s-mesto-provedeniya {
+  aspect-ratio: 1 / 1.073694;
+  background: linear-gradient(rgba(255,255,255,.04), rgba(0,0,0,.03)),
+    #d7d3cb;
+}
+
+.mesto-provedeniya__zagolovok {
+  position: absolute;
+  left: 0cqw;
+  top: 17.90698cqw;
+  width: 100cqw;
+  height: auto;
+  margin: 0;
+  font-family: var(--font-script);
+  font-size: 11.5cqw;
+  line-height: 1.05;
+  letter-spacing: 0.5cqw;
+  text-align: center;
+  color: #f8f6f1;
+  text-shadow: 0 1px 3px rgba(120,112,98,.45);
+}
+
+.mesto-provedeniya__osobnyak {
+  position: absolute;
+  left: 10.93023cqw;
+  top: 127.67442cqw;
+  width: 78cqw;
+  height: 46.53734cqw;
+  object-fit: contain;
+}
+
+.mesto-provedeniya__nazvanie-mesta {
+  position: absolute;
+  left: 0cqw;
+  top: 75.81395cqw;
+  width: 100cqw;
+  height: auto;
+  margin: 0;
+  font-family: var(--font-script);
+  font-size: 9.5cqw;
+  line-height: 1.25;
+  text-align: center;
+  color: #f8f6f1;
+  text-shadow: 0 1px 3px rgba(120,112,98,.4);
+}
+
+.mesto-provedeniya__tekst {
+  position: absolute;
+  left: 3.48837cqw;
+  top: 42.32558cqw;
+  width: 70cqw;
+  height: auto;
+  margin: 0;
+  font-family: var(--font-body, serif);
+  font-size: 5.5814cqw;
+  line-height: 1.3;
+  text-align: center;
+  color: #2b2b2b;
+}
+
+.s-sekciya-2 {
+  aspect-ratio: 1 / 1.6;
+  background: #ffffff;
+}
+
+.sekciya-2__programma-dnya {
+  position: absolute;
+  left: 10.93023cqw;
+  top: 26.74419cqw;
+  width: 80cqw;
+  height: 55.11628cqw;
+  --wcb-accent: #7c6a54;
+  --wcb-size: 4.4186cqw;
+}
+
+.sekciya-2__tekst {
+  position: absolute;
+  left: 24.18605cqw;
+  top: 19.53488cqw;
+  width: 49.30233cqw;
+  height: auto;
+  margin: 0;
+  font-family: var(--font-body, serif);
+  font-size: 5.5814cqw;
+  line-height: 1.3;
+  text-align: center;
+  color: #2b2b2b;
+}
+
+.s-sekciya-3 {
+  aspect-ratio: 1 / 1.6;
+  background: #ffffff;
+}
+
+.sekciya-3__tekst {
+  position: absolute;
+  left: 14.88372cqw;
+  top: 25.5814cqw;
+  width: 70cqw;
+  height: auto;
+  margin: 0;
+  font-family: var(--font-body, serif);
+  font-size: 5.5814cqw;
+  line-height: 1.3;
+  text-align: center;
+  color: #2b2b2b;
+}
+
+.sekciya-3__photo-2024-06-23-22-28-36 {
+  position: absolute;
+  left: 15.11628cqw;
+  top: 44.88372cqw;
+  width: 70cqw;
+  height: 42.32558cqw;
+  object-fit: cover;
+}

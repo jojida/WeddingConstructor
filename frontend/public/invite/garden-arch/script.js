@@ -17,7 +17,19 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
+
+  function safeHref(value) {
+    if (typeof value !== 'string') return '#';
+    try {
+      var parsed = new URL(value, window.location.href);
+      return /^(https?:|mailto:|tel:)$/.test(parsed.protocol) ? parsed.href : '#';
+    } catch (_) { return '#'; }
+  }
+
   function imageUrl(url) {
+    if (typeof url !== 'string' || /[<>"\x00-\x20]/.test(url)) return '';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:image\/(png|jpeg|gif|webp);base64,)/i.test(url)) return '';
+
     if (!url) return '';
     if (/^https?:\/\//.test(url) || url.indexOf('data:') === 0) return url;
     if (url.indexOf('/invite/') === 0) return url;
@@ -111,7 +123,7 @@
   function isImageIcon(s) { return /^(https?:|data:|\/)/.test(s) || /\.(svg|png|jpe?g|gif|webp)$/i.test(s); }
   function iconNode(raw) {
     raw = raw || '';
-    if (isImageIcon(raw)) return '<img class="tl-icon-node" src="' + imageUrl(raw) + '" alt="">';
+    if (isImageIcon(raw)) return '<img class="tl-icon-node" src="' + escapeHtml(imageUrl(raw)) + '" alt="">';
     return '<span class="tl-icon-node" style="display:flex;align-items:center;justify-content:center;font-size:54px">' + escapeHtml(raw) + '</span>';
   }
   function scheduleFromDOM() {
@@ -380,7 +392,7 @@
     if (!url) return;
     document.querySelectorAll('[data-edit="venue"], [data-edit="venueAddress"]').forEach(function (el) {
       if (el.tagName === 'A') {
-        el.setAttribute('href', url);
+        el.setAttribute('href', safeHref(url));
         el.setAttribute('target', '_blank');
         el.setAttribute('rel', 'noopener');
         return;
@@ -463,6 +475,7 @@
   }
 
   window.addEventListener('message', function (e) {
+    if (e.origin !== window.location.origin || e.source !== window.parent) return;
     var msg = e.data;
     if (msg && msg.type === 'wc:data' && msg.payload) applyData(msg.payload);
   });
@@ -475,7 +488,7 @@
     initReveal();
     initHeartReveal();
     initRsvp();
-    try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'wc:ready' }, '*'); } catch (e) {}
+    try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'wc:ready' }, window.location.origin); } catch (e) {}
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

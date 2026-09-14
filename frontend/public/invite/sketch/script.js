@@ -21,7 +21,19 @@
     });
   }
 
+
+  function safeHref(value) {
+    if (typeof value !== 'string') return '#';
+    try {
+      var parsed = new URL(value, window.location.href);
+      return /^(https?:|mailto:|tel:)$/.test(parsed.protocol) ? parsed.href : '#';
+    } catch (_) { return '#'; }
+  }
+
   function imageUrl(url) {
+    if (typeof url !== 'string' || /[<>"\x00-\x20]/.test(url)) return '';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:image\/(png|jpeg|gif|webp);base64,)/i.test(url)) return '';
+
     if (!url) return '';
     if (/^https?:\/\//.test(url) || url.indexOf('data:') === 0) return url;
     if (url.indexOf('/invite/') === 0) return url;        // ассеты фронта (этот origin)
@@ -164,7 +176,7 @@
       div.className = 'stop ' + side + ' fu in';
       div.style.top = (TOP0 + idx * STEP) + 'px';
       div.innerHTML =
-        '<img class="ic" src="' + imageUrl(it.icon || '') + '" alt="">' +
+        '<img class="ic" src="' + escapeHtml(imageUrl(it.icon || '')) + '" alt="">' +
         '<span class="time">' + escapeHtml(it.time || '') + '</span>' +
         '<span class="lab">' + escapeHtml(it.title || '') + '</span>';
       tl.appendChild(div);
@@ -180,7 +192,7 @@
     if (!url) return;
     document.querySelectorAll('[data-edit="venue"], [data-edit="venueAddress"]').forEach(function (el) {
       if (el.tagName === 'A') {
-        el.setAttribute('href', url);
+        el.setAttribute('href', safeHref(url));
         el.setAttribute('target', '_blank');
         el.setAttribute('rel', 'noopener');
         return;
@@ -282,6 +294,7 @@
 
   // ─── postMessage из редактора ────────────────────
   window.addEventListener('message', function (e) {
+    if (e.origin !== window.location.origin || e.source !== window.parent) return;
     var msg = e.data;
     if (msg && msg.type === 'wc:data' && msg.payload) applyData(msg.payload);
   });
@@ -291,7 +304,7 @@
     initRsvp();
     try {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'wc:ready' }, '*');
+        window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);
       }
     } catch (e) {}
   }

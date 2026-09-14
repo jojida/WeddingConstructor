@@ -894,7 +894,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       greetingTitle: 'Дорогие гости',
       surveyText:    'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closingTitle:  'Будем ждать вас с нетерпением!',
-      closingSign:   'Ваши Дарья и Вадим',
+      closingSign:   '', // Пустое поле — автоматическая подпись с именами пары.
       dressPhoto2:   '/invite/calla/assets/dress2.jpg',
       dressPhoto3:   '/invite/calla/assets/dress3.jpg',
       finalPhoto:    '/invite/calla/assets/couple-photo.jpg',

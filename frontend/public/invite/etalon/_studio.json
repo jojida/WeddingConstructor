@@ -1,0 +1,300 @@
+{
+  "version": 1,
+  "id": "etalon0000",
+  "slug": "etalon",
+  "canvas": {
+    "width": 430,
+    "maxWidth": 680
+  },
+  "catalog": {
+    "name": "Эталон — место проведения",
+    "description": "Проверочная пересборка секции «Место проведения» из «Калл».",
+    "tags": [
+      "проверка"
+    ],
+    "colors": [
+      "#d7d3cb",
+      "#7c6a54"
+    ],
+    "sampleBride": "Дарья",
+    "sampleGroom": "Вадим",
+    "cover": ""
+  },
+  "fonts": [
+    {
+      "key": "script",
+      "stack": "\"Anastasia Script\", \"Marck Script\", cursive",
+      "source": "google",
+      "googleSpec": "Marck+Script"
+    }
+  ],
+  "assets": [
+    {
+      "id": "mansion",
+      "file": "mansion.svg",
+      "kind": "svg",
+      "w": 1366,
+      "h": 815,
+      "bytes": 1042047
+    },
+    {
+      "id": "21e444a3af4dba27",
+      "file": "1-21e444.webp",
+      "kind": "image",
+      "w": 860,
+      "h": 570,
+      "bytes": 66440,
+      "thumb": "data:image/webp;base64,UklGRiQDAABXRUJQVlA4WAoAAAAgAAAAPwAAKQAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggNgEAALAIAJ0BKkAAKgA+iTaVSCUjIiE6uAwAoBEJaQAA7yG+1z6hsBQ/PHsDTC+zpHqX3wwbEU8bihvCoGsZ5l1Ihg+YiGMuu7hDm7u4+tXgeAD++Q65lSfdOazA6bVcujse7WL06KSPGOA+WmWhCFIWNTwmyUKP2QV4fPwR5KvC/uokf4VkHrLqHrLR7uqfO+LB0tfX3gN2fgffWS5bX3XMd5EGb4lwj8+ONR9ekvhG0tz9H5XCrRxcfU5XB3mA8SHWz9rDk+YYE/dlPfuS6EKTTVxuAi9qREVPL63p+QvcWBbRlCv98aTPjZb2YslBR7D6DaMlFIY8fR/XnsFhy5cemYBeMGqiBuiC0SpJIKcoNezpClq9y0yAB0Bv4DFaTfWd9jLQWqkCZC8mNVHAe5slP0h41X8AAAA="
+    },
+    {
+      "id": "210eaadb81e762a4",
+      "file": "photo-2024-06-23-22-28-36-210eaa.webp",
+      "kind": "image",
+      "w": 860,
+      "h": 573,
+      "bytes": 68766,
+      "thumb": "data:image/webp;base64,UklGRmIFAABXRUJQVlA4WAoAAAAgAAAAPwAAKgAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggdAMAAPAOAJ0BKkAAKwA+nUidSyWkIqGlamiwE4ljALzYEksZZ3PrOTf3QoI9u1tvsfdK4i9NPNJ8eOoN0qFGgLw5A1N6pXBvpZnCVixw0yyUMl6IAGB5njZ1Zf1nMF/U9NyBTx6nTZX17D7Ek572GLZ2WHXzqn/8o1oFwc+6DnyuNLIAAP7+4colmpPiJsFAFFoFUGNQUK/e/vMS4s/bXor37BNmn8K+3OzVU3v01fJeyeqBzyTQwcvUNzqLr2amFjkUnABfKlsi9/ZbR07dDlQaTXlBNYQlhgMfcuLsMu5JLp3avPpbTBki2298HzTez7QCUX/z9e+xYVgupQgYFO0rZkCTHmgLwSvFOHmAAy+aybC9TuLNctmQzCUTriJJgvqflWSWVK50KvhwU2NEzzFN5gfdqBkqeq/7ELollVFN/BWSisdlGAZ7rJo82aI0Nka3Z7S9WEi9Vp7kRnT8xBlPFjTPb7kMShpqiVbij97uLjWLt9yJbkXiBIaD2p0pNuO5BxXzEIQ76MxTZKOVyV7WYpnxcqXe5d0fErjDWhMGucZeSnBzwwddwGmE7yFGIh5vDkY05w64zDDureGbpOAcVyUmY/65qfNKS2+dAWI/q1teLu6YxVCXtInBdEcdeBkUAWkRNrSxxQlypaieURMI5PmDkXXqw4jn9/AR5+pPhD78d30reeayPectIbM8f67wUDZU3svNI+mOy7jE/cCpkdvGJTILUNhVoIj/IIhLkZt0FVfIw+w51PqZGrEMdnXVlggpe1+EwbjnPvFcaOnbZk2lGhyfpwHOCXqnLix0aI5g15Z0M/iG2lOxBWLCdI9DilO/v4HOneGW23rEUkV+ImdeuTNUfp+KUuVkJ+/tlVDZWMJcMhdP9WpoH1T/KaP5T1utlfTn4BF7pZwZvzZmEt/OEYz2d0AgHyFILW6Wa0QoX49mGFIM4oCKug0UuKxmlJ3Rhdn/d9vTKZ/beAHagVmC/V61ObQ+P3P2JQC+O86vlWIejhZbXpyAFfz2rGl9w7+551HT1/2rLQyU1d4376gjq0e1hs1oIa5c8qaxq0ET6bQOlHmoO2x85T7jTol8v6t+iDy7v36sb9dO5HPbe6frwP4ZWLxN9D3V/yob6LXMT5XybnpEIDNFgnvweVZ1bpHjGtmpAcxIuGRBxHU/psiJjwAA"
+    },
+    {
+      "id": "616ff05930595d1b",
+      "file": "model1-616ff0.webp",
+      "kind": "image",
+      "w": 860,
+      "h": 860,
+      "bytes": 38344,
+      "thumb": "data:image/webp;base64,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"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec-venue",
+      "name": "Место проведения",
+      "height": {
+        "mode": "ratio",
+        "value": 1.0736944851146901
+      },
+      "background": {
+        "color": "#d7d3cb",
+        "overlay": {
+          "from": "rgba(255,255,255,.04)",
+          "to": "rgba(0,0,0,.03)"
+        }
+      },
+      "layers": [
+        {
+          "id": "l-title",
+          "kind": "text",
+          "name": "Заголовок",
+          "x": 0,
+          "y": 77,
+          "w": 430,
+          "h": 56,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "autoHeight": true,
+          "content": "Место проведения",
+          "tag": "h2",
+          "font": "var(--font-script)",
+          "size": 49.45,
+          "lineHeight": 1.05,
+          "tracking": 2.15,
+          "align": "center",
+          "color": "#f8f6f1",
+          "shadow": "0 1px 3px rgba(120,112,98,.45)",
+          "editable": {
+            "key": "venueTitle",
+            "type": "text",
+            "label": "Заголовок секции",
+            "panelSection": "Место проведения",
+            "scope": "custom"
+          }
+        },
+        {
+          "id": "l-mansion",
+          "kind": "image",
+          "name": "Особняк",
+          "x": 47,
+          "y": 549,
+          "w": 335.40000000000003,
+          "h": 200.11054172767203,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "assetId": "mansion",
+          "fit": "contain",
+          "radius": 0,
+          "alt": "Место проведения",
+          "editable": {
+            "key": "venuePhoto",
+            "type": "image",
+            "label": "Фото места",
+            "panelSection": "Место проведения",
+            "scope": "custom"
+          }
+        },
+        {
+          "id": "l-place",
+          "kind": "text",
+          "name": "Название места",
+          "x": 0,
+          "y": 326,
+          "w": 430,
+          "h": 52,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "autoHeight": true,
+          "content": "ваа",
+          "tag": "p",
+          "font": "var(--font-script)",
+          "size": 40.85,
+          "lineHeight": 1.25,
+          "tracking": 0,
+          "align": "center",
+          "color": "#f8f6f1",
+          "shadow": "0 1px 3px rgba(120,112,98,.4)",
+          "editable": {
+            "key": "venue",
+            "type": "text",
+            "label": "Место проведения",
+            "panelSection": "Место проведения",
+            "scope": "data"
+          }
+        },
+        {
+          "id": "frdwl0r7mf8q",
+          "name": "Текст",
+          "x": 15,
+          "y": 182,
+          "w": 301,
+          "h": 31,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "kind": "text",
+          "autoHeight": true,
+          "content": "Новый текст",
+          "tag": "p",
+          "font": "var(--font-body, serif)",
+          "size": 24,
+          "lineHeight": 1.3,
+          "tracking": 0,
+          "align": "center",
+          "color": "#2b2b2b"
+        }
+      ]
+    },
+    {
+      "id": "uamfpbt5bml2",
+      "name": "Секция 2",
+      "height": {
+        "mode": "ratio",
+        "value": 1.6
+      },
+      "background": {
+        "color": "#ffffff"
+      },
+      "layers": [
+        {
+          "id": "h9jd4lasbo4n",
+          "name": "Программа дня",
+          "x": 47,
+          "y": 115,
+          "w": 344,
+          "h": 237,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "kind": "block",
+          "block": "schedule",
+          "params": {
+            "size": 19,
+            "accent": "#7c6a54"
+          }
+        },
+        {
+          "id": "64pw98hnhu7l",
+          "name": "Текст",
+          "x": 104,
+          "y": 84,
+          "w": 212,
+          "h": 31,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "kind": "text",
+          "autoHeight": true,
+          "content": "кукук",
+          "tag": "p",
+          "font": "var(--font-body, serif)",
+          "size": 24,
+          "lineHeight": 1.3,
+          "tracking": 0,
+          "align": "center",
+          "color": "#2b2b2b"
+        }
+      ]
+    },
+    {
+      "id": "vwisztkukcib",
+      "name": "Секция 3",
+      "height": {
+        "mode": "ratio",
+        "value": 1.6
+      },
+      "background": {
+        "color": "#ffffff"
+      },
+      "layers": [
+        {
+          "id": "ewijgnvzkglo",
+          "name": "Текст",
+          "x": 64,
+          "y": 110,
+          "w": 301,
+          "h": 31,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "kind": "text",
+          "autoHeight": true,
+          "content": "Новый текст",
+          "tag": "p",
+          "font": "var(--font-body, serif)",
+          "size": 24,
+          "lineHeight": 1.3,
+          "tracking": 0,
+          "align": "center",
+          "color": "#2b2b2b"
+        },
+        {
+          "id": "3nh9vj71lg2g",
+          "name": "photo_2024-06-23_22-28-36",
+          "x": 65,
+          "y": 193,
+          "w": 301,
+          "h": 182,
+          "rotation": 0,
+          "opacity": 1,
+          "locked": false,
+          "hidden": false,
+          "kind": "image",
+          "assetId": "210eaadb81e762a4",
+          "fit": "cover",
+          "radius": 0,
+          "alt": ""
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-09-04T16:30:59.252Z",
+  "updatedAt": "2026-09-05T10:27:24.641Z"
+}

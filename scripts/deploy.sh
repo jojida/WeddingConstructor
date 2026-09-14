@@ -70,7 +70,7 @@ log "$(git log --oneline -1)"
 if ! git diff --quiet "$local_rev" "$remote_rev" -- backend; then
   log "менялся бэкенд — пересобираю"
   cd "$REPO/backend"
-  npm install --no-audit --no-fund
+  npm ci --no-audit --no-fund
   npm run build
   pm2 restart wedding-api --update-env
   cd "$REPO"
@@ -79,9 +79,9 @@ fi
 cd "$REPO/frontend"
 
 # package.json тронули — значит, могли появиться новые зависимости.
-if ! git diff --quiet "$local_rev" "$remote_rev" -- frontend/package.json; then
+if ! git diff --quiet "$local_rev" "$remote_rev" -- frontend/package.json frontend/package-lock.json; then
   log "менялся package.json — ставлю зависимости"
-  npm install --no-audit --no-fund
+  npm ci --no-audit --no-fund
 fi
 
 # Старую сборку не удаляем, а отодвигаем.

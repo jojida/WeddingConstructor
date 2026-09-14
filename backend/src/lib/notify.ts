@@ -1,6 +1,7 @@
 // Уведомления владельцу приглашения о новом ответе гостя.
 // Пара выбирает ОДИН канал: telegram | email | none.
 import prisma from './prisma';
+import { escapeHtml } from './security';
 import { sendEmail, isEmailConfigured } from './email';
 import { inviteDrinkLabels, formatDrinkChoice } from './drinks';
 
@@ -13,7 +14,7 @@ export async function tgSend(chatId: string | number, text: string): Promise<voi
     await fetch(TG_API('sendMessage'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+      body: JSON.stringify({ chat_id: chatId, text }),
     });
   } catch (e) {
     console.error('Telegram send error:', e);
@@ -50,7 +51,7 @@ function formatMessage(invite: InviteLike, r: ResponseLike): { subject: string; 
   if (r.drinkChoice) lines.push(`🥂 Напитки: ${formatDrinkChoice(r.drinkChoice, inviteDrinkLabels(invite.customData))}`);
   if (r.wishes) lines.push(`💌 Пожелания: ${r.wishes}`);
   const text = lines.join('\n');
-  const html = lines.map((l) => (l ? `<div>${l}</div>` : '<br>')).join('');
+  const html = lines.map((l) => (l ? `<div>${escapeHtml(l)}</div>` : '<br>')).join('');
   return { subject: `RSVP: ${r.guestName} — ${invite.groomName || ''} & ${invite.brideName || ''}`, text, html };
 }
 
@@ -73,7 +74,6 @@ export async function notifyOwner(invite: InviteLike, r: ResponseLike): Promise<
         to = user?.email || '';
       }
       if (!to) return;
-      console.log(`\n📧 [RSVP NOTIFY] → ${to}\n${msg.text}\n`);
       if (isEmailConfigured()) {
         await sendEmail({ to, subject: msg.subject, text: msg.text, html: msg.html });
       }

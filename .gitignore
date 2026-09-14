@@ -5,3 +5,17 @@ DEPLOY.md
 
 # Продакшн-секреты живут только на сервере
 backend/.env.production
+
+# Local credentials, generated files and private application data
+**/.env
+**/.env.*
+!**/.env.example
+**/node_modules/
+**/dist/
+**/.next/
+**/*.tsbuildinfo
+**/*.db
+**/*.db-journal
+backend/uploads/
+backend/.test-tmp/
+.claude/settings.local.json
