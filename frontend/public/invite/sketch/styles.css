@@ -24,27 +24,17 @@
   --sw-pink:  #df5d84;
   --sw-cream: #f5eedf;
 
-  /* Шрифты из оригинального дизайна (извлечены из PDF) */
-  --font-title:  'HitchHike', 'Caveat', cursive;   /* «МЫ женимся!», заголовки, имена, время */
-  --font-body:   'Anaktoria', Georgia, serif;       /* абзацы и подписи под иконками */
+  /* Рукописные шрифты из оригинального дизайна пришлось заменить: из PDF они
+     извлеклись подмножествами (43 и 44 символа), и на буквах, которых в них
+     нет, браузер подставлял системный шрифт — в одном слове получались буквы
+     из разных гарнитур. Caveat и Alice покрывают кириллицу целиком. */
+  --font-title:  'Caveat', cursive;                  /* «МЫ женимся!», заголовки, имена, время */
+  --font-body:   'Alice', Georgia, serif;            /* абзацы и подписи под иконками */
   --font-badge:  'Caveat', cursive;                  /* «Наконец-то!» */
   --font-dates:  'Life Savers', cursive;             /* 06 07 08 09 10 */
   --font-form:   'Alice', Georgia, serif;            /* текст анкеты */
 
   --pad-x: 26px;
-}
-
-@font-face {
-  font-family: 'HitchHike';
-  src: url('assets/fonts/HitchHike.woff2') format('woff2'),
-       url('assets/fonts/HitchHike.ttf') format('truetype');
-  font-weight: normal; font-style: normal; font-display: swap;
-}
-@font-face {
-  font-family: 'Anaktoria';
-  src: url('assets/fonts/Anaktoria.woff2') format('woff2'),
-       url('assets/fonts/Anaktoria.ttf') format('truetype');
-  font-weight: normal; font-style: normal; font-display: swap;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -214,14 +204,22 @@ img, svg { display: block; max-width: 100%; }
   position: absolute;
   z-index: 3;
   font-family: var(--font-title);
-  font-size: 16cqw;
+  font-size: 13cqw;
   line-height: 1;
   color: var(--ink);
   white-space: nowrap;
   pointer-events: none;
 }
-.pol-l .pol-cap { left: 53.8%; top: 85.9%; transform: translate(-50%, -50%) rotate(-5.9deg); }
-.pol-r .pol-cap { left: 44.5%; top: 85.1%; transform: translate(-50%, -50%) rotate(7.4deg); }
+.pol-l .pol-cap { left: 58%; top: 86.5%; transform: translate(-50%, -50%) rotate(-5.9deg); }
+.pol-r .pol-cap { left: 49%; top: 85.5%; transform: translate(-50%, -50%) rotate(7.4deg); }
+
+/* Наведение: полароид подрастает, сохраняя свой наклон, и выходит вперёд.
+   Только там, где курсор есть, — на тачскрине ховер залипает после нажатия. */
+@media (hover: hover) {
+  .polaroids .pol { cursor: pointer; transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+  .polaroids .pol-l:hover { transform: rotate(-5deg) scale(1.07); z-index: 4; }
+  .polaroids .pol-r:hover { transform: rotate(4deg) scale(1.07); z-index: 4; }
+}
 
 /* ─── Дорогие гости ────────────────────────────── */
 .guests { padding-top: 14px; padding-bottom: 30px; }

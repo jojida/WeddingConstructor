@@ -107,7 +107,7 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
   /* ── Карточка-превью (точная копия обложки шаблона) ───────── */
   const ink   = '#1c1c1c';
   const pink  = '#e85d86';
-  const titleFont = "'HitchHike', 'Caveat', cursive";
+  const titleFont = "'Caveat', cursive";
   const A = '/invite/sketch/assets';
   const groom = data?.groomName || 'Артем';
   const bride = data?.brideName || 'Екатерина';
@@ -121,7 +121,7 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
       background: '#ffffff',
       padding: '28px 26px 14px',
       boxSizing: 'border-box',
-      fontFamily: "'Anaktoria', Georgia, serif",
+      fontFamily: "'Alice', Georgia, serif",
     }}>
       {/* ── обложка (cover-head) ── */}
       <div style={{ position: 'relative', minHeight: 320 }}>

@@ -225,10 +225,16 @@
     prog = Math.max(0, Math.min(1, prog));
 
     var at = prog * CAR.len;
-    var p, ahead;
+    /* Направление берём по отрезку, который всегда лежит внутри трека:
+       на самом конце «точка впереди» совпала бы с текущей, направление вышло
+       бы нулевым и машинку разворачивало. */
+    var STEP = 8;
+    var from = Math.max(0, Math.min(CAR.len - STEP, at));
+    var p, a, b;
     try {
       p = CAR.path.getPointAtLength(at);
-      ahead = CAR.path.getPointAtLength(Math.min(CAR.len, at + 8));
+      a = CAR.path.getPointAtLength(from);
+      b = CAR.path.getPointAtLength(from + STEP);
     } catch (e) { return; }
 
     /* Трек растянут неравномерно (preserveAspectRatio="none"), поэтому
@@ -238,7 +244,7 @@
     var x = p.x * kx, y = p.y * ky;
 
     /* Картинка нарисована носом вверх, отсюда поправка на 90 градусов. */
-    var angle = Math.atan2((ahead.y - p.y) * ky, (ahead.x - p.x) * kx) * 180 / Math.PI + 90;
+    var angle = Math.atan2((b.y - a.y) * ky, (b.x - a.x) * kx) * 180 / Math.PI + 90;
 
     CAR.el.style.transform =
       'translate(' + (x - CAR.el.offsetWidth / 2).toFixed(1) + 'px,' +
