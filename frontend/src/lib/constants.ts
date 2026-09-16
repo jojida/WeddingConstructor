@@ -563,6 +563,8 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'groomPhoto', type: 'image', label: 'Фото жениха',  scope: 'custom' },
         { id: 'bridePhoto', type: 'image', label: 'Фото невесты', scope: 'custom' },
+        { id: 'groomCaption', type: 'text', label: 'Подпись под фото жениха',  scope: 'custom' },
+        { id: 'brideCaption', type: 'text', label: 'Подпись под фото невесты', scope: 'custom' },
       ],
     },
     {
@@ -942,6 +944,8 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       finalPhoto:   '/invite/sketch/assets/couple.png',
       groomPhoto:   '/invite/sketch/assets/polaroid-groom.png',
       bridePhoto:   '/invite/sketch/assets/polaroid-bride.png',
+      groomCaption: 'Жених',
+      brideCaption: 'Невеста',
     },
   },
 

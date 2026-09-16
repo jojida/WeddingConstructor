@@ -302,6 +302,8 @@
     setRichText('surveyText', d.surveyText);
     setRichText('wishesText', d.wishesText);
 
+    setRichText('groomCaption', d.groomCaption);
+    setRichText('brideCaption', d.brideCaption);
     setImg('groomPhoto', d.groomPhoto);
     setImg('bridePhoto', d.bridePhoto);
     rebuildSwatches(d.dressCodeColors);

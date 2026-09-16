@@ -179,6 +179,7 @@ img, svg { display: block; max-width: 100%; }
   flex: 1 1 0;
   max-width: 230px;
   aspect-ratio: 440 / 495;
+  container-type: inline-size;   /* подпись масштабируется вместе с полароидом */
 }
 .pol .photo {
   position: absolute;
@@ -203,6 +204,24 @@ img, svg { display: block; max-width: 100%; }
 }
 .polaroids .pol-l { transform: rotate(-5deg); }
 .polaroids .pol-r { transform: rotate(4deg); margin-top: 18px; }
+
+/* Подпись в белой полосе под фото. Полароид нарисован наклонным внутри
+   самого SVG, поэтому подпись доворачиваем отдельно — иначе она ляжет не
+   параллельно краю рамки. Центр полосы и угол посчитаны по координатам
+   из polaroid-frame-l/r.svg (середина между нижним краем окна и нижним
+   краем рамки). */
+.pol .pol-cap {
+  position: absolute;
+  z-index: 3;
+  font-family: var(--font-title);
+  font-size: 16cqw;
+  line-height: 1;
+  color: var(--ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.pol-l .pol-cap { left: 53.8%; top: 85.9%; transform: translate(-50%, -50%) rotate(-5.9deg); }
+.pol-r .pol-cap { left: 44.5%; top: 85.1%; transform: translate(-50%, -50%) rotate(7.4deg); }
 
 /* ─── Дорогие гости ────────────────────────────── */
 .guests { padding-top: 14px; padding-bottom: 30px; }
