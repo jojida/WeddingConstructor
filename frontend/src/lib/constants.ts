@@ -588,8 +588,10 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom' },
         { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры',       scope: 'data' },
-        { id: 'dressCodePhoto',  type: 'image',     label: 'Фото образа 1',       scope: 'data' },
-        { id: 'dressPhoto2',     type: 'image',     label: 'Фото образа 2',       scope: 'custom' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Женский образ 1',     scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Женский образ 2',     scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Мужской образ 1',     scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Мужской образ 2',     scope: 'custom' },
       ],
     },
     {
@@ -935,6 +937,8 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       surveyText:   'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       wishesText:   'Будем рады вашим тёплым словам и пожеланиям — они для нас самый дорогой подарок',
       dressPhoto2:  '/invite/sketch/assets/dress2.png',
+      dressMan1:    '/invite/sketch/assets/man1.jpg',
+      dressMan2:    '/invite/sketch/assets/man2.jpg',
       finalPhoto:   '/invite/sketch/assets/couple.png',
       groomPhoto:   '/invite/sketch/assets/polaroid-groom.png',
       bridePhoto:   '/invite/sketch/assets/polaroid-bride.png',

@@ -212,6 +212,73 @@
     });
   }
 
+  /* ─── Машинка едет по треку программы дня ─────────── */
+  var CAR = {};
+
+  function updateCar() {
+    if (!CAR.wrap || !CAR.path || !CAR.el || !CAR.svg) return;
+    if (!CAR.len) { try { CAR.len = CAR.path.getTotalLength(); } catch (e) { return; } }
+
+    /* Доля пройденного пути = насколько блок программы проехал середину экрана. */
+    var rect = CAR.wrap.getBoundingClientRect();
+    var prog = (window.innerHeight * 0.55 - rect.top) / CAR.wrap.offsetHeight;
+    prog = Math.max(0, Math.min(1, prog));
+
+    var at = prog * CAR.len;
+    var p, ahead;
+    try {
+      p = CAR.path.getPointAtLength(at);
+      ahead = CAR.path.getPointAtLength(Math.min(CAR.len, at + 8));
+    } catch (e) { return; }
+
+    /* Трек растянут неравномерно (preserveAspectRatio="none"), поэтому
+       координаты viewBox переводим в пиксели по каждой оси отдельно. */
+    var kx = CAR.svg.clientWidth / 420;
+    var ky = CAR.svg.clientHeight / 1500;
+    var x = p.x * kx, y = p.y * ky;
+
+    /* Картинка нарисована носом вверх, отсюда поправка на 90 градусов. */
+    var angle = Math.atan2((ahead.y - p.y) * ky, (ahead.x - p.x) * kx) * 180 / Math.PI + 90;
+
+    CAR.el.style.transform =
+      'translate(' + (x - CAR.el.offsetWidth / 2).toFixed(1) + 'px,' +
+      (y - CAR.el.offsetHeight / 2).toFixed(1) + 'px) rotate(' + angle.toFixed(1) + 'deg)';
+  }
+
+  function initCar() {
+    CAR.wrap = document.querySelector('.timeline');
+    CAR.svg = document.querySelector('.timeline .track');
+    CAR.path = CAR.svg && CAR.svg.querySelector('path');
+    CAR.el = document.querySelector('.tl-car');
+    if (!CAR.wrap || !CAR.path || !CAR.el) return;
+    try { CAR.len = CAR.path.getTotalLength(); } catch (e) {}
+    window.addEventListener('scroll', updateCar, { passive: true });
+    window.addEventListener('resize', function () { CAR.len = 0; updateCar(); }, { passive: true });
+    window.addEventListener('load', updateCar);
+    updateCar();
+  }
+
+  /* ─── Вкладки дресс-кода ──────────────────────────── */
+  function initDressTabs() {
+    var tabs = [].slice.call(document.querySelectorAll('.dc-tab'));
+    var pics = [].slice.call(document.querySelectorAll('.dress-pic'));
+    if (!tabs.length) return;
+    function show(name) {
+      pics.forEach(function (el) {
+        el.classList.toggle('is-hidden', el.getAttribute('data-group') !== name);
+      });
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-group') === name;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.getAttribute('data-group')); });
+    });
+    show('women');
+  }
+
   function applyData(d) {
     if (!d) return;
     applyMapLink(d.mapLink);
@@ -240,6 +307,8 @@
     rebuildSwatches(d.dressCodeColors);
     setImg('dressCodePhoto', d.dressCodePhoto);
     setImg('dressPhoto2', d.dressPhoto2);
+    setImg('dressMan1', d.dressMan1);
+    setImg('dressMan2', d.dressMan2);
     setImg('finalPhoto', d.finalPhoto);
 
     applySchedule(d.schedule);
@@ -302,6 +371,8 @@
   function init() {
     applyData(dataFromUrl());
     initRsvp();
+    initDressTabs();
+    initCar();
     try {
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);

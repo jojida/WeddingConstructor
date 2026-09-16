@@ -85,7 +85,7 @@
     <!-- ══════════════ ЛОКАЦИЯ ══════════════ -->
     <section class="section location">
       <img class="confetti" style="top:8px; right:-10px; width:110px" src="assets/confetti-yellow.svg" alt="">
-      <img class="loc-heart fu" src="assets/heart-location.png" alt="">
+      <img class="loc-icon fu" src="assets/gazebo.png" alt="">
       <h2 class="h-marker fu">Локация</h2>
       <p class="lead fu fu-d1" data-edit="locationText">Праздник пройдёт на базе отдыха «Барвиха»</p>
       <img class="car fu fu-d2" src="assets/car.svg" alt="">
@@ -105,6 +105,9 @@
                    C 168,785 246,820 246,960
                    C 246,1075 168,1120 168,1260" vector-effect="non-scaling-stroke"/>
         </svg>
+
+        <!-- едет по треку при прокрутке, положение и поворот считает script.js -->
+        <img class="tl-car" src="assets/car.png" alt="">
 
         <!-- 15:30 -->
         <div class="stop left s1 fu">
@@ -157,13 +160,26 @@
         <i style="background:var(--sw-pink)"></i>
         <i style="background:var(--sw-cream)"></i>
       </div>
+      <div class="dc-tabs fu fu-d1" role="tablist">
+        <button class="dc-tab is-active" type="button" data-group="women" role="tab" aria-selected="true">Женщины</button>
+        <button class="dc-tab" type="button" data-group="men" role="tab" aria-selected="false">Мужчины</button>
+      </div>
+
       <div class="photos fu fu-d2">
-        <div class="dress-pic ph-l">
-          <img class="photo" src="assets/dress1.png" alt="" data-edit="dressCodePhoto">
+        <div class="dress-pic ph-l" data-group="women">
+          <img class="photo" src="assets/dress1.png" alt="Женский образ" data-edit="dressCodePhoto">
           <img class="frame" src="assets/frame-red.svg" alt="">
         </div>
-        <div class="dress-pic ph-r">
-          <img class="photo" src="assets/dress2.png" alt="" data-edit="dressPhoto2">
+        <div class="dress-pic ph-r" data-group="women">
+          <img class="photo" src="assets/dress2.png" alt="Женский образ" data-edit="dressPhoto2">
+          <img class="frame" src="assets/frame-red.svg" alt="">
+        </div>
+        <div class="dress-pic ph-l" data-group="men">
+          <img class="photo" src="assets/man1.jpg" alt="Мужской образ" data-edit="dressMan1">
+          <img class="frame" src="assets/frame-red.svg" alt="">
+        </div>
+        <div class="dress-pic ph-r" data-group="men">
+          <img class="photo" src="assets/man2.jpg" alt="Мужской образ" data-edit="dressMan2">
           <img class="frame" src="assets/frame-red.svg" alt="">
         </div>
       </div>
