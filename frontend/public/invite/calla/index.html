@@ -88,12 +88,20 @@
           <span style="--c:#c9985e"></span><span style="--c:#eccb90"></span><span style="--c:#916743"></span><span style="--c:#bec9d0"></span>
         </div>
 
+        <div class="dc-tabs fade-up" role="tablist">
+          <button class="dc-tab is-active" type="button" data-group="women" role="tab" aria-selected="true">Женщины</button>
+          <button class="dc-tab" type="button" data-group="men" role="tab" aria-selected="false">Мужчины</button>
+        </div>
+
         <div class="carousel fade-up">
           <button class="carousel__nav carousel__nav--prev" type="button" aria-label="Назад">&#8249;</button>
           <div class="carousel__track" id="dressTrack">
-            <div class="carousel__slide"><img class="zoomable" src="assets/dress1.jpg" data-edit="dressCodePhoto" alt="Образ 1" /></div>
-            <div class="carousel__slide"><img class="zoomable" src="assets/dress2.jpg" data-edit="dressPhoto2" alt="Образ 2" /></div>
-            <div class="carousel__slide"><img class="zoomable" src="assets/dress3.jpg" data-edit="dressPhoto3" alt="Образ 3" /></div>
+            <div class="carousel__slide" data-group="women"><img class="zoomable" src="assets/dress1.jpg" data-edit="dressCodePhoto" alt="Женский образ 1" /></div>
+            <div class="carousel__slide" data-group="women"><img class="zoomable" src="assets/dress2.jpg" data-edit="dressPhoto2" alt="Женский образ 2" /></div>
+            <div class="carousel__slide" data-group="women"><img class="zoomable" src="assets/dress3.jpg" data-edit="dressPhoto3" alt="Женский образ 3" /></div>
+            <div class="carousel__slide" data-group="men"><img class="zoomable" src="assets/man1.jpg" data-edit="dressMan1" alt="Мужской образ 1" /></div>
+            <div class="carousel__slide" data-group="men"><img class="zoomable" src="assets/man2.jpg" data-edit="dressMan2" alt="Мужской образ 2" /></div>
+            <div class="carousel__slide" data-group="men"><img class="zoomable" src="assets/man3.jpg" data-edit="dressMan3" alt="Мужской образ 3" /></div>
           </div>
           <button class="carousel__nav carousel__nav--next" type="button" aria-label="Вперёд">&#8250;</button>
           <div class="carousel__dots" id="dressDots"></div>

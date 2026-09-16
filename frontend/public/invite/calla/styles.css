@@ -221,6 +221,19 @@ body {
   background: var(--c); box-shadow: 0 1px 4px rgba(0,0,0,.08);
 }
 
+/* Вкладки дресс-кода. Обе группы образов живут в одной карусели,
+   неактивная просто скрыта — так сохраняется вся логика прокрутки и точек. */
+.dc-tabs { display: flex; justify-content: center; gap: 3cqw; margin: 0 0 5cqw; }
+.dc-tab {
+  font-family: var(--font-body); font-size: 4.2cqw; letter-spacing: .25cqw;
+  padding: 1.6cqw 6cqw; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(255,255,255,.55);
+  background: rgba(255,255,255,.18); color: var(--white);
+  transition: background .2s ease, color .2s ease;
+}
+.dc-tab.is-active { background: var(--white); color: var(--brown); border-color: var(--white); }
+.carousel__slide.is-hidden { display: none; }
+
 .carousel { position: relative; padding: 0 2cqw; }
 .carousel__track {
   display: flex; overflow-x: auto; scroll-snap-type: x mandatory;

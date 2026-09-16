@@ -294,13 +294,20 @@
     var track = document.getElementById('dressTrack');
     var dotsBox = document.getElementById('dressDots');
     if (!track) return;
-    var slides = [].slice.call(track.querySelectorAll('.carousel__slide'));
     var prev = document.querySelector('.carousel__nav--prev');
     var next = document.querySelector('.carousel__nav--next');
+    var tabs = [].slice.call(document.querySelectorAll('.dc-tab'));
+    var all = [].slice.call(track.querySelectorAll('.carousel__slide'));
 
-    if (dotsBox) {
+    /* Видимые слайды зависят от выбранной вкладки, поэтому считаем их каждый раз. */
+    function visible() {
+      return all.filter(function (s) { return !s.classList.contains('is-hidden'); });
+    }
+
+    function buildDots() {
+      if (!dotsBox) return;
       dotsBox.innerHTML = '';
-      slides.forEach(function (_, i) {
+      visible().forEach(function (_, i) {
         var b = document.createElement('button');
         b.type = 'button';
         b.className = 'carousel__dot' + (i === 0 ? ' is-active' : '');
@@ -310,9 +317,22 @@
       });
     }
 
+    function showGroup(name) {
+      all.forEach(function (s) {
+        s.classList.toggle('is-hidden', s.getAttribute('data-group') !== name);
+      });
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-group') === name;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      track.scrollLeft = 0;
+      buildDots();
+    }
+
     function current() { return Math.round(track.scrollLeft / track.clientWidth); }
     function go(i) {
-      i = Math.max(0, Math.min(slides.length - 1, i));
+      i = Math.max(0, Math.min(visible().length - 1, i));
       track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
     }
     function syncDots() {
@@ -328,6 +348,11 @@
       window.clearTimeout(track._t);
       track._t = window.setTimeout(syncDots, 60);
     }, { passive: true });
+
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { showGroup(t.getAttribute('data-group')); });
+    });
+    showGroup('women');
   }
 
   /* ─── Анимация появления (fade up) ────────────────── */
@@ -418,6 +443,9 @@
     setImg('dressCodePhoto', d.dressCodePhoto);
     setImg('dressPhoto2', d.dressPhoto2);
     setImg('dressPhoto3', d.dressPhoto3);
+    setImg('dressMan1', d.dressMan1);
+    setImg('dressMan2', d.dressMan2);
+    setImg('dressMan3', d.dressMan3);
     setImg('finalPhoto', d.finalPhoto);
 
     rebuildPalette(d.dressCodeColors);

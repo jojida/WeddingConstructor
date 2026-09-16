@@ -525,9 +525,12 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Дресс-код', icon: '👗',
       fields: [
         { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры', scope: 'data' },
-        { id: 'dressCodePhoto',  type: 'image',     label: 'Образ 1 (карусель)', scope: 'data' },
-        { id: 'dressPhoto2',     type: 'image',     label: 'Образ 2 (карусель)', scope: 'custom' },
-        { id: 'dressPhoto3',     type: 'image',     label: 'Образ 3 (карусель)', scope: 'custom' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Женский образ 1', scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Женский образ 2', scope: 'custom' },
+        { id: 'dressPhoto3',     type: 'image',     label: 'Женский образ 3', scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Мужской образ 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Мужской образ 2', scope: 'custom' },
+        { id: 'dressMan3',       type: 'image',     label: 'Мужской образ 3', scope: 'custom' },
       ],
     },
     {
@@ -897,6 +900,9 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       closingSign:   '', // Пустое поле — автоматическая подпись с именами пары.
       dressPhoto2:   '/invite/calla/assets/dress2.jpg',
       dressPhoto3:   '/invite/calla/assets/dress3.jpg',
+      dressMan1:     '/invite/calla/assets/man1.jpg',
+      dressMan2:     '/invite/calla/assets/man2.jpg',
+      dressMan3:     '/invite/calla/assets/man3.jpg',
       finalPhoto:    '/invite/calla/assets/couple-photo.jpg',
     },
   },
