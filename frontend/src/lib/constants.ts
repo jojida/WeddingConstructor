@@ -490,6 +490,8 @@ export const BUILTIN_GALLERY: string[] = [
   '/invite/assets/wedding-4.jpg',
   '/invite/assets/dresscode-bride.jpg',
   '/invite/assets/dresscode-guest.jpg',
+  '/invite/assets/dresscode-man1.jpg',
+  '/invite/assets/dresscode-man2.jpg',
 ];
 
 /* Схема полей по шаблонам (имена/дата/время правятся в отдельном окне) */
@@ -763,8 +765,10 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Дресс-код', icon: '👗',
       fields: [
-        { id: 'dressCodePhoto', type: 'image', label: 'Образ невесты', scope: 'data' },
-        { id: 'dressPhoto2',    type: 'image', label: 'Образ гостей',  scope: 'custom' },
+        { id: 'dressCodePhoto', type: 'image', label: 'Женский образ 1', scope: 'data' },
+        { id: 'dressPhoto2',    type: 'image', label: 'Женский образ 2', scope: 'custom' },
+        { id: 'dressMan1',      type: 'image', label: 'Мужской образ 1', scope: 'custom' },
+        { id: 'dressMan2',      type: 'image', label: 'Мужской образ 2', scope: 'custom' },
       ],
     },
     {
@@ -1047,6 +1051,8 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       organizerText: 'По всем вопросам обращайтесь к нашему организатору',
       organizerPhone: '+7 922 222 22 22',
       dressPhoto2: '/invite/assets/dresscode-guest.jpg',
+      dressMan1:   '/invite/assets/dresscode-man1.jpg',
+      dressMan2:   '/invite/assets/dresscode-man2.jpg',
       photo1: '/invite/assets/wedding-1.jpg',
       photo2: '/invite/assets/wedding-3.jpg',
       photo3: '/invite/assets/wedding-2.jpg',

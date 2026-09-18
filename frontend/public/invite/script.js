@@ -286,6 +286,8 @@
 
     setImg('dressCodePhoto', d.dressCodePhoto);
     setImg('dressPhoto2', d.dressPhoto2);
+    setImg('dressMan1', d.dressMan1);
+    setImg('dressMan2', d.dressMan2);
     setImg('photo1', d.photo1);
     setImg('photo2', d.photo2);
     setImg('photo3', d.photo3);
@@ -306,6 +308,27 @@
     if (p.get('date')) d.weddingDate = p.get('date');
     if (p.get('time')) d.weddingTime = p.get('time');
     return d;
+  }
+
+  /* ─── Вкладки дресс-кода ──────────────────────────── */
+  function initDressTabs() {
+    var tabs = [].slice.call(document.querySelectorAll('.dc-tab'));
+    var cards = [].slice.call(document.querySelectorAll('.dresscode-frame-wrap'));
+    if (!tabs.length) return;
+    function show(name) {
+      cards.forEach(function (el) {
+        el.classList.toggle('is-hidden', el.getAttribute('data-group') !== name);
+      });
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-group') === name;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.getAttribute('data-group')); });
+    });
+    show('women');
   }
 
   function initRsvp() {
@@ -352,6 +375,7 @@
     bindFormOptions();
     initHeartFollower();
     initRsvp();
+    initDressTabs();
     try {
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);

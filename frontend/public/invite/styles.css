@@ -766,16 +766,37 @@ body {
   margin-bottom: 36px;
 }
 
+/* Переключатель образов — женские и мужские в одном блоке,
+   неактивная группа скрыта. */
+.dc-tabs {
+  display: flex; justify-content: center; gap: 10px;
+  margin: -14px 0 26px;
+}
+.dc-tab {
+  font-family: 'Raleway', sans-serif;
+  font-size: 13px; letter-spacing: .14em; text-transform: uppercase;
+  color: #354366; background: none;
+  border: 1px solid rgba(17,78,136,.3); border-radius: 999px;
+  padding: 7px 20px; cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.dc-tab.is-active { background: #114e88; border-color: #114e88; color: #fff; }
+.dresscode-frame-wrap.is-hidden { display: none; }
+
+/* Образы выходят за поля секции — так карточки заметно крупнее,
+   а рамка-волна остаётся с запасом до края экрана. */
 .dresscode-photos {
   display: flex;
   justify-content: center;
-  gap: 28px;
+  gap: 14px;
+  width: calc(100% + 28px);
+  margin: 0 -14px;
 }
 
 .dresscode-frame-wrap {
   position: relative;
-  width: 43%;
-  max-width: 180px;
+  width: calc(50% - 7px);
+  max-width: 230px;
   aspect-ratio: 100 / 140;   /* gives the wrap height so layers can stack */
   /* Float animation */
   will-change: translate;
@@ -1056,25 +1077,6 @@ body {
   margin: 0 auto 44px;
 }
 
-/* Organic blob backgrounds */
-.collage-blob {
-  position: absolute;
-  border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
-}
-
-.blob-1 {
-  width: 170px; height: 160px;
-  top: 12px; left: 4%;
-  background: #c8dff0;
-  border-radius: 58% 42% 62% 38% / 52% 58% 42% 48%;
-}
-
-.blob-4 {
-  width: 150px; height: 140px;
-  bottom: 16px; right: 4%;
-  background: #c8dff0;
-  border-radius: 48% 52% 45% 55% / 55% 45% 55% 45%;
-}
 
 .collage-photo {
   position: absolute;
@@ -1159,16 +1161,6 @@ body {
   bottom: 12px; right: 5%;
   transform: rotate(-4deg);
   border-radius: 50% 50% 48% 52% / 52% 50% 50% 48%;
-}
-
-/* Blue brushstroke behind photo 3 */
-.collage-brush {
-  position: absolute;
-  z-index: 1;
-}
-.brush-3 {
-  width: 180px; height: 80px;
-  bottom: 46px; left: 4%;
 }
 
 /* Hearts decoration */

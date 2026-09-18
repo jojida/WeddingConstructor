@@ -102,6 +102,7 @@
         </div>
         <img src="assets/flower-single.png" class="hero-deco hero-deco-left" alt="">
         <img src="assets/flower-single.png" class="hero-deco hero-deco-right" alt="">
+
       </div>
     </section>
 
@@ -251,13 +252,18 @@
     <!-- ═══════════════════════════════════════ DRESS CODE ═══════════════════════════════════════ -->
     <section class="dresscode-section fade-up">
       <h2 class="dresscode-title">Дресс код</h2>
+      <div class="dc-tabs" role="tablist">
+        <button class="dc-tab is-active" type="button" data-group="women" role="tab" aria-selected="true">Женщины</button>
+        <button class="dc-tab" type="button" data-group="men" role="tab" aria-selected="false">Мужчины</button>
+      </div>
+
       <div class="dresscode-photos">
 
         <!-- Each card = replaceable PHOTO layer (.dc-photo-inner) + a separate
              decorative FRAME layer (.dc-frame-svg) on top, both bound to the
              same .dresscode-frame-wrap so the frame always tracks the photo.
              To swap a photo, change only the <img src> (or its slot via JS). -->
-        <div class="dresscode-frame-wrap">
+        <div class="dresscode-frame-wrap" data-group="women">
           <div class="dresscode-photo-inner">
             <img id="dc-photo-bride" data-photo-slot="bride" data-edit="dressCodePhoto" src="assets/dresscode-bride.jpg" class="dc-photo" alt="Образ невесты">
           </div>
@@ -276,9 +282,46 @@
           </svg>
         </div>
 
-        <div class="dresscode-frame-wrap">
+        <div class="dresscode-frame-wrap" data-group="women">
           <div class="dresscode-photo-inner">
             <img id="dc-photo-guest" data-photo-slot="guest" data-edit="dressPhoto2" src="assets/dresscode-guest.jpg" class="dc-photo" alt="Образ гостей">
+          </div>
+          <!-- Decorative frame — separate overlay layer, not part of the photo -->
+          <svg class="dc-frame-svg" viewBox="-4 -4 108 149" preserveAspectRatio="none" aria-hidden="true">
+            <path d="
+              M 13 5 Q 21 -1 29 5 Q 37 11 45 5 Q 53 -1 61 5 Q 69 11 77 5 Q 85 -1 90 4
+              L 96 11 Q 102 19 96 27 Q 90 35 96 43 Q 102 51 96 59 Q 90 67 96 75
+              Q 102 83 96 91 Q 90 99 96 107 Q 102 115 96 123 Q 90 131 96 133
+              L 90 137 Q 82 143 74 137 Q 66 131 58 137 Q 50 143 42 137 Q 34 131 26 137
+              Q 18 143 13 138
+              L 4 131 Q -2 123 4 115 Q 10 107 4 99 Q -2 91 4 83 Q 10 75 4 67
+              Q -2 59 4 51 Q 10 43 4 35 Q -2 27 4 19 Q 10 11 4 9
+              Z
+            " fill="none" stroke="#114e88" stroke-width="2.2"/>
+          </svg>
+        </div>
+
+        <div class="dresscode-frame-wrap" data-group="men">
+          <div class="dresscode-photo-inner">
+            <img id="dc-photo-man1" data-photo-slot="man1" data-edit="dressMan1" src="assets/dresscode-man1.jpg" class="dc-photo" alt="Мужской образ">
+          </div>
+          <!-- Decorative frame — separate overlay layer, not part of the photo -->
+          <svg class="dc-frame-svg" viewBox="-4 -4 108 149" preserveAspectRatio="none" aria-hidden="true">
+            <path d="
+              M 13 5 Q 21 -1 29 5 Q 37 11 45 5 Q 53 -1 61 5 Q 69 11 77 5 Q 85 -1 90 4
+              L 96 11 Q 102 19 96 27 Q 90 35 96 43 Q 102 51 96 59 Q 90 67 96 75
+              Q 102 83 96 91 Q 90 99 96 107 Q 102 115 96 123 Q 90 131 96 133
+              L 90 137 Q 82 143 74 137 Q 66 131 58 137 Q 50 143 42 137 Q 34 131 26 137
+              Q 18 143 13 138
+              L 4 131 Q -2 123 4 115 Q 10 107 4 99 Q -2 91 4 83 Q 10 75 4 67
+              Q -2 59 4 51 Q 10 43 4 35 Q -2 27 4 19 Q 10 11 4 9
+              Z
+            " fill="none" stroke="#114e88" stroke-width="2.2"/>
+          </svg>
+        </div>
+        <div class="dresscode-frame-wrap" data-group="men">
+          <div class="dresscode-photo-inner">
+            <img id="dc-photo-man2" data-photo-slot="man2" data-edit="dressMan2" src="assets/dresscode-man2.jpg" class="dc-photo" alt="Мужской образ">
           </div>
           <!-- Decorative frame — separate overlay layer, not part of the photo -->
           <svg class="dc-frame-svg" viewBox="-4 -4 108 149" preserveAspectRatio="none" aria-hidden="true">
@@ -401,30 +444,14 @@
       <h2 class="closing-title" data-edit="closingTitle">Ждем вас на нашей<br>свадьбе!</h2>
 
       <div class="photo-collage">
-        <!-- Blue blob background for photo 1 -->
-        <div class="collage-blob blob-1"></div>
         <div class="collage-photo photo-1">
           <img src="assets/wedding-1.jpg" alt="Наша свадьба" data-edit="photo1">
-        </div>
-
-        <!-- Blue brushstrokes behind photo 3 -->
-        <div class="collage-brush brush-3">
-          <svg viewBox="0 0 80 60" fill="none">
-            <line x1="5" y1="10" x2="75" y2="8" stroke="#354366" stroke-width="3.5" stroke-linecap="round" opacity="0.4"/>
-            <line x1="8" y1="22" x2="72" y2="20" stroke="#354366" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
-            <line x1="6" y1="34" x2="70" y2="32" stroke="#354366" stroke-width="3.5" stroke-linecap="round" opacity="0.4"/>
-            <line x1="10" y1="46" x2="68" y2="44" stroke="#354366" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
-          </svg>
-        </div>
-        <div class="collage-photo photo-3">
-          <img src="assets/wedding-2.jpg" alt="Мы ждём вас" data-edit="photo3">
         </div>
 
         <div class="collage-photo photo-2">
           <img src="assets/wedding-3.jpg" alt="Мы ждём вас" data-edit="photo2">
         </div>
 
-        <div class="collage-blob blob-4"></div>
         <div class="collage-photo photo-4">
           <img src="assets/wedding-4.jpg" alt="Наша свадьба" data-edit="photo4">
         </div>
