@@ -118,19 +118,6 @@ img.corner-br { bottom: 0; right: 0; transform: scale(-1,-1); }
 .arch-bouquet-tl { width: 57%; left: -15%; top: -4%; z-index: 5; }
 .arch-bouquet-br { width: 60%; right: -20%; bottom: -10%; transform: scale(-1,-1); z-index: 5; }
 
-.std-label {
-  position: absolute;
-  right: -22px; top: 28%;
-  transform: translateY(-50%);
-  display: flex; flex-direction: column; align-items: center; gap: 2px; z-index: 6;
-}
-.std-label span {
-  font-family: 'Raleway', sans-serif;
-  font-size: 9px; font-weight: 300;
-  letter-spacing: 0.25em; color: var(--text); line-height: 1;
-}
-.std-spacer { height: 5px !important; }
-
 .the-wedding-of {
   font-family: 'Raleway', sans-serif; font-size: 12px; font-weight: 300;
   letter-spacing: 0.38em; text-transform: uppercase;
@@ -299,8 +286,8 @@ img.corner-br { bottom: 0; right: 0; transform: scale(-1,-1); }
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 22px 14px 22px 4px;
+  gap: 8px;
+  padding: 22px 10px 22px 2px;
 }
 .sched-item-left .sched-meta { text-align: right; }
 
@@ -309,27 +296,28 @@ img.corner-br { bottom: 0; right: 0; transform: scale(-1,-1); }
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 12px;
-  padding: 22px 4px 22px 14px;
+  gap: 8px;
+  padding: 22px 2px 22px 10px;
 }
 .sched-item-right .sched-meta { text-align: left; }
 
 .sched-meta { display: flex; flex-direction: column; gap: 3px; }
 
 .sched-time {
-  font-family: 'Raleway', sans-serif; font-size: 16px; font-weight: 300;
-  letter-spacing: 0.15em; color: var(--gold);
+  font-family: 'Raleway', sans-serif; font-size: clamp(17px, 4.6vw, 20px); font-weight: 300;
+  letter-spacing: 0.12em; color: var(--gold);
 }
 .sched-name {
-  font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 300;
-  letter-spacing: 0.1em; color: var(--text); line-height: 1.3;
+  font-family: 'Raleway', sans-serif; font-size: clamp(12px, 3vw, 13.5px); font-weight: 300;
+  letter-spacing: 0.06em; color: var(--text); line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 /* Иконки расписания — убираем белый фон через mix-blend-mode.
    background: var(--bg) нужен, чтобы multiply работал внутри
    stacking context (transform от .fu даёт прозрачный фон). */
 .sched-icon {
-  width: 58px; height: 58px; object-fit: contain; flex-shrink: 0;
+  width: clamp(46px, 13vw, 58px); height: auto; aspect-ratio: 1; object-fit: contain; flex-shrink: 0;
   background: var(--bg);
   mix-blend-mode: multiply;
 }
@@ -357,11 +345,21 @@ span.sched-emoji {
 }
 
 .dc-genders {
-  font-family: 'Raleway', sans-serif; font-size: 9px; font-weight: 300;
-  letter-spacing: 0.25em; text-transform: uppercase; color: var(--text);
   display: flex; align-items: center; gap: 10px; margin-bottom: 22px;
 }
 .dc-divider { color: var(--gold); font-size: 14px; }
+
+/* Переключатель образов: выглядит как надпись из макета, но нажимается. */
+.dc-tab {
+  font-family: 'Raleway', sans-serif; font-size: 10px; font-weight: 300;
+  letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--text); opacity: .45;
+  background: none; border: 0; padding: 4px 2px; cursor: pointer;
+  border-bottom: 1px solid transparent;
+  transition: opacity .2s ease, border-color .2s ease;
+}
+.dc-tab.is-active { opacity: 1; border-bottom-color: var(--gold); }
+.dc-photo.is-hidden { display: none; }
 
 /* ── 4 свотча дресс-кода (dresscode.svg × 4, разные цвета через CSS filter) ── */
 .dc-swatches {
@@ -370,7 +368,7 @@ span.sched-emoji {
 }
 .dc-swatch {
   display: block;
-  width: 120px;
+  width: 78px;
   height: auto;
   object-fit: contain;
 }
@@ -384,17 +382,20 @@ span.sched-emoji {
 .dc-s4 { filter: sepia(0.65) saturate(0.35) brightness(0.82) hue-rotate(5deg); }
 
 /* ── Два фото рядом — в своём масштабе, без растяжки ── */
+/* Фото образов выходят за поля секции — так они заметно крупнее,
+   а сетка остаётся в два столбца. */
 .dc-photos {
   display: flex;
-  gap: 16px;
+  gap: 10px;
   justify-content: center;
   align-items: flex-start;
-  width: 100%;
+  width: calc(100% + 24px);
+  margin: 0 -12px;
 }
 .dc-photo {
-  width: 42%;
-  max-width: 180px;
-  aspect-ratio: 3 / 4;
+  width: calc(50% - 5px);
+  max-width: 250px;
+  aspect-ratio: 2 / 3;
   object-fit: cover;
   object-position: top center;
   display: block;
@@ -722,7 +723,7 @@ span.sched-emoji {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .sched-row {
   display: grid;
-  grid-template-columns: 1fr 24px 1fr;
+  grid-template-columns: 1fr 20px 1fr;
   align-items: center;
 }
 .sched-row .sched-center {
@@ -746,17 +747,15 @@ span.sched-emoji {
 .sched-row .sched-side.right { justify-content: flex-start; }
 /* Не дать длинным словам вылезать за край карточки (узкие экраны) */
 .sched-row .sched-item-left,
-.sched-row .sched-item-right { padding: 14px 2px; gap: 5px; min-width: 0; max-width: 100%; }
+.sched-row .sched-item-right { padding: 20px 2px; gap: 8px; min-width: 0; max-width: 100%; }
 .sched-row .sched-meta { min-width: 0; }
-.sched-row .sched-time { font-size: 14px; }
-.sched-row .sched-name { font-size: 10px; letter-spacing: 0.02em; line-height: 1.25; overflow-wrap: anywhere; }
-.sched-row .sched-icon { width: 42px; height: 42px; background: var(--bg); }
+.sched-row .sched-icon { background: var(--bg); }
 
 /* Цветной свотч дресс-кода: силуэт dresscode.svg + текстура (luminosity) + выбранный цвет.
    background-color (задаётся из редактора) даёт оттенок, svg-картинка — фактуру ткани. */
 .dc-swatch-color {
   display: block;
-  width: 120px;
+  width: 78px;
   aspect-ratio: 159 / 197.25;
   background-image: url('assets/icons/dresscode.svg');
   background-size: 100% 100%;

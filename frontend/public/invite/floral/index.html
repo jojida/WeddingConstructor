@@ -23,14 +23,6 @@
       <img class="corner corner-tr" src="assets/decor/branch_corner.png" alt="">
 
       <div class="arch-block">
-        <div class="std-label">
-          <span>S</span><span>A</span><span>V</span><span>E</span>
-          <span class="std-spacer"></span>
-          <span>T</span><span>H</span><span>E</span>
-          <span class="std-spacer"></span>
-          <span>D</span><span>A</span><span>T</span><span>E</span>
-        </div>
-
         <div class="arch-frame">
           <!-- Фото с маской через SVG — самый надёжный способ обрезки по кривым -->
           <svg class="arch-photo-svg" viewBox="0 0 572.25 900" preserveAspectRatio="none" aria-hidden="true">
@@ -47,7 +39,7 @@
                          L 555.800781 883.371094 Z"/>
               </clipPath>
             </defs>
-            <image href="assets/photos/couple1.jpg" data-edit="coverPhoto"
+            <image href="assets/photos/couple3.jpg" data-edit="coverPhoto"
                    x="0" y="0" width="572.25" height="900"
                    preserveAspectRatio="xMidYMin slice"
                    clip-path="url(#arch-photo-clip)"/>
@@ -70,8 +62,8 @@
         </div>
       </div>
 
-      <p class="the-wedding-of">THE WEDDING OF</p>
-      <h1 class="couple-names" data-edit="names">Olivia &amp; Sebastian</h1>
+      <p class="the-wedding-of">СВАДЬБА</p>
+      <h1 class="couple-names" data-edit="names">Оливия и Себастьян</h1>
       <p class="invite-label">ПРИГЛАШЕНИЕ</p>
     </section>
 
@@ -203,10 +195,10 @@
 
       <h2 class="section-script">Дресс код</h2>
 
-      <div class="dc-genders">
-        <span>ЖЕНЩИНЫ</span>
+      <div class="dc-genders" role="tablist">
+        <button class="dc-tab is-active" type="button" data-group="women" role="tab" aria-selected="true">ЖЕНЩИНЫ</button>
         <span class="dc-divider">|</span>
-        <span>МУЖЧИНЫ</span>
+        <button class="dc-tab" type="button" data-group="men" role="tab" aria-selected="false">МУЖЧИНЫ</button>
       </div>
 
       <!-- 4 цветных свотча: один oval-swatch, 4 варианта через CSS filter -->
@@ -219,8 +211,10 @@
 
       <!-- Два фото -->
       <div class="dc-photos">
-        <img class="dc-photo" src="assets/photos/dress1.jpg" alt="" data-edit="dressCodePhoto">
-        <img class="dc-photo" src="assets/photos/dress2.jpg" alt="" data-edit="dressPhoto2">
+        <img class="dc-photo" data-group="women" src="assets/photos/dress1.jpg" alt="Женский образ" data-edit="dressCodePhoto">
+        <img class="dc-photo" data-group="women" src="assets/photos/dress2.jpg" alt="Женский образ" data-edit="dressPhoto2">
+        <img class="dc-photo" data-group="men" src="assets/photos/man1.jpg" alt="Мужской образ" data-edit="dressMan1">
+        <img class="dc-photo" data-group="men" src="assets/photos/man2.jpg" alt="Мужской образ" data-edit="dressMan2">
       </div>
 
     </section>

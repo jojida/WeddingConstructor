@@ -95,8 +95,8 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
     }
     // Гость — сначала конверт, затем приглашение
     if (!revealed) {
-      const brideInitial = (data.brideName || 'Olivia').trim().charAt(0).toUpperCase();
-      const groomInitial = (data.groomName || 'Sebastian').trim().charAt(0).toUpperCase();
+      const brideInitial = (data.brideName || 'Оливия').trim().charAt(0).toUpperCase();
+      const groomInitial = (data.groomName || 'Себастьян').trim().charAt(0).toUpperCase();
       return (
         <WeddingEnvelope
           onOpen={() => setRevealed(true)}
@@ -123,7 +123,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
   const text = '#3d3d3d';
   const gold = '#947f57';
 
-  const cover = data.coverPhoto || '/invite/floral/assets/photos/couple1.jpg';
+  const cover = data.coverPhoto || '/invite/floral/assets/photos/couple3.jpg';
 
   return (
     <div style={{
@@ -181,10 +181,10 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       {/* Имена */}
       <div style={{ position:'relative', zIndex:4, textAlign:'center', marginTop:'8%', padding:'0 8%' }}>
         <p style={{ fontFamily:"var(--font-raleway,'Raleway',sans-serif)", fontSize:'6px', fontWeight:300, letterSpacing:'0.38em', color: text, marginBottom:'2px' }}>
-          THE WEDDING OF
+          СВАДЬБА
         </p>
         <h2 style={{ fontFamily:"var(--font-great-vibes,'Great Vibes',cursive)", fontSize:'22px', fontWeight:400, color: text, lineHeight:1.1, margin:0 }}>
-          {data.brideName || 'Olivia'} &amp; {data.groomName || 'Sebastian'}
+          {data.brideName || 'Оливия'} и {data.groomName || 'Себастьян'}
         </h2>
         <p style={{ fontFamily:"var(--font-raleway,'Raleway',sans-serif)", fontSize:'6px', fontWeight:300, letterSpacing:'0.5em', color: text, marginTop:'3px' }}>
           ПРИГЛАШЕНИЕ

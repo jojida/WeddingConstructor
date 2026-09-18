@@ -62,11 +62,32 @@
   }
 
   // ─── Имена (обложка): Невеста & Жених ────────────
+  /* ─── Вкладки дресс-кода ──────────────────────────── */
+  function initDressTabs() {
+    var tabs = [].slice.call(document.querySelectorAll('.dc-tab'));
+    var pics = [].slice.call(document.querySelectorAll('.dc-photo'));
+    if (!tabs.length) return;
+    function show(name) {
+      pics.forEach(function (el) {
+        el.classList.toggle('is-hidden', el.getAttribute('data-group') !== name);
+      });
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-group') === name;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.getAttribute('data-group')); });
+    });
+    show('women');
+  }
+
   function applyNames(groom, bride) {
     groom = (groom || '').trim();
     bride = (bride || '').trim();
     if (!groom && !bride) return;
-    var combined = bride + (bride && groom ? ' & ' : '') + groom;
+    var combined = bride + (bride && groom ? ' и ' : '') + groom;
     document.querySelectorAll('[data-edit="names"]').forEach(function (el) {
       el.textContent = combined;
     });
@@ -230,6 +251,8 @@
     setSvgImage('coverPhoto', d.coverPhoto);
     setImg('dressCodePhoto', d.dressCodePhoto);
     setImg('dressPhoto2', d.dressPhoto2);
+    setImg('dressMan1', d.dressMan1);
+    setImg('dressMan2', d.dressMan2);
     setImg('polaroid1', d.polaroid1);
     setImg('polaroid2', d.polaroid2);
     setImg('locationPhoto', d.locationPhoto);
@@ -293,6 +316,7 @@
     applyData(dataFromUrl());
     restartCountdown();
     initRsvp();
+    initDressTabs();
     try {
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);
