@@ -85,7 +85,7 @@ const HANDMADE_TEMPLATES = [
     tags: ['Цветы', 'Нежный', 'Бохо', 'Кружево', 'Романтика'],
     colors: ['#d5d0c8', '#a29b88', '#947f57'],
     preview: '/invite/floral/assets/photos/couple3.jpg',
-    defaultCover: '/invite/floral/assets/photos/couple3.jpg',
+    defaultCover: '/invite/floral/assets/photos/cover.jpg',
     defaultGallery: [] as string[],
     sampleBride: 'Оливия',
     sampleGroom: 'Себастьян',

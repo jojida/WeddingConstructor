@@ -123,7 +123,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
   const text = '#3d3d3d';
   const gold = '#947f57';
 
-  const cover = data.coverPhoto || '/invite/floral/assets/photos/couple3.jpg';
+  const cover = data.coverPhoto || '/invite/floral/assets/photos/cover.jpg';
 
   return (
     <div style={{
