@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
+import PreviewScale from '@/components/PreviewScale';
 import { TEMPLATES, sampleWeddingDate } from '@/lib/constants';
 import styles from './page.module.css';
 
@@ -90,7 +91,7 @@ export default function TemplatesPage() {
             }}
           >
             <div className={styles.cardImageWrapper}>
-              <div className={styles.previewScale}>
+              <PreviewScale className={styles.previewScale}>
                 <LazyMount>
                   <TemplatePreview
                     data={{
@@ -104,7 +105,7 @@ export default function TemplatesPage() {
                     apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
                   />
                 </LazyMount>
-              </div>
+              </PreviewScale>
             </div>
 
             <div className={styles.cardActions}>

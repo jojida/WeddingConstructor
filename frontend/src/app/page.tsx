@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
+import PreviewScale from '@/components/PreviewScale';
 import MediterraneanTemplate from '@/components/MediterraneanTemplate';
 import styles from './page.module.css';
 
@@ -207,7 +208,7 @@ function TemplatesSection() {
           {TEMPLATES.map((tpl) => (
             <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}>
               <div className={styles.mosaicCard}>
-                <div className={styles.previewScale}>
+                <PreviewScale className={styles.previewScale}>
                   <LazyMount>
                     <TemplatePreview
                       data={{
@@ -221,7 +222,7 @@ function TemplatesSection() {
                       apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
                     />
                   </LazyMount>
-                </div>
+                </PreviewScale>
                 <div className={styles.mosaicOverlay} />
                 <div className={styles.mosaicInfo}>
                   <h3 className={styles.mosaicTitle}>{tpl.name}</h3>

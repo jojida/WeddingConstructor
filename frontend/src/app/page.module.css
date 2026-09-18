@@ -366,11 +366,13 @@
   overflow: hidden;
   pointer-events: none;
 }
+/* Превью рисуется в «родной» ширине шаблона, а масштаб под карточку считает
+   PreviewScale.tsx — иначе на узкой карточке содержимое не помещается. */
 .previewScale > div {
-  width: 125% !important;
-  height: 125% !important;
-  max-width: 125% !important;
-  transform: scale(0.8);
+  width: 480px !important;
+  height: var(--preview-height, 650px) !important;
+  max-width: none !important;
+  transform: scale(var(--preview-scale, 0.8));
   transform-origin: top left;
   border-radius: 0 !important;
   box-shadow: none !important;
@@ -719,6 +721,10 @@
   .featuresGrid { grid-template-columns: 1fr; }
   .templatesScroll { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .templateScrollItem { height: 300px; }
+  /* На узкой карточке длинные названия («Средиземноморье») упирались в край
+     и обрезались: подпись не была ограничена справа. */
+  .mosaicInfo { left: 12px; right: 12px; bottom: 14px; }
+  .mosaicTitle { font-size: 15px; line-height: 1.25; overflow-wrap: break-word; }
   .ctaBox { padding: 48px 24px; }
   .ctaTitle { font-size: 28px; }
   .footerGrid { grid-template-columns: 1fr; gap: 32px; }
