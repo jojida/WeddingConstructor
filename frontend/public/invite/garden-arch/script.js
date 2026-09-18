@@ -415,8 +415,8 @@
   function applyData(d) {
     if (!d) return;
     applyMapLink(d.mapLink);
-    if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
     if (typeof d.apiBase === 'string') STATE.apiBase = d.apiBase;
+    if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
     if (typeof d.slug === 'string' && d.slug) STATE.slug = d.slug;
     if (typeof d.guestToken === 'string' && d.guestToken) STATE.guestToken = d.guestToken;
     if (typeof d.guestName === 'string' && d.guestName) {

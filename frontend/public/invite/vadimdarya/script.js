@@ -54,9 +54,9 @@
   // ─── Применение данных к DOM ─────────────────────
   function applyData(d) {
     if (!d) return;
-    if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
 
     if (typeof d.apiBase === 'string') STATE.apiBase = d.apiBase;
+    if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
 
     // Имена
     var groom = (d.groomName || '').trim();
