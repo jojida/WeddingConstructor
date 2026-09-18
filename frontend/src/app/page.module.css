@@ -503,6 +503,15 @@
   max-width: 700px;
   margin: 0 auto;
 }
+.pricingNote {
+  max-width: 700px;
+  margin: 24px auto 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--on-surface-variant, #7d766c);
+}
+
 .pricingCard {
   background: var(--surface-container-lowest);
   border: 1px solid rgba(206,197,186,0.4);

@@ -370,9 +370,10 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
   if (!advanced) return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>🌐</div>
-      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Свой домен — на тарифе Премиум</h3>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Привязка своего домена — на тарифе Премиум</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
-        Привяжите собственный домен (например, denis-i-maria.ru) к вашему сайту-приглашению.
+        Купите домен у регистратора (например, denis-i-maria.ru) и привяжите его к сайту-приглашению.
+        Сам домен в тариф не входит — мы помогаем его подключить.
       </p>
       <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>Улучшить тариф →</Link>
     </div>
@@ -413,6 +414,7 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
     <div style={{ maxWidth: 600 }}>
       <p style={{ fontSize: 14, color: '#5b554c', marginBottom: 16 }}>
         По умолчанию сайт доступен на нашем домене. Можно привязать свой — например, denis-i-maria.ru.
+        Домен вы покупаете сами у регистратора, мы его не продаём: ниже инструкция, как подключить.
       </p>
       <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#7d766c', textTransform: 'uppercase', marginBottom: 6 }}>Ваш домен</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
