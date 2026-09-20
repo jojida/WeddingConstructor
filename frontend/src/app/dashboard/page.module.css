@@ -61,6 +61,14 @@
   gap: 6px;
   position: relative;
 }
+/* Карточка с фотографией: снимок кадрируется по центру, поверх — затемнение
+   из inline-стиля, поэтому имена остаются читаемыми на светлых снимках. */
+.cardPreviewPhoto {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 .cardStatus {
   position: absolute;
   top: 16px;

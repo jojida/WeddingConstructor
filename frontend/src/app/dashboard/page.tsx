@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
+import { TEMPLATES } from '@/lib/constants';
 import styles from './page.module.css';
 
 interface Invite {
@@ -18,6 +19,20 @@ interface Invite {
   templateId: string;
   plan: string;
   updatedAt: string;
+  coverPhoto?: string;
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+
+/* Главное фото карточки: сначала загруженное парой, иначе обложка шаблона.
+   Загрузки лежат на бэкенде, ассеты шаблонов — на этом же домене. */
+function coverUrl(invite: Invite): string {
+  const raw = invite.coverPhoto
+    || TEMPLATES.find(t => t.id === invite.templateId)?.defaultCover
+    || '';
+  if (!raw) return '';
+  if (/^https?:\/\//.test(raw) || raw.startsWith('/invite/')) return raw;
+  return raw.startsWith('/') ? API_BASE + raw : raw;
 }
 
 const TEMPLATE_COLORS: Record<string, [string, string]> = {
@@ -105,22 +120,29 @@ export default function DashboardPage() {
           <div className={styles.grid}>
             {invites.map(invite => {
               const [bg, accent] = TEMPLATE_COLORS[invite.templateId] || TEMPLATE_COLORS.classic;
+              const cover = coverUrl(invite);
               return (
                 <div key={invite.id} className={styles.card}>
-                  <div className={styles.cardPreview} style={{ background: `linear-gradient(160deg, ${bg}, ${accent}33)` }}>
+                  <div
+                    className={`${styles.cardPreview} ${cover ? styles.cardPreviewPhoto : ''}`}
+                    style={cover
+                      /* затемнение снизу — чтобы имена читались на любом снимке */
+                      ? { backgroundImage: `linear-gradient(to top, rgba(0,0,0,.62) 0%, rgba(0,0,0,.18) 45%, rgba(0,0,0,.04) 100%), url(${JSON.stringify(cover)})` }
+                      : { background: `linear-gradient(160deg, ${bg}, ${accent}33)` }}
+                  >
                     <div className={styles.cardStatus}>
                       <span className={`${styles.statusBadge} ${invite.status === 'paid' || invite.status === 'published' ? styles.statusPaid : styles.statusDraft}`}>
                         {invite.status === 'paid' || invite.status === 'published' ? '✓ Опубликовано' : '✎ Черновик'}
                       </span>
                     </div>
-                    <div className={styles.cardNames} style={{ color: invite.templateId === 'luxury' ? '#fff' : '#2c2c2c' }}>
+                    <div className={styles.cardNames} style={{ color: cover || invite.templateId === 'luxury' ? '#fff' : '#2c2c2c' }}>
                       {invite.groomName && invite.brideName
                         ? `${invite.groomName} & ${invite.brideName}`
                         : <span style={{ opacity: 0.4 }}>Без названия</span>
                       }
                     </div>
                     {invite.weddingDate && (
-                      <div className={styles.cardDate} style={{ color: accent }}>
+                      <div className={styles.cardDate} style={{ color: cover ? 'rgba(255,255,255,.88)' : accent }}>
                         {formatDate(invite.weddingDate)}
                       </div>
                     )}
