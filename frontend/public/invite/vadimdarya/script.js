@@ -121,10 +121,15 @@
       var hero = document.getElementById('heroImg');
       var fb = document.getElementById('heroFallback');
       if (hero) {
-        hero.src = imageUrl(d.coverPhoto);
-        // Кадр под встроенный снимок прижат вправо; чужое фото кадрируем
-        // по центру — там пара обычно и стоит.
-        hero.style.objectPosition = 'center top';
+        var coverUrl = imageUrl(d.coverPhoto);
+        hero.src = coverUrl;
+        // Встроенный снимок кадрируем по правому краю: пара стоит там, и
+        // только так она видна целиком. Он приходит и в данных тоже, поэтому
+        // отличаем его по имени файла. Чужое фото центрируем — на своих
+        // снимках пара обычно посередине.
+        hero.style.objectPosition = /images\/couple\.jpg(\?|$)/.test(coverUrl)
+          ? '100% top'
+          : 'center top';
         hero.style.display = '';
         if (fb) fb.style.display = 'none';
       }
