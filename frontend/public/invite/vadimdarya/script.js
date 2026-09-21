@@ -122,6 +122,9 @@
       var fb = document.getElementById('heroFallback');
       if (hero) {
         hero.src = imageUrl(d.coverPhoto);
+        // Кадр под встроенный снимок прижат вправо; чужое фото кадрируем
+        // по центру — там пара обычно и стоит.
+        hero.style.objectPosition = 'center top';
         hero.style.display = '';
         if (fb) fb.style.display = 'none';
       }
