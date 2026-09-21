@@ -799,21 +799,24 @@ img {
   box-shadow: 0 4px 16px rgba(40, 50, 30, 0.16);
 }
 
+/* Пион лежит на углу карточки, а не поверх снимка: раньше он занимал
+   две трети ширины и закрывал лицо. Смещения в процентах — чтобы на любом
+   экране заходить на фото одинаково, примерно на четверть цветка. */
 .dc-flower {
   position: absolute;
-  width: 64%;
+  width: 42%;
   z-index: 2;
   pointer-events: none;
 }
 
 .dc-flower-tl {
-  top: -22px;
-  left: -22px;
+  top: -6%;
+  left: -24%;
 }
 
 .dc-flower-br {
-  bottom: -22px;
-  right: -22px;
+  bottom: -6%;
+  right: -24%;
   transform: rotate(180deg);
 }
 
