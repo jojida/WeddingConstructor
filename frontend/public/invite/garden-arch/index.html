@@ -187,13 +187,26 @@
         <span class="ga-swatch" style="background:#bcd2dd"></span>
       </div>
 
+      <div class="dc-tabs" role="tablist">
+        <button class="dc-tab is-active" type="button" data-group="women" role="tab" aria-selected="true">Женщины</button>
+        <button class="dc-tab" type="button" data-group="men" role="tab" aria-selected="false">Мужчины</button>
+      </div>
+
       <div class="dc-photos">
-        <div class="dc-card">
-          <img class="dc-photo" src="assets/photos/dress1.jpg" alt="" data-edit="dressCodePhoto">
+        <div class="dc-card" data-group="women">
+          <img class="dc-photo" src="assets/photos/dress1.jpg" alt="Женский образ" data-edit="dressCodePhoto">
           <img class="dc-flower dc-flower-tl" src="assets/decor/peony.png" alt="">
         </div>
-        <div class="dc-card">
-          <img class="dc-photo" src="assets/photos/dress2.jpg" alt="" data-edit="dressPhoto2">
+        <div class="dc-card" data-group="women">
+          <img class="dc-photo" src="assets/photos/dress2.jpg" alt="Женский образ" data-edit="dressPhoto2">
+          <img class="dc-flower dc-flower-br" src="assets/decor/peony.png" alt="">
+        </div>
+        <div class="dc-card" data-group="men">
+          <img class="dc-photo" src="assets/photos/man1.jpg" alt="Мужской образ" data-edit="dressMan1">
+          <img class="dc-flower dc-flower-tl" src="assets/decor/peony.png" alt="">
+        </div>
+        <div class="dc-card" data-group="men">
+          <img class="dc-photo" src="assets/photos/man2.jpg" alt="Мужской образ" data-edit="dressMan2">
           <img class="dc-flower dc-flower-br" src="assets/decor/peony.png" alt="">
         </div>
       </div>

@@ -412,6 +412,27 @@
     });
   }
 
+  /* ─── Вкладки дресс-кода ──────────────────────────── */
+  function initDressTabs() {
+    var tabs = [].slice.call(document.querySelectorAll('.dc-tab'));
+    var cards = [].slice.call(document.querySelectorAll('.dc-card'));
+    if (!tabs.length) return;
+    function show(name) {
+      cards.forEach(function (el) {
+        el.classList.toggle('is-hidden', el.getAttribute('data-group') !== name);
+      });
+      tabs.forEach(function (t) {
+        var on = t.getAttribute('data-group') === name;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.getAttribute('data-group')); });
+    });
+    show('women');
+  }
+
   function applyData(d) {
     if (!d) return;
     applyMapLink(d.mapLink);
@@ -436,6 +457,8 @@
     setImg('polaroid2', d.polaroid2);
     setImg('dressCodePhoto', d.dressCodePhoto);
     setImg('dressPhoto2', d.dressPhoto2);
+    setImg('dressMan1', d.dressMan1);
+    setImg('dressMan2', d.dressMan2);
     rebuildSwatches(d.dressCodeColors);
     if (Array.isArray(d.schedule) && d.schedule.length) applySchedule(d.schedule);
     rebuildDrinks(d.drinks);
@@ -488,6 +511,7 @@
     initReveal();
     initHeartReveal();
     initRsvp();
+    initDressTabs();
     try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'wc:ready' }, window.location.origin); } catch (e) {}
   }
 

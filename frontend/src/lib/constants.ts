@@ -731,9 +731,11 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Дресс-код', icon: '👗',
       fields: [
-        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры', scope: 'data' },
-        { id: 'dressCodePhoto',  type: 'image',     label: 'Фото образа 1',  scope: 'data' },
-        { id: 'dressPhoto2',     type: 'image',     label: 'Фото образа 2',  scope: 'custom' },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры',   scope: 'data' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Женский образ 1', scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Женский образ 2', scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Мужской образ 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Мужской образ 2', scope: 'custom' },
       ],
     },
     {
@@ -1034,6 +1036,8 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       surveyText: 'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closing:    'Ждём вас на нашей свадьбе!',
       dressPhoto2: '/invite/garden-arch/assets/photos/dress2.jpg',
+      dressMan1:   '/invite/garden-arch/assets/photos/man1.jpg',
+      dressMan2:   '/invite/garden-arch/assets/photos/man2.jpg',
       polaroid1:   '/invite/garden-arch/assets/photos/couple1.jpg',
       polaroid2:   '/invite/garden-arch/assets/photos/couple2.jpg',
     },
