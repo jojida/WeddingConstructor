@@ -294,11 +294,19 @@ export const _TEMPLATES_LEGACY = [
 
 export const PLANS = [
   {
+    id: 'lite',
+    name: 'Лайт',
+    price: 1990,
+    period: 'разовая оплата за один сайт',
+    features: ['Сайт-приглашение', 'Форма RSVP', 'Ответы гостей в личном кабинете', 'Правки в любой момент', 'Ссылка на нашем домене'],
+    color: '#8a8f98',
+  },
+  {
     id: 'basic',
     name: 'Базовый',
     price: 3990,
     period: 'разовая оплата за один сайт',
-    features: ['Сайт-приглашение', 'Форма RSVP', 'Уведомления в Telegram или на Email', 'Музыкальный фон', 'Ссылка на нашем домене'],
+    features: ['Всё из Лайта', 'Уведомления в Telegram или на Email', 'Музыкальный фон'],
     color: '#6b8f5c',
   },
   {
@@ -306,11 +314,19 @@ export const PLANS = [
     name: 'Премиум',
     price: 5990,
     period: 'разовая оплата за один сайт',
-    features: ['Всё из Базового', 'Личный кабинет гостей', 'Персональные ссылки с именным обращением', 'Ответы по каждому гостю', 'Привязка своего домена', 'Неограниченно гостей и фото'],
+    features: ['Всё из Базового', 'Личный кабинет гостей', 'Персональные ссылки с именным обращением', 'Ответы по каждому гостю', 'Привязка своего домена'],
     color: '#c9a96e',
     popular: true,
   },
 ];
+
+/** Уведомления об ответах гостей в Telegram и на почту — с «Базового». */
+export const hasNotifications = (plan?: string | null): boolean =>
+  plan === 'basic' || plan === 'premium' || plan === 'standard';
+
+/** Фоновая мелодия в приглашении — с «Базового». */
+export const hasMusic = (plan?: string | null): boolean =>
+  plan === 'basic' || plan === 'premium' || plan === 'standard';
 
 /** Продвинутый тариф (Премиум): личный кабинет гостей + персональные ссылки. */
 export const isAdvancedPlan = (plan?: string | null): boolean =>
@@ -499,7 +515,7 @@ export const BUILTIN_GALLERY: string[] = [
 const MUSIC_SECTION: TemplateSection = {
   title: 'Музыка', icon: '🎵',
   fields: [
-    { id: 'musicUrl', type: 'audio', label: 'Фоновая мелодия', hint: 'MP3 до 15 МБ. Гость включает её кнопкой в углу сайта', scope: 'data' },
+    { id: 'musicUrl', type: 'audio', label: 'Фоновая мелодия', hint: 'MP3 до 15 МБ. Гость включает её кнопкой в углу сайта. Входит в «Базовый» и «Премиум»', scope: 'data' },
   ],
 };
 

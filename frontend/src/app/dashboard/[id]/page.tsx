@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { isAdvancedPlan, hasCustomDomain, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice } from '@/lib/constants';
+import { isAdvancedPlan, hasCustomDomain, hasNotifications, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice } from '@/lib/constants';
 
 interface Invite {
   id: string; slug: string; status: string; plan: string;
@@ -246,6 +246,26 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
 
 // ─── Вкладка «Уведомления» ─────────────────────────────────────────────────
 function NotifyTab({ invite, userEmail, onSaved }: { invite: Invite; userEmail: string; onSaved: () => void }) {
+  // На «Лайте» уведомлений нет — сервер их не отправляет, поэтому и настройки
+  // не показываем, чтобы пара не ждала сообщений, которые не придут.
+  if (!hasNotifications(invite.plan)) return (
+    <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
+      <div style={{ fontSize: 36, marginBottom: 8 }}>🔔</div>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Уведомления — с тарифа «Базовый»</h3>
+      <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
+        На «Лайте» ответы гостей видны во вкладке «Ответы». С «Базового» каждый новый ответ
+        приходит сразу в Telegram или на почту — проверять кабинет не нужно.
+      </p>
+      <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
+        Улучшить тариф →
+      </Link>
+    </div>
+  );
+
+  return <NotifySettings invite={invite} userEmail={userEmail} onSaved={onSaved} />;
+}
+
+function NotifySettings({ invite, userEmail, onSaved }: { invite: Invite; userEmail: string; onSaved: () => void }) {
   const [channel, setChannel] = useState(invite.notifyChannel || 'none');
   const [email, setEmail] = useState(invite.notifyEmail || userEmail || '');
   const [tg, setTg] = useState<{ deepLink: string; botUsername: string; connected: boolean } | null>(null);

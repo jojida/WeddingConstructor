@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PreviewScale from '@/components/PreviewScale';
@@ -129,7 +129,7 @@ function Hero() {
 
           <p className={styles.heroSubtitle} data-animate data-delay="200">
             Дизайнерские шаблоны с RSVP-анкетой гостей, музыкой и картой проезда.
-            Разовая оплата от 3 990 ₽ — без подписок, сайт работает бессрочно.
+            Разовая оплата от 1 990 ₽ — без подписок, сайт работает бессрочно.
           </p>
 
           <div className={styles.heroCtas} data-animate data-delay="300">
@@ -377,22 +377,8 @@ function Features() {
 }
 
 // ─── Pricing ──────────────────────────────────────────────────────────────────
-const PLANS = [
-  {
-    name: 'Базовый',
-    price: '3 990',
-    period: 'разовая оплата за один сайт',
-    features: ['Сайт-приглашение', 'Форма RSVP', 'Уведомления в Telegram или на Email', 'Музыкальный фон', 'Ссылка на нашем домене'],
-    popular: false,
-  },
-  {
-    name: 'Премиум',
-    price: '5 990',
-    period: 'разовая оплата за один сайт',
-    features: ['Всё из Базового', 'Личный кабинет гостей', 'Персональные ссылки с обращением', 'Ответы по каждому гостю', 'Привязка своего домена', 'Неограниченно гостей и фото'],
-    popular: true,
-  },
-];
+/* Тарифы берём из constants — там же их читают страница оплаты и бэкенд.
+   Своя копия на лендинге уже приводила к расхождению текстов. */
 
 function Pricing() {
   return (
@@ -412,7 +398,7 @@ function Pricing() {
               <div className={styles.planName}>{plan.name}</div>
               <div className={styles.planPriceRow}>
                 <span className={styles.planCurrency}>₽</span>
-                <span className={styles.planPrice}>{plan.price}</span>
+                <span className={styles.planPrice}>{plan.price.toLocaleString('ru-RU')}</span>
               </div>
               <div className={styles.planPeriod}>{plan.period}</div>
               <ul className={styles.planFeatures}>
@@ -596,7 +582,7 @@ function CompareSection() {
     'Приглашение легко потерять или забыть дома',
   ];
   const site = [
-    'От 3 990 ₽ один раз — на всех гостей сразу',
+    'От 1 990 ₽ один раз — на всех гостей сразу',
     'Одна ссылка — отправьте её в любом мессенджере, по SMS или почте',
     'RSVP-анкета сама собирает ответы и выбор напитков',
     'До публикации правьте текст и фото сколько угодно',
@@ -629,22 +615,9 @@ function CompareSection() {
 // ─── Отзывы ──────────────────────────────────────────────────────────────────
 /* ⚠️ ЗАГЛУШКИ: заменить на реальные отзывы первых клиентов перед деплоем
    (промо «−30% за отзыв»). Пустой массив — секция не показывается. */
-const REVIEWS = [
-  {
-    names: 'Анна и Александр',
-    template: 'Тёмная элегантность',
-    text: 'Собрали сайт за один вечер, а гости писали, что такого приглашения ещё не видели. Никого не пришлось обзванивать — ответы пришли сами, прямо в Telegram.',
-  },
-  {
-    names: 'Екатерина и Артём',
-    template: 'Скетч',
-    text: 'Хотели что-то небанальное — выбрали рисованный стиль и добавили свои полароиды. Бабушкам отправили ссылку по SMS, разобрались все.',
-  },
-  {
-    names: 'Маргарита и Елис',
-    template: 'Цветущая арка',
-    text: 'Удобно, что видно, кто из гостей уже открыл анкету и что выбрал. К банкету точно знали количество и напитки — банкетный менеджер был счастлив.',
-  },
+const REVIEWS: { names: string; template: string; text: string }[] = [
+  /* Сюда — только настоящие отзывы клиентов с их согласия. Пока массив пуст,
+     секция не показывается: выдуманные отзывы вводят покупателя в заблуждение. */
 ];
 
 function ReviewsSection() {
@@ -684,7 +657,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Сколько это стоит? Есть ли подписка?',
-    a: 'Оплата разовая: 3 990 ₽ за тариф «Базовый» или 5 990 ₽ за «Премиум». Никаких подписок и продлений — опубликованный сайт работает бессрочно.',
+    a: 'Оплата разовая: 1 990 ₽ за «Лайт», 3 990 ₽ за «Базовый», 5 990 ₽ за «Премиум». Никаких подписок и продлений — опубликованный сайт работает бессрочно, а правки бесплатны и в любой момент.',
   },
   {
     q: 'Можно ли попробовать бесплатно?',
@@ -692,7 +665,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Можно ли редактировать сайт после оплаты?',
-    a: 'Нет — вы оплачиваете готовый сайт, после публикации он фиксируется. До оплаты меняйте текст, фото и дизайн сколько угодно, поэтому проверьте всё перед публикацией.',
+    a: 'Да, в любой момент и бесплатно. Зайдите в редактор из личного кабинета, поправьте что нужно и сохраните — гости увидят изменения сразу, ссылка не меняется.',
   },
   {
     q: 'Что умеет RSVP-анкета?',
@@ -760,7 +733,7 @@ function JsonLd() {
         offers: PLANS.map((plan) => ({
           '@type': 'Offer',
           name: `Тариф «${plan.name}»`,
-          price: plan.price.replace(/\s/g, ''),
+          price: String(plan.price),
           priceCurrency: 'RUB',
           url: `${SITE_URL}/#pricing`,
           availability: 'https://schema.org/InStock',

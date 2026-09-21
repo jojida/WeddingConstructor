@@ -496,12 +496,15 @@
 
 /* ── Pricing ─────────────────────────────────────────────────────────────────── */
 .pricingSection { padding: 120px 0; }
+/* Три тарифа: сколько влезет по ширине — три, два или один.
+   Так не приходится держать по правилу на каждую ширину экрана. */
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 28px;
-  max-width: 700px;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 20px;
+  max-width: 1020px;
   margin: 0 auto;
+  align-items: start;
 }
 .pricingNote {
   max-width: 700px;
@@ -691,7 +694,7 @@
   .heroGrid { padding: 60px 40px; }
   .templateScrollItem { height: 420px; }
   .footerGrid { grid-template-columns: 1fr 1fr; gap: 40px; }
-  .pricingGrid { grid-template-columns: 1fr; max-width: 420px; }
+  .pricingNote { padding: 0 20px; }
   .pricingCardPopular { transform: scale(1); }
 }
 

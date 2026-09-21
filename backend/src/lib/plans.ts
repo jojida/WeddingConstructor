@@ -1,11 +1,23 @@
 // Тарифы и общие хелперы продукта.
 //
-// Функциональных уровня два:
-//   • базовый      — basic   (сайт + RSVP + уведомления + музыка)
+// Функциональных уровня три:
+//   • лайт         — lite    (сайт + RSVP, ответы только в кабинете)
+//   • базовый      — basic   (+ уведомления об ответах и фоновая музыка)
 //   • продвинутый  — premium (+ кабинет гостей, персональные ссылки, свой домен)
-// Ранее существовал 'standard' — в старых dev-записях мог сохраниться.
+// Ранее существовал 'standard' — в старых dev-записях мог сохраниться,
+// по возможностям он равен базовому.
 
-export type Plan = 'basic' | 'premium';
+export type Plan = 'lite' | 'basic' | 'premium';
+
+/** Уведомления об ответах гостей (Telegram, почта) — с «Базового». */
+export function hasNotifications(plan: string | null | undefined): boolean {
+  return plan === 'basic' || plan === 'premium' || plan === 'standard';
+}
+
+/** Фоновая мелодия в приглашении — с «Базового». */
+export function hasMusic(plan: string | null | undefined): boolean {
+  return plan === 'basic' || plan === 'premium' || plan === 'standard';
+}
 
 /** Продвинутый тариф (Премиум): доступны кабинет гостей и персональные ссылки. */
 export function isAdvanced(plan: string | null | undefined): boolean {

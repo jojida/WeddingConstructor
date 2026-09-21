@@ -7,6 +7,7 @@ const router = Router();
 
 // Цена — разовый платёж за один сайт (без срока действия).
 const PLANS = {
+  lite:    { price: 199000, label: 'Лайт' },     // 1 990 руб в копейках
   basic:   { price: 399000, label: 'Базовый' },  // 3 990 руб в копейках
   premium: { price: 599000, label: 'Премиум' },
 };
@@ -64,7 +65,7 @@ async function kassaRequest(method: 'GET' | 'POST', path: string, body?: unknown
 
 /** Отметить приглашение оплаченным. Уже оплаченное не трогаем (идемпотентно). */
 async function markPaid(inviteId: string, plan: string, paymentId: string) {
-  if (!['basic', 'premium', 'standard'].includes(plan)) throw new Error('Invalid payment plan');
+  if (!['lite', 'basic', 'premium', 'standard'].includes(plan)) throw new Error('Invalid payment plan');
   const invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
   if (!invite || invite.status === 'paid' || invite.status === 'published') return;
   await prisma.invitation.updateMany({

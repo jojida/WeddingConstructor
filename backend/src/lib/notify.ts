@@ -4,6 +4,7 @@ import prisma from './prisma';
 import { escapeHtml } from './security';
 import { sendEmail, isEmailConfigured } from './email';
 import { inviteDrinkLabels, formatDrinkChoice } from './drinks';
+import { hasNotifications } from './plans';
 
 const TG_API = (method: string) =>
   `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN || ''}/${method}`;
@@ -58,6 +59,8 @@ function formatMessage(invite: InviteLike, r: ResponseLike): { subject: string; 
 /** Отправляет уведомление владельцу по выбранному им каналу (best-effort, не бросает). */
 export async function notifyOwner(invite: InviteLike, r: ResponseLike): Promise<void> {
   try {
+    // На «Лайте» уведомлений нет — ответы гость видит только в кабинете пары.
+    if (!hasNotifications((invite as { plan?: string }).plan)) return;
     const channel = invite.notifyChannel || 'none';
     if (channel === 'none') return;
     const msg = formatMessage(invite, r);

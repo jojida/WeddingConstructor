@@ -244,8 +244,8 @@ function EditorContent() {
 
   const template = TEMPLATES.find(t => t.id === data.templateId) || TEMPLATES[0];
   const apiBase  = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-  // Оплата — за готовый сайт: опубликованное приглашение не редактируется
-  // (бэкенд тоже отклоняет PUT для paid/published — это только UX-слой).
+  // Опубликованный сайт правится как обычно — разница только в том, что
+  // изменения тут же видят гости, о чём предупреждает полоса над редактором.
   const isPublished = data.status === 'paid' || data.status === 'published';
   // Схема полей для шаблона (если есть — рендерим движок полей, иначе старый сайдбар)
   const sections = TEMPLATE_FIELDS[data.templateId];
@@ -413,9 +413,10 @@ function EditorContent() {
   };
 
   const handleSave = async () => {
-    if (isPublished) { toast('Сайт опубликован — правки недоступны', { icon: '🔒' }); return; }
     if (!user) { setShowAuthModal(true); return; }
-    if (await saveToServer()) toast.success('Сохранено!');
+    if (await saveToServer()) {
+      toast.success(isPublished ? 'Сохранено — гости уже видят изменения' : 'Сохранено!');
+    }
   };
 
   const handleShare = async () => {
@@ -518,7 +519,8 @@ function EditorContent() {
 
         {isPublished && (
           <div style={{ background: '#f6efe2', borderBottom: '1px solid #e3d5b8', color: '#6b5b35', padding: '10px 20px', textAlign: 'center', fontSize: 14 }}>
-            🔒 Сайт оплачен и опубликован — редактирование недоступно. Ссылка для гостей и ответы — в{' '}
+            Сайт опубликован — правьте что угодно, гости увидят изменения сразу после сохранения.
+            Ссылка для гостей и ответы — в{' '}
             <Link href="/dashboard" style={{ textDecoration: 'underline', color: 'inherit' }}>личном кабинете</Link>.
           </div>
         )}

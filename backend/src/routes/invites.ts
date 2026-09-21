@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { isPaid, hasCustomDomain } from '../lib/plans';
+import { isPaid, hasCustomDomain, hasMusic } from '../lib/plans';
 import { botUsername } from '../lib/telegram';
 import { validInviteInput } from '../lib/inviteValidation';
 import { normalizeEmail } from '../lib/security';
@@ -38,6 +38,9 @@ function stripPrivate(invite: any) {
 function publicInvite(invite: any) {
   return {
     ...stripPrivate(invite),
+    // Фоновая мелодия входит в «Базовый» и «Премиум»: на «Лайте» её просто
+    // не отдаём гостям, даже если файл был загружен до смены тарифа.
+    musicUrl: hasMusic(invite.plan) ? invite.musicUrl : '',
     galleryPhotos: parseArr(invite.galleryPhotos),
     schedule: parseArr(invite.schedule),
     dressCodeColors: parseArr(invite.dressCodeColors),
@@ -101,11 +104,9 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
       return res.status(404).json({ error: 'Приглашение не найдено' });
     }
 
-    // Оплата — за готовый сайт: после публикации контент фиксируется.
-    // Настройки уведомлений, слаг и домен меняются отдельными PATCH-роутами.
-    if (invite.status === 'paid' || invite.status === 'published') {
-      return res.status(403).json({ error: 'Сайт опубликован — редактирование недоступно' });
-    }
+    // Опубликованный сайт тоже правится: опечатку в имени или перенос времени
+    // пара должна исправить сама, а не через поддержку. Изменения видны гостям
+    // сразу — редактор об этом предупреждает.
 
     const {
       groomName, brideName, weddingDate, weddingTime, venue, venueAddress,
