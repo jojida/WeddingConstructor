@@ -108,6 +108,11 @@ export default function TemplatesPage() {
               </PreviewScale>
             </div>
 
+            <div className={styles.cardInfo}>
+              <h2 className={styles.cardTitle}>{tpl.name}</h2>
+              <p className={styles.cardTags}>{tpl.tags.slice(0, 3).join(' · ')}</p>
+            </div>
+
             <div className={styles.cardActions}>
               <Link href={`/demo/${tpl.id}`} target="_blank" className={styles.actionBtnOutline}>
                 Посмотреть

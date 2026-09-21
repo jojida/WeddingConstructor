@@ -125,7 +125,26 @@
 }
 
 /* ─── Actions ───────────────────────────────────────────────────────────────── */
-.cardActions { display: flex; gap: 12px; margin-top: 16px; }
+.cardInfo { margin-top: 16px; }
+
+.cardTitle {
+  font-family: var(--font-playfair, Georgia), serif;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--on-surface, #0e1d26);
+  margin: 0;
+}
+
+.cardTags {
+  font-family: var(--font-inter);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--on-surface-variant, #7d766c);
+  margin: 4px 0 0;
+}
+
+.cardActions { display: flex; gap: 12px; margin-top: 14px; }
 
 .actionBtnOutline, .actionBtnPrimary {
   flex: 1; display: flex; align-items: center; justify-content: center;
