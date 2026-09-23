@@ -80,6 +80,16 @@ export default function ManageInvitePage() {
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
             <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>
               Тариф: <b>{invite.plan}</b>
+              {/* Тестовому аккаунту тариф нужно гонять туда-обратно: обычная
+                  ссылка «Улучшить тариф» на «Премиуме» уже не показывается. */}
+              {user?.free && (
+                <>
+                  {' · '}
+                  <Link href={`/payment?id=${invite.id}`} style={{ color: '#2e7d32', textDecoration: 'underline' }}>
+                    сменить (бесплатно)
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
