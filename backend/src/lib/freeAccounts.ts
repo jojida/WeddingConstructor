@@ -18,7 +18,7 @@ import crypto from 'crypto';
    (после правки: pm2 restart wedding-api --update-env)                      */
 
 const HASHES = new Set<string>([
-  // sha256 почты владельца
+  'b977f932459d5cbd57e4c89b92d975c32db5eafc61185d5d74afca627987c10a', // владелец
 ]);
 
 /** sha256 нормализованной почты — ровно так заполняется HASHES. */
