@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { isFreeAccount } from '../lib/freeAccounts';
 
 const router = Router();
 
@@ -89,6 +90,26 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
     if (!planData) return res.status(400).json({ error: 'Неверный тариф' });
 
     const successUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/success?id=${encodeURIComponent(inviteId)}`;
+
+    /* Тестовый аккаунт владельца: публикуем без кассы. Статус ставим тот же
+       ('paid'), что и настоящая оплата, иначе проверка отличалась бы от того,
+       что увидит покупатель. Тариф меняется и у уже опубликованного сайта —
+       так можно посмотреть, чем «Лайт» отличается от «Премиума», не заводя
+       каждый раз новое приглашение. */
+    const buyer = await prisma.user.findUnique({ where: { id: req.userId! } });
+    if (isFreeAccount(buyer?.email)) {
+      await prisma.invitation.update({
+        where: { id: inviteId },
+        data: { status: 'paid', plan, paidAt: invite.paidAt ?? new Date(), paymentId: 'free_account' },
+      });
+      console.log(`🎁 Бесплатная публикация (тестовый аккаунт): invite ${inviteId}, тариф ${plan}`);
+      return res.json({
+        free: true,
+        plan,
+        redirectUrl: successUrl,
+        message: `Тестовый аккаунт: сайт опубликован по тарифу «${planData.label}» без оплаты`,
+      });
+    }
 
     // Уже оплачен — второй платёж не создаём, просто ведём на страницу успеха.
     if (invite.status === 'paid' || invite.status === 'published') {

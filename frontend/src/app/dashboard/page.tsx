@@ -100,7 +100,18 @@ export default function DashboardPage() {
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>Мои приглашения</h1>
-            <p className={styles.subtitle}>Добро пожаловать, {user?.name}!</p>
+            <p className={styles.subtitle}>
+              Добро пожаловать, {user?.name}!
+              {/* Чтобы не гадать, почему сайт опубликовался без оплаты. */}
+              {user?.free && (
+                <span style={{
+                  marginLeft: 8, padding: '2px 10px', borderRadius: 999,
+                  background: '#e8f5e9', color: '#2e7d32', fontSize: 12, whiteSpace: 'nowrap',
+                }}>
+                  тестовый аккаунт — публикация бесплатно
+                </span>
+              )}
+            </p>
           </div>
           <button id="create-new" className="btn-primary" onClick={createNew}>
             + Создать новое

@@ -14,6 +14,9 @@ function PaymentContent() {
   const router = useRouter();
   const { user } = useAuthStore();
   const inviteId = searchParams.get('id') || '';
+  /* Тестовый аккаунт владельца: касса не вызывается, тариф переключается
+     сколько угодно раз — в том числе у уже опубликованного сайта. */
+  const isFree = !!user?.free;
 
   const [selectedPlan, setSelectedPlan] = useState('premium');
   const [loading, setLoading] = useState(false);
@@ -59,7 +62,7 @@ function PaymentContent() {
         plan: selectedPlan,
         ...(promo ? { promoCode: promo.code } : {}),
       });
-      if (res.data.devMode || res.data.alreadyPaid) {
+      if (res.data.devMode || res.data.alreadyPaid || res.data.free) {
         if (res.data.message) toast.success(res.data.message);
         router.push(`/payment/success?id=${inviteId}`);
       } else if (res.data.paymentUrl) {
@@ -87,7 +90,11 @@ function PaymentContent() {
         <div className={styles.header}>
           <div className={styles.logo}>✦ WeddingCraft</div>
           <h1 className={styles.title}>Выберите тариф</h1>
-          <p className={styles.subtitle}>После оплаты вы получите уникальную ссылку для гостей</p>
+          <p className={styles.subtitle}>
+            {isFree
+              ? 'Тестовый аккаунт: публикация и смена тарифа — без оплаты'
+              : 'После оплаты вы получите уникальную ссылку для гостей'}
+          </p>
         </div>
 
         {invite && (
@@ -131,7 +138,7 @@ function PaymentContent() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', margin: '18px 0 4px', flexWrap: 'wrap' }}>
+        <div style={{ display: isFree ? 'none' : 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', margin: '18px 0 4px', flexWrap: 'wrap' }}>
           <input
             id="promo-input"
             className="input-field"
@@ -156,36 +163,56 @@ function PaymentContent() {
           <button id="pay-button" className="btn-primary" onClick={handlePay} disabled={loading}
             style={{ fontSize: '17px', padding: '16px 64px' }}>
             {loading
-              ? 'Перенаправление...'
-              : `Оплатить ${priceWithPromo(PLANS.find(p => p.id === selectedPlan)?.price || 0).toLocaleString('ru-RU')} ₽`}
+              ? (isFree ? 'Публикуем…' : 'Перенаправление...')
+              : isFree
+                ? 'Опубликовать бесплатно'
+                : `Оплатить ${priceWithPromo(PLANS.find(p => p.id === selectedPlan)?.price || 0).toLocaleString('ru-RU')} ₽`}
           </button>
           {promo && (
             <p className={styles.payNote} style={{ color: '#2e7d32' }}>
               Промокод {promo.code}: скидка {promo.percent}% применена
             </p>
           )}
-          <p className={styles.payNote}>
-            💳 Оплата через ЮKassa: банковские карты, СБП, SberPay
-          </p>
-          <p className={styles.payNote} style={{ marginTop: 6 }}>
-            Сайт публикуется сразу после оплаты и работает бессрочно — без продлений и подписок.
-          </p>
-          <p className={styles.payNote} style={{ marginTop: 4 }}>
-            ⚠️ Проверьте имена, даты и текст до оплаты: вы оплачиваете готовый сайт,
-            после публикации он не редактируется.
-          </p>
+          {isFree ? (
+            <>
+              <p className={styles.payNote}>
+                🎁 Тестовый аккаунт: касса не вызывается, сайт публикуется сразу.
+              </p>
+              <p className={styles.payNote} style={{ marginTop: 6 }}>
+                Тариф можно переключить в любой момент — вернитесь на эту страницу
+                и выберите другой, чтобы сравнить возможности.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className={styles.payNote}>
+                💳 Оплата через ЮKassa: банковские карты, СБП, SberPay
+              </p>
+              <p className={styles.payNote} style={{ marginTop: 6 }}>
+                Сайт публикуется сразу после оплаты и работает бессрочно — без продлений и подписок.
+              </p>
+              <p className={styles.payNote} style={{ marginTop: 4 }}>
+                Правки после публикации бесплатны и не ограничены: гости увидят их сразу,
+                ссылка не меняется.
+              </p>
+            </>
+          )}
           <p className={styles.payNote} style={{ marginTop: 4 }}>
             Вопросы? <a href="mailto:support@weddingcraft.ru" style={{ textDecoration: 'underline' }}>support@weddingcraft.ru</a> — отвечаем быстро
           </p>
-          <p className={styles.payNote} style={{ marginTop: 4 }}>
-            Нажимая «Оплатить», вы принимаете <Link href="/oferta" style={{ textDecoration: 'underline' }}>условия оферты</Link> и{' '}
-            <Link href="/privacy" style={{ textDecoration: 'underline' }}>политику конфиденциальности</Link>
-          </p>
-          {/* Покупатель должен видеть, кому платит, прямо на экране оплаты. */}
-          <p className={styles.payNote} style={{ marginTop: 10, opacity: 0.75 }}>
-            Получатель платежа: {LEGAL.sellerStatus} {LEGAL.sellerName},{' '}
-            ИНН {LEGAL.sellerInn}{LEGAL.sellerOgrnip ? `, ОГРНИП ${LEGAL.sellerOgrnip}` : ''}
-          </p>
+          {!isFree && (
+            <>
+              <p className={styles.payNote} style={{ marginTop: 4 }}>
+                Нажимая «Оплатить», вы принимаете <Link href="/oferta" style={{ textDecoration: 'underline' }}>условия оферты</Link> и{' '}
+                <Link href="/privacy" style={{ textDecoration: 'underline' }}>политику конфиденциальности</Link>
+              </p>
+              {/* Покупатель должен видеть, кому платит, прямо на экране оплаты. */}
+              <p className={styles.payNote} style={{ marginTop: 10, opacity: 0.75 }}>
+                Получатель платежа: {LEGAL.sellerStatus} {LEGAL.sellerName},{' '}
+                ИНН {LEGAL.sellerInn}{LEGAL.sellerOgrnip ? `, ОГРНИП ${LEGAL.sellerOgrnip}` : ''}
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

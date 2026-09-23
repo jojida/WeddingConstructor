@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
+import { useAuthStore } from '@/store/auth';
 import { isAdvancedPlan, LEGAL } from '@/lib/constants';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
@@ -20,6 +21,8 @@ type PayState = 'checking' | 'paid' | 'stalled';
 function SuccessContent() {
   const searchParams = useSearchParams();
   const inviteId = searchParams.get('id') || '';
+  /* Тестовому аккаунту кассу не показывали — поздравлять с оплатой нечестно. */
+  const isFree = !!useAuthStore((st) => st.user)?.free;
   const [invite, setInvite] = useState<any>(null);
   const [state, setState] = useState<PayState>('checking');
   const [paymentStatus, setPaymentStatus] = useState('');
@@ -71,8 +74,8 @@ function SuccessContent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const title = state === 'paid' ? 'Оплата прошла!'
-    : state === 'checking' ? 'Проверяем оплату…'
+  const title = state === 'paid' ? (isFree ? 'Сайт опубликован!' : 'Оплата прошла!')
+    : state === 'checking' ? (isFree ? 'Публикуем сайт…' : 'Проверяем оплату…')
       : paymentStatus === 'canceled' ? 'Платёж не прошёл' : 'Оплата пока не подтверждена';
 
   const subtitle = state === 'paid' ? 'Ваш сайт-приглашение готов к отправке гостям'
