@@ -327,21 +327,21 @@
   .editorBody { flex-direction: column; overflow: visible; }
 
   /* ── Превью сверху ── */
+  /* Макет телефона сохраняет свои пропорции 1:2 и не обрезается: на экране
+     шириной 390px он ровно такой же, как был, просто под ним теперь лежат
+     поля, а не пустота. */
   .canvas {
     order: 1; flex: none;
-    height: 44vh;
-    height: 44dvh;
-    padding: 10px 12px;
+    height: auto;
+    padding: 16px 12px;
   }
   .canvasControls { display: none; }
-  .phoneContainer { width: 100%; height: 100%; cursor: pointer; }
+  .phoneContainer { width: 100%; display: flex; justify-content: center; cursor: pointer; }
   .phoneMockup {
-    width: 100%; height: 100%;
-    padding: 0; border-radius: 14px;
-    background: #ffffff; border: 1px solid #e5e7eb;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    width: min(360px, 100%);
+    height: auto;
+    aspect-ratio: 360 / 720;
   }
-  .phoneScreen { border-radius: 13px; background: #ffffff; }
   /* Свайп по превью листал бы приглашение (оно длиной в несколько экранов),
      а не страницу. Поэтому касания превью не ловит, а тап по нему открывает
      полноэкранный просмотр — там листается свободно. */
