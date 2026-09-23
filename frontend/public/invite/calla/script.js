@@ -11,12 +11,12 @@
                 'July', 'August', 'September', 'October', 'November', 'December'];
 
   var DEFAULT_SCHEDULE = [
-    { time: '12:00', title: 'Дворцовая усадьба 12', icon: 'assets/couple-illustration.svg' },
-    { time: '13:00', title: 'Дворцовая усадьба 12', icon: 'assets/champagne.svg' },
-    { time: '14:00', title: 'Дворцовая усадьба 12', icon: 'assets/rings.svg' },
+    { time: '12:00', title: 'Дворцовая усадьба 12', icon: 'assets/couple-illustration.webp' },
+    { time: '13:00', title: 'Дворцовая усадьба 12', icon: 'assets/champagne.webp' },
+    { time: '14:00', title: 'Дворцовая усадьба 12', icon: 'assets/rings.webp' },
     { time: '15:00', title: 'Дворцовая усадьба 12', icon: 'assets/bouquet.svg' },
-    { time: '16:00', title: 'Дворцовая усадьба 12', icon: 'assets/cake.svg' },
-    { time: '17:00', title: 'Дворцовая усадьба 12', icon: 'assets/car.svg' }
+    { time: '16:00', title: 'Дворцовая усадьба 12', icon: 'assets/cake.webp' },
+    { time: '17:00', title: 'Дворцовая усадьба 12', icon: 'assets/car.webp' }
   ];
 
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -122,7 +122,7 @@
       var cell = document.createElement('span');
       if (d === day) {
         cell.className = 'cal__mark';
-        cell.innerHTML = d + '<img src="assets/heart-red.svg" alt="">';
+        cell.innerHTML = d + '<img src="assets/heart-red.webp" alt="">';
       } else {
         cell.textContent = d;
       }

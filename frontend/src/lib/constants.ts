@@ -428,13 +428,13 @@ export interface TemplateSection {
 /* Наборы иконок для пикера в «Программе дня» */
 export const ICON_SETS: Record<string, string[]> = {
   calla: [
-    '/invite/calla/assets/couple-illustration.svg',
-    '/invite/calla/assets/champagne.svg',
-    '/invite/calla/assets/rings.svg',
+    '/invite/calla/assets/couple-illustration.webp',
+    '/invite/calla/assets/champagne.webp',
+    '/invite/calla/assets/rings.webp',
     '/invite/calla/assets/bouquet.svg',
-    '/invite/calla/assets/cake.svg',
-    '/invite/calla/assets/car.svg',
-    '/invite/calla/assets/doves.svg',
+    '/invite/calla/assets/cake.webp',
+    '/invite/calla/assets/car.webp',
+    '/invite/calla/assets/doves.webp',
     '/invite/calla/assets/pearl-bead.png',
   ],
   sketch: [
@@ -906,12 +906,12 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
       'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
     schedule: [
-      { time: '12:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/couple-illustration.svg' },
-      { time: '13:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/champagne.svg' },
-      { time: '14:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/rings.svg' },
+      { time: '12:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/couple-illustration.webp' },
+      { time: '13:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/champagne.webp' },
+      { time: '14:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/rings.webp' },
       { time: '15:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/bouquet.svg' },
-      { time: '16:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/cake.svg' },
-      { time: '17:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/car.svg' },
+      { time: '16:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/cake.webp' },
+      { time: '17:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/car.webp' },
     ],
     dressCodeColors: ['#d7bca4', '#e1d5c6', '#8c967b', '#7b9365', '#c9985e', '#eccb90', '#916743', '#bec9d0'],
     dressCodePhoto: '/invite/calla/assets/dress1.jpg',

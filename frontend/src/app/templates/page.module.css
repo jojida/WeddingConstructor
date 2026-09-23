@@ -93,8 +93,12 @@
   box-shadow: 0 4px 24px rgba(14,29,38,0.06);
   border: 0.5px solid rgba(206,197,186,0.4);
   width: 100%;
-  height: 420px;
-  max-height: 420px;
+  /* Высота — от ширины, а не фиксированные 420px. Превью рисуется в родной
+     ширине 480px и ужимается под карточку, поэтому при постоянной высоте чем
+     шире карточка, тем меньше шаблона видно: на телефоне карточка становится
+     почти во весь экран и обрезала имена пары. Соотношение 480:700 показывает
+     первый экран приглашения целиком на любой ширине. */
+  aspect-ratio: 480 / 700;
   position: relative;
   flex-shrink: 0;
   transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s;
@@ -107,7 +111,6 @@
 .previewScale {
   width: 100%;
   height: 100%;
-  max-height: 420px;
   overflow: hidden;
   pointer-events: none;
 }
@@ -115,7 +118,7 @@
    PreviewScale.tsx — иначе на узкой карточке содержимое не помещается. */
 .previewScale > div {
   width: 480px !important;
-  height: var(--preview-height, 650px) !important;
+  height: var(--preview-height, 700px) !important;
   max-width: none !important;
   transform: scale(var(--preview-scale, 0.8));
   transform-origin: top left;
@@ -192,6 +195,8 @@
   .grid { grid-template-columns: repeat(2, 1fr); padding: 16px 20px 60px; gap: 24px; }
 }
 @media (max-width: 600px) {
-  .grid { grid-template-columns: 1fr; }
+  /* Одна колонка, но не шире 420px: иначе на планшете в портрете карточка
+     растягивается на всю ширину и превью становится непомерно высоким. */
+  .grid { grid-template-columns: minmax(0, 420px); justify-content: center; }
   .hero { padding: 120px 20px 48px; }
 }

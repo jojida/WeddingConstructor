@@ -127,7 +127,7 @@ export default function GardenArchTemplate({ data, apiBase, fullPage, slug, edit
       fontFamily: "'Cormorant Garamond', Georgia, serif",
     }}>
       <div style={{ position: 'relative', width: '100%' }}>
-        <img src="/invite/garden-arch/assets/decor/arch.svg" alt=""
+        <img src="/invite/garden-arch/assets/decor/arch.webp" alt=""
           style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', aspectRatio: '1038 / 1351' }} />
 
         {/* Шатёр (беседка) и пара — слоями в проёме арки */}

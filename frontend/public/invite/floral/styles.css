@@ -361,7 +361,7 @@ span.sched-emoji {
 .dc-tab.is-active { opacity: 1; border-bottom-color: var(--gold); }
 .dc-photo.is-hidden { display: none; }
 
-/* ── 4 свотча дресс-кода (dresscode.svg × 4, разные цвета через CSS filter) ── */
+/* ── 4 свотча дресс-кода (dresscode.webp × 4, разные цвета через CSS filter) ── */
 .dc-swatches {
   display: flex; gap: 12px; margin-bottom: 28px;
   align-items: center; justify-content: center; flex-wrap: wrap;
@@ -751,18 +751,18 @@ span.sched-emoji {
 .sched-row .sched-meta { min-width: 0; }
 .sched-row .sched-icon { background: var(--bg); }
 
-/* Цветной свотч дресс-кода: силуэт dresscode.svg + текстура (luminosity) + выбранный цвет.
-   background-color (задаётся из редактора) даёт оттенок, svg-картинка — фактуру ткани. */
+/* Цветной свотч дресс-кода: силуэт dresscode.webp + текстура (luminosity) + выбранный цвет.
+   background-color (задаётся из редактора) даёт оттенок, картинка — фактуру ткани. */
 .dc-swatch-color {
   display: block;
   width: 78px;
   aspect-ratio: 159 / 197.25;
-  background-image: url('assets/icons/dresscode.svg');
+  background-image: url('assets/icons/dresscode.webp');
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-blend-mode: luminosity;
-  -webkit-mask: url('assets/icons/dresscode.svg') center / 100% 100% no-repeat;
-          mask: url('assets/icons/dresscode.svg') center / 100% 100% no-repeat;
+  -webkit-mask: url('assets/icons/dresscode.webp') center / 100% 100% no-repeat;
+          mask: url('assets/icons/dresscode.webp') center / 100% 100% no-repeat;
 }
 
 /* Фото в кружевной рамке секции Локация */

@@ -111,7 +111,7 @@ export default function CallaTemplate({ data, apiBase, fullPage, slug, editing }
       background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,.25), transparent 60%), #d7d3cb',
     }}>
       <img
-        src="/invite/calla/assets/callas-pair.svg"
+        src="/invite/calla/assets/callas-pair.webp"
         alt="Каллы"
         style={{ position: 'absolute', top: '2%', right: '-6%', width: '64%', opacity: .96, pointerEvents: 'none' }}
       />
