@@ -488,7 +488,10 @@ function EditorContent() {
         {/* ── TOP BAR ─────────────────────────────────────────────────────── */}
         <header className={styles.topBar}>
           <div className={styles.topBarLeft}>
-            <Link href="/" className={styles.topBarTitle}>WeddingCraft</Link>
+            <Link href="/" className={styles.topBarTitle}>
+              <img src="/brand/logo-mark.svg" alt="WeddingCraft" width={31} height={22} className={styles.logoMark} />
+              <span className={styles.logoText}>WeddingCraft</span>
+            </Link>
             <div className={styles.topBarBreadcrumb}>
               <span className={styles.topBarSep}>›</span>
               <span>Шаблоны</span>
@@ -499,8 +502,9 @@ function EditorContent() {
             </div>
           </div>
           <div className={styles.topBarRight}>
-            <button className={styles.topBarBtnOutline} onClick={() => setStep('setup')} style={{ marginRight: 16 }}>
-              Имена и дата
+            <button className={styles.topBarBtnOutline} onClick={() => setStep('setup')}>
+              <span className={styles.phoneHidden}>Имена и дата</span>
+              <span className={styles.phoneOnly}>Имена</span>
             </button>
             <button className={styles.topBarIconBtn} onClick={handleSave} disabled={saving} title="Сохранить">
               <Save size={18} />
@@ -508,11 +512,12 @@ function EditorContent() {
             <button className={styles.topBarBtnOutline} onClick={() => setShowPreview(true)}>
               Предпросмотр
             </button>
-            <Link href="/dashboard" className={styles.topBarBtnOutline} style={{ marginRight: 12 }}>
+            <Link href="/dashboard" className={`${styles.topBarBtnOutline} ${styles.phoneHidden}`}>
               Личный кабинет
             </Link>
             <button className={styles.topBarBtnPrimary} onClick={handleShare}>
-              Завершить дизайн
+              <span className={styles.phoneHidden}>Завершить дизайн</span>
+              <span className={styles.phoneOnly}>Готово</span>
             </button>
           </div>
         </header>
@@ -537,7 +542,15 @@ function EditorContent() {
                 <button className={styles.zoomBtn}><Maximize size={16} /></button>
               </div>
             </div>
-            <div className={styles.phoneContainer}>
+            {/* На телефоне превью не ловит касания (иначе свайп листал бы
+                приглашение вместо страницы), зато тап по нему открывает
+                полноэкранный просмотр. На большом экране всё как было. */}
+            <div
+              className={styles.phoneContainer}
+              onClick={() => {
+                if (window.matchMedia('(max-width: 768px)').matches) setShowPreview(true);
+              }}
+            >
               <div className={styles.phoneMockup}>
                 <div className={styles.phoneScreen}>
                   <div className={styles.phoneContent}>

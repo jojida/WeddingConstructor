@@ -20,6 +20,7 @@
 .topBarTitle {
   font-family: var(--font-playfair); font-size: 22px; font-weight: 600;
   color: #1a1a1a; text-decoration: none; letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 8px;
 }
 .topBarBreadcrumb {
   display: flex; align-items: center; gap: 8px;
@@ -289,13 +290,73 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* Показ/скрытие элементов верхней панели на телефоне */
+.logoMark { display: none; }
+.phoneOnly { display: none; }
+
 /* Responsive */
 @media (max-width: 1024px) {
   .topBarBreadcrumb { display: none; }
   .rightSidebar { width: 260px; }
   .canvas { padding: 24px; }
 }
+/* ─── Телефон ────────────────────────────────────────────────────────────────
+   Панель полей раньше просто пряталась (display: none), и редактировать сайт
+   можно было, только повернув телефон вбок. Теперь превью занимает верх
+   экрана, поля лежат под ним, а прокручивается страница целиком: вложенный
+   скролл на телефоне перехватывал бы свайп и «запирал» страницу. */
 @media (max-width: 768px) {
-  .rightSidebar { display: none; }
+  .page {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh; /* адресная строка Safari не должна срезать низ панели */
+    overflow: visible;
+  }
+
+  /* Кнопки «Сохранить», «Предпросмотр» и «Готово» нужны на любой прокрутке. */
+  .topBar { position: sticky; top: 0; padding: 0 12px; height: 56px; gap: 8px; }
+  .topBarLeft { gap: 8px; min-width: 0; }
+  .topBarRight { gap: 6px; }
+  .topBarBtnOutline { padding: 7px 9px; font-size: 11px; }
+  .topBarBtnPrimary { padding: 8px 12px; font-size: 11px; }
+  .logoText { display: none; }
+  .logoMark { display: block; }
+  .phoneHidden { display: none !important; }
+  .phoneOnly { display: inline; }
+
+  .editorBody { flex-direction: column; overflow: visible; }
+
+  /* ── Превью сверху ── */
+  .canvas {
+    order: 1; flex: none;
+    height: 44vh;
+    height: 44dvh;
+    padding: 10px 12px;
+  }
+  .canvasControls { display: none; }
+  .phoneContainer { width: 100%; height: 100%; cursor: pointer; }
+  .phoneMockup {
+    width: 100%; height: 100%;
+    padding: 0; border-radius: 14px;
+    background: #ffffff; border: 1px solid #e5e7eb;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  }
+  .phoneScreen { border-radius: 13px; background: #ffffff; }
+  /* Свайп по превью листал бы приглашение (оно длиной в несколько экранов),
+     а не страницу. Поэтому касания превью не ловит, а тап по нему открывает
+     полноэкранный просмотр — там листается свободно. */
+  .phoneContent { overflow: hidden; pointer-events: none; }
+
+  /* ── Поля под превью ── */
+  .rightSidebar {
+    display: flex; order: 2;
+    width: 100%; flex: none;
+    border-left: none; border-top: 1px solid #e5e7eb;
+    padding: 18px 16px 28px;
+  }
+  .sidebarBranding { display: none; }
+  .sidebarContent { flex: none; overflow: visible; padding-top: 0; }
+  .sidebarFooter { padding-top: 20px; }
+
   .rightIconsPanel { display: none; }
 }
