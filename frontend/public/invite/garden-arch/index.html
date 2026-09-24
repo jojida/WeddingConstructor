@@ -156,6 +156,14 @@
           <label class="rsvp-option"><input type="radio" name="attend" value="no"><span>К сожалению, не смогу
               прийти</span></label>
         </fieldset>
+        <fieldset class="rsvp-fieldset" data-rsvp-count>
+          <legend class="rsvp-legend">Сколько вас будет?</legend>
+          <div class="wc-count" data-wc-count>
+            <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+            <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет">
+            <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+          </div>
+        </fieldset>
         <fieldset class="rsvp-fieldset">
           <legend class="rsvp-legend">Что предпочитаете из напитков?</legend>
           <div data-edit="drinks">
@@ -245,6 +253,7 @@
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="script.js"></script>
 </body>

@@ -61,6 +61,7 @@ router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response)
       greeting: computeGreeting(g.salutation, g.names),
       responded: !!r,
       attending: r ? r.attending : null,
+      guestsCount: r ? r.guestsCount : null,
       drinkChoice: r ? r.drinkChoice : '',
       wishes: r ? r.wishes : '',
     };

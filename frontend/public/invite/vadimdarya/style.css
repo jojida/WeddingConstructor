@@ -1492,3 +1492,21 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   margin-top: 0;
 }
 .venue-block .wc-map__route { margin-top: 20px; font-size: .72rem; font-weight: 400; letter-spacing: .3em; text-transform: uppercase; padding: 11px 22px; }
+
+/* ── Анкета: имя гостя и «Сколько вас будет?» (../assets/rsvp-count.js) ── */
+.guest-name-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+.guest-name-input:focus { border-color: var(--gold); background: rgba(255, 255, 255, 0.9); }
+.guest-name-input::placeholder { color: rgba(92, 74, 74, 0.6); font-style: italic; }
+.guest-form .wc-count { color: var(--gold-dark); align-self: flex-start; }
+.guest-form .wc-count__num { color: var(--text-dark); font-family: var(--font-body); }

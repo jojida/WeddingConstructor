@@ -15,6 +15,7 @@ import guestsRouter from './routes/guests';
 import telegramRouter from './routes/telegram';
 import domainsRouter from './routes/domains';
 import { initTelegram } from './lib/telegram';
+import { ensureSchema } from './lib/ensureSchema';
 import { jwtSecret } from './lib/security';
 import { rateLimit } from './middleware/rateLimit';
 
@@ -88,10 +89,15 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   res.status(status).json({ error: status === 413 ? 'Слишком большой запрос' : status === 400 ? 'Некорректный JSON' : 'Ошибка сервера' });
 });
 
-if (require.main === module) app.listen(PORT, () => {
-  console.log(`🚀 Wedding Constructor API running on http://localhost:${PORT}`);
-  // Бот сервиса настраивается сам, если задан TELEGRAM_BOT_TOKEN:
-  // имя берётся через getMe, вебхук ставится на BACKEND_URL.
-  initTelegram();
-});
+if (require.main === module) {
+  // Недостающие колонки — до первого запроса к ним: деплой миграции не запускает.
+  ensureSchema()
+    .catch((e) => console.error('Проверка схемы БД не удалась:', e))
+    .finally(() => app.listen(PORT, () => {
+      console.log(`🚀 Wedding Constructor API running on http://localhost:${PORT}`);
+      // Бот сервиса настраивается сам, если задан TELEGRAM_BOT_TOKEN:
+      // имя берётся через getMe, вебхук ставится на BACKEND_URL.
+      initTelegram();
+    }));
+}
 export default app;

@@ -104,6 +104,9 @@ model GuestResponse {
   attending     Boolean
   drinkChoice   String   @default("")   // wine | champagne | juice | water | no_alcohol | other
   wishes        String   @default("")
+  // Сколько человек придёт по этому ответу (гость и те, кто с ним). В рабочую
+  // базу колонку дописывает сам бэкенд при запуске — src/lib/ensureSchema.ts.
+  guestsCount   Int      @default(1)
   createdAt     DateTime @default(now())
 
   @@index([guestId])

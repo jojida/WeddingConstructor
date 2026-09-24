@@ -19,14 +19,18 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
       return res.status(402).json({ error: 'Сайт ещё не опубликован — анкета заработает после оплаты' });
     }
 
-    const { guestName, attending, drinkChoice, wishes, guestToken } = req.body;
+    const { guestName, attending, drinkChoice, wishes, guestToken, guestsCount } = req.body;
     if (typeof attending !== 'boolean' ||
         (guestName != null && (typeof guestName !== 'string' || guestName.length > 200)) ||
         (drinkChoice != null && (typeof drinkChoice !== 'string' || drinkChoice.length > 500)) ||
         (wishes != null && (typeof wishes !== 'string' || wishes.length > 4000)) ||
-        (guestToken != null && (typeof guestToken !== 'string' || guestToken.length > 100))) {
+        (guestToken != null && (typeof guestToken !== 'string' || guestToken.length > 100)) ||
+        (guestsCount != null && !(Number.isInteger(guestsCount) && guestsCount >= 1 && guestsCount <= 20))) {
       return res.status(400).json({ error: 'Проверьте поля анкеты' });
     }
+    // Сколько человек придёт по ответу. Старые страницы шаблонов поля не шлют —
+    // тогда один; у отказа количество не спрашивается.
+    const people = attending && Number.isInteger(guestsCount) ? guestsCount as number : 1;
 
     // Персональная ссылка (продвинутый тариф): связываем ответ с гостем.
     let guest = null as Awaited<ReturnType<typeof prisma.guest.findUnique>> | null;
@@ -50,6 +54,7 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
         attending: attending !== false,
         drinkChoice: drinkChoice || '',
         wishes: wishes || '',
+        guestsCount: people,
       },
       });
       if (guest) await tx.guest.update({ where: { id: guest.id }, data: { responseId: saved.id } });
@@ -62,6 +67,7 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
       attending: attending !== false,
       drinkChoice: drinkChoice || '',
       wishes: wishes || '',
+      guestsCount: people,
     });
 
     return res.json({ success: true, id: response.id });
@@ -88,6 +94,8 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
     total: responses.length,
     attending: responses.filter(r => r.attending).length,
     notAttending: responses.filter(r => !r.attending).length,
+    // Людей, а не ответов: «Денис и Мария» одной анкетой — это двое.
+    attendingGuests: responses.reduce((sum, r) => sum + (r.attending ? r.guestsCount || 1 : 0), 0),
     // drinkChoice может быть мультивыбором ("sparkling,red") — считаем каждый.
     drinks: responses.reduce((acc, r) => {
       if (r.attending && r.drinkChoice) {

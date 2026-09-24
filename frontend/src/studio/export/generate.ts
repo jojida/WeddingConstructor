@@ -563,6 +563,7 @@ ${panels.join('\n\n')}
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/studio-runtime.js"></script>
   <script src="script.js"></script>
 </body>

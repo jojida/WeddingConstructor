@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { isAdvancedPlan, hasCustomDomain, hasNotifications, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice } from '@/lib/constants';
+import { isAdvancedPlan, hasCustomDomain, hasNotifications, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
 
 interface Invite {
   id: string; slug: string; status: string; plan: string;
@@ -17,11 +17,12 @@ interface Invite {
 }
 interface Guest {
   id: string; token: string; salutation: string; names: string;
-  greeting: string; responded: boolean; attending: boolean | null; drinkChoice: string; wishes: string;
+  greeting: string; responded: boolean; attending: boolean | null; guestsCount?: number | null; drinkChoice: string; wishes: string;
 }
 interface RsvpData {
-  responses: { id: string; guestName: string; attending: boolean; drinkChoice: string; wishes: string; createdAt: string }[];
-  stats: { total: number; attending: number; notAttending: number; drinks: Record<string, number> };
+  responses: { id: string; guestName: string; attending: boolean; guestsCount?: number; drinkChoice: string; wishes: string; createdAt: string }[];
+  // attendingGuests — людей (сколько придёт по всем «да»), attending — ответов
+  stats: { total: number; attending: number; notAttending: number; attendingGuests?: number; drinks: Record<string, number> };
   drinkLabels: Record<string, string>;
 }
 
@@ -79,7 +80,7 @@ export default function ManageInvitePage() {
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
             <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>
-              Тариф: <b>{invite.plan}</b>
+              Тариф: <b>{PLAN_TITLES[invite.plan] || invite.plan}</b>
               {/* Тестовому аккаунту тариф нужно гонять туда-обратно: обычная
                   ссылка «Улучшить тариф» на «Премиуме» уже не показывается. */}
               {user?.free && (
@@ -138,7 +139,7 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>
         <Stat n={data.stats.total} label="Всего ответов" />
-        <Stat n={data.stats.attending} label="Придут" color="#2e8b57" />
+        <Stat n={data.stats.attendingGuests ?? data.stats.attending} label="Гостей придёт" color="#2e8b57" />
         <Stat n={data.stats.notAttending} label="Не придут" color="#b85c5c" />
       </div>
       {Object.keys(data.stats.drinks).length > 0 && (
@@ -152,7 +153,7 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
           <div key={r.id} style={{ background: '#fff', border: BORDER, borderRadius: 10, padding: '12px 16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
               <span style={{ fontWeight: 600, color: '#0e1d26' }}>{r.guestName}</span>
-              <span style={{ fontSize: 13, color: r.attending ? '#2e8b57' : '#b85c5c' }}>{r.attending ? '✓ Придёт' : '✗ Не придёт'}</span>
+              <span style={{ fontSize: 13, color: r.attending ? '#2e8b57' : '#b85c5c' }}>{r.attending ? attendingText(r.guestsCount) : '✗ Не придёт'}</span>
             </div>
             {r.drinkChoice && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>🥂 {formatDrinkChoice(r.drinkChoice, data.drinkLabels)}</div>}
             {r.wishes && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4, fontStyle: 'italic' }}>«{r.wishes}»</div>}
@@ -214,6 +215,9 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
     toast.success('Персональная ссылка скопирована');
   };
 
+  // Людей, а не записей: «Денис и Мария» одной ссылкой — это двое
+  const guestsComing = guests.reduce((sum, g) => sum + (g.responded && g.attending ? g.guestsCount || 1 : 0), 0);
+
   return (
     <div>
       {/* Add form */}
@@ -238,7 +242,7 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
         // Сводка по списку гостей: кто придёт, кто нет, кто ещё молчит
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
           <Stat n={guests.length} label="Приглашено" />
-          <Stat n={guests.filter(g => g.responded && g.attending).length} label="Придут" color="#2e8b57" />
+          <Stat n={guestsComing} label="Гостей придёт" color="#2e8b57" />
           <Stat n={guests.filter(g => g.responded && !g.attending).length} label="Не придут" color="#b85c5c" />
           <Stat n={guests.filter(g => !g.responded).length} label="Не ответили" color="#a39b8e" />
         </div>
@@ -251,7 +255,7 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
               <div style={{ flex: 1, minWidth: 160 }}>
                 <div style={{ fontWeight: 600, color: '#0e1d26' }}>{g.greeting}</div>
                 <div style={{ fontSize: 12, marginTop: 3, color: g.responded ? (g.attending ? '#2e8b57' : '#b85c5c') : '#a39b8e' }}>
-                  {g.responded ? (g.attending ? `✓ Придёт${g.drinkChoice ? ' · ' + formatDrinkChoice(g.drinkChoice, drinkLabels) : ''}` : '✗ Не придёт') : '○ Не ответил(а)'}
+                  {g.responded ? (g.attending ? `${attendingText(g.guestsCount)}${g.drinkChoice ? ' · ' + formatDrinkChoice(g.drinkChoice, drinkLabels) : ''}` : '✗ Не придёт') : '○ Не ответил(а)'}
                 </div>
               </div>
               <button onClick={() => copyLink(g.token)} className="btn-outline" style={{ padding: '7px 12px', fontSize: 12 }}>🔗 Ссылка</button>
@@ -563,6 +567,14 @@ function SiteAddressCard({ invite, origin, onSaved }: { invite: Invite; origin: 
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────
+/* Названия тарифов: сейчас продаётся один «Премиум», у старых сайтов остались Лайт и Базовый */
+const PLAN_TITLES: Record<string, string> = { lite: 'Лайт', basic: 'Базовый', standard: 'Базовый', premium: 'Премиум' };
+
+/* «✓ Придёт» или, если гость придёт не один, «✓ Придут: 3 гостя» */
+function attendingText(count?: number | null): string {
+  return count && count > 1 ? `✓ Придут: ${count} ${guestsWord(count)}` : '✓ Придёт';
+}
+
 function Stat({ n, label, color }: { n: number; label: string; color?: string }) {
   return (
     <div style={{ background: '#fff', border: BORDER, borderRadius: 12, padding: '16px 18px', textAlign: 'center' }}>

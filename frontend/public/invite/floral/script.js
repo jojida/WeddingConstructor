@@ -301,7 +301,7 @@
         fetch((STATE.apiBase || '') + '/api/rsvp/' + STATE.slug, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ guestName: guestName, attending: attending, drinkChoice: drinks.join(','), wishes: '', guestToken: STATE.guestToken || '' })
+          body: JSON.stringify({ guestName: guestName, attending: attending, drinkChoice: drinks.join(','), wishes: '', guestToken: STATE.guestToken || '', guestsCount: window.WCRsvpCount ? WCRsvpCount.get(form) : 1 })
         }).then(function () { done(); }).catch(function () { done(); });
       } else {
         done();

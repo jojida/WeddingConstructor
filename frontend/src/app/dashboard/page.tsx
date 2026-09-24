@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { TEMPLATES } from '@/lib/constants';
+import { TEMPLATES, guestsWord } from '@/lib/constants';
 import styles from './page.module.css';
 
 interface Invite {
@@ -35,7 +35,8 @@ function coverUrl(invite: Invite): string {
   return raw.startsWith('/') ? API_BASE + raw : raw;
 }
 
-interface RsvpStats { total: number; attending: number; notAttending: number }
+// attendingGuests — людей (анкета спрашивает «Сколько вас будет?»), attending — ответов
+interface RsvpStats { total: number; attending: number; notAttending: number; attendingGuests?: number }
 
 const isPublished = (i: Invite) => i.status === 'paid' || i.status === 'published';
 
@@ -251,7 +252,9 @@ function RsvpSummary({ id, stats }: { id: string; stats?: RsvpStats }) {
         <span className={styles.rsvpMuted}>Гости ещё не ответили</span>
       ) : (
         <>
-          <span className={styles.rsvpYes}>✓ Придут: <b>{stats.attending}</b></span>
+          <span className={styles.rsvpYes}>
+            ✓ Придут: <b>{stats.attendingGuests ?? stats.attending}</b> {guestsWord(stats.attendingGuests ?? stats.attending)}
+          </span>
           <span className={styles.rsvpNo}>✗ Не придут: <b>{stats.notAttending}</b></span>
         </>
       )}

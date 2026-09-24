@@ -209,6 +209,15 @@
         <label class="opt radio"><input type="radio" name="attend" value="yes" checked><span class="box"></span>Да, буду!</label>
         <label class="opt radio"><input type="radio" name="attend" value="no"><span class="box"></span>К сожалению, не смогу прийти</label>
 
+        <div data-rsvp-count>
+          <p class="q">Сколько вас будет?</p>
+          <div class="wc-count" data-wc-count>
+            <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+            <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет">
+            <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+          </div>
+        </div>
+
         <p class="q">Что предпочитаете из напитков?</p>
         <div data-edit="drinks">
           <label class="opt"><input type="checkbox" name="drink" value="sparkling"><span class="box"></span>Игристое</label>
@@ -267,6 +276,7 @@
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="script.js"></script>
 </body>

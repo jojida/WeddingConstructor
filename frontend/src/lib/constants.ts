@@ -346,6 +346,14 @@ export const isAdvancedPlan = (plan?: string | null): boolean =>
 export const hasCustomDomain = (plan?: string | null): boolean =>
   plan === 'premium';
 
+/** «гость» в нужной форме: 1 гость, 2 гостя, 5 гостей, 21 гость. */
+export function guestsWord(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  if (m10 === 1 && m100 !== 11) return 'гость';
+  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'гостя';
+  return 'гостей';
+}
+
 /** Варианты обращения к гостю (персональная ссылка). */
 export const SALUTATIONS = [
   { value: 'дорогой', label: 'Дорогой (м)' },

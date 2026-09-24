@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=40" />
+  <link rel="stylesheet" href="style.css?v=41" />
 </head>
 <body>
 
@@ -257,6 +257,11 @@
         </p>
 
         <form class="guest-form" onsubmit="event.preventDefault(); sendRsvp(this);">
+
+          <div class="form-group">
+            <p class="form-question">Как вас зовут?</p>
+            <input type="text" name="guestName" class="guest-name-input" placeholder="Ваше имя" autocomplete="name" maxlength="120">
+          </div>
           
           <div class="form-group">
             <p class="form-question">Планируете ли присутствовать на нашей свадьбе?</p>
@@ -271,6 +276,15 @@
                 <span class="radio-mark"></span>
                 К сожалению, не смогу
               </label>
+            </div>
+          </div>
+
+          <div class="form-group" data-rsvp-count>
+            <p class="form-question">Сколько вас будет?</p>
+            <div class="wc-count" data-wc-count>
+              <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+              <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет">
+              <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
             </div>
           </div>
 
@@ -338,8 +352,9 @@
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
-  <script src="script.js?v=25"></script>
+  <script src="script.js?v=26"></script>
 </body>
 </html>
 

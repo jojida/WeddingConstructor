@@ -38,11 +38,20 @@ interface ResponseLike {
   attending: boolean;
   drinkChoice: string;
   wishes: string;
+  guestsCount?: number;
+}
+
+// 1 человек, 2 человека, 5 человек
+function people(n: number): string {
+  const mod10 = n % 10, mod100 = n % 100;
+  const word = mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? 'человека' : 'человек';
+  return `${n} ${word}`;
 }
 
 function formatMessage(invite: InviteLike, r: ResponseLike): { subject: string; text: string; html: string } {
   const couple = [invite.groomName, invite.brideName].filter(Boolean).join(' & ') || 'ваша свадьба';
-  const attend = r.attending ? '✅ Придёт' : '❌ Не придёт';
+  const n = r.guestsCount && r.guestsCount > 1 ? r.guestsCount : 1;
+  const attend = r.attending ? (n > 1 ? `✅ Придут — ${people(n)}` : '✅ Придёт') : '❌ Не придёт';
   const lines = [
     `Новый ответ на приглашение (${couple})`,
     ``,

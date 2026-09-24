@@ -60,6 +60,11 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
         type: 'wc:data',
         payload: {
           apiBase,
+          // Адрес сайта — куда слать анкету; без него (превью, демо) она не уходит
+          slug: slug || '',
+          // Персональная ссылка ?g=: гость и его имя (кладёт страница сайта в customData)
+          guestToken: dataRef.current.customData?.guestToken,
+          guestName: dataRef.current.customData?.guestName,
           groomName: dataRef.current.groomName,
           brideName: dataRef.current.brideName,
           weddingDate: dataRef.current.weddingDate,

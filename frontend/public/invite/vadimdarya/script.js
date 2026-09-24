@@ -17,7 +17,9 @@
   var STATE = {
     weddingDate: '2026-09-20',
     weddingTime: '15:00',
-    apiBase: ''
+    apiBase: '',
+    slug: '',        // адрес сайта: без него (превью, демо) анкету не отправляем
+    guestToken: ''   // персональная ссылка ?g= — ответ привязывается к гостю
   };
 
   function pad(n) { return String(n).padStart(2, '0'); }
@@ -56,6 +58,13 @@
     if (!d) return;
 
     if (typeof d.apiBase === 'string') STATE.apiBase = d.apiBase;
+    if (typeof d.slug === 'string' && d.slug) STATE.slug = d.slug;
+    if (typeof d.guestToken === 'string' && d.guestToken) STATE.guestToken = d.guestToken;
+    // Персональная ссылка: имя гостя уже известно — подставляем в анкету
+    if (typeof d.guestName === 'string' && d.guestName) {
+      var gn = document.querySelector('.guest-form [name="guestName"]');
+      if (gn && !gn.value) gn.value = d.guestName;
+    }
     if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
 
     // Имена
@@ -359,16 +368,47 @@
     if (targetContent) targetContent.classList.add('active');
   };
 
-  // ─── RSVP / Сообщения (реальная отправка — следующий этап) ──
+  // ─── Анкета гостя: отправка ответа паре ──────────
+  // Раньше кнопка только показывала «Спасибо» — ответ никуда не уходил.
   window.sendRsvp = function (form) {
     var attendance = form.querySelector('input[name="attendance"]:checked');
     if (!attendance) { alert('Пожалуйста, выберите ответ о присутствии.'); return; }
+    var nameEl = form.querySelector('[name="guestName"]');
+    var guestName = nameEl ? nameEl.value.trim() : '';
+    if (!guestName && !STATE.guestToken) {
+      alert('Пожалуйста, укажите ваше имя');
+      if (nameEl) nameEl.focus();
+      return;
+    }
+    var drinks = [].map.call(form.querySelectorAll('input[name="drink"]:checked'), function (c) { return c.value; });
     var btn = form.querySelector('button[type="submit"]');
-    if (btn) {
+    var done = function () {
+      if (!btn) return;
       btn.disabled = true;
       btn.textContent = '✓ Спасибо! Ваш ответ получен';
       btn.style.opacity = '0.6';
-    }
+    };
+    // Превью в редакторе и демо — сайта ещё нет, отправлять некуда
+    if (!STATE.slug) { done(); return; }
+    if (btn) { btn.disabled = true; btn.textContent = 'Отправляем…'; }
+    fetch((STATE.apiBase || '') + '/api/rsvp/' + encodeURIComponent(STATE.slug), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guestName: guestName,
+        attending: attendance.value === 'yes',
+        drinkChoice: drinks.join(','),
+        wishes: '',
+        guestToken: STATE.guestToken || '',
+        guestsCount: window.WCRsvpCount ? WCRsvpCount.get(form) : 1
+      })
+    }).then(function (r) {
+      if (!r.ok) throw new Error('rsvp ' + r.status);
+      done();
+    }).catch(function () {
+      if (btn) { btn.disabled = false; btn.textContent = 'Отправить'; }
+      alert('Не удалось отправить ответ. Попробуйте ещё раз.');
+    });
   };
 
   window.sendGuestMessage = function () {

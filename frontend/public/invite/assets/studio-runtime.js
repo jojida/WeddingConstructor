@@ -227,6 +227,13 @@
       '<label class="wcb-rsvp__radio"><input type="radio" name="attending" value="yes" checked /> Да, буду</label>' +
       '<label class="wcb-rsvp__radio"><input type="radio" name="attending" value="no" /> К сожалению, нет</label>' +
       '</div>' +
+      // Сколько человек придёт — оживляет ../assets/rsvp-count.js
+      '<div class="wcb-rsvp__field" data-rsvp-count><span>Сколько вас будет?</span>' +
+      '<div class="wc-count" data-wc-count>' +
+      '<button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>' +
+      '<input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />' +
+      '<button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>' +
+      '</div></div>' +
       (drinks.length
         ? '<div class="wcb-rsvp__field"><span>Что предпочитаете?</span>' +
           '<div class="wcb-rsvp__drinks">' + drinks.map(function (d) {
@@ -240,6 +247,7 @@
       '</form>';
 
     var form = el.querySelector('form');
+    if (window.WCRsvpCount) WCRsvpCount.init();
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var nameEl = form.querySelector('[name="guestName"]');
@@ -268,7 +276,8 @@
           attending: attending,
           drinkChoice: chosen.join(','),
           wishes: '',
-          guestToken: STATE.guestToken || ''
+          guestToken: STATE.guestToken || '',
+          guestsCount: window.WCRsvpCount ? WCRsvpCount.get(form) : 1
         })
       }).then(done).catch(done);
     });
