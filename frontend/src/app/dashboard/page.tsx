@@ -35,6 +35,10 @@ function coverUrl(invite: Invite): string {
   return raw.startsWith('/') ? API_BASE + raw : raw;
 }
 
+interface RsvpStats { total: number; attending: number; notAttending: number }
+
+const isPublished = (i: Invite) => i.status === 'paid' || i.status === 'published';
+
 const TEMPLATE_COLORS: Record<string, [string, string]> = {
   classic:  ['#f5f0e8', '#c9a96e'],
   modern:   ['#f9f9f9', '#111111'],
@@ -60,6 +64,17 @@ export default function DashboardPage() {
       .catch(() => toast.error('Ошибка загрузки'))
       .finally(() => setFetching(false));
   }, [user]);
+
+  // Сколько гостей придёт / не придёт — прямо на карточке сайта, без захода в
+  // «Управление». Ответы бывают только у опубликованных сайтов.
+  const [rsvp, setRsvp] = useState<Record<string, RsvpStats>>({});
+  useEffect(() => {
+    invites.filter(isPublished).forEach(inv => {
+      api.get(`/api/rsvp/${inv.id}`)
+        .then(res => setRsvp(prev => ({ ...prev, [inv.id]: res.data.stats })))
+        .catch(() => {});
+    });
+  }, [invites]);
 
   const createNew = async () => {
     sessionStorage.removeItem('wc_draft_id');
@@ -162,6 +177,9 @@ export default function DashboardPage() {
                     <div className={styles.cardMeta}>
                       Обновлено {formatDate(invite.updatedAt)}
                     </div>
+                    {isPublished(invite) && (
+                      <RsvpSummary id={invite.id} stats={rsvp[invite.id]} />
+                    )}
                     <div className={styles.cardActions}>
                       {invite.status === 'draft' ? (
                         <>
@@ -220,6 +238,24 @@ export default function DashboardPage() {
         />
       )}
     </div>
+  );
+}
+
+/* Ответы гостей на карточке: кто придёт и кто нет. Клик — к списку ответов. */
+function RsvpSummary({ id, stats }: { id: string; stats?: RsvpStats }) {
+  return (
+    <Link href={`/dashboard/${id}`} className={styles.rsvpRow} title="Ответы гостей">
+      {!stats ? (
+        <span className={styles.rsvpMuted}>Ответы гостей…</span>
+      ) : stats.total === 0 ? (
+        <span className={styles.rsvpMuted}>Гости ещё не ответили</span>
+      ) : (
+        <>
+          <span className={styles.rsvpYes}>✓ Придут: <b>{stats.attending}</b></span>
+          <span className={styles.rsvpNo}>✗ Не придут: <b>{stats.notAttending}</b></span>
+        </>
+      )}
+    </Link>
   );
 }
 

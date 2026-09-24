@@ -234,6 +234,16 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
         )}
       </div>
 
+      {guests.length > 0 && (
+        // Сводка по списку гостей: кто придёт, кто нет, кто ещё молчит
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
+          <Stat n={guests.length} label="Приглашено" />
+          <Stat n={guests.filter(g => g.responded && g.attending).length} label="Придут" color="#2e8b57" />
+          <Stat n={guests.filter(g => g.responded && !g.attending).length} label="Не придут" color="#b85c5c" />
+          <Stat n={guests.filter(g => !g.responded).length} label="Не ответили" color="#a39b8e" />
+        </div>
+      )}
+
       {guests.length === 0 ? <Empty>Гостей пока нет. Добавьте первого выше.</Empty> : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {guests.map(g => (

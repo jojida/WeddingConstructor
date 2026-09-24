@@ -93,6 +93,17 @@
 
 .cardBody { padding: 16px 20px 20px; }
 .cardMeta { font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; }
+/* Ответы гостей: придут / не придут */
+.rsvpRow {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px;
+  margin: -4px 0 14px; padding: 9px 12px;
+  background: #faf8f5; border: 1px solid rgba(206, 197, 186, 0.45); border-radius: 10px;
+  font-size: 13px; text-decoration: none; transition: border-color 0.15s;
+}
+.rsvpRow:hover { border-color: rgba(104, 93, 74, 0.45); }
+.rsvpYes { color: #2e8b57; }
+.rsvpNo { color: #b85c5c; }
+.rsvpMuted { color: var(--text-secondary); }
 .cardActions { display: flex; gap: 10px; margin-bottom: 12px; }
 .deleteBtn {
   padding: 10px 14px;
