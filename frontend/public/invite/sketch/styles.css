@@ -470,9 +470,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   --wc-map-border: 2px solid var(--ink);
   --wc-map-shadow: 5px 5px 0 var(--yellow);
   --wc-map-accent: var(--pink-dk);
-  --wc-map-text: var(--text);
   --wc-map-font: var(--font-body);
   margin-top: 26px;
 }
-.location .wc-map__addr { margin-top: 28px; font-size: 17px; line-height: 1.6; letter-spacing: 0; }
-.location .wc-map__route { margin-top: 20px; font-family: var(--font-title); font-size: 22px; letter-spacing: .01em; padding: 6px 22px 8px; border-width: 2px; }
+.location .wc-map__route { margin-top: 24px; font-family: var(--font-title); font-size: 22px; letter-spacing: .01em; padding: 6px 22px 8px; border-width: 2px; }

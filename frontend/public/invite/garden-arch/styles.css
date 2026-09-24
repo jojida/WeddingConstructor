@@ -1001,8 +1001,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   --wc-map-border: 1px solid rgba(184, 154, 106, .55);
   --wc-map-shadow: 0 6px 18px rgba(75, 79, 68, .08);
   --wc-map-accent: var(--gold-deep);
-  --wc-map-text: var(--ink-soft);
   margin-top: 18px;
 }
-.venue .wc-map__addr { margin-top: 24px; font-size: clamp(13px, 3.6vw, 17px); letter-spacing: .14em; line-height: 1.7; text-transform: uppercase; }
 .venue .wc-map__route { margin-top: 20px; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }

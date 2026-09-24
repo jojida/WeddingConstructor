@@ -396,11 +396,9 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   --wc-map-shadow: 0 8px 24px rgba(111, 102, 90, .18);
   --wc-map-accent: var(--brown);
   --wc-map-accent-ink: var(--white);
-  --wc-map-text: var(--ink);
   --wc-map-font: var(--font-body);
   margin: 0;
   padding: 0 9% 9%;
   background: var(--paper);
 }
-.calla-map .wc-map__addr { margin-top: 26px; font-size: 18px; line-height: 1.45; letter-spacing: .03em; }
 .calla-map .wc-map__route { margin-top: 20px; font-size: 15px; letter-spacing: .08em; }

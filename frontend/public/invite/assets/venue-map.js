@@ -19,9 +19,8 @@
    Вид — CSS-переменные на .wc-map в стилях шаблона:
      --wc-map-h, --wc-map-radius, --wc-map-border, --wc-map-shadow,
      --wc-map-accent (кнопка), --wc-map-accent-ink (текст кнопки при наведении),
-     --wc-map-font, --wc-map-text (подпись с адресом), --wc-map-width.
-   data-wc-map-addr="off" — не показывать адрес под картой (если он уже есть
-   в вёрстке рядом).
+     --wc-map-font, --wc-map-width.
+   Адрес подписью под картой не выводим: он — метка на самой карте.
 
    Подключение: <script src="../assets/venue-map.js"> ДО script.js шаблона,
    в applyData — WCMap.set({ address: d.venueAddress, venue: d.venue,
@@ -43,8 +42,6 @@
       'overflow:hidden;border:var(--wc-map-border,1px solid rgba(0,0,0,.14));box-shadow:var(--wc-map-shadow,none);' +
       'background:#eceae6;transform:translateZ(0)}' +
     '.wc-map__frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}' +
-    '.wc-map__addr{margin:16px auto 0;max-width:92%;font-family:var(--wc-map-font,inherit);font-size:14px;' +
-      'line-height:1.45;letter-spacing:.03em;color:var(--wc-map-text,inherit)}' +
     '.wc-map__route{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:10px 20px;' +
       'border-radius:999px;border:1px solid var(--wc-map-accent,#354366);color:var(--wc-map-accent,#354366);' +
       'background:transparent;font-family:var(--wc-map-font,inherit);font-size:13px;line-height:1;' +
@@ -142,15 +139,13 @@
       if (!visible || box.__wcMapKey === key) return;
       box.__wcMapKey = key;
       var title = 'Карта: ' + (state.venue || address || 'место проведения');
-      var addr = address && box.getAttribute('data-wc-map-addr') !== 'off'
-        ? '<p class="wc-map__addr">' + esc(address) + '</p>' : '';
       // Своя ссылка пары без точки (короткая ссылка, 2ГИС…) — её и открываем
       var go = link && !linkPoint
         ? '<a class="wc-map__route" href="' + esc(link) + '" target="_blank" rel="noopener">' + PIN + 'Открыть карту</a>'
         : '<a class="wc-map__route" href="' + esc(routeUrl(q, point)) + '" target="_blank" rel="noopener">' + PIN + 'Построить маршрут</a>';
       box.innerHTML =
         '<div class="wc-map__frame"><iframe src="' + esc(widgetUrl(q, point)) + '" title="' + esc(title) + '"' +
-        ' loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>' + addr + go;
+        ' loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>' + go;
     });
   }
 

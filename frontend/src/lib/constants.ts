@@ -536,7 +536,7 @@ const MUSIC_SECTION: TemplateSection = {
     ссылка на место в Яндекс Картах ставит метку точно. Поля добавляются в
     секцию места каждого шаблона (то, чего там ещё нет). */
 const MAP_ADDRESS: TemplateField = {
-  id: 'venueAddress', type: 'text', label: 'Адрес', hint: 'По нему строится карта. Например: Москва, ул. Тверская, 7', scope: 'data', maxLength: 90,
+  id: 'venueAddress', type: 'text', label: 'Адрес', hint: 'Появится меткой на карте. Например: Москва, ул. Тверская, 7', scope: 'data', maxLength: 90,
 };
 const MAP_LINK: TemplateField = {
   id: 'mapLink', type: 'text', label: 'Ссылка на место в Яндекс Картах (необязательно)', hint: 'Метка на карте встанет точно на место', scope: 'data',
@@ -680,8 +680,8 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Локация', icon: '📍',
       fields: [
         { id: 'venue',        type: 'text',  label: 'Место проведения', hint: 'Например: Дворец бракосочетания 12/8', scope: 'data' },
-        { id: 'locationPhoto', type: 'image', label: 'Фото в рамке локации', scope: 'custom' },
         MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        { id: 'locationPhoto', type: 'image', label: 'Фото в рамке локации', scope: 'custom' },
       ],
     },
     {
@@ -799,7 +799,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue',        type: 'text', label: 'Название места', hint: 'Например: СПА Отель',            scope: 'data' },
-        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'По нему строится карта. Например: г. Сочи, ул. Приморская, 15', scope: 'data', maxLength: 90 },
+        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'Появится меткой на карте. Например: г. Сочи, ул. Приморская, 15', scope: 'data', maxLength: 90 },
         MAP_LINK, MAP_TOGGLE,
       ],
     },
@@ -873,7 +873,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Локация', icon: '📍',
       fields: [
         { id: 'venue',        type: 'text', label: 'Название места', hint: '«Артурс Спа Отель»', scope: 'data', maxLength: 50 },
-        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'По нему строится карта', scope: 'data', maxLength: 90 },
+        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'Появится меткой на карте', scope: 'data', maxLength: 90 },
         MAP_LINK, MAP_TOGGLE,
       ],
     },

@@ -788,10 +788,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   --wc-map-border: 1px solid rgba(248, 249, 240, .5);
   --wc-map-accent: var(--cream);
   --wc-map-accent-ink: var(--text);
-  --wc-map-text: var(--text-lt);
   --wc-map-font: 'Raleway', sans-serif;
   width: 92%;
   margin-top: 0;
 }
-.location-section .wc-map__addr { margin-top: 26px; font-size: 13px; font-weight: 300; letter-spacing: .12em; line-height: 1.9; }
 .location-section .wc-map__route { margin-top: 22px; font-weight: 300; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
