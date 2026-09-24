@@ -40,7 +40,7 @@ const SAMPLE_DATA = {
   weddingDate: sampleWeddingDate(),
   weddingTime: '16:00',
   venue: 'Усадьба «Белый сад»',
-  venueAddress: 'Москва, ул. Розовая, 1',
+  venueAddress: 'Москва, ул. Крымский Вал, 9',
   inviteText: 'С радостью приглашаем вас разделить с нами один из самых счастливых дней нашей жизни',
   story: 'Мы встретились пять лет назад и с тех пор не расставались. Наш путь был полон приключений и любви.',
   dressCode: 'White Tie',
@@ -48,7 +48,7 @@ const SAMPLE_DATA = {
   dressCodePhoto: '',
   coverPhoto: '',
   galleryPhotos: [],
-  mapLink: 'https://maps.google.com',
+  mapLink: '',
   schedule: [
     { time: '15:00', title: 'Торжественная регистрация', icon: '💍' },
     { time: '16:00', title: 'Фотосессия', icon: '📸' },

@@ -75,8 +75,11 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
           musicUrl: dataRef.current.musicUrl,
           schedule: dataRef.current.schedule,
           dressCodeColors: dataRef.current.dressCodeColors,
-          // Кадрирование фото в рамках (у остальных мостов приходит в ...customData)
+          // Кадрирование фото, галочка «Показывать карту» и координаты адреса
+          // (у остальных мостов приходят в ...customData)
           photoFrames: dataRef.current.customData?.photoFrames,
+          showMap: dataRef.current.customData?.showMap,
+          mapPoint: dataRef.current.customData?.mapPoint,
         },
       },
       window.location.origin

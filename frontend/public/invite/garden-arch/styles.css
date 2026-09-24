@@ -992,3 +992,16 @@ img {
    горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
 html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── Карта места (Яндекс) в «Месте проведения» — ../assets/venue-map.js ── */
+.venue .wc-map {
+  --wc-map-width: 440px;
+  --wc-map-h: 230px;
+  --wc-map-radius: 6px;
+  --wc-map-border: 1px solid rgba(184, 154, 106, .55);
+  --wc-map-shadow: 0 6px 18px rgba(75, 79, 68, .08);
+  --wc-map-accent: var(--gold-deep);
+  --wc-map-text: var(--ink-soft);
+  margin-top: 18px;
+}
+.venue .wc-map__route { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }

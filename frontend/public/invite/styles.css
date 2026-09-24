@@ -1227,3 +1227,19 @@ body {
    горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
 html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── Карта места (Яндекс) под овалом — assets/venue-map.js ─────────────── */
+.venue-stripes .wc-map {
+  --wc-map-width: 360px;
+  --wc-map-h: 230px;
+  --wc-map-radius: 16px;
+  --wc-map-border: 1px solid rgba(17, 78, 136, .35);
+  --wc-map-shadow: 0 8px 22px rgba(17, 78, 136, .14);
+  --wc-map-accent: #114e88;
+  --wc-map-font: 'Poiret One', 'Raleway', sans-serif;
+  position: relative;
+  z-index: 1;
+  margin-top: 28px;
+}
+.venue-stripes .wc-map__route { background: #fff; }
+.venue-stripes .wc-map__route:hover { background: #114e88; }

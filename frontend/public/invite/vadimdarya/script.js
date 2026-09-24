@@ -165,6 +165,9 @@
     // Кадрирование фото в рамках (обложка и образ)
     if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);
 
+    // Карта места (Яндекс) по адресу — общий модуль ../assets/venue-map.js
+    if (window.WCMap) WCMap.set({ address: d.venueAddress, venue: d.venue, mapLink: d.mapLink, point: d.mapPoint, show: d.showMap });
+
     // Перезапуск таймера под новую дату
     restartCountdown();
   }

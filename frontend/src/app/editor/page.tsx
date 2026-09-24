@@ -274,6 +274,36 @@ function EditorContent() {
     return () => window.removeEventListener('message', onMsg);
   }, []);
 
+  // Координаты адреса для карты (public/invite/assets/venue-map.js). В маленьком
+  // окне виджет Яндекса, найдя адрес сам, не ставит метку — поэтому ищем точку
+  // один раз, когда адрес перестали набирать (OpenStreetMap, без ключа), и
+  // храним в customData.mapPoint вместе с адресом. Берём только найденный дом
+  // или место; улица/посёлок целиком — не метка, тогда карта ищет адрес сама.
+  const mapAddress = (data.venueAddress || '').trim();
+  const mapPointFor = data.customData?.mapPoint?.q;
+  useEffect(() => {
+    if (step !== 'editor' || !mapAddress || mapPointFor === mapAddress) return;
+    const ctrl = new AbortController();
+    const timer = setTimeout(async () => {
+      let point: { q: string; lat?: number; lon?: number } = { q: mapAddress };
+      try {
+        const res = await fetch(
+          'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&accept-language=ru&q=' + encodeURIComponent(mapAddress),
+          { signal: ctrl.signal },
+        );
+        const [hit] = await res.json();
+        if (hit && hit.place_rank >= 30 && isFinite(+hit.lat) && isFinite(+hit.lon)) {
+          point = { q: mapAddress, lat: +hit.lat, lon: +hit.lon };
+        }
+      } catch {
+        return;   // нет сети — карта пока ищет адрес сама, попробуем при следующей правке
+      }
+      setData(prev => ((prev.venueAddress || '').trim() !== mapAddress ? prev
+        : { ...prev, customData: { ...(prev.customData || {}), mapPoint: point } }));
+    }, 1200);
+    return () => { clearTimeout(timer); ctrl.abort(); };
+  }, [step, mapAddress, mapPointFor]);
+
   // ── Load draft ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (step !== 'editor') return;
@@ -845,6 +875,15 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, upl
       return <ScheduleEditor value={value || []} onChange={onChange} iconSet={field.iconSet} withDesc={field.withDesc} />;
     case 'drinks':
       return <DrinksEditor value={value || []} onChange={onChange} />;
+    case 'toggle':
+      // Не задано — включено: так поле работает и у пар, созданных до его появления
+      return (
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, cursor: 'pointer', fontSize: 13, color: '#4b463d', fontFamily: 'var(--font-inter)' }}>
+          <input type="checkbox" checked={value !== false} onChange={e => onChange(e.target.checked)}
+            style={{ width: 16, height: 16, margin: 0, accentColor: '#685d4a', cursor: 'pointer' }} />
+          {field.label}
+        </label>
+      );
     default:
       return null;
   }

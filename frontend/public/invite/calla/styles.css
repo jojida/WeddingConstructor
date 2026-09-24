@@ -384,3 +384,23 @@ body {
    горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
 html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── Карта места (Яндекс) отдельной полосой под холстом места ─────────────
+   ../assets/venue-map.js. У холста фиксированные пропорции, поэтому карта
+   идёт следом, на том же фоне. */
+.calla-map {
+  --wc-map-width: none;
+  --wc-map-h: 250px;
+  --wc-map-radius: 3px;
+  --wc-map-border: 6px solid var(--frame-cream);
+  --wc-map-shadow: 0 8px 24px rgba(111, 102, 90, .18);
+  --wc-map-accent: var(--brown);
+  --wc-map-accent-ink: var(--white);
+  --wc-map-text: var(--ink);
+  --wc-map-font: var(--font-body);
+  margin: 0;
+  padding: 0 9% 9%;
+  background: var(--paper);
+}
+.calla-map .wc-map__addr { font-size: 16px; }
+.calla-map .wc-map__route { font-size: 15px; letter-spacing: .08em; }

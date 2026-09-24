@@ -1477,3 +1477,18 @@ body {
    горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
 html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── Карта места (Яндекс) под адресом — ../assets/venue-map.js ─────────── */
+.venue-block .wc-map {
+  --wc-map-width: 340px;
+  --wc-map-h: 220px;
+  --wc-map-radius: 14px;
+  --wc-map-border: 4px solid var(--cream);
+  --wc-map-shadow: 0 12px 40px rgba(0, 0, 0, .12);
+  --wc-map-accent: var(--gold-dark);
+  --wc-map-accent-ink: #fff;
+  --wc-map-font: var(--font-body);
+  width: min(340px, 85vw);
+  margin-top: 0;
+}
+.venue-block .wc-map__route { font-size: .72rem; font-weight: 400; letter-spacing: .3em; text-transform: uppercase; padding: 11px 22px; }

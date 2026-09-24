@@ -461,3 +461,17 @@ img, svg { display: block; max-width: 100%; }
    горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
 html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── Карта места (Яндекс) в «Локации» — ../assets/venue-map.js ─────────── */
+.location .wc-map {
+  --wc-map-width: 400px;
+  --wc-map-h: 230px;
+  --wc-map-radius: 14px;
+  --wc-map-border: 2px solid var(--ink);
+  --wc-map-shadow: 5px 5px 0 var(--yellow);
+  --wc-map-accent: var(--pink-dk);
+  --wc-map-text: var(--text);
+  --wc-map-font: var(--font-body);
+  margin-top: 26px;
+}
+.location .wc-map__route { font-family: var(--font-title); font-size: 22px; letter-spacing: .01em; padding: 6px 22px 8px; border-width: 2px; }

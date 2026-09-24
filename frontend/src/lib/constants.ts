@@ -406,7 +406,8 @@ export interface ScheduleItem { time: string; title: string; icon: string; desc?
 export interface DrinkOption  { value: string; label: string; }
 
 export type FieldType =
-  | 'text' | 'textarea' | 'image' | 'audio' | 'colorList' | 'schedule' | 'drinks';
+  | 'text' | 'textarea' | 'image' | 'audio' | 'colorList' | 'schedule' | 'drinks'
+  | 'toggle';                 // галочка: значение true/false, по умолчанию включено
 
 export interface TemplateField {
   id: string;                 // data-edit ключ + ключ хранения
@@ -519,6 +520,17 @@ const MUSIC_SECTION: TemplateSection = {
   ],
 };
 
+/** Карта места (Яндекс, public/invite/assets/venue-map.js) — строится по адресу;
+    ссылка на место в Яндекс Картах ставит метку точно. Поля добавляются в
+    секцию места каждого шаблона (то, чего там ещё нет). */
+const MAP_ADDRESS: TemplateField = {
+  id: 'venueAddress', type: 'text', label: 'Адрес', hint: 'По нему строится карта. Например: Москва, ул. Тверская, 7', scope: 'data', maxLength: 90,
+};
+const MAP_LINK: TemplateField = {
+  id: 'mapLink', type: 'text', label: 'Ссылка на место в Яндекс Картах (необязательно)', hint: 'Метка на карте встанет точно на место', scope: 'data',
+};
+const MAP_TOGGLE: TemplateField = { id: 'showMap', type: 'toggle', label: 'Показывать карту', scope: 'custom' };
+
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   calla: [
     {
@@ -531,6 +543,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Дворцовая усадьба 12', scope: 'data' },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
       ],
     },
     {
@@ -595,6 +608,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Локация', icon: '📍',
       fields: [
         { id: 'locationText', type: 'textarea', label: 'Текст локации', hint: 'Например: Праздник пройдёт на базе отдыха «Барвиха»', scope: 'custom' },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
       ],
     },
     {
@@ -655,6 +669,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'venue',        type: 'text',  label: 'Место проведения', hint: 'Например: Дворец бракосочетания 12/8', scope: 'data' },
         { id: 'locationPhoto', type: 'image', label: 'Фото в рамке локации', scope: 'custom' },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
       ],
     },
     {
@@ -720,6 +735,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Хвойный 17', scope: 'data' },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
       ],
     },
     {
@@ -771,7 +787,8 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue',        type: 'text', label: 'Название места', hint: 'Например: СПА Отель',            scope: 'data' },
-        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'Например: г. Сочи, ул. Приморская, 15', scope: 'data', maxLength: 90 },
+        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'По нему строится карта. Например: г. Сочи, ул. Приморская, 15', scope: 'data', maxLength: 90 },
+        MAP_LINK, MAP_TOGGLE,
       ],
     },
     {
@@ -844,8 +861,8 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Локация', icon: '📍',
       fields: [
         { id: 'venue',        type: 'text', label: 'Название места', hint: '«Артурс Спа Отель»', scope: 'data', maxLength: 50 },
-        { id: 'venueAddress', type: 'text', label: 'Адрес',          scope: 'data', maxLength: 90 },
-        { id: 'mapLink',      type: 'text', label: 'Ссылка на карту (необязательно)', scope: 'data' },
+        { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'По нему строится карта', scope: 'data', maxLength: 90 },
+        MAP_LINK, MAP_TOGGLE,
       ],
     },
     {

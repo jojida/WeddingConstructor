@@ -779,3 +779,19 @@ span.sched-emoji {
    горизонтальная прокрутка отключена, чтобы не было пустого сдвига вбок. */
 html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
 html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ── Карта места (Яндекс) в «Локации» — ../assets/venue-map.js ─────────── */
+.location-section .wc-map {
+  --wc-map-width: 420px;
+  --wc-map-h: 230px;
+  --wc-map-radius: 2px;
+  --wc-map-border: 1px solid rgba(248, 249, 240, .5);
+  --wc-map-accent: var(--cream);
+  --wc-map-accent-ink: var(--text);
+  --wc-map-text: var(--text-lt);
+  --wc-map-font: 'Raleway', sans-serif;
+  width: 92%;
+  margin-top: 0;
+}
+.location-section .wc-map__addr { font-weight: 300; letter-spacing: .08em; }
+.location-section .wc-map__route { font-weight: 300; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
