@@ -1241,5 +1241,5 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   z-index: 1;
   margin-top: 28px;
 }
-.venue-stripes .wc-map__route { background: #fff; }
+.venue-stripes .wc-map__route { margin-top: 20px; background: #fff; }
 .venue-stripes .wc-map__route:hover { background: #114e88; }

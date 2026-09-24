@@ -793,5 +793,5 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   width: 92%;
   margin-top: 0;
 }
-.location-section .wc-map__addr { margin-top: 18px; font-size: 12px; font-weight: 300; letter-spacing: .2em; line-height: 1.8; }
-.location-section .wc-map__route { margin-top: 16px; font-weight: 300; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
+.location-section .wc-map__addr { margin-top: 26px; font-size: 13px; font-weight: 300; letter-spacing: .12em; line-height: 1.9; }
+.location-section .wc-map__route { margin-top: 22px; font-weight: 300; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; }
