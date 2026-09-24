@@ -438,13 +438,13 @@ function Cta() {
           <div className={styles.ctaOrb1} />
           <div className={styles.ctaOrb2} />
           <div className={styles.ctaContent}>
-            <h2 className={styles.ctaTitle}>Готовы создать своё цифровое чудо?</h2>
+            <h2 className={styles.ctaTitle}>Нет нужного шаблона?</h2>
             <p className={styles.ctaText}>
-              Начните прямо сейчас и удивите своих гостей современным подходом к традициям.
+              Наш дизайнер создаст вам уникальный шаблон по вашему ТЗ.
             </p>
-            <Link href="/templates" className={styles.ctaBtn}>
-              Создать приглашение сейчас
-            </Link>
+            <a href={`mailto:${LEGAL.contactEmail}?subject=${encodeURIComponent('Заявка на уникальный шаблон')}`} className={styles.ctaBtn}>
+              Подать заявку
+            </a>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PreviewScale from '@/components/PreviewScale';
-import { TEMPLATES, sampleWeddingDate } from '@/lib/constants';
+import { LEGAL, TEMPLATES, sampleWeddingDate } from '@/lib/constants';
 import styles from './page.module.css';
 
 function useScrollReveal(count: number) {
@@ -126,10 +126,11 @@ export default function TemplatesPage() {
       </div>
 
       <div className={styles.cta}>
-        <p className={styles.ctaText}>Не знаете что выбрать? Начните с любого — всё можно изменить в редакторе</p>
-        <Link href={`/editor?template=${TEMPLATES[0].id}`} className="btn-primary">
-          Начать бесплатно
-        </Link>
+        <h2 className={styles.ctaTitle}>Нет нужного шаблона?</h2>
+        <p className={styles.ctaText}>Наш дизайнер создаст вам уникальный шаблон по вашему ТЗ.</p>
+        <a href={`mailto:${LEGAL.contactEmail}?subject=${encodeURIComponent('Заявка на уникальный шаблон')}`} className="btn-primary">
+          Подать заявку
+        </a>
       </div>
     </div>
   );

@@ -184,6 +184,11 @@
   border-top: 1px solid rgba(206,197,186,0.2);
   background: linear-gradient(to bottom, var(--background), var(--surface-container-low));
 }
+.ctaTitle {
+  font-size: clamp(24px, 4vw, 36px);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
 .ctaText {
   font-size: 16px; color: var(--on-surface-variant);
   margin-bottom: 28px; font-family: var(--font-inter);
