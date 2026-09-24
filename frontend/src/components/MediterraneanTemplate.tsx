@@ -13,7 +13,7 @@ interface Props {
 /* ─────────────────────────────────────────────────────────
    Full-page / editing → iframe реального дизайна.
      URL-параметры (страница гостя) + postMessage('wc:data') (живое превью).
-     В режиме editing передаём editing=1 — стирание даты/скролл-гейт отключаются.
+     В режиме editing передаём editing=1 — «слив воды» с даты/скролл-гейт отключаются.
    Preview/card → миниатюра с именами поверх фото.
 ───────────────────────────────────────────────────────── */
 export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, editing }: Props) {

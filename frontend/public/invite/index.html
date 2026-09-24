@@ -129,7 +129,6 @@
           <span class="date-lbl" style="font-size:9px">год</span>
         </div>
       </div>
-      <p class="scratch-hint" id="scratch-hint">Сотрите кружки, чтобы узнать дату 👆</p>
     </section>
 
     <!-- ═══════════════════════════════════════ VENUE ═══════════════════════════════════════ -->
@@ -493,10 +492,16 @@
       var vid   = document.getElementById('intro-vid');
       var btn   = document.getElementById('intro-skip');
 
+      // Заставка ушла — даём знать анимации даты (она ждёт, пока видео не закроет кружки)
+      function remove() {
+        if (!wrap.parentNode) return;
+        wrap.remove();
+        window.dispatchEvent(new Event('wc:intro-done'));
+      }
       function dismiss() {
         wrap.classList.add('fade-out');
         // remove from DOM after fade so it doesn't block interaction
-        setTimeout(function () { wrap.remove(); }, 900);
+        setTimeout(remove, 900);
       }
 
       // Dismiss when video ends
@@ -507,7 +512,7 @@
       var safety = setTimeout(dismiss, 12000);
       vid.addEventListener('ended', function () { clearTimeout(safety); });
       // If video can't load at all — hide immediately
-      vid.addEventListener('error', function () { wrap.remove(); });
+      vid.addEventListener('error', remove);
     })();
 
     /* ── 1. Countdown и 2. Custom radio/checkbox перенесены в script.js
@@ -544,28 +549,31 @@
       return !!img;
     };
 
-    /* ── 6. Scratch-off date reveal + scroll gate ──
-       Each date circle gets a Canvas overlay painted with a blue texture.
-       The user erases it (mouse on desktop, finger on touch). When >50% of a
-       circle is scratched it auto-reveals. Until all three are revealed the
-       page is gated — any scroll past the section snaps back. */
+    /* ── 6. Date reveal: water drains from the circles + scroll gate ──
+       Каждый кружок даты залит «водой» (canvas с синей фактурой). Когда
+       кружки целиком видны (и заставка-видео уже ушла), все три резервуара
+       одновременно пустеют сверху вниз за 3 секунды. Пока вода не ушла,
+       страница не прокручивается дальше кружков. */
     (function () {
-      // В режиме редактора стирание/скролл-гейт отключены: дата видна, страница прокручивается.
+      // В режиме редактора анимация/скролл-гейт отключены: дата видна, страница прокручивается.
       if (new URLSearchParams(location.search).get('editing') === '1') return;
+      // «Уменьшить движение» в системе — дату показываем сразу, без анимации
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       var section = document.querySelector('.date-section');
       if (!section) return;
       var circlesWrap = section.querySelector('.date-circles');
       var circles = Array.prototype.slice.call(section.querySelectorAll('.date-circle'));
-      var hint = document.getElementById('scratch-hint');
       if (!circles.length) return;
 
-      var total = circles.length;
-      var doneCount = 0;
+      var DRAIN_MS = 3000;
+      var tanks = [];
       var revealed = false;
       var active = false;
+      var started = false;
+      var inView = false;
 
-      /* Paint the erasable blue layer with an "interesting" texture:
-         gradient + diagonal sheen + Mediterranean wavy lines + sparkles */
+      /* Фактура воды: градиент + диагональный блик + средиземноморские волны.
+         Искорки рисуются отдельно (BUBBLES) — пока вода уходит, они всплывают. */
       function drawTexture(ctx, w, h) {
         var g = ctx.createLinearGradient(0, 0, w, h);
         g.addColorStop(0,   '#2a79bf');
@@ -596,98 +604,122 @@
           ctx.stroke();
         }
         ctx.restore();
+      }
+      var BUBBLES = [[0.26, 0.30], [0.70, 0.26], [0.56, 0.60], [0.34, 0.72], [0.78, 0.70]];
 
+      /* Линия воды: две синусоиды, фаза бежит со временем — поверхность колышется */
+      function tracePath(ctx, s, level, amp, t, shift, closed) {
+        var step = s / 24;
+        ctx.beginPath();
+        for (var x = 0; x <= s + step; x += step) {
+          var y = level +
+            amp * Math.sin((x / s) * 6.9 + t * 4.2 + shift) +
+            amp * 0.45 * Math.sin((x / s) * 14.5 - t * 6.3 + shift * 1.7);
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        if (closed) { ctx.lineTo(s + step, s + 2); ctx.lineTo(0, s + 2); ctx.closePath(); }
+      }
+
+      /* p — доля пройденного времени (0…1), t — секунды с начала слива */
+      function drawTank(tk, p, t) {
+        var ctx = tk.ctx, s = tk.s, amp = s * 0.045;
+        var e = (1 - Math.cos(Math.PI * p)) / 2;   // easeInOutSine
+        // Уровень воды: впадины волны у верхнего края (полный) → гребни задней
+        // волны под нижним (пустой). Запас минимальный, чтобы слив шёл все 3 с.
+        var level = -amp * 1.5 + (s + amp * 3.7) * e;
+        ctx.clearRect(0, 0, s, s);
+
+        // Задняя волна — светлее и прозрачнее, чуть выше передней: объём воды
+        tracePath(ctx, s, level - amp * 0.9, amp * 0.8, t, 2.1, true);
+        ctx.fillStyle = 'rgba(92, 160, 222, 0.55)';
+        ctx.fill();
+
+        // Передняя волна: под поверхностью — фактура воды и пузырьки
         ctx.save();
+        tracePath(ctx, s, level, amp, t, 0, true);
+        ctx.clip();
+        ctx.drawImage(tk.tex, 0, 0, s, s);
         ctx.fillStyle = '#ffffff';
-        var pts = [[0.26, 0.30], [0.70, 0.26], [0.56, 0.60], [0.34, 0.72], [0.78, 0.70]];
-        for (var i = 0; i < pts.length; i++) {
-          ctx.globalAlpha = 0.5;
-          ctx.beginPath();
-          ctx.arc(pts[i][0] * w, pts[i][1] * h, w * 0.022, 0, Math.PI * 2);
-          ctx.fill();
+        ctx.globalAlpha = 0.5;
+        var r = s * 0.022, span = s + 2 * r;
+        for (var i = 0; i < BUBBLES.length; i++) {
+          var by = BUBBLES[i][1] * s - t * s * (0.10 + i * 0.025) + r;
+          by = ((by % span) + span) % span - r;
+          var bx = BUBBLES[i][0] * s + Math.sin(t * 3 + i * 1.3) * s * 0.015;
+          ctx.beginPath(); ctx.arc(bx, by, r, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
+
+        // Блик по линии воды
+        tracePath(ctx, s, level, amp, t, 0, false);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+        ctx.lineWidth = Math.max(1, s * 0.016);
+        ctx.stroke();
       }
 
-      function setupCircle(circle) {
-        var size = Math.round(circle.getBoundingClientRect().width);
-        if (!size) { setTimeout(function () { setupCircle(circle); }, 120); return; }
+      function setupTank(circle) {
+        if (revealed) return;
+        var size = circle.clientWidth;
+        if (!size) { setTimeout(function () { setupTank(circle); }, 120); return; }
 
         var dpr = Math.min(window.devicePixelRatio || 1, 3);
+        var px = Math.round(size * dpr);
         var canvas = document.createElement('canvas');
-        canvas.className = 'scratch-canvas';
-        canvas.width  = Math.round(size * dpr);
-        canvas.height = Math.round(size * dpr);
+        canvas.className = 'date-water';
+        canvas.width = canvas.height = px;
         var ctx = canvas.getContext('2d');
         ctx.scale(dpr, dpr);
-        drawTexture(ctx, size, size);
+
+        var tex = document.createElement('canvas');
+        tex.width = tex.height = px;
+        var tctx = tex.getContext('2d');
+        tctx.scale(dpr, dpr);
+        drawTexture(tctx, size, size);
+
+        var tk = { canvas: canvas, ctx: ctx, tex: tex, s: size };
+        drawTank(tk, 0, 0);
         circle.appendChild(canvas);
+        tanks.push(tk);
         active = true;
-
-        var drawing = false, finished = false, lastCheck = 0;
-        var brush = size * 0.17;
-
-        function rel(e) {
-          var r = canvas.getBoundingClientRect();
-          return { x: e.clientX - r.left, y: e.clientY - r.top };
-        }
-        function scratch(x, y) {
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.beginPath();
-          ctx.arc(x, y, brush, 0, Math.PI * 2);
-          ctx.fill();
-        }
-        function progress() {
-          var img;
-          try { img = ctx.getImageData(0, 0, canvas.width, canvas.height); }
-          catch (err) { return 0; }
-          var d = img.data, cleared = 0, n = 0;
-          for (var i = 3; i < d.length; i += 24) { n++; if (d[i] < 128) cleared++; }
-          return n ? cleared / n : 0;
-        }
-        function maybeFinish() {
-          if (finished) return;
-          if (progress() > 0.5) {
-            finished = true;
-            circle.classList.add('revealed');
-            doneCount++;
-            if (doneCount >= total) revealAll();
-          }
-        }
-        function down(e) {
-          if (finished) return;
-          drawing = true;
-          if (canvas.setPointerCapture) { try { canvas.setPointerCapture(e.pointerId); } catch (x) {} }
-          var p = rel(e); scratch(p.x, p.y);
-          e.preventDefault();
-        }
-        function move(e) {
-          if (!drawing || finished) return;
-          var p = rel(e); scratch(p.x, p.y);
-          e.preventDefault();
-          var now = Date.now();
-          if (now - lastCheck > 180) { lastCheck = now; maybeFinish(); }
-        }
-        function up() {
-          if (!drawing) return;
-          drawing = false;
-          maybeFinish();
-        }
-        canvas.addEventListener('pointerdown', down);
-        canvas.addEventListener('pointermove', move);
-        window.addEventListener('pointerup', up);
-        canvas.addEventListener('pointercancel', up);
       }
 
-      function revealAll() {
+      function now() { return window.performance && performance.now ? performance.now() : Date.now(); }
+      /* rAF в некоторых iframe не тикает — подстраховываемся таймером */
+      function nextFrame(fn) {
+        var fired = false;
+        function run() { if (!fired) { fired = true; fn(); } }
+        requestAnimationFrame(run);
+        setTimeout(run, 50);
+      }
+
+      function start() {
+        if (started) return;
+        started = true;
+        var t0 = now();
+        (function frame() {
+          if (revealed) return;
+          var el = now() - t0, p = Math.min(1, el / DRAIN_MS);
+          tanks.forEach(function (tk) { drawTank(tk, p, el / 1000); });
+          if (p < 1) nextFrame(frame); else finish();
+        })();
+        // Страница не должна застрять на кружках, даже если кадры не рисуются
+        setTimeout(finish, DRAIN_MS + 500);
+      }
+
+      function finish() {
+        if (revealed) return;
         revealed = true;
-        if (hint) {
-          hint.textContent = 'Дата открыта 💙';
-          setTimeout(function () { hint.classList.add('done'); }, 900);
-        }
+        tanks.forEach(function (tk) {
+          if (tk.canvas.parentNode) tk.canvas.parentNode.removeChild(tk.canvas);
+        });
       }
 
-      /* ── Scroll gate: pin the page at the circles until all are revealed ── */
+      /* Старт: кружки видны целиком и заставка уже ушла (иначе слив прошёл бы под видео) */
+      function maybeStart() {
+        if (!started && active && inView && !document.getElementById('intro-wrap')) start();
+      }
+
+      /* ── Scroll gate: pin the page at the circles until the water is gone ── */
       /* Scroll position at which the circles sit centred in the viewport */
       function lockTarget() {
         var r = circlesWrap.getBoundingClientRect();
@@ -715,7 +747,6 @@
       }, { passive: true });
       window.addEventListener('touchmove', function (e) {
         if (!gateActive() || !e.touches.length) return;
-        if (e.target && e.target.classList && e.target.classList.contains('scratch-canvas')) return;
         var dy = touchY - e.touches[0].clientY;   /* >0 = trying to scroll down */
         if (dy > 0 && window.scrollY >= lockTarget() - 2) e.preventDefault();
       }, { passive: false });
@@ -727,7 +758,12 @@
             window.scrollY >= lockTarget() - 2) e.preventDefault();
       });
 
-      circles.forEach(setupCircle);
+      circles.forEach(setupTank);
+      new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) { inView = en.isIntersecting && en.intersectionRatio >= 0.9; });
+        maybeStart();
+      }, { threshold: [0, 0.9, 1] }).observe(circlesWrap);
+      window.addEventListener('wc:intro-done', maybeStart);
       requestAnimationFrame(enforce);
     })();
   </script>

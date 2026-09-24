@@ -143,7 +143,7 @@ function Hero() {
         <div className={styles.heroDevice}>
           <div className={styles.heroDeviceFrame}>
             {/* Живой шаблон «Средиземноморье» — прокручивается прямо в окошке.
-                editing=1 отключает скролл-гейт и «стирание даты» внутри шаблона. */}
+                editing=1 отключает скролл-гейт и «слив воды» с даты внутри шаблона. */}
             <div className={styles.heroDeviceScreen}>
               <MediterraneanTemplate
                 data={heroMediterraneanData()}
