@@ -33,22 +33,24 @@
   var state = { address: '', venue: '', mapLink: '', point: null, show: true };
   var timer = 0;
 
-  // Базовый вид — в :where() (нулевой вес): любое правило шаблона сильнее
+  // Базовый вид — обычными классами (сильнее сброса шаблона вида * { margin:0;
+  // padding:0 }), но в начале <head>: правила шаблона с тем же весом идут позже
+  // и побеждают, поэтому шаблон донастраивает всё своими классами.
   var CSS =
-    ':where(.wc-map){width:100%;max-width:var(--wc-map-width,440px);margin:22px auto 0;text-align:center;box-sizing:border-box}' +
+    '.wc-map{width:100%;max-width:var(--wc-map-width,440px);margin:22px auto 0;text-align:center;box-sizing:border-box}' +
     '.wc-map[hidden]{display:none!important}' +
-    ':where(.wc-map__frame){position:relative;height:var(--wc-map-h,240px);border-radius:var(--wc-map-radius,12px);' +
+    '.wc-map__frame{position:relative;height:var(--wc-map-h,240px);border-radius:var(--wc-map-radius,12px);' +
       'overflow:hidden;border:var(--wc-map-border,1px solid rgba(0,0,0,.14));box-shadow:var(--wc-map-shadow,none);' +
       'background:#eceae6;transform:translateZ(0)}' +
-    ':where(.wc-map__frame) iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}' +
-    ':where(.wc-map__addr){margin:12px auto 0;max-width:92%;font-family:var(--wc-map-font,inherit);font-size:13px;' +
+    '.wc-map__frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}' +
+    '.wc-map__addr{margin:16px auto 0;max-width:92%;font-family:var(--wc-map-font,inherit);font-size:14px;' +
       'line-height:1.45;letter-spacing:.03em;color:var(--wc-map-text,inherit)}' +
-    ':where(.wc-map__route){display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:10px 20px;' +
+    '.wc-map__route{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:10px 20px;' +
       'border-radius:999px;border:1px solid var(--wc-map-accent,#354366);color:var(--wc-map-accent,#354366);' +
       'background:transparent;font-family:var(--wc-map-font,inherit);font-size:13px;line-height:1;' +
       'letter-spacing:.06em;text-decoration:none;transition:background .2s,color .2s}' +
-    ':where(.wc-map__route):hover{background:var(--wc-map-accent,#354366);color:var(--wc-map-accent-ink,#fff)}' +
-    ':where(.wc-map__route) svg{width:14px;height:14px;flex:none}';
+    '.wc-map__route:hover{background:var(--wc-map-accent,#354366);color:var(--wc-map-accent-ink,#fff)}' +
+    '.wc-map__route svg{width:14px;height:14px;flex:none}';
 
   function injectCss() {
     if (document.getElementById('wc-map-css')) return;

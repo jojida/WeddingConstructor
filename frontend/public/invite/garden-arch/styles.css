@@ -1004,4 +1004,5 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   --wc-map-text: var(--ink-soft);
   margin-top: 18px;
 }
-.venue .wc-map__route { font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }
+.venue .wc-map__addr { margin-top: 16px; font-size: 12px; letter-spacing: .16em; line-height: 1.7; text-transform: uppercase; }
+.venue .wc-map__route { margin-top: 14px; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }

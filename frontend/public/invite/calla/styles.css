@@ -402,5 +402,5 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   padding: 0 9% 9%;
   background: var(--paper);
 }
-.calla-map .wc-map__addr { font-size: 16px; }
-.calla-map .wc-map__route { font-size: 15px; letter-spacing: .08em; }
+.calla-map .wc-map__addr { margin-top: 18px; font-size: 18px; line-height: 1.4; letter-spacing: .03em; }
+.calla-map .wc-map__route { margin-top: 14px; font-size: 15px; letter-spacing: .08em; }
