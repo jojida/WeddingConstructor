@@ -26,11 +26,11 @@ import { METRIKA_ID } from "@/lib/metrika";
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Сайт-приглашение на свадьбу с RSVP-анкетой — WeddingCraft",
+    default: "Сайт-приглашение на свадьбу с анкетой для гостей — WeddingCraft",
     template: "%s — WeddingCraft",
   },
   description:
-    "Создайте электронное свадебное приглашение за 5 минут: изящные шаблоны, RSVP-анкета, " +
+    "Создайте электронное свадебное приглашение за 5 минут: изящные шаблоны, анкета для гостей, " +
     "уведомления об ответах гостей в Telegram и на Email, персональные ссылки и привязка своего домена.",
   keywords: [
     "сайт-приглашение на свадьбу",
@@ -47,16 +47,16 @@ export const metadata: Metadata = {
     siteName: "WeddingCraft",
     locale: "ru_RU",
     url: "/",
-    title: "Сайт-приглашение на свадьбу с RSVP-анкетой — WeddingCraft",
+    title: "Сайт-приглашение на свадьбу с анкетой для гостей — WeddingCraft",
     description:
-      "Электронные свадебные приглашения: изящные шаблоны, RSVP-анкета, уведомления в Telegram, " +
+      "Электронные свадебные приглашения: изящные шаблоны, анкета для гостей, уведомления в Telegram, " +
       "персональные ссылки для гостей и привязка своего домена.",
     images: [{ url: "/invite/calla/assets/couple-photo.jpg", width: 1200, height: 630, alt: "Пример свадебного сайта-приглашения WeddingCraft" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Сайт-приглашение на свадьбу с RSVP-анкетой — WeddingCraft",
-    description: "Электронные свадебные приглашения: шаблоны, RSVP-анкета, уведомления в Telegram.",
+    title: "Сайт-приглашение на свадьбу с анкетой для гостей — WeddingCraft",
+    description: "Электронные свадебные приглашения: шаблоны, анкета для гостей, уведомления в Telegram.",
     images: ["/invite/calla/assets/couple-photo.jpg"],
   },
   robots: {

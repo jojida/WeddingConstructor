@@ -87,7 +87,7 @@ export async function generateMetadata({ params }: Props) {
   if (!template) return { title: 'Превью шаблона' };
   return {
     title: `Шаблон «${template.name}» — сайт-приглашение на свадьбу`,
-    description: `${template.description} Живое демо шаблона свадебного сайта-приглашения с RSVP-анкетой.`,
+    description: `${template.description} Живое демо шаблона свадебного сайта-приглашения с анкетой для гостей.`,
     alternates: { canonical: `/demo/${template.id}` },
     openGraph: {
       title: `Шаблон «${template.name}» — сайт-приглашение на свадьбу`,

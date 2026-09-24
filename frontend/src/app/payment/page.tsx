@@ -89,10 +89,10 @@ function PaymentContent() {
         
         <div className={styles.header}>
           <div className={styles.logo}>✦ WeddingCraft</div>
-          <h1 className={styles.title}>Выберите тариф</h1>
+          <h1 className={styles.title}>{PLANS.length > 1 ? 'Выберите тариф' : 'Публикация сайта'}</h1>
           <p className={styles.subtitle}>
             {isFree
-              ? 'Тестовый аккаунт: публикация и смена тарифа — без оплаты'
+              ? 'Тестовый аккаунт: публикация без оплаты'
               : 'После оплаты вы получите уникальную ссылку для гостей'}
           </p>
         </div>
@@ -108,7 +108,7 @@ function PaymentContent() {
           </div>
         )}
 
-        <div className={styles.plans}>
+        <div className={`${styles.plans} ${PLANS.length === 1 ? styles.plansSingle : ''}`}>
           {PLANS.map(plan => (
             <div
               key={plan.id}
@@ -116,7 +116,7 @@ function PaymentContent() {
               className={`${styles.plan} ${selectedPlan === plan.id ? styles.planActive : ''} ${plan.popular ? styles.planPopular : ''}`}
               onClick={() => setSelectedPlan(plan.id)}
             >
-              {plan.popular && <div className={styles.popularBadge}>Популярный</div>}
+              {plan.popular && <div className={styles.popularBadge}>{plan.badge || 'Популярный'}</div>}
               <div className={styles.planHeader}>
                 <div className={styles.planName}>{plan.name}</div>
                 <div className={styles.radio}>
@@ -177,10 +177,6 @@ function PaymentContent() {
             <>
               <p className={styles.payNote}>
                 🎁 Тестовый аккаунт: касса не вызывается, сайт публикуется сразу.
-              </p>
-              <p className={styles.payNote} style={{ marginTop: 6 }}>
-                Тариф можно переключить в любой момент — вернитесь на эту страницу
-                и выберите другой, чтобы сравнить возможности.
               </p>
             </>
           ) : (

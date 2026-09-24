@@ -506,6 +506,11 @@
   margin: 0 auto;
   align-items: start;
 }
+/* Один тариф — одна карточка по центру, не растянутая на всю ширину */
+.pricingGridSingle {
+  grid-template-columns: minmax(0, 420px);
+  justify-content: center;
+}
 .pricingNote {
   max-width: 700px;
   margin: 24px auto 0;

@@ -32,7 +32,7 @@ function Header() {
         <nav className={styles.nav}>
           <Link href="/templates" className={styles.navLink}>Шаблоны</Link>
           <a href="#features" className={styles.navLink}>Возможности</a>
-          <a href="#rsvp" className={styles.navLink}>Управление RSVP</a>
+          <a href="#rsvp" className={styles.navLink}>Управление</a>
           <a href="#pricing" className={styles.navLink}>Цены</a>
         </nav>
 
@@ -61,7 +61,7 @@ function Header() {
         <div className={styles.mobileMenu}>
           <Link href="/templates" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Шаблоны</Link>
           <a href="#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</a>
-          <a href="#rsvp" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Управление RSVP</a>
+          <a href="#rsvp" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Управление</a>
           <a href="#pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Цены</a>
           <div className={styles.mobileDivider} />
           {user ? (
@@ -131,8 +131,8 @@ function Hero() {
           </h1>
 
           <p className={styles.heroSubtitle} data-animate data-delay="200">
-            Дизайнерские шаблоны с RSVP-анкетой гостей, музыкой и картой проезда.
-            Разовая оплата от 1 990 ₽ — без подписок, сайт работает бессрочно.
+            Дизайнерские шаблоны с анкетой для гостей, музыкой и картой проезда.
+            Разовая оплата 2 450 ₽ — без подписок, сайт работает бессрочно.
           </p>
 
           <div className={styles.heroCtas} data-animate data-delay="300">
@@ -263,7 +263,7 @@ function HowItWorks() {
         </svg>
       ),
       title: 'Персонализируйте',
-      text: 'Добавьте музыку, карту проезда и анкету RSVP в нашем интуитивном редакторе за 5 минут.',
+      text: 'Добавьте музыку, карту проезда и анкету для гостей в нашем интуитивном редакторе за 5 минут.',
     },
     {
       icon: (
@@ -333,7 +333,7 @@ function Features() {
           <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
         </svg>
       ),
-      title: 'Умный RSVP',
+      title: 'Умная анкета',
       text: 'Отслеживайте подтверждения гостей в реальном времени. Получайте уведомления и управляйте списком в личном кабинете.',
     },
     {
@@ -394,10 +394,10 @@ function Pricing() {
           </p>
         </div>
 
-        <div className={styles.pricingGrid}>
+        <div className={`${styles.pricingGrid} ${PLANS.length === 1 ? styles.pricingGridSingle : ''}`}>
           {PLANS.map((plan, i) => (
             <div key={i} className={`${styles.pricingCard} ${plan.popular ? styles.pricingCardPopular : ''}`} data-animate data-delay={String(i * 100)}>
-              {plan.popular && <div className={styles.popularBadge}>Популярный</div>}
+              {plan.popular && <div className={styles.popularBadge}>{plan.badge || 'Популярный'}</div>}
               <div className={styles.planName}>{plan.name}</div>
               <div className={styles.planPriceRow}>
                 <span className={styles.planCurrency}>₽</span>
@@ -476,7 +476,7 @@ function Footer() {
               <li><Link href="/templates" className={styles.footerLink}>Цифровые приглашения</Link></li>
               <li><Link href="/templates" className={styles.footerLink}>Digital Save the Date</Link></li>
               <li><Link href="/templates" className={styles.footerLink}>Свадебные сайты</Link></li>
-              <li><a href="#rsvp" className={styles.footerLink}>Управление RSVP</a></li>
+              <li><a href="#rsvp" className={styles.footerLink}>Управление</a></li>
             </ul>
           </div>
           <div>
@@ -540,18 +540,18 @@ function RsvpSection() {
     <section id="rsvp" className={styles.featuresSection}>
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
-          <h2 className={styles.sectionTitle}>Умное управление RSVP</h2>
+          <h2 className={styles.sectionTitle}>Умное управление гостями</h2>
           <p className={styles.howSubtitle}>Сайт сам собирает ответы гостей — вам остаётся встречать</p>
         </div>
 
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', maxWidth: 920, margin: '0 auto' }} data-animate>
           <div style={card}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6b8f5c', marginBottom: 6 }}>Базовый</div>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6b8f5c', marginBottom: 6 }}>Ответы гостей</div>
             <h3 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22, color: '#0e1d26', margin: '0 0 16px' }}>Анкета + уведомления</h3>
             {simple.map(t => <div key={t} style={item}>{check}<span>{t}</span></div>)}
           </div>
           <div style={{ ...card, borderColor: 'rgba(201,169,110,0.55)', boxShadow: '0 10px 40px rgba(201,169,110,0.12)' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 6 }}>Премиум</div>
+            <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#c9a96e', marginBottom: 6 }}>Именные приглашения</div>
             <h3 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22, color: '#0e1d26', margin: '0 0 16px' }}>Личный кабинет гостей</h3>
             {advanced.map(t => <div key={t} style={item}>{check}<span>{t}</span></div>)}
           </div>
@@ -559,7 +559,7 @@ function RsvpSection() {
 
         <div style={{ textAlign: 'center', marginTop: 28 }} data-animate>
           <Link href="/templates" className={styles.ctaBtn} style={{ display: 'inline-block' }}>
-            Создать приглашение с RSVP
+            Создать приглашение с анкетой
           </Link>
         </div>
       </div>
@@ -585,9 +585,9 @@ function CompareSection() {
     'Приглашение легко потерять или забыть дома',
   ];
   const site = [
-    'От 1 990 ₽ один раз — на всех гостей сразу',
+    '2 450 ₽ один раз — на всех гостей сразу',
     'Одна ссылка — отправьте её в любом мессенджере, по SMS или почте',
-    'RSVP-анкета сама собирает ответы и выбор напитков',
+    'Анкета для гостей сама собирает ответы и выбор напитков',
     'До публикации правьте текст и фото сколько угодно',
     'Карта, программа дня и таймер всегда под рукой у гостя',
   ];
@@ -660,7 +660,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Сколько это стоит? Есть ли подписка?',
-    a: 'Оплата разовая: 1 990 ₽ за «Лайт», 3 990 ₽ за «Базовый», 5 990 ₽ за «Премиум». Никаких подписок и продлений — опубликованный сайт работает бессрочно, а правки бесплатны и в любой момент.',
+    a: 'Оплата разовая: 2 450 ₽ — тариф «Премиум», в нём всё: анкета для гостей, уведомления об ответах, музыка, карта, личный кабинет гостей и свой домен. Никаких подписок и продлений — опубликованный сайт работает бессрочно, а правки бесплатны и в любой момент.',
   },
   {
     q: 'Можно ли попробовать бесплатно?',
@@ -671,8 +671,8 @@ const FAQ_ITEMS = [
     a: 'Да, в любой момент и бесплатно. Зайдите в редактор из личного кабинета, поправьте что нужно и сохраните — гости увидят изменения сразу, ссылка не меняется.',
   },
   {
-    q: 'Что умеет RSVP-анкета?',
-    a: 'Гость отвечает, придёт ли он, и выбирает напитки. Ответы мгновенно приходят вам в Telegram или на email и собираются в личном кабинете. В «Премиуме» — персональные ссылки с именным обращением и статус по каждому гостю.',
+    q: 'Что умеет анкета для гостей?',
+    a: 'Гость отвечает, придёт ли он, и выбирает напитки. Ответы мгновенно приходят вам в Telegram или на email и собираются в личном кабинете. А ещё можно отправить каждому гостю персональную ссылку с именным обращением и видеть ответ по каждому.',
   },
   {
     q: 'Можно ли подключить свой домен?',
@@ -731,7 +731,7 @@ function JsonLd() {
         '@type': 'Product',
         name: 'Сайт-приглашение на свадьбу',
         description:
-          'Электронное свадебное приглашение: готовые шаблоны, RSVP-анкета гостей, уведомления в Telegram и на Email, персональные ссылки и привязка своего домена.',
+          'Электронное свадебное приглашение: готовые шаблоны, анкета для гостей, уведомления в Telegram и на Email, персональные ссылки и привязка своего домена.',
         brand: { '@id': `${SITE_URL}/#organization` },
         offers: PLANS.map((plan) => ({
           '@type': 'Offer',

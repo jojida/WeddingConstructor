@@ -6,11 +6,12 @@ import { isFreeAccount } from '../lib/freeAccounts';
 
 const router = Router();
 
-// Цена — разовый платёж за один сайт (без срока действия).
+// Цена — разовый платёж за один сайт (без срока действия). Продаётся один тариф —
+// «Премиум», в нём всё. «Лайт» и «Базовый» остались только у уже оплаченных сайтов
+// (markPaid их по-прежнему принимает — для платежей, созданных до смены цен).
+// Держать в согласии с PLANS во frontend/src/lib/constants.ts.
 const PLANS = {
-  lite:    { price: 199000, label: 'Лайт' },     // 1 990 руб в копейках
-  basic:   { price: 399000, label: 'Базовый' },  // 3 990 руб в копейках
-  premium: { price: 599000, label: 'Премиум' },
+  premium: { price: 245000, label: 'Премиум' },  // 2 450 руб в копейках
 };
 
 /* ── Промокоды ────────────────────────────────────────────────────────────────
@@ -79,7 +80,7 @@ async function markPaid(inviteId: string, plan: string, paymentId: string) {
 // POST /api/payment/create — создать платёж в ЮKassa, вернуть ссылку на оплату
 router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { inviteId, plan = 'basic', promoCode } = req.body;
+    const { inviteId, plan = 'premium', promoCode } = req.body;
 
     const invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
     if (!invite || invite.userId !== req.userId) {
@@ -94,8 +95,7 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
     /* Тестовый аккаунт владельца: публикуем без кассы. Статус ставим тот же
        ('paid'), что и настоящая оплата, иначе проверка отличалась бы от того,
        что увидит покупатель. Тариф меняется и у уже опубликованного сайта —
-       так можно посмотреть, чем «Лайт» отличается от «Премиума», не заводя
-       каждый раз новое приглашение. */
+       так старый тестовый сайт можно перевести на «Премиум», не заводя новое. */
     const buyer = await prisma.user.findUnique({ where: { id: req.userId! } });
     if (isFreeAccount(buyer?.email)) {
       await prisma.invitation.update({
@@ -212,7 +212,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
     }
 
     const inviteId = payment.metadata?.inviteId;
-    if (inviteId) await markPaid(inviteId, payment.metadata?.plan || 'basic', payment.id);
+    if (inviteId) await markPaid(inviteId, payment.metadata?.plan || 'premium', payment.id);
     return res.status(200).send('OK');
   } catch (e) {
     console.error('Webhook error:', e);

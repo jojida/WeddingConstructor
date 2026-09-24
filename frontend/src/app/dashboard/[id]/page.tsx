@@ -266,14 +266,14 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
 
 // ─── Вкладка «Уведомления» ─────────────────────────────────────────────────
 function NotifyTab({ invite, userEmail, onSaved }: { invite: Invite; userEmail: string; onSaved: () => void }) {
-  // На «Лайте» уведомлений нет — сервер их не отправляет, поэтому и настройки
-  // не показываем, чтобы пара не ждала сообщений, которые не придут.
+  // У сайтов, оплаченных раньше по «Лайту», уведомлений нет — сервер их не
+  // отправляет, поэтому и настройки не показываем, чтобы пара не ждала сообщений.
   if (!hasNotifications(invite.plan)) return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>🔔</div>
-      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Уведомления — с тарифа «Базовый»</h3>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Уведомления — в тарифе «Премиум»</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
-        На «Лайте» ответы гостей видны во вкладке «Ответы». С «Базового» каждый новый ответ
+        На вашем тарифе ответы гостей видны во вкладке «Ответы». В «Премиуме» каждый новый ответ
         приходит сразу в Telegram или на почту — проверять кабинет не нужно.
       </p>
       <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
