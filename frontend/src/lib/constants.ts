@@ -312,7 +312,7 @@ export const PLANS = [
   {
     id: 'premium',
     name: 'Премиум',
-    price: 2450,
+    price: 2490,
     period: 'разовая оплата за один сайт',
     features: [
       'Сайт-приглашение по любому шаблону',
