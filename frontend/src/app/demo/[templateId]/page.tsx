@@ -50,7 +50,7 @@ export default async function DemoPage({ params }: Props) {
     <div style={{ minHeight: '100vh', background: '#ececec', position: 'relative', display: 'flex', justifyContent: 'center' }}>
       {/* Единая ширина превью для всех шаблонов (как у «Скетч» / «Цветущая арка»).
           На десктопе — центрированная колонка, на телефоне — на всю ширину экрана. */}
-      <div style={{ width: '100%', maxWidth: 500, boxShadow: '0 10px 50px rgba(60,48,32,0.18)' }}>
+      <div style={{ width: '100%', maxWidth: 500, isolation: 'isolate', zIndex: 0, boxShadow: '0 10px 50px rgba(60,48,32,0.18)' }}>
       <TemplatePreview
         data={{
           ...SAMPLE_DATA,

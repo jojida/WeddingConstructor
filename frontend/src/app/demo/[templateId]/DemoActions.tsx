@@ -9,6 +9,8 @@ export default function DemoActions({ templateId }: { templateId: string }) {
       bottom: '32px',
       left: '32px',
       display: 'flex',
+      flexWrap: 'wrap',
+      maxWidth: 'calc(100vw - 64px)',
       gap: '12px',
       zIndex: 100,
       background: 'rgba(0,0,0,0.5)',
@@ -18,8 +20,12 @@ export default function DemoActions({ templateId }: { templateId: string }) {
       border: '1px solid rgba(255,255,255,0.1)'
     }}>
       <a 
-        href="#"
-        onClick={(e) => { e.preventDefault(); window.close(); }}
+        href="/templates"
+        onClick={(e) => {
+          if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+          // If the browser refuses to close this tab, the link returns to the catalogue.
+          window.close();
+        }}
         style={{
           padding: '12px 24px',
           borderRadius: '50px',
