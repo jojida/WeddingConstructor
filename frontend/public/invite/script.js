@@ -292,6 +292,7 @@
     setImg('photo2', d.photo2);
     setImg('photo3', d.photo3);
     setImg('photo4', d.photo4);
+    if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     rebuildStory(d.story);
     applySchedule(d.schedule);

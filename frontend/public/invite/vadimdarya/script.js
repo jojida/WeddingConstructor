@@ -149,10 +149,21 @@
     if (d.dressCodePhoto) {
       var slot = document.getElementById('dc-custom-photo');
       if (slot) {
-        slot.innerHTML = '<img src="' + escapeHtml(imageUrl(d.dressCodePhoto)) + '" alt="Образ" class="dc-custom-img" />';
+        // Картинку пересоздаём только при смене фото: иначе каждая правка в
+        // редакторе заново грузила бы её и сбрасывала кадрирование
+        var dcUrl = imageUrl(d.dressCodePhoto);
+        var dcImg = slot.querySelector('img.dc-custom-img');
+        if (!dcImg) {
+          slot.innerHTML = '<img alt="Образ" class="dc-custom-img" data-edit="dressCodePhoto" />';
+          dcImg = slot.querySelector('img');
+        }
+        if (dcImg.getAttribute('src') !== dcUrl) dcImg.setAttribute('src', dcUrl);
         slot.removeAttribute('hidden');
       }
     }
+
+    // Кадрирование фото в рамках (обложка и образ)
+    if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);
 
     // Перезапуск таймера под новую дату
     restartCountdown();

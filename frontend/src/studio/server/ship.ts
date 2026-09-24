@@ -49,7 +49,7 @@ async function repoRoot(): Promise<string | null> {
 /**
  * Что уезжает на сервер вместе с шаблоном.
  *
- * Первые четыре — сам шаблон и общий рантайм, который его страница грузит.
+ * Первые пять — сам шаблон и общий рантайм, который его страница грузит.
  * Остальные — код сайта, который показывает студийные шаблоны: без
  * studioTemplates.ts сборка падает на первом же импорте в constants.ts.
  */
@@ -58,6 +58,7 @@ const shippedPaths = (slug: string): string[] => [
   'frontend/public/invite/_studio-registry.json',
   'frontend/public/invite/assets/studio-runtime.js',
   'frontend/public/invite/assets/studio-blocks.css',
+  'frontend/public/invite/assets/photo-frame.js',
   'frontend/src/lib/studio-templates.generated.ts',
   'frontend/src/lib/studioTemplates.ts',
   'frontend/src/components/StudioTemplate.tsx',

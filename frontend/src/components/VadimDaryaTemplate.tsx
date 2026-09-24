@@ -75,6 +75,8 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
           musicUrl: dataRef.current.musicUrl,
           schedule: dataRef.current.schedule,
           dressCodeColors: dataRef.current.dressCodeColors,
+          // Кадрирование фото в рамках (у остальных мостов приходит в ...customData)
+          photoFrames: dataRef.current.customData?.photoFrames,
         },
       },
       window.location.origin

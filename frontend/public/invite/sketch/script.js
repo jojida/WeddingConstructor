@@ -318,6 +318,7 @@
     setImg('dressMan1', d.dressMan1);
     setImg('dressMan2', d.dressMan2);
     setImg('finalPhoto', d.finalPhoto);
+    if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     applySchedule(d.schedule);
     rebuildDrinks(d.drinks);

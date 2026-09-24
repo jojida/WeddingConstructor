@@ -459,6 +459,7 @@
     setImg('dressPhoto2', d.dressPhoto2);
     setImg('dressMan1', d.dressMan1);
     setImg('dressMan2', d.dressMan2);
+    if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
     rebuildSwatches(d.dressCodeColors);
     if (Array.isArray(d.schedule) && d.schedule.length) applySchedule(d.schedule);
     rebuildDrinks(d.drinks);

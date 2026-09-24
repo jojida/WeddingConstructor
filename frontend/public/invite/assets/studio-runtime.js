@@ -204,7 +204,7 @@
       colors.map(function (c) {
         return '<span class="wcb-dc__swatch" style="background:' + esc(c) + '"></span>';
       }).join('') + '</div>' +
-      (photo ? '<img class="wcb-dc__photo" src="' + esc(imageUrl(photo)) + '" alt="Образ" />' : '') +
+      (photo ? '<img class="wcb-dc__photo" data-edit="dressCodePhoto" src="' + esc(imageUrl(photo)) + '" alt="Образ" />' : '') +
       '</div>';
   }
 
@@ -341,6 +341,8 @@
     if (window.WCMusic && d.musicUrl !== undefined) WCMusic.set(imageUrl(d.musicUrl));
 
     renderBlocks();
+    // Кадрирование фото в рамках — после renderBlocks: блоки пересоздают свои <img>
+    if (window.WCPhotoFrame) WCPhotoFrame.apply(DATA.photoFrames);
     tickCountdown();
   }
 

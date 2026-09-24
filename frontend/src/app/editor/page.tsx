@@ -10,6 +10,7 @@ import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLE
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import AuthModal from '@/components/AuthModal';
+import PhotoFrameEditor, { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import styles from './page.module.css';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -260,6 +261,19 @@ function EditorContent() {
     reachGoal(GOAL.editorOpen);
   }, []);
 
+  // Рамки фото в превью: пропорции и исходное положение (шлёт photo-frame.js
+  // шаблона) — по ним рисуется окно кадрирования у каждого поля с фото.
+  const [photoSlots, setPhotoSlots] = useState<Record<string, PhotoSlot>>({});
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin) return;
+      const m = e.data;
+      if (m && m.type === 'wc:photo-slots' && m.slots && typeof m.slots === 'object') setPhotoSlots(m.slots);
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
   // ── Load draft ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (step !== 'editor') return;
@@ -376,6 +390,15 @@ function EditorContent() {
   // Универсальная запись поля верхнего уровня по строковому ключу (для движка схемы)
   const setAny = (key: string, value: any) =>
     setData(prev => ({ ...prev, [key]: value }));
+
+  // Кадр фото в рамке: customData.photoFrames[id поля] = { x, y, z }; null — как в шаблоне
+  const setPhotoFrame = (id: string, frame: PhotoFrame | null) =>
+    setData(prev => {
+      const cd = prev.customData || {};
+      const frames = { ...(cd.photoFrames || {}) };
+      if (frame) frames[id] = frame; else delete frames[id];
+      return { ...prev, customData: { ...cd, photoFrames: frames } };
+    });
 
   // Загрузка картинки, возвращает URL (для ImagePicker)
   const uploadImage = async (file: File): Promise<string | null> => {
@@ -582,6 +605,9 @@ function EditorContent() {
                       apiBase={apiBase}
                       uploadImage={uploadImage}
                       uploadAudio={uploadAudio}
+                      frame={(data.customData?.photoFrames || {})[f.id] ?? null}
+                      slot={photoSlots[f.id]}
+                      onFrame={fr => setPhotoFrame(f.id, fr)}
                     />
                   ))}
                 </div>
@@ -758,13 +784,16 @@ function CharCounter({ value, max }: { value: string; max: number }) {
   );
 }
 
-function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, uploadAudio }: {
+function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, uploadAudio, frame, slot, onFrame }: {
   field: TemplateField;
   value: any;
   onChange: (v: any) => void;
   apiBase: string;
   uploadImage: (f: File) => Promise<string | null>;
   uploadAudio: (f: File) => Promise<string | null>;
+  frame: PhotoFrame | null;
+  slot?: PhotoSlot;
+  onFrame: (f: PhotoFrame | null) => void;
 }) {
   // Лимиты символов, чтобы длинный текст не ломал вёрстку шаблона.
   // Явный field.maxLength имеет приоритет; ссылки (URL) без лимита.
@@ -791,7 +820,13 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, upl
     case 'image':
       return (
         <Field label={field.label}>
-          <ImagePicker value={value || ''} onChange={onChange} apiBase={apiBase} uploadImage={uploadImage} />
+          <ImagePicker
+            value={value || ''}
+            // Новое фото — старый кадр к нему не подходит, начинаем с положения по умолчанию
+            onChange={v => { if (v !== (value || '') && frame) onFrame(null); onChange(v); }}
+            apiBase={apiBase} uploadImage={uploadImage}
+            frame={frame} slot={slot} onFrame={onFrame}
+          />
         </Field>
       );
     case 'audio':
@@ -862,15 +897,20 @@ function AudioPicker({ value, onChange, apiBase, uploadAudio, hint }: {
   );
 }
 
-function ImagePicker({ value, onChange, apiBase, uploadImage }: {
+function ImagePicker({ value, onChange, apiBase, uploadImage, frame, slot, onFrame }: {
   value: string; onChange: (v: string) => void; apiBase: string;
   uploadImage: (f: File) => Promise<string | null>;
+  frame?: PhotoFrame | null; slot?: PhotoSlot; onFrame?: (f: PhotoFrame | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [showGallery, setShowGallery] = useState(false);
+  const [showFrame, setShowFrame] = useState(false);
   const resolve = (url: string) => !url ? ''
     : (/^https?:\/\//.test(url) || url.startsWith('data:') || url.startsWith('/invite/')) ? url
       : url.startsWith('/') ? apiBase + url : url;
+  // Кадрировать можно и фото из дизайна шаблона, пока пара не загрузила своё
+  const frameSrc = value ? resolve(value) : (slot?.src || '');
+  const canFrame = !!onFrame && !!frameSrc;
   return (
     <div>
       <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }}
@@ -891,18 +931,27 @@ function ImagePicker({ value, onChange, apiBase, uploadImage }: {
         )}
         {value && <div className={styles.dropzoneOverlay}>Изменить</div>}
       </div>
-      <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
         <button type="button" onClick={() => setShowGallery(true)}
-          style={{ flex: 1, padding: 7, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
+          style={{ flex: 1, whiteSpace: 'nowrap', padding: 7, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
           🖼 Из галереи
         </button>
+        {canFrame && (
+          <button type="button" onClick={() => setShowFrame(s => !s)} aria-expanded={showFrame}
+            style={{ flex: 1, whiteSpace: 'nowrap', padding: 7, border: showFrame || frame ? '1px solid #685d4a' : '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: showFrame ? '#efe3d2' : 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
+            ✥ Кадрировать
+          </button>
+        )}
         {value && (
           <button type="button" onClick={() => onChange('')}
-            style={{ flex: 1, padding: 7, border: '1px solid rgba(231,76,60,0.3)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#e74c3c', cursor: 'pointer' }}>
+            style={{ flex: 1, whiteSpace: 'nowrap', padding: 7, border: '1px solid rgba(231,76,60,0.3)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#e74c3c', cursor: 'pointer' }}>
             Удалить
           </button>
         )}
       </div>
+      {showFrame && canFrame && onFrame && (
+        <PhotoFrameEditor src={frameSrc} frame={frame ?? null} slot={slot} onChange={onFrame} />
+      )}
       {showGallery && <GalleryModal onPick={u => { onChange(u); setShowGallery(false); }} onClose={() => setShowGallery(false)} />}
     </div>
   );

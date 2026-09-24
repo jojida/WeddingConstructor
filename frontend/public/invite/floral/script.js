@@ -256,6 +256,7 @@
     setImg('polaroid1', d.polaroid1);
     setImg('polaroid2', d.polaroid2);
     setImg('locationPhoto', d.locationPhoto);
+    if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     rebuildSwatches(d.dressCodeColors);
     applySchedule(d.schedule);

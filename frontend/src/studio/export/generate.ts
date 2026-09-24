@@ -561,6 +561,7 @@ ${panels.join('\n\n')}
   </main>
 
   <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
   <script src="../assets/studio-runtime.js"></script>
   <script src="script.js"></script>
 </body>

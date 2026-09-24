@@ -447,6 +447,7 @@
     setImg('dressMan2', d.dressMan2);
     setImg('dressMan3', d.dressMan3);
     setImg('finalPhoto', d.finalPhoto);
+    if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     rebuildPalette(d.dressCodeColors);
     rebuildStory(d.story);
