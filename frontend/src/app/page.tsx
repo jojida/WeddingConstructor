@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateCustomDefaults } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PreviewScale from '@/components/PreviewScale';
@@ -104,7 +104,10 @@ function heroMediterraneanData() {
     galleryPhotos: [],
     mapLink: '',
     schedule: defs.schedule ?? [],
-    customData: templateCustomDefaults('mediterranean', weddingDate),
+    customData: {
+      ...templateCustomDefaults('mediterranean', weddingDate),
+      mapPoint: demoMapPoint(defs.venueAddress),
+    },
   };
 }
 

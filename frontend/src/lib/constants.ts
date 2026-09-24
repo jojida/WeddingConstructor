@@ -53,6 +53,18 @@ export function templateCustomDefaults(templateId: string, weddingDate?: string)
   return custom;
 }
 
+/* Координаты адресов демо-данных для карты (venue-map.js). У пар их находит
+   редактор, у демо и превью редактора нет — без них виджет Яндекса в маленьком
+   окне только центрирует карту, без метки. */
+const DEMO_MAP_POINTS: Record<string, { lat: number; lon: number }> = {
+  'Москва, ул. Крымский Вал, 9': { lat: 55.73144, lon: 37.60342 },   // главный вход Парка Горького
+  'г. Сочи, ул. Приморская, 15': { lat: 43.57367, lon: 39.72640 },
+};
+export function demoMapPoint(address?: string): { q: string; lat: number; lon: number } | undefined {
+  const p = address ? DEMO_MAP_POINTS[address] : undefined;
+  return p && address ? { q: address, ...p } : undefined;
+}
+
 const HANDMADE_TEMPLATES = [
   {
     id: 'calla',
