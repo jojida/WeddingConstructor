@@ -60,6 +60,9 @@ body {
 .intro-wrap {
   position: fixed;
   inset: 0;
+  /* Только в колонке приглашения (как .invitation), а не на весь экран */
+  max-width: 520px;
+  margin: 0 auto;
   z-index: 9999;
   background: #0a1522;
   display: flex;
