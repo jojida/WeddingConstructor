@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 
 export default function DemoActions({ templateId }: { templateId: string }) {
   return (
@@ -19,7 +20,7 @@ export default function DemoActions({ templateId }: { templateId: string }) {
       backdropFilter: 'blur(12px)',
       border: '1px solid rgba(255,255,255,0.1)'
     }}>
-      <a 
+      <Link
         href="/templates"
         onClick={(e) => {
           if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -40,7 +41,7 @@ export default function DemoActions({ templateId }: { templateId: string }) {
         }}
       >
         Закрыть
-      </a>
+      </Link>
       <a
         href={`/editor?template=${templateId}`}
         style={{
