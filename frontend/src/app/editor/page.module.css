@@ -76,7 +76,6 @@
   border-radius: 6px; color: #4b5563; display: flex; align-items: center; justify-content: center;
 }
 .zoomBtn:hover { background: #f3f4f6; color: #1a1a1a; }
-.zoomDivider { width: 1px; height: 16px; background: #e5e7eb; margin: 0 4px; }
 
 /* Phone Mockup */
 .phoneContainer { position: relative; z-index: 10; }
@@ -137,17 +136,6 @@
 }
 .finishBtn:hover { background: #7a5c56; }
 
-/* ─── RIGHT ICONS PANEL ─────────────────────────────────────────────────────── */
-.rightIconsPanel {
-  width: 60px; background: #fbfbfb; border-left: 1px solid #e5e7eb;
-  display: flex; flex-direction: column; align-items: center; padding: 24px 0; gap: 24px;
-  order: 3; flex-shrink: 0;
-}
-.rightIconBtn {
-  background: none; border: none; color: #9ca3af; cursor: pointer;
-  transition: color 0.2s; display: flex; align-items: center; justify-content: center;
-}
-.rightIconBtn:hover { color: #1a1a1a; }
 
 /* ─── CUSTOM EDITOR COMPONENTS (Typography, Colors, etc) ────────────────────── */
 
@@ -357,6 +345,4 @@
   .sidebarBranding { display: none; }
   .sidebarContent { flex: none; overflow: visible; padding-top: 0; }
   .sidebarFooter { padding-top: 20px; }
-
-  .rightIconsPanel { display: none; }
 }

@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
@@ -16,6 +16,12 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const { setAuth } = useAuthStore();
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,8 +136,11 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
           </form>
         )}
 
+        {/* Ссылки — в новой вкладке: модалка открыта поверх редактора с несохранёнными правками */}
         <p className={styles.privacy}>
-          Нажимая «Войти», вы соглашаетесь с условиями использования
+          Нажимая «{step === 'email' ? 'Получить код' : 'Войти'}», вы соглашаетесь с{' '}
+          <a href="/oferta" target="_blank" rel="noopener" style={{ textDecoration: 'underline', color: 'inherit' }}>условиями оферты</a> и{' '}
+          <a href="/privacy" target="_blank" rel="noopener" style={{ textDecoration: 'underline', color: 'inherit' }}>политикой конфиденциальности</a>
         </p>
       </div>
     </div>

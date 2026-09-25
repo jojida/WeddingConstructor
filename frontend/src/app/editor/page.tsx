@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { Save, ArrowLeft, Eye, Share2, History, Layers, MessageSquare, Copy, Type, Sparkles, LayoutGrid, ZoomOut, ZoomIn, Maximize } from 'lucide-react';
+import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, TemplateField, ScheduleItem, DrinkOption, templateCustomDefaults } from '@/lib/constants';
@@ -87,6 +87,8 @@ const PRESET_SCHEDULE = [
 ];
 
 // ─── Setup Step ───────────────────────────────────────────────────────────────
+type SetupKey = 'groomName' | 'brideName' | 'weddingDate' | 'weddingTime';
+
 function SetupStep({ templateId, onComplete, initialData }: {
   templateId: string;
   onComplete: (d: Partial<InviteData>) => void;
@@ -100,6 +102,10 @@ function SetupStep({ templateId, onComplete, initialData }: {
   const [venue,       setVenue]       = useState(initialData?.venue || '');
   const [venueAddress,setVenueAddress]= useState(initialData?.venueAddress || '');
   const [mapLink,     setMapLink]     = useState(initialData?.mapLink || '');
+  // Ошибки показываем у самих полей: тост в углу по одной ошибке за раз
+  // заставлял угадывать, какое поле не так.
+  const [errors, setErrors] = useState<Partial<Record<SetupKey, string>>>({});
+  const clearError = (k: SetupKey) => setErrors(prev => (prev[k] ? { ...prev, [k]: undefined } : prev));
 
   // Границы даты: свадьба не может быть в прошлом и не дальше 3 лет вперёд.
   const fmtDate = (dt: Date) => `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
@@ -108,25 +114,23 @@ function SetupStep({ templateId, onComplete, initialData }: {
   const maxDateStr = fmtDate(maxDateObj);
 
   const handleSubmit = () => {
-    // Все поля обязательны, кроме ссылки на карту.
-    const required: [string, string][] = [
-      [groomName.trim(),    'Введите имя жениха'],
-      [brideName.trim(),    'Введите имя невесты'],
-      [weddingDate,         'Укажите дату свадьбы'],
-      [weddingTime,         'Укажите время начала'],
-      [venue.trim(),        'Укажите название места'],
-      [venueAddress.trim(), 'Укажите адрес'],
-    ];
-    for (const [val, msg] of required) {
-      if (!val) { toast.error(msg); return; }
-    }
+    // Обязательны имена, дата и время. Место и адрес можно указать позже:
+    // пока их нет, в приглашении пример из шаблона, а перед оплатой редактор
+    // попросит их заполнить (handleShare).
+    const next: Partial<Record<SetupKey, string>> = {};
+    if (!groomName.trim()) next.groomName = 'Введите имя жениха';
+    if (!brideName.trim()) next.brideName = 'Введите имя невесты';
     // Дата должна быть корректной: не в прошлом и не слишком далеко.
     // Сравнение ISO-строк (YYYY-MM-DD) хронологично и не зависит от таймзоны.
-    if (Number.isNaN(new Date(weddingDate + 'T00:00:00').getTime())) {
-      toast.error('Неверная дата свадьбы'); return;
-    }
-    if (weddingDate < todayStr) { toast.error('Дата свадьбы не может быть в прошлом'); return; }
-    if (weddingDate > maxDateStr) { toast.error('Дата свадьбы слишком далеко — проверьте год'); return; }
+    if (!weddingDate) next.weddingDate = 'Укажите дату свадьбы';
+    else if (Number.isNaN(new Date(weddingDate + 'T00:00:00').getTime())) next.weddingDate = 'Неверная дата свадьбы';
+    else if (weddingDate < todayStr) next.weddingDate = 'Дата свадьбы не может быть в прошлом';
+    else if (weddingDate > maxDateStr) next.weddingDate = 'Дата слишком далеко — проверьте год';
+    if (!weddingTime) next.weddingTime = 'Укажите время начала';
+
+    setErrors(next);
+    const firstInvalid = (Object.keys(next) as SetupKey[])[0];
+    if (firstInvalid) { document.getElementById(`setup-${firstInvalid}`)?.focus(); return; }
 
     onComplete({
       groomName: groomName.trim(),
@@ -161,40 +165,46 @@ function SetupStep({ templateId, onComplete, initialData }: {
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {/* Names */}
+            {/* Names. Плейсхолдеры с «Например» — голые «Вадим»/«Дарья» принимали за уже введённые имена */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <SetupField label="Имя жениха" required>
-                <input className="input-field" placeholder="Вадим" value={groomName} maxLength={24}
-                  onChange={e => setGroomName(e.target.value)}
+              <SetupField label="Имя жениха" htmlFor="setup-groomName" required error={errors.groomName}>
+                <input id="setup-groomName" className="input-field" placeholder="Например, Вадим" value={groomName} maxLength={24}
+                  aria-invalid={!!errors.groomName} style={errors.groomName ? SETUP_INVALID : undefined}
+                  onChange={e => { setGroomName(e.target.value); clearError('groomName'); }}
                   onKeyDown={e => e.key === 'Enter' && handleSubmit()} autoFocus />
               </SetupField>
-              <SetupField label="Имя невесты" required>
-                <input className="input-field" placeholder="Дарья" value={brideName} maxLength={24}
-                  onChange={e => setBrideName(e.target.value)}
+              <SetupField label="Имя невесты" htmlFor="setup-brideName" required error={errors.brideName}>
+                <input id="setup-brideName" className="input-field" placeholder="Например, Дарья" value={brideName} maxLength={24}
+                  aria-invalid={!!errors.brideName} style={errors.brideName ? SETUP_INVALID : undefined}
+                  onChange={e => { setBrideName(e.target.value); clearError('brideName'); }}
                   onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
               </SetupField>
             </div>
 
             {/* Date and Time */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <SetupField label="Дата свадьбы" required>
-                <input type="date" className="input-field" value={weddingDate} min={todayStr} max={maxDateStr}
-                  onChange={e => setWeddingDate(e.target.value)} />
+              <SetupField label="Дата свадьбы" htmlFor="setup-weddingDate" required error={errors.weddingDate}>
+                <input id="setup-weddingDate" type="date" className="input-field" value={weddingDate} min={todayStr} max={maxDateStr}
+                  aria-invalid={!!errors.weddingDate} style={errors.weddingDate ? SETUP_INVALID : undefined}
+                  onChange={e => { setWeddingDate(e.target.value); clearError('weddingDate'); }} />
               </SetupField>
-              <SetupField label="Время начала" required>
-                <input type="time" className="input-field" value={weddingTime} onChange={e => setWeddingTime(e.target.value)} />
+              <SetupField label="Время начала" htmlFor="setup-weddingTime" required error={errors.weddingTime}>
+                <input id="setup-weddingTime" type="time" className="input-field" value={weddingTime}
+                  aria-invalid={!!errors.weddingTime} style={errors.weddingTime ? SETUP_INVALID : undefined}
+                  onChange={e => { setWeddingTime(e.target.value); clearError('weddingTime'); }} />
               </SetupField>
             </div>
 
-            {/* Venue */}
-            <SetupField label="Название места" required>
-              <input className="input-field" placeholder="«Артурс Спа Отель»" value={venue} maxLength={50} onChange={e => setVenue(e.target.value)} />
+            {/* Venue — можно позже: многие пары ещё выбирают площадку */}
+            <SetupField label="Название места" htmlFor="setup-venue" note="можно позже">
+              <input id="setup-venue" className="input-field" placeholder="Например, «Артурс Спа Отель»" value={venue} maxLength={50} onChange={e => setVenue(e.target.value)} />
             </SetupField>
-            <SetupField label="Адрес" required>
-              <input className="input-field" placeholder="Московская обл., Мытищи..." value={venueAddress} maxLength={90} onChange={e => setVenueAddress(e.target.value)} />
+            <SetupField label="Адрес" htmlFor="setup-venueAddress" note="можно позже"
+              hint="Пока места нет, в приглашении будет пример из шаблона — поменяете в редакторе.">
+              <input id="setup-venueAddress" className="input-field" placeholder="Например, Московская обл., Мытищи…" value={venueAddress} maxLength={90} onChange={e => setVenueAddress(e.target.value)} />
             </SetupField>
-            <SetupField label="Ссылка на карту (необязательно)">
-              <input className="input-field" placeholder="https://yandex.ru/maps/..." value={mapLink} onChange={e => setMapLink(e.target.value)} />
+            <SetupField label="Ссылка на карту" htmlFor="setup-mapLink" note="необязательно">
+              <input id="setup-mapLink" className="input-field" placeholder="https://yandex.ru/maps/..." value={mapLink} onChange={e => setMapLink(e.target.value)} />
             </SetupField>
           </div>
 
@@ -208,13 +218,25 @@ function SetupStep({ templateId, onComplete, initialData }: {
   );
 }
 
-function SetupField({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+const SETUP_INVALID: React.CSSProperties = { borderColor: '#c0392b', boxShadow: '0 0 0 3px rgba(192,57,43,0.12)' };
+
+function SetupField({ label, htmlFor, required, note, hint, error, children }: {
+  label: string; htmlFor?: string; required?: boolean;
+  note?: string;   // приписка к подписи: «можно позже», «необязательно»
+  hint?: string;   // пояснение под полем
+  error?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div>
-      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7d766c', marginBottom: 7, textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-inter)' }}>
+      <label htmlFor={htmlFor} style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7d766c', marginBottom: 7, textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-inter)' }}>
         {label}{required && <span style={{ color: '#685d4a', marginLeft: 3 }}>*</span>}
+        {note && <span style={{ fontWeight: 500, textTransform: 'none', letterSpacing: 0, color: '#a39b8e' }}> · {note}</span>}
       </label>
       {children}
+      {error
+        ? <div role="alert" style={{ marginTop: 6, fontSize: 12, color: '#c0392b', fontFamily: 'var(--font-inter)' }}>{error}</div>
+        : hint && <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.45, color: '#8a8378', fontFamily: 'var(--font-inter)' }}>{hint}</div>}
     </div>
   );
 }
@@ -229,6 +251,8 @@ function EditorContent() {
   const idFromUrl         = searchParams.get('id');
 
   const [step,          setStep]          = useState<'setup' | 'editor'>(idFromUrl ? 'editor' : 'setup');
+  // Пока не заглянули в гостевой черновик, не показываем ни анкету, ни редактор
+  const [draftChecked,  setDraftChecked]  = useState(!!idFromUrl);
   const [activeSection, setActiveSection] = useState<string>('couple');
   const [data,          setData]          = useState<InviteData>({ ...EMPTY, templateId: templateIdFromUrl });
   const [saving,        setSaving]        = useState(false);
@@ -304,6 +328,28 @@ function EditorContent() {
     return () => { clearTimeout(timer); ctrl.abort(); };
   }, [step, mapAddress, mapPointFor]);
 
+  // ── Возврат к черновику без аккаунта ────────────────────────────────────────
+  // Черновик гостя живёт в localStorage, но раньше при возврате снова
+  // открывалась пустая анкета «Расскажите о вашей свадьбе» — казалось, что
+  // вся работа пропала. Есть имена и дата — сразу в редактор (данные подтянет
+  // «Load draft» ниже, шаблон берётся из URL).
+  // Решаем в эффекте, а не в useState(): в dev редактор рендерится и на
+  // сервере, где localStorage нет, — иначе расхождение при гидратации.
+  // До решения показываем спиннер (draftChecked), так что лишнего кадра нет.
+  useEffect(() => {
+    if (draftChecked) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(GUEST_DRAFT_KEY) || 'null');
+      if (saved && saved.groomName && saved.brideName && saved.weddingDate) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- разовое решение после монтирования, см. выше
+        setStep('editor');
+        toast.success('Черновик восстановлен', { id: 'draft-restored' });
+      }
+    } catch {}
+    setDraftChecked(true);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Load draft ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (step !== 'editor') return;
@@ -370,6 +416,12 @@ function EditorContent() {
         wasOther ? (def ?? cur) : (cur && cur.trim() ? cur : (def ?? cur));
       const keepArr = <T,>(cur: T[], def?: T[]) =>
         wasOther ? (def ?? cur) : (cur && cur.length ? cur : (def ?? cur));
+      // Место и адрес — данные пары, а не дизайна: при смене шаблона введённые
+      // парой переносим, а демо-значение прошлого шаблона меняем на демо нового.
+      // Раньше название места всегда затиралось примером нового шаблона.
+      const oldDefs = wasOther ? TEMPLATE_DEFAULTS[cd.__seededTemplate] : undefined;
+      const ownOr = (cur: string, oldDef: string | undefined, def: string | undefined) =>
+        (cur && cur.trim() && !(wasOther && cur === oldDef)) ? cur : (def ?? cur);
       const seededCustom = {
         // Дедлайн RSVP считается от даты свадьбы пары, а не берётся зашитой датой.
         ...templateCustomDefaults(prev.templateId, prev.weddingDate),
@@ -380,8 +432,8 @@ function EditorContent() {
         ...prev,
         inviteText: (!wasOther && prev.inviteText && prev.inviteText !== EMPTY.inviteText)
           ? prev.inviteText : (defs.inviteText ?? prev.inviteText),
-        venue: wasOther ? (defs.venue ?? prev.venue) : (prev.venue || (defs.venue ?? prev.venue)),
-        venueAddress: prev.venueAddress || (defs.venueAddress ?? prev.venueAddress),
+        venue: ownOr(prev.venue, oldDefs?.venue, defs.venue),
+        venueAddress: ownOr(prev.venueAddress, oldDefs?.venueAddress, defs.venueAddress),
         story: keepStr(prev.story, defs.story),
         schedule: keepArr(prev.schedule, defs.schedule),
         dressCodeColors: keepArr(prev.dressCodeColors, defs.dressCodeColors),
@@ -475,6 +527,19 @@ function EditorContent() {
   const handleShare = async () => {
     if (isPublished) { router.push('/dashboard'); return; }
     if (!data.brideName && !data.groomName) { toast.error('Введите имена'); return; }
+    // Место и адрес на старте можно пропустить — тогда в приглашении пример из
+    // шаблона. Перед оплатой не даём уйти гостям с пустым или чужим адресом.
+    const venue = (data.venue || '').trim();
+    const address = (data.venueAddress || '').trim();
+    if (!venue || !address) {
+      toast.error('Укажите место и адрес свадьбы — без них гости не найдут, куда ехать');
+      return;
+    }
+    const defs = TEMPLATE_DEFAULTS[data.templateId];
+    if ((defs?.venue && venue === defs.venue) || (defs?.venueAddress && address === defs.venueAddress)) {
+      // Не блокируем: вдруг площадка пары и правда совпала с примером
+      if (!window.confirm(`Место и адрес сейчас как в примере шаблона:\n«${venue}», ${address}\n\nВсё верно?`)) return;
+    }
     if (!user) { setShowAuthModal(true); return; }
     if (await saveToServer()) router.push(`/payment?id=${data.id}`);
   };
@@ -514,6 +579,14 @@ function EditorContent() {
     setData(prev => ({ ...prev, ...setupData }));
     setStep('editor');
   };
+
+  if (!draftChecked) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ width: 36, height: 36, border: '2px solid rgba(206,197,186,0.4)', borderTopColor: '#685d4a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      </div>
+    );
+  }
 
   if (step === 'setup') {
     return <SetupStep templateId={templateIdFromUrl} onComplete={handleSetupComplete} initialData={data} />;
@@ -587,12 +660,14 @@ function EditorContent() {
 
           {/* ── CANVAS (LEFT) ─────────────────────────────────────────────── */}
           <main className={styles.canvas}>
+            {/* Была панель зума без обработчиков — нажатия ничего не делали.
+                Оставили одну рабочую кнопку: полноэкранный предпросмотр. */}
             <div className={styles.canvasControls}>
               <div className={styles.zoomGroup}>
-                <button className={styles.zoomBtn}><ZoomOut size={16} /></button>
-                <button className={styles.zoomBtn}><ZoomIn size={16} /></button>
-                <div className={styles.zoomDivider} />
-                <button className={styles.zoomBtn}><Maximize size={16} /></button>
+                <button className={styles.zoomBtn} onClick={() => setShowPreview(true)}
+                  title="Открыть во весь экран" aria-label="Открыть во весь экран">
+                  <Maximize size={16} />
+                </button>
               </div>
             </div>
             {/* На телефоне превью не ловит касания (иначе свайп листал бы
@@ -780,13 +855,6 @@ function EditorContent() {
                 ЗАВЕРШИТЬ ДИЗАЙН ✓
               </button>
             </div>
-          </aside>
-
-          {/* ── RIGHT ICONS PANEL ───────────────────────────────────────── */}
-          <aside className={styles.rightIconsPanel}>
-            <button className={styles.rightIconBtn} title="История"><History size={20} /></button>
-            <button className={styles.rightIconBtn} title="Слои"><Layers size={20} /></button>
-            <button className={styles.rightIconBtn} title="Комментарии"><MessageSquare size={20} /></button>
           </aside>
         </div>
       </div>
