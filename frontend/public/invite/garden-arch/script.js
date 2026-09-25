@@ -494,7 +494,10 @@
         var btn = form.querySelector('button[type="submit"]'); if (btn) btn.disabled = true;
         fetch((STATE.apiBase || '') + '/api/rsvp/' + STATE.slug, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ guestName: guestName, attending: attending, drinkChoice: drinks.join(','), wishes: '', guestToken: STATE.guestToken || '', guestsCount: window.WCRsvpCount ? WCRsvpCount.get(form) : 1 })
+          body: JSON.stringify(Object.assign(
+            { guestName: guestName, attending: attending, drinkChoice: drinks.join(','), wishes: '', guestToken: STATE.guestToken || '', guestsCount: window.WCRsvpCount ? WCRsvpCount.get(form) : 1 },
+            // «Пока не знаю», дети и доп. вопросы — общий модуль ../assets/rsvp-count.js
+            window.WCRsvp ? WCRsvp.payload(form) : {}))
         }).then(done).catch(done);
       } else { done(); }
     });

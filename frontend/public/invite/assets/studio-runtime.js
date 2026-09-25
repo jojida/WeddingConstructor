@@ -271,14 +271,15 @@
       fetch((STATE.apiBase || '') + '/api/rsvp/' + STATE.slug, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        body: JSON.stringify(Object.assign({
           guestName: guestName,
           attending: attending,
           drinkChoice: chosen.join(','),
           wishes: '',
           guestToken: STATE.guestToken || '',
           guestsCount: window.WCRsvpCount ? WCRsvpCount.get(form) : 1
-        })
+        // «Пока не знаю», дети и доп. вопросы — общий модуль ../assets/rsvp-count.js
+        }, window.WCRsvp ? WCRsvp.payload(form) : {}))
       }).then(done).catch(done);
     });
   }

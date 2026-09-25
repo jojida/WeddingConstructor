@@ -10,6 +10,9 @@ import prisma from './prisma';
    ничего не станет менять, определения совпадают со schema.prisma. */
 const COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: 'GuestResponse', column: 'guestsCount', ddl: '"guestsCount" INTEGER NOT NULL DEFAULT 1' },
+  { table: 'GuestResponse', column: 'attendance', ddl: `"attendance" TEXT NOT NULL DEFAULT ''` },
+  { table: 'GuestResponse', column: 'childrenCount', ddl: '"childrenCount" INTEGER NOT NULL DEFAULT 0' },
+  { table: 'GuestResponse', column: 'answers', ddl: `"answers" TEXT NOT NULL DEFAULT '[]'` },
 ];
 
 export async function ensureSchema(): Promise<void> {

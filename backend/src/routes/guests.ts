@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isAdvanced, isSalutation, computeGreeting, isPaid } from '../lib/plans';
+import { attendanceOf, parseAnswers } from '../lib/rsvpDetails';
 
 const router = Router();
 
@@ -25,14 +26,16 @@ router.get('/resolve/:token', async (req: Request, res: Response) => {
   const invitation = await prisma.invitation.findUnique({ where: { id: guest.invitationId } });
   if (!invitation || !isPaid(invitation.status)) return res.status(404).json({ error: 'Гость не найден' });
   let attending: boolean | null = null;
+  let attendance: string | null = null;
   if (guest.responseId) {
     const r = await prisma.guestResponse.findUnique({ where: { id: guest.responseId } });
-    if (r) attending = r.attending;
+    if (r) { attending = r.attending; attendance = attendanceOf(r); }
   }
   return res.json({
     greeting: computeGreeting(guest.salutation, guest.names),
     names: guest.names,
     attending,
+    attendance,
   });
 });
 
@@ -61,9 +64,12 @@ router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response)
       greeting: computeGreeting(g.salutation, g.names),
       responded: !!r,
       attending: r ? r.attending : null,
+      attendance: r ? attendanceOf(r) : null,
       guestsCount: r ? r.guestsCount : null,
+      childrenCount: r ? r.childrenCount : 0,
       drinkChoice: r ? r.drinkChoice : '',
       wishes: r ? r.wishes : '',
+      answers: r ? parseAnswers(r.answers) : [],
     };
   });
   return res.json({ advanced: isAdvanced(invite.plan), guests: result });

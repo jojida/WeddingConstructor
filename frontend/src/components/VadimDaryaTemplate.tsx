@@ -85,6 +85,11 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
           photoFrames: dataRef.current.customData?.photoFrames,
           showMap: dataRef.current.customData?.showMap,
           mapPoint: dataRef.current.customData?.mapPoint,
+          // Настройки анкеты — их читает общий модуль ../assets/rsvp-count.js
+          rsvpMaybe: dataRef.current.customData?.rsvpMaybe,
+          rsvpChildren: dataRef.current.customData?.rsvpChildren,
+          rsvpQuestions: dataRef.current.customData?.rsvpQuestions,
+          rsvpCustomQ: dataRef.current.customData?.rsvpCustomQ,
         },
       },
       window.location.origin

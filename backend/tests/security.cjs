@@ -76,6 +76,24 @@ test('security and functional regressions on an isolated migrated database', asy
     assert.equal((await request('/api/rsvp/' + invite.slug, 'POST', { attending: true, guestToken: 'wrong' })).status, 400);
     assert.equal((await request('/api/rsvp/' + invite.slug, 'POST', { attending: 'false', guestName: 'Guest' })).status, 400);
   });
+  await t.test('RSVP keeps «maybe», children and extra answers', async () => {
+    const post = body => request('/api/rsvp/' + invite.slug, 'POST', { guestName: 'Гость', ...body });
+    const answers = [{ id: 'menu', q: 'Горячее', a: 'Рыба', t: 'one' }, { id: 'song', q: 'Песня', a: 'ABBA', t: 'text' }];
+    assert.equal((await post({ attending: false, attendance: 'maybe', guestsCount: 3, childrenCount: 1 })).status, 200);
+    assert.equal((await post({ attending: true, attendance: 'yes', guestsCount: 4, childrenCount: 9, answers })).status, 200);
+    assert.equal((await post({ attending: true })).status, 200);   // старая страница шаблона
+    assert.equal((await post({ attendance: 'perhaps' })).status, 400);
+    assert.equal((await post({ attendance: 'yes', answers: [{ id: 'menu', q: 'x', a: 1 }] })).status, 400);
+    assert.equal((await post({ attendance: 'yes', childrenCount: -1 })).status, 400);
+    const { stats, responses } = await (await request('/api/rsvp/' + invite.id, 'GET', undefined, token)).json();
+    assert.equal(stats.maybe, 1);
+    assert.equal(stats.maybeGuests, 3);
+    assert.equal(stats.attendingChildren, 3);   // детей не больше, чем людей минус один взрослый
+    assert.deepEqual(stats.answers, [{ id: 'menu', q: 'Горячее', counts: { 'Рыба': 1 } }]);
+    const withAnswers = responses.find(r => r.answers.length);
+    assert.deepEqual(withAnswers.answers, answers);
+    assert.equal(withAnswers.attendance, 'yes');
+  });
   await t.test('unsafe uploads fail, safe uploads get a server-selected extension', async () => {
     async function upload(content, type, name) {
       const form = new FormData(); form.append('image', new Blob([content], { type }), name);

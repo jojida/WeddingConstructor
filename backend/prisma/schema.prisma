@@ -107,6 +107,13 @@ model GuestResponse {
   // Сколько человек придёт по этому ответу (гость и те, кто с ним). В рабочую
   // базу колонку дописывает сам бэкенд при запуске — src/lib/ensureSchema.ts.
   guestsCount   Int      @default(1)
+  // Ответ «придёт»: yes | no | maybe. Пустой у ответов, записанных до вопроса
+  // «Пока не знаю», — для них статус берётся из attending (lib/rsvpDetails.ts).
+  attendance    String   @default("")
+  // Сколько из guestsCount — дети (анкета спрашивает отдельно, если пара включила)
+  childrenCount Int      @default(0)
+  // Ответы на дополнительные вопросы анкеты, JSON: [{ id, q, a, t }]
+  answers       String   @default("[]")
   createdAt     DateTime @default(now())
 
   @@index([guestId])

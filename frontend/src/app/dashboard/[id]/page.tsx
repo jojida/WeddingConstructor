@@ -15,14 +15,26 @@ interface Invite {
   customDomain: string;
   customData?: Record<string, any>;
 }
+// Ответ «придёт»: yes | no | maybe («Пока не знаю»). Старый бэкенд поля не шлёт.
+type Attendance = 'yes' | 'no' | 'maybe';
+// Ответ на дополнительный вопрос анкеты: текст вопроса приходит вместе с ответом
+interface RsvpAnswer { id: string; q: string; a: string; t: 'one' | 'many' | 'text' }
 interface Guest {
   id: string; token: string; salutation: string; names: string;
-  greeting: string; responded: boolean; attending: boolean | null; guestsCount?: number | null; drinkChoice: string; wishes: string;
+  greeting: string; responded: boolean; attending: boolean | null; attendance?: Attendance | null;
+  guestsCount?: number | null; childrenCount?: number; drinkChoice: string; wishes: string; answers?: RsvpAnswer[];
 }
 interface RsvpData {
-  responses: { id: string; guestName: string; attending: boolean; guestsCount?: number; drinkChoice: string; wishes: string; createdAt: string }[];
+  responses: {
+    id: string; guestName: string; attending: boolean; attendance?: Attendance; guestsCount?: number; childrenCount?: number;
+    drinkChoice: string; wishes: string; answers?: RsvpAnswer[]; createdAt: string;
+  }[];
   // attendingGuests — людей (сколько придёт по всем «да»), attending — ответов
-  stats: { total: number; attending: number; notAttending: number; attendingGuests?: number; drinks: Record<string, number> };
+  stats: {
+    total: number; attending: number; notAttending: number; attendingGuests?: number; drinks: Record<string, number>;
+    maybe?: number; maybeGuests?: number; attendingChildren?: number;
+    answers?: { id: string; q: string; counts: Record<string, number> }[];
+  };
   drinkLabels: Record<string, string>;
 }
 
@@ -135,30 +147,51 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
   if (!data) return <Empty>Загрузка…</Empty>;
   if (data.stats.total === 0) return <Empty>Пока нет ответов. Они появятся, когда гости заполнят анкету.</Empty>;
 
+  const kids = data.stats.attendingChildren || 0;
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>
         <Stat n={data.stats.total} label="Всего ответов" />
-        <Stat n={data.stats.attendingGuests ?? data.stats.attending} label="Гостей придёт" color="#2e8b57" />
+        <Stat n={data.stats.attendingGuests ?? data.stats.attending} label="Гостей придёт" color="#2e8b57"
+          note={kids ? `из них ${kidsWord(kids)}` : undefined} />
+        {/* «Пока не знаю» — только если такие ответы есть: не у всех пар этот вариант включён */}
+        {(data.stats.maybe || 0) > 0 && (
+          <Stat n={data.stats.maybeGuests ?? data.stats.maybe ?? 0} label="Пока не знают" color={MAYBE_COLOR} />
+        )}
         <Stat n={data.stats.notAttending} label="Не придут" color="#b85c5c" />
       </div>
       {Object.keys(data.stats.drinks).length > 0 && (
-        <div style={{ marginBottom: 20, fontSize: 14, color: '#5b554c' }}>
+        <div style={{ marginBottom: 12, fontSize: 14, color: '#5b554c' }}>
           <b>Напитки:</b>{' '}
           {Object.entries(data.stats.drinks).map(([k, v]) => `${data.drinkLabels[k] || k}: ${v}`).join(' · ')}
         </div>
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {data.responses.map(r => (
-          <div key={r.id} style={{ background: '#fff', border: BORDER, borderRadius: 10, padding: '12px 16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-              <span style={{ fontWeight: 600, color: '#0e1d26' }}>{r.guestName}</span>
-              <span style={{ fontSize: 13, color: r.attending ? '#2e8b57' : '#b85c5c' }}>{r.attending ? attendingText(r.guestsCount) : '✗ Не придёт'}</span>
+      {/* Сводка по вопросам с вариантами — среди тех, кто придёт */}
+      {(data.stats.answers || []).map(s => (
+        <div key={s.id} style={{ marginBottom: 12, fontSize: 14, color: '#5b554c' }}>
+          <b>{s.q}</b>{' '}
+          {Object.entries(s.counts).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+        </div>
+      ))}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
+        {data.responses.map(r => {
+          const st = statusOf(r);
+          return (
+            <div key={r.id} style={{ background: '#fff', border: BORDER, borderRadius: 10, padding: '12px 16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                <span style={{ fontWeight: 600, color: '#0e1d26' }}>{r.guestName}</span>
+                <span style={{ fontSize: 13, color: STATUS_COLOR[st], textAlign: 'right' }}>{statusText(st, r.guestsCount, r.childrenCount)}</span>
+              </div>
+              {r.drinkChoice && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>🥂 {formatDrinkChoice(r.drinkChoice, data.drinkLabels)}</div>}
+              {(r.answers || []).map(x => (
+                <div key={x.id} style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>
+                  <span style={{ color: '#9a948a' }}>{x.q}</span> — {x.a}
+                </div>
+              ))}
+              {r.wishes && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4, fontStyle: 'italic' }}>«{r.wishes}»</div>}
             </div>
-            {r.drinkChoice && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>🥂 {formatDrinkChoice(r.drinkChoice, data.drinkLabels)}</div>}
-            {r.wishes && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4, fontStyle: 'italic' }}>«{r.wishes}»</div>}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -216,7 +249,8 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
   };
 
   // Людей, а не записей: «Денис и Мария» одной ссылкой — это двое
-  const guestsComing = guests.reduce((sum, g) => sum + (g.responded && g.attending ? g.guestsCount || 1 : 0), 0);
+  const guestsComing = guests.reduce((sum, g) => sum + (g.responded && statusOf(g) === 'yes' ? g.guestsCount || 1 : 0), 0);
+  const guestsMaybe = guests.filter(g => g.responded && statusOf(g) === 'maybe').length;
 
   return (
     <div>
@@ -243,7 +277,8 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 20 }}>
           <Stat n={guests.length} label="Приглашено" />
           <Stat n={guestsComing} label="Гостей придёт" color="#2e8b57" />
-          <Stat n={guests.filter(g => g.responded && !g.attending).length} label="Не придут" color="#b85c5c" />
+          {guestsMaybe > 0 && <Stat n={guestsMaybe} label="Пока не знают" color={MAYBE_COLOR} />}
+          <Stat n={guests.filter(g => g.responded && statusOf(g) === 'no').length} label="Не придут" color="#b85c5c" />
           <Stat n={guests.filter(g => !g.responded).length} label="Не ответили" color="#a39b8e" />
         </div>
       )}
@@ -254,9 +289,16 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
             <div key={g.id} style={{ background: '#fff', border: BORDER, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               <div style={{ flex: 1, minWidth: 160 }}>
                 <div style={{ fontWeight: 600, color: '#0e1d26' }}>{g.greeting}</div>
-                <div style={{ fontSize: 12, marginTop: 3, color: g.responded ? (g.attending ? '#2e8b57' : '#b85c5c') : '#a39b8e' }}>
-                  {g.responded ? (g.attending ? `${attendingText(g.guestsCount)}${g.drinkChoice ? ' · ' + formatDrinkChoice(g.drinkChoice, drinkLabels) : ''}` : '✗ Не придёт') : '○ Не ответил(а)'}
+                <div style={{ fontSize: 12, marginTop: 3, color: g.responded ? STATUS_COLOR[statusOf(g)] : '#a39b8e' }}>
+                  {g.responded
+                    ? `${statusText(statusOf(g), g.guestsCount, g.childrenCount)}${statusOf(g) !== 'no' && g.drinkChoice ? ' · ' + formatDrinkChoice(g.drinkChoice, drinkLabels) : ''}`
+                    : '○ Не ответил(а)'}
                 </div>
+                {(g.answers || []).map(x => (
+                  <div key={x.id} style={{ fontSize: 12, marginTop: 2, color: '#7d766c' }}>
+                    <span style={{ color: '#9a948a' }}>{x.q}</span> — {x.a}
+                  </div>
+                ))}
               </div>
               <button onClick={() => copyLink(g.token)} className="btn-outline" style={{ padding: '7px 12px', fontSize: 12 }}>🔗 Ссылка</button>
               <button onClick={() => removeGuest(g.id)} title="Удалить" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b85c5c', fontSize: 18 }}>🗑</button>
@@ -570,16 +612,41 @@ function SiteAddressCard({ invite, origin, onSaved }: { invite: Invite; origin: 
 /* Названия тарифов: сейчас продаётся один «Премиум», у старых сайтов остались Лайт и Базовый */
 const PLAN_TITLES: Record<string, string> = { lite: 'Лайт', basic: 'Базовый', standard: 'Базовый', premium: 'Премиум' };
 
-/* «✓ Придёт» или, если гость придёт не один, «✓ Придут: 3 гостя» */
-function attendingText(count?: number | null): string {
-  return count && count > 1 ? `✓ Придут: ${count} ${guestsWord(count)}` : '✓ Придёт';
+const MAYBE_COLOR = '#b8862e';
+const STATUS_COLOR: Record<Attendance, string> = { yes: '#2e8b57', maybe: MAYBE_COLOR, no: '#b85c5c' };
+
+/* Статус ответа. Ответы, записанные до «Пока не знаю», приходят без attendance. */
+function statusOf(r: { attending: boolean | null; attendance?: Attendance | null }): Attendance {
+  return r.attendance || (r.attending ? 'yes' : 'no');
 }
 
-function Stat({ n, label, color }: { n: number; label: string; color?: string }) {
+/* «✓ Придут: 3 гостя (1 ребёнок)», «? Пока не знают — до 2 гостей», «✗ Не придёт» */
+function statusText(st: Attendance, count?: number | null, children?: number | null): string {
+  if (st === 'no') return '✗ Не придёт';
+  const n = count && count > 1 ? count : 1;
+  const kids = children && children > 0 ? ` (${kidsWord(children)})` : '';
+  if (st === 'maybe') return n > 1 ? `? Пока не знают — до ${n} ${guestsWordGen(n)}${kids}` : '? Пока не знает';
+  return n > 1 ? `✓ Придут: ${n} ${guestsWord(n)}${kids}` : '✓ Придёт';
+}
+
+// 1 ребёнок, 2 ребёнка, 5 детей
+function kidsWord(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  const w = m10 === 1 && m100 !== 11 ? 'ребёнок' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'ребёнка' : 'детей';
+  return `${n} ${w}`;
+}
+
+// «до 2 гостей», «до 21 гостя» — родительный падеж после «до»
+function guestsWordGen(n: number): string {
+  return n % 10 === 1 && n % 100 !== 11 ? 'гостя' : 'гостей';
+}
+
+function Stat({ n, label, color, note }: { n: number; label: string; color?: string; note?: string }) {
   return (
     <div style={{ background: '#fff', border: BORDER, borderRadius: 12, padding: '16px 18px', textAlign: 'center' }}>
       <div style={{ fontSize: 30, fontWeight: 700, color: color || '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif' }}>{n}</div>
       <div style={{ fontSize: 12, color: '#7d766c', marginTop: 2 }}>{label}</div>
+      {note && <div style={{ fontSize: 11, color: '#9a948a', marginTop: 2 }}>{note}</div>}
     </div>
   );
 }

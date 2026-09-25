@@ -36,7 +36,7 @@ function coverUrl(invite: Invite): string {
 }
 
 // attendingGuests — людей (анкета спрашивает «Сколько вас будет?»), attending — ответов
-interface RsvpStats { total: number; attending: number; notAttending: number; attendingGuests?: number }
+interface RsvpStats { total: number; attending: number; notAttending: number; attendingGuests?: number; maybe?: number; maybeGuests?: number }
 
 const isPublished = (i: Invite) => i.status === 'paid' || i.status === 'published';
 
@@ -255,6 +255,11 @@ function RsvpSummary({ id, stats }: { id: string; stats?: RsvpStats }) {
           <span className={styles.rsvpYes}>
             ✓ Придут: <b>{stats.attendingGuests ?? stats.attending}</b> {guestsWord(stats.attendingGuests ?? stats.attending)}
           </span>
+          {/* «Пока не знаю» есть не у всех анкет — строка только когда такие ответы пришли */}
+          {(stats.maybe || 0) > 0 && (
+            // Людей, как у «Придут»: «пока не знаю» на троих — это трое
+            <span className={styles.rsvpMuted}>? Пока не знают: <b>{stats.maybeGuests ?? stats.maybe}</b></span>
+          )}
           <span className={styles.rsvpNo}>✗ Не придут: <b>{stats.notAttending}</b></span>
         </>
       )}

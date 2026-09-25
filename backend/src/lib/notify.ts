@@ -5,6 +5,7 @@ import { escapeHtml } from './security';
 import { sendEmail, isEmailConfigured } from './email';
 import { inviteDrinkLabels, formatDrinkChoice } from './drinks';
 import { hasNotifications } from './plans';
+import type { Attendance, RsvpAnswer } from './rsvpDetails';
 
 const TG_API = (method: string) =>
   `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN || ''}/${method}`;
@@ -36,9 +37,12 @@ interface InviteLike {
 interface ResponseLike {
   guestName: string;
   attending: boolean;
+  attendance?: Attendance;     // нет у старых вызовов — тогда по attending
   drinkChoice: string;
   wishes: string;
   guestsCount?: number;
+  childrenCount?: number;
+  answers?: RsvpAnswer[];
 }
 
 // 1 человек, 2 человека, 5 человек
@@ -48,10 +52,23 @@ function people(n: number): string {
   return `${n} ${word}`;
 }
 
+// 1 ребёнок, 2 ребёнка, 5 детей
+function kids(n: number): string {
+  const mod10 = n % 10, mod100 = n % 100;
+  const word = mod10 === 1 && mod100 !== 11 ? 'ребёнок'
+    : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14) ? 'ребёнка' : 'детей';
+  return `${n} ${word}`;
+}
+
 function formatMessage(invite: InviteLike, r: ResponseLike): { subject: string; text: string; html: string } {
   const couple = [invite.groomName, invite.brideName].filter(Boolean).join(' & ') || 'ваша свадьба';
+  const status = r.attendance || (r.attending ? 'yes' : 'no');
   const n = r.guestsCount && r.guestsCount > 1 ? r.guestsCount : 1;
-  const attend = r.attending ? (n > 1 ? `✅ Придут — ${people(n)}` : '✅ Придёт') : '❌ Не придёт';
+  const withKids = r.childrenCount && r.childrenCount > 0 ? ` (из них ${kids(r.childrenCount)})` : '';
+  const attend =
+    status === 'yes' ? (n > 1 ? `✅ Придут — ${people(n)}${withKids}` : '✅ Придёт')
+    : status === 'maybe' ? (n > 1 ? `🤔 Пока не знают — возможно, ${people(n)}${withKids}` : '🤔 Пока не знает')
+    : '❌ Не придёт';
   const lines = [
     `Новый ответ на приглашение (${couple})`,
     ``,
@@ -59,6 +76,7 @@ function formatMessage(invite: InviteLike, r: ResponseLike): { subject: string; 
     `${attend}`,
   ];
   if (r.drinkChoice) lines.push(`🥂 Напитки: ${formatDrinkChoice(r.drinkChoice, inviteDrinkLabels(invite.customData))}`);
+  for (const x of r.answers || []) lines.push(`• ${x.q} — ${x.a}`);
   if (r.wishes) lines.push(`💌 Пожелания: ${r.wishes}`);
   const text = lines.join('\n');
   const html = lines.map((l) => (l ? `<div>${escapeHtml(l)}</div>` : '<br>')).join('');

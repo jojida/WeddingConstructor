@@ -50,6 +50,8 @@ export function templateCustomDefaults(templateId: string, weddingDate?: string)
     if (typeof custom[key] === 'string') custom[key] = custom[key].replace(/\{\{rsvpDate\}\}/g, deadline);
   }
   if (defs?.drinks) custom.drinks = defs.drinks;
+  // «Пока не знаю» — новым сайтам сразу; у сайтов без этого ключа вариант выключен
+  custom.rsvpMaybe = true;
   return custom;
 }
 
@@ -425,7 +427,8 @@ export interface DrinkOption  { value: string; label: string; }
 
 export type FieldType =
   | 'text' | 'textarea' | 'image' | 'audio' | 'colorList' | 'schedule' | 'drinks'
-  | 'toggle';                 // галочка: значение true/false, по умолчанию включено
+  | 'toggle'                  // галочка: значение true/false, по умолчанию включено (см. defaultOff)
+  | 'rsvpQuestions';          // список готовых вопросов анкеты (RSVP_QUESTIONS)
 
 export interface TemplateField {
   id: string;                 // data-edit ключ + ключ хранения
@@ -436,6 +439,7 @@ export interface TemplateField {
   iconSet?: string;           // для schedule — набор иконок-картинок (иначе ввод эмодзи)
   withDesc?: boolean;         // для schedule — показывать поле описания пункта
   maxLength?: number;         // ограничение длины для text/textarea
+  defaultOff?: boolean;       // для toggle — не задано значит выключено
 }
 
 export interface TemplateSection {
@@ -549,6 +553,44 @@ const MAP_LINK: TemplateField = {
 };
 const MAP_TOGGLE: TemplateField = { id: 'showMap', type: 'toggle', label: 'Показывать карту', scope: 'custom' };
 
+/** Готовые вопросы анкеты. Сами вопросы и варианты ответа гость видит такими,
+    как их задаёт общий модуль public/invite/assets/rsvp-count.js (QUESTIONS) —
+    id держать одинаковыми. Здесь — подписи для галочек в редакторе. */
+export const RSVP_QUESTIONS: { id: string; label: string; hint: string }[] = [
+  { id: 'ceremony', label: 'Регистрация', hint: 'Будет ли гость на регистрации или только на банкете' },
+  { id: 'menu',     label: 'Горячее',     hint: 'Мясо, рыба или вегетарианское' },
+  { id: 'allergy',  label: 'Аллергии',    hint: 'Ограничения в еде — свободный ответ' },
+  { id: 'transfer', label: 'Трансфер',    hint: 'До площадки и обратно' },
+  { id: 'stay',     label: 'Жильё',       hint: 'Нужна ли помощь с размещением' },
+  { id: 'parking',  label: 'Парковка',    hint: 'Приедет ли гость на машине' },
+  { id: 'song',     label: 'Песня',       hint: 'Под какую песню гость выйдет танцевать' },
+  { id: 'seat',     label: 'Рассадка',    hint: 'С кем гость хотел бы сидеть рядом' },
+  { id: 'toast',    label: 'Тост',        hint: 'Хочет ли гость сказать тост' },
+  { id: 'wishes',   label: 'Пожелания',   hint: 'Тёплые слова молодожёнам' },
+];
+
+/** Что ещё спросить у гостей — одинаково во всех шаблонах, встаёт в их раздел
+    анкеты (withRsvpFields). «Пока не знаю» новым сайтам включено в
+    templateCustomDefaults, у уже опубликованных анкета не меняется сама. */
+const RSVP_FIELDS: TemplateField[] = [
+  { id: 'rsvpMaybe',     type: 'toggle', label: 'Вариант ответа «Пока не знаю»', scope: 'custom', defaultOff: true },
+  { id: 'rsvpChildren',  type: 'toggle', label: 'Спрашивать отдельно про детей', scope: 'custom', defaultOff: true },
+  { id: 'rsvpQuestions', type: 'rsvpQuestions', label: 'Дополнительные вопросы', scope: 'custom' },
+  { id: 'rsvpCustomQ',   type: 'text', label: 'Свой вопрос', hint: 'Например: Нужна ли вам няня на вечер?', scope: 'custom', maxLength: 120 },
+];
+
+/** Поля анкеты — в раздел шаблона со списком напитков / текстом к анкете;
+    если такого раздела нет, отдельный раздел перед «Музыкой». */
+function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
+  const isRsvp = (s: TemplateSection) => s.fields.some((f) => f.id === 'drinks' || f.id === 'surveyText');
+  if (sections.some(isRsvp)) {
+    return sections.map((s) => (isRsvp(s) ? { ...s, fields: [...s.fields, ...RSVP_FIELDS] } : s));
+  }
+  const at = sections.findIndex((s) => s.fields.some((f) => f.id === 'musicUrl'));
+  const rsvp: TemplateSection = { title: 'Анкета гостя', icon: '📝', fields: RSVP_FIELDS };
+  return at < 0 ? [...sections, rsvp] : [...sections.slice(0, at), rsvp, ...sections.slice(at)];
+}
+
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   calla: [
     {
@@ -589,7 +631,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Анкета гостя (RSVP)', icon: '📝',
+      title: 'Анкета гостя', icon: '📝',
       fields: [
         { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
         { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
@@ -647,7 +689,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Анкета гостя (RSVP)', icon: '📝',
+      title: 'Анкета гостя', icon: '📝',
       fields: [
         { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
         { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
@@ -713,7 +755,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Анкета гостя (RSVP)', icon: '📝',
+      title: 'Анкета гостя', icon: '📝',
       fields: [
         { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
         { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
@@ -773,7 +815,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Анкета гостя (RSVP)', icon: '📝',
+      title: 'Анкета гостя', icon: '📝',
       fields: [
         { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
         { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
@@ -838,7 +880,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Анкета гостя (RSVP)', icon: '📝',
+      title: 'Анкета гостя', icon: '📝',
       fields: [
         { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
         { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
@@ -924,12 +966,14 @@ export interface TemplateDefaults {
 
 /* Схема панели для шаблонов «Верстака» собирается студией из пометок на слоях.
    Общий раздел с музыкой добавляется здесь, чтобы он был у всех одинаковый. */
-export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
-  ...HANDMADE_TEMPLATE_FIELDS,
-  ...Object.fromEntries(
-    STUDIO_TEMPLATES.map((t) => [t.id, [...(t.fields ?? []), MUSIC_SECTION]]),
-  ),
-};
+export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = Object.fromEntries(
+  Object.entries({
+    ...HANDMADE_TEMPLATE_FIELDS,
+    ...Object.fromEntries(
+      STUDIO_TEMPLATES.map((t) => [t.id, [...(t.fields ?? []), MUSIC_SECTION]]),
+    ),
+  }).map(([id, sections]) => [id, withRsvpFields(sections)]),
+);
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
   calla: {
