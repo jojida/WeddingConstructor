@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, TemplateField, ScheduleItem, DrinkOption, templateCustomDefaults } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import AuthModal from '@/components/AuthModal';
@@ -275,6 +275,24 @@ function EditorContent() {
   // Схема полей для шаблона (если есть — рендерим движок полей, иначе старый сайдбар)
   const sections = TEMPLATE_FIELDS[data.templateId];
 
+  // Разделы — аккордеон: открыт один (сначала первый), остальные свёрнуты.
+  // Раньше все поля шли одной простынёй на несколько экранов.
+  const [openTitle, setOpenTitle] = useState<string | null | undefined>(undefined);
+  const openNow = openTitle === undefined ? sections?.[0]?.title : openTitle;
+
+  // Превью листается к блоку, который сейчас правят (раздел открыли или
+  // перешли в поле) — scrollPreviewTo
+  const previewRef = useRef<HTMLDivElement>(null);
+  const revealInPreview = (ids: string[]) => scrollPreviewTo(previewRef.current?.querySelector('iframe'), ids);
+  const toggleSection = (s: TemplateSection, head: HTMLElement) => {
+    const open = openNow !== s.title;
+    setOpenTitle(open ? s.title : null);
+    if (!open) return;
+    revealInPreview(s.fields.map(f => f.id));
+    // Раздел выше свернулся — шапка открытого уехала бы вверх; возвращаем её к началу панели
+    setTimeout(() => head.scrollIntoView({ block: 'start', behavior: 'smooth' }), 30);
+  };
+
   // Вход в редактор — вторая ступень воронки после галереи шаблонов.
   // Реф защищает от двойного вызова: в разработке StrictMode прогоняет
   // эффекты дважды, и цель улетала бы два раза за один визит.
@@ -422,10 +440,12 @@ function EditorContent() {
       const oldDefs = wasOther ? TEMPLATE_DEFAULTS[cd.__seededTemplate] : undefined;
       const ownOr = (cur: string, oldDef: string | undefined, def: string | undefined) =>
         (cur && cur.trim() && !(wasOther && cur === oldDef)) ? cur : (def ?? cur);
+      // Настройки анкеты (rsvp*) от дизайна не зависят — при смене шаблона остаются
+      const keepRsvp = Object.fromEntries(Object.entries(cd).filter(([k]) => k.startsWith('rsvp')));
       const seededCustom = {
         // Дедлайн RSVP считается от даты свадьбы пары, а не берётся зашитой датой.
         ...templateCustomDefaults(prev.templateId, prev.weddingDate),
-        ...(wasOther ? {} : cd),       // в рамках того же/нового пустого — сохранённое имеет приоритет
+        ...(wasOther ? keepRsvp : cd), // в рамках того же/нового пустого — сохранённое имеет приоритет
         __seededTemplate: prev.templateId,
       };
       return {
@@ -681,7 +701,7 @@ function EditorContent() {
             >
               <div className={styles.phoneMockup}>
                 <div className={styles.phoneScreen}>
-                  <div className={styles.phoneContent}>
+                  <div className={styles.phoneContent} ref={previewRef}>
                     <TemplatePreview data={data} apiBase={apiBase} editing />
                   </div>
                 </div>
@@ -698,25 +718,43 @@ function EditorContent() {
 
             <div className={styles.sidebarContent}>
 
-              {sections ? sections.map(section => (
-                <div className={styles.fields} key={section.title}>
-                  <div className={styles.panelTitle}>{section.icon ? section.icon + ' ' : ''}{section.title}</div>
-                  {section.fields.map(f => (
-                    <SchemaFieldRenderer
-                      key={f.id}
-                      field={f}
-                      value={f.scope === 'data' ? (data as any)[f.id] : (data.customData || {})[f.id]}
-                      onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
-                      apiBase={apiBase}
-                      uploadImage={uploadImage}
-                      uploadAudio={uploadAudio}
-                      frame={(data.customData?.photoFrames || {})[f.id] ?? null}
-                      slot={photoSlots[f.id]}
-                      onFrame={fr => setPhotoFrame(f.id, fr)}
-                    />
-                  ))}
-                </div>
-              )) : (<>
+              {sections ? sections.map(section => {
+                const open = openNow === section.title;
+                const ids = section.fields.map(f => f.id);
+                return (
+                  <div className={`${styles.fields} ${styles.section}`} key={section.title}
+                    // Перешли в поле — превью к его блоку (а если у поля блока нет — к разделу)
+                    onFocusCapture={e => {
+                      const id = (e.target as HTMLElement).closest('[data-field]')?.getAttribute('data-field');
+                      if (id) revealInPreview([id, ...ids.filter(x => x !== id)]);
+                    }}>
+                    <button type="button" className={styles.sectionHead} aria-expanded={open}
+                      onClick={e => toggleSection(section, e.currentTarget)}>
+                      <span>{section.icon ? section.icon + ' ' : ''}{section.title}</span>
+                      <span className={styles.sectionChevron} aria-hidden="true">›</span>
+                    </button>
+                    {open && (
+                      <div className={styles.sectionBody}>
+                        {section.fields.map(f => (
+                          <div key={f.id} data-field={f.id}>
+                            <SchemaFieldRenderer
+                              field={f}
+                              value={f.scope === 'data' ? (data as any)[f.id] : (data.customData || {})[f.id]}
+                              onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
+                              apiBase={apiBase}
+                              uploadImage={uploadImage}
+                              uploadAudio={uploadAudio}
+                              frame={(data.customData?.photoFrames || {})[f.id] ?? null}
+                              slot={photoSlots[f.id]}
+                              onFrame={fr => setPhotoFrame(f.id, fr)}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }) : (<>
 
               <div className={styles.fields}>
                 <div className={styles.panelTitle}>Локация</div>
@@ -943,18 +981,124 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, upl
       return <ScheduleEditor value={value || []} onChange={onChange} iconSet={field.iconSet} withDesc={field.withDesc} />;
     case 'drinks':
       return <DrinksEditor value={value || []} onChange={onChange} />;
-    case 'toggle':
-      // Не задано — включено: так поле работает и у пар, созданных до его появления
+    case 'toggle': {
+      // Не задано — включено: так поле работает и у пар, созданных до его появления.
+      // defaultOff — наоборот: новая возможность сама не включается у готовых сайтов.
+      const on = field.defaultOff ? value === true : value !== false;
       return (
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, cursor: 'pointer', fontSize: 13, color: '#4b463d', fontFamily: 'var(--font-inter)' }}>
-          <input type="checkbox" checked={value !== false} onChange={e => onChange(e.target.checked)}
+          <input type="checkbox" checked={on} onChange={e => onChange(e.target.checked)}
             style={{ width: 16, height: 16, margin: 0, accentColor: '#685d4a', cursor: 'pointer' }} />
           {field.label}
         </label>
       );
+    }
+    case 'rsvpQuestions':
+      return (
+        <Field label={field.label}>
+          <RsvpQuestionsPicker value={Array.isArray(value) ? value : []} onChange={onChange} />
+        </Field>
+      );
     default:
       return null;
   }
+}
+
+/* Готовые вопросы анкеты: галочка — вопрос появится у гостя. Текст вопросов и
+   порядок в анкете задаёт общий модуль шаблонов (rsvp-count.js), здесь
+   хранится только список включённых. */
+function RsvpQuestionsPicker({ value, onChange }: { value: string[]; onChange: (v: string[]) => void }) {
+  const toggle = (id: string) => onChange(value.includes(id) ? value.filter(x => x !== id) : [...value, id]);
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {RSVP_QUESTIONS.map(q => {
+        const on = value.includes(q.id);
+        return (
+          <label key={q.id} style={{
+            display: 'flex', gap: 10, alignItems: 'flex-start', padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
+            border: `1px solid ${on ? '#b9a98f' : 'rgba(206,197,186,0.6)'}`, background: on ? '#f7f2ea' : '#fff',
+            fontFamily: 'var(--font-inter)',
+          }}>
+            <input type="checkbox" checked={on} onChange={() => toggle(q.id)}
+              style={{ width: 16, height: 16, margin: '2px 0 0', flexShrink: 0, accentColor: '#685d4a', cursor: 'pointer' }} />
+            <span>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#2f2a24' }}>{q.label}</span>
+              <span style={{ display: 'block', fontSize: 12, color: '#8a8378', marginTop: 2 }}>{q.hint}</span>
+            </span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─── Превью следует за правкой ────────────────────────────────────────────
+   Превью — iframe шаблона с того же сайта, до его документа можно дотянуться.
+   Ищем элемент поля: id поля == data-edit в шаблоне, а у полей без своего
+   элемента — по PREVIEW_TARGETS. Листаем только внутри iframe: scrollIntoView
+   прокрутил бы и саму страницу редактора (на телефоне — прочь от полей). */
+const PREVIEW_TARGETS: Record<string, string[]> = {
+  schedule: ['[data-edit="programTitle"]', '.timeline', '.timeline-inner', '.tl-svg', '.schedule', '.sched-row', '[data-block="schedule"]'],
+  dressCodeColors: ['[data-edit="palette"]', '[data-edit="swatches"]', '[data-edit="dressCode"]'],
+  venueAddress: ['[data-wc-map]', '[data-edit="venue"]'],
+  mapLink: ['[data-wc-map]', '[data-edit="venue"]'],
+  showMap: ['[data-wc-map]', '[data-edit="venue"]'],
+  drinks: ['form'],
+  rsvpMaybe: ['[data-wc-maybe]', 'form'],
+  rsvpChildren: ['[data-rsvp-count]', 'form'],
+  rsvpQuestions: ['[data-wc-q]', 'form'],
+  rsvpCustomQ: ['[data-wc-q="custom"]', '[data-wc-q]', 'form'],
+};
+
+function findPreviewTarget(doc: Document, id: string): HTMLElement | null {
+  const selectors = [`[data-edit="${CSS.escape(id)}"]`, ...(PREVIEW_TARGETS[id] || [])];
+  for (const sel of selectors) {
+    // Спрятанное (display:none, неактивная вкладка дресс-кода) не годится
+    const hit = Array.from(doc.querySelectorAll<HTMLElement>(sel)).find(el => el.getClientRects().length > 0);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+// Повтор того же блока подряд (фокус прыгает между полями раздела) превью не дёргает
+let lastReveal = { key: '', at: 0 };
+
+function scrollPreviewTo(frame: HTMLIFrameElement | null | undefined, ids: string[]) {
+  const key = ids.join('|');
+  const now = Date.now();
+  if (lastReveal.key === key && now - lastReveal.at < 1500) return;
+  lastReveal = { key, at: now };
+
+  const doc = frame?.contentDocument;
+  const win = frame?.contentWindow;
+  if (!doc || !win || !doc.body) return;
+  let el: HTMLElement | null = null;
+  for (const id of ids) { el = findPreviewTarget(doc, id); if (el) break; }
+  if (!el) return;
+
+  // Ближайший прокручиваемый предок внутри шаблона, иначе сам документ
+  const root = (doc.scrollingElement || doc.documentElement) as HTMLElement;
+  let box: HTMLElement | null = el.parentElement;
+  while (box && box !== doc.body && box !== doc.documentElement &&
+         !(box.scrollHeight > box.clientHeight + 1 && /auto|scroll/.test(win.getComputedStyle(box).overflowY))) {
+    box = box.parentElement;
+  }
+  const scroller = box && box !== doc.body && box !== doc.documentElement ? box : root;
+  const viewTop = scroller === root ? 0 : scroller.getBoundingClientRect().top;
+  const viewHeight = scroller === root ? win.innerHeight : scroller.clientHeight;
+  const top = el.getBoundingClientRect().top - viewTop + scroller.scrollTop - viewHeight * 0.2;
+  scroller.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+
+  // Короткая подсветка: видно, какой блок сейчас правится
+  if (!doc.getElementById('wc-editor-flash-css')) {
+    const st = doc.createElement('style');
+    st.id = 'wc-editor-flash-css';
+    st.textContent = '.wc-editor-flash{outline:2px solid rgba(140,107,101,.55)!important;outline-offset:6px;border-radius:6px}';
+    doc.head.appendChild(st);
+  }
+  el.classList.add('wc-editor-flash');
+  const target = el;
+  setTimeout(() => target.classList.remove('wc-editor-flash'), 1300);
 }
 
 function AudioPicker({ value, onChange, apiBase, uploadAudio, hint }: {
