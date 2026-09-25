@@ -958,7 +958,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       greetingTitle: 'Дорогие гости',
-      surveyText:    'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
+      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closingTitle:  'Будем ждать вас с нетерпением!',
       closingSign:   '', // Пустое поле — автоматическая подпись с именами пары.
       dressPhoto2:   '/invite/calla/assets/dress2.jpg',
@@ -1034,7 +1034,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     custom: {
       dearGuests: 'Дорогие гости',
       weAwait:    'Мы ждём вас',
-      surveyText: 'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
+      surveyText: 'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closing:    'Будем рады видеть вас',
       dressPhoto2: '/invite/floral/assets/photos/dress2.jpg',
       dressMan1:   '/invite/floral/assets/photos/man1.jpg',
@@ -1068,7 +1068,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       dearGuests: 'Дорогие друзья',
-      surveyText: 'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
+      surveyText: 'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closing:    'Ждём вас на нашей свадьбе!',
       dressPhoto2: '/invite/garden-arch/assets/photos/dress2.jpg',
       dressMan1:   '/invite/garden-arch/assets/photos/man1.jpg',
@@ -1101,7 +1101,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     custom: {
       greetingTitle: 'Любимые друзья!',
       greetingSub:   'приглашаем вас на нашу свадьбу',
-      surveyText:    'Чтобы мы знали сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
+      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
       closingTitle:  'Ждем вас на нашей\nсвадьбе!',
       organizerText: 'По всем вопросам обращайтесь к нашему организатору',
       organizerPhone: '+7 922 222 22 22',

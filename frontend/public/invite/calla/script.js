@@ -7,8 +7,10 @@
   'use strict';
 
   var STATE = { apiBase: '', slug: '', date: '2026-05-22', time: '12:00' };
-  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'];
+  // Календарь по-русски: у Pinyon Script нет кириллицы, её рисует Marck Script
+  // из того же --font-fancy (оба подключены в index.html)
+  var MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
   var DEFAULT_SCHEDULE = [
     { time: '12:00', title: 'Дворцовая усадьба 12', icon: 'assets/couple-illustration.webp' },
@@ -112,7 +114,7 @@
     if (!grid) return;
     grid.querySelectorAll('span:not(.cal__dow)').forEach(function (s) { s.remove(); });
 
-    var first = new Date(y, m - 1, 1).getDay();      // 0 = Sun
+    var first = (new Date(y, m - 1, 1).getDay() + 6) % 7;   // неделя с понедельника: 0 = Пн
     var dim = new Date(y, m, 0).getDate();
     var i;
     for (i = 0; i < first; i++) {

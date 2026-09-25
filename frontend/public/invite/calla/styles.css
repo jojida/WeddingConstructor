@@ -26,6 +26,9 @@
   --white:        #f8f6f1;
   --ink:          #6f665a;
   --ink-soft:     #8b8275;
+  /* Основной текст (приглашение, анкета): 5.4:1 на --paper. Белый с тенью
+     давал 1.4:1 — на телефоне днём его было не прочитать. */
+  --ink-strong:   #574f45;
   --brown:        #7c6a54;
   --brown-soft:   #9a8a72;
 
@@ -138,8 +141,8 @@ body {
 .guests__title { position: absolute; top: 8%; left: 0; right: 0; text-align: center; font-size: 12cqw; }
 .guests__lead {
   position: absolute; top: 20%; left: 14%; right: 14%; margin: 0;
-  text-align: center; font-style: italic; color: var(--white);
-  font-size: 4.6cqw; line-height: 1.7; text-shadow: 0 1px 2px rgba(120,112,98,.35);
+  text-align: center; font-style: italic; color: var(--ink-strong);
+  font-size: 4.6cqw; line-height: 1.7;
 }
 .guests__cal { position: absolute; left: 11%; right: 11%; top: 42%; }
 .cal__head { text-align: center; color: var(--ink); }
@@ -311,8 +314,8 @@ body {
 .rsvp { padding: 9cqw 0 10cqw; }
 .rsvp__title { text-align: center; font-size: 11.5cqw; margin-bottom: 5cqw; }
 .rsvp__lead {
-  margin: 0 12% 8cqw; text-align: center; color: var(--white);
-  font-size: 4.4cqw; line-height: 1.6; text-shadow: 0 1px 2px rgba(120,112,98,.35);
+  margin: 0 12% 8cqw; text-align: center; color: var(--ink-strong);
+  font-size: 4.4cqw; line-height: 1.6;
 }
 .rsvp__form { margin: 0 13%; display: flex; flex-direction: column; gap: 6cqw; }
 .rsvp__name {
@@ -322,10 +325,10 @@ body {
 }
 .rsvp__name::placeholder { color: var(--ink-soft); }
 .rsvp__group { border: 0; margin: 0; padding: 0; }
-.rsvp__group legend { padding: 0; margin-bottom: 3.5cqw; color: var(--ink); font-size: 4.6cqw; }
+.rsvp__group legend { padding: 0; margin-bottom: 3.5cqw; color: var(--ink-strong); font-size: 4.6cqw; }
 .form-option {
   display: flex; align-items: center; gap: 3cqw; margin-bottom: 3.2cqw;
-  color: var(--ink); font-size: 4.4cqw; cursor: pointer;
+  color: var(--ink-strong); font-size: 4.4cqw; cursor: pointer;
 }
 .form-option input { position: absolute; opacity: 0; width: 0; height: 0; }
 .custom-radio, .custom-check {
