@@ -170,6 +170,23 @@
 
 .heroText { display: flex; flex-direction: column; align-items: center; gap: 24px; }
 
+/* Появление первого экрана — чистый CSS, без ожидания JS. Раньше эти блоки
+   были [data-animate] и оставались прозрачными до гидратации: на медленной
+   сети первый экран стоял пустым, пока не загрузится весь бандл. */
+@keyframes heroIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+.heroBadge, .heroHeadline, .heroSubtitle, .heroCtas {
+  animation: heroIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.heroHeadline { animation-delay: 0.08s; }
+.heroSubtitle { animation-delay: 0.16s; }
+.heroCtas { animation-delay: 0.24s; }
+@media (prefers-reduced-motion: reduce) {
+  .heroBadge, .heroHeadline, .heroSubtitle, .heroCtas { animation: none; }
+}
+
 .heroBadge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 14px;

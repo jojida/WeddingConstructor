@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
@@ -111,6 +111,47 @@ function heroMediterraneanData() {
   };
 }
 
+/* Живой шаблон «Средиземноморье» в окошке hero. Сам шаблон — iframe с фото,
+   видео и Яндекс.Картой (мегабайты), поэтому сначала показываем лёгкую
+   миниатюру того же дизайна, а iframe подключаем после window.load — чтобы он
+   не отнимал канал у JS и шрифтов первого экрана. На телефоне iframe не нужен
+   совсем: там он не прокручивается (тап открывает демо), хватает миниатюры. */
+function HeroLivePreview() {
+  const data = useMemo(() => heroMediterraneanData(), []);
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+  const [live, setLive] = useState(false);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 768px)').matches) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const mount = () => { timer = setTimeout(() => setLive(true), 200); };
+    if (document.readyState === 'complete') mount();
+    else window.addEventListener('load', mount, { once: true });
+    return () => { window.removeEventListener('load', mount); clearTimeout(timer); };
+  }, []);
+
+  // Миниатюра лежит под iframe, пока тот не загрузится, — окошко не пустеет.
+  // Страховка на случай, если load так и не придёт (виснет карта или видео).
+  useEffect(() => {
+    if (!live) return;
+    const t = setTimeout(() => setShown(true), 3000);
+    return () => clearTimeout(t);
+  }, [live]);
+
+  return (
+    <>
+      <MediterraneanTemplate data={data} apiBase={apiBase} />
+      {live && (
+        <div style={{ position: 'absolute', inset: 0, opacity: shown ? 1 : 0, transition: 'opacity .5s ease' }}>
+          {/* editing=1 отключает скролл-гейт и «слив воды» с даты внутри шаблона */}
+          <MediterraneanTemplate data={data} apiBase={apiBase} editing onFrameLoad={() => setShown(true)} />
+        </div>
+      )}
+    </>
+  );
+}
+
 function Hero() {
   return (
     <section className={styles.hero}>
@@ -119,23 +160,24 @@ function Hero() {
       </div>
 
       <div className={styles.heroGrid}>
+        {/* Без data-animate: первый экран виден сразу, появление — чистым CSS (heroIn) */}
         <div className={styles.heroText}>
-          <div className={styles.heroBadge} data-animate>
+          <div className={styles.heroBadge}>
             <span className={styles.heroBadgeDot} />
             <span>КОЛЛЕКЦИЯ 2026</span>
           </div>
 
-          <h1 className={styles.heroHeadline} data-animate data-delay="100">
+          <h1 className={styles.heroHeadline}>
             Сайт-приглашение на свадьбу —{' '}
             <em className={styles.heroItalic}>готов за один вечер</em>
           </h1>
 
-          <p className={styles.heroSubtitle} data-animate data-delay="200">
+          <p className={styles.heroSubtitle}>
             Дизайнерские шаблоны с анкетой для гостей, музыкой и картой проезда.
             Разовая оплата 2 490 ₽ — без подписок, сайт работает бессрочно.
           </p>
 
-          <div className={styles.heroCtas} data-animate data-delay="300">
+          <div className={styles.heroCtas}>
             <Link href="/templates" className={styles.heroCtaPrimary}>Создать бесплатно</Link>
             <div style={{ marginTop: 10, fontSize: 13, color: '#8a8378', letterSpacing: '0.02em' }}>
               Без регистрации · Оплата — только при публикации
@@ -145,14 +187,8 @@ function Hero() {
 
         <div className={styles.heroDevice}>
           <div className={styles.heroDeviceFrame}>
-            {/* Живой шаблон «Средиземноморье» — прокручивается прямо в окошке.
-                editing=1 отключает скролл-гейт и «слив воды» с даты внутри шаблона. */}
             <div className={styles.heroDeviceScreen}>
-              <MediterraneanTemplate
-                data={heroMediterraneanData()}
-                apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                editing
-              />
+              <HeroLivePreview />
               {/* На мобильных прокрутка внутри окошка «съедает» свайпы —
                   поэтому там iframe не интерактивен, а тап открывает демо. */}
               <Link href="/demo/mediterranean" className={styles.heroDeviceTapLink} aria-label="Открыть демо шаблона «Средиземноморье»">

@@ -8,6 +8,8 @@ interface Props {
   fullPage?: boolean;
   slug?: string;
   editing?: boolean;
+  /** load iframe живого превью — hero лендинга ждёт его, чтобы сменить миниатюру */
+  onFrameLoad?: () => void;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -16,7 +18,7 @@ interface Props {
      В режиме editing передаём editing=1 — «слив воды» с даты/скролл-гейт отключаются.
    Preview/card → миниатюра с именами поверх фото.
 ───────────────────────────────────────────────────────── */
-export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, editing }: Props) {
+export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, editing, onFrameLoad }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dataRef = useRef(data);
   useEffect(() => { dataRef.current = data; }, [data]);
@@ -97,6 +99,7 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
         style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#dbeeff' }}
         title="Превью «Средиземноморье»"
         allow="autoplay"
+        onLoad={onFrameLoad}
       />
     );
   }
@@ -134,7 +137,7 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
 
       {/* Watercolour botanical overlay — top-left (from real design) */}
       <img
-        src="/invite/assets/branch.png"
+        src="/invite/assets/branch.webp"
         alt=""
         style={{
           position: 'absolute', top: 0, left: 0,
@@ -215,7 +218,7 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
 
       {/* Flower cluster bottom-right */}
       <img
-        src="/invite/assets/flower-cluster.png"
+        src="/invite/assets/flower-cluster.webp"
         alt=""
         style={{
           position: 'absolute', bottom: 0, right: 0,

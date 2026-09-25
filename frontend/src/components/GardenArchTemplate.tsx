@@ -131,9 +131,9 @@ export default function GardenArchTemplate({ data, apiBase, fullPage, slug, edit
           style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', aspectRatio: '1038 / 1351' }} />
 
         {/* Шатёр (беседка) и пара — слоями в проёме арки */}
-        <img src="/invite/garden-arch/assets/decor/gazebo.png" alt=""
+        <img src="/invite/garden-arch/assets/decor/gazebo.webp" alt=""
           style={{ position: 'absolute', zIndex: 2, left: '50%', bottom: '20%', transform: 'translateX(-50%)', width: '60%', height: 'auto', pointerEvents: 'none' }} />
-        <img src="/invite/garden-arch/assets/decor/couple_walk.png" alt=""
+        <img src="/invite/garden-arch/assets/decor/couple_walk.webp" alt=""
           style={{ position: 'absolute', zIndex: 3, left: '50%', bottom: '14%', transform: 'translateX(-50%)', width: '30%', height: 'auto', pointerEvents: 'none' }} />
 
         <div style={{ position: 'absolute', zIndex: 4, left: 0, right: 0, top: '21%', textAlign: 'center', padding: '0 20%' }}>
