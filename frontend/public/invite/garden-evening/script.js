@@ -470,17 +470,112 @@
     });
   }
 
-  /* ─── Обложка появляется после конверта (в редакторе — сразу) ── */
+  /* ─── Обложка ─────────────────────────────────────────
+     Гость: конверт → видео (сад оживает, пара подходит и замирает в позе
+     обложки) → видео гаснет поверх тех же слоёв сцены и пары, сад темнеет,
+     появляются надпись и имена (класс hero-go). Без видео — редактор,
+     «меньше движения», экономия трафика, видео не загрузилось — финал
+     сразу после конверта. */
+  var LIVE = { v: null, started: false, playing: false, done: false, timer: 0 };
+
   function startHero() {
+    if (ROOT.classList.contains('hero-go')) return;
     fitNames();
     ROOT.classList.add('hero-go');
   }
 
-  function initHero() {
-    if (window.WCEnvelope && window.WCEnvelope.active) {
-      window.addEventListener('wc:envelope-open', startHero);
+  function unloadVideo(v) {
+    try { v.pause(); v.removeAttribute('src'); v.load(); } catch (e) {}
+    if (v.parentNode) v.parentNode.removeChild(v);
+  }
+
+  // Видео не нужно или сломалось до старта — под конвертом обычная обложка
+  function dropLive() {
+    var v = LIVE.v || document.getElementById('heroLive');
+    LIVE.v = null;
+    ROOT.classList.remove('hero-live');
+    if (v) unloadVideo(v);
+  }
+
+  function finishLive() {
+    if (LIVE.done) return;
+    LIVE.done = true;
+    clearTimeout(LIVE.timer);
+    startHero();
+    // видео погасло — освобождаем память телефона
+    var v = LIVE.v;
+    if (v) setTimeout(function () { unloadVideo(v); }, 1600);
+  }
+
+  function playLive() {
+    var v = LIVE.v;
+    if (!v) { startHero(); return; }
+    if (LIVE.started) return;
+    LIVE.started = true;
+    try { if (v.currentTime > 0.05) v.currentTime = 0; } catch (e) {}
+    var p;
+    try { p = v.play(); } catch (e) { finishLive(); return; }
+    if (p && typeof p.catch === 'function') p.catch(finishLive);
+    // Начало не успело загрузиться — открываем обложку без видео
+    LIVE.timer = setTimeout(function () { if (!LIVE.playing) finishLive(); }, 4000);
+  }
+
+  function initLive() {
+    var v = document.getElementById('heroLive');
+    var conn = navigator.connection;
+    if (!v || REDUCED || (conn && conn.saveData) || !v.canPlayType || !v.canPlayType('video/mp4')) {
+      dropLive();
       return;
     }
+    LIVE.v = v;
+    v.muted = true;
+    v.poster = v.getAttribute('data-poster');
+    v.preload = 'auto';
+    v.src = v.getAttribute('data-src');
+    ROOT.classList.add('hero-live');
+
+    // Гаснет чуть раньше последнего кадра: пара уже замерла
+    v.addEventListener('timeupdate', function () {
+      if (LIVE.started && v.duration && v.currentTime >= v.duration - 0.3) finishLive();
+    });
+    v.addEventListener('ended', function () { if (LIVE.started) finishLive(); });
+    v.addEventListener('error', function () { if (LIVE.started) finishLive(); else dropLive(); });
+    v.addEventListener('playing', function () {
+      if (!LIVE.started || LIVE.done) return;
+      LIVE.playing = true;
+      // зависло посреди ролика — не держим гостя
+      clearTimeout(LIVE.timer);
+      LIVE.timer = setTimeout(finishLive, ((v.duration || 8) - v.currentTime + 4) * 1000);
+    });
+
+    // Касание конверта «разрешает» видео: iPhone в режиме энергосбережения
+    // без касания не запустит даже беззвучное. Запуск и сразу пауза
+    var env = document.getElementById('envelope');
+    if (!env) return;
+    var prime = function () {
+      env.removeEventListener('click', prime);
+      env.removeEventListener('keydown', prime);
+      if (LIVE.started || !LIVE.v) return;
+      try {
+        var p = v.play();
+        if (p && typeof p.then === 'function') {
+          p.then(function () {
+            if (!LIVE.started) { v.pause(); try { v.currentTime = 0; } catch (e) {} }
+          }, function () {});
+        }
+      } catch (e) {}
+    };
+    env.addEventListener('click', prime);
+    env.addEventListener('keydown', prime);
+  }
+
+  function initHero() {
+    if (window.WCEnvelope && window.WCEnvelope.active) {
+      initLive();
+      window.addEventListener('wc:envelope-open', playLive);
+      return;
+    }
+    dropLive();
     // Без конверта ждём шрифты (не дольше секунды), чтобы имена не мигнули запасным
     var started = false;
     var go = function () { if (!started) { started = true; startHero(); } };

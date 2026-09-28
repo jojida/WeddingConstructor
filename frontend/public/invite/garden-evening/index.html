@@ -18,6 +18,7 @@
       opacity: 1 !important; transform: none !important; filter: none !important;
       -webkit-mask-image: none !important; mask-image: none !important;
     }
+    .hero__dim { opacity: 1 !important; }
   </style></noscript>
 </head>
 <body>
@@ -37,14 +38,25 @@
 
   <main class="invite" id="invite">
 
-    <!-- 1 — ОБЛОЖКА: вечерний сад, гирлянды, пара -->
+    <!-- 1 — ОБЛОЖКА: вечерний сад, гирлянды, пара.
+         У гостя после конверта играет видео: сад оживает, пара идёт к зрителю
+         и замирает в позе обложки. Последний кадр видео совпадает со слоями
+         сцены и пары, поэтому видео гаснет поверх них, сад за парой темнеет
+         и появляются надпись и имена. Видео подключает script.js
+         (data-src, data-poster) — в редакторе оно не грузится. -->
     <section class="hero" id="hero">
       <img class="hero__scene" src="assets/hero-scene.webp" alt="" />
+      <div class="hero__dim" aria-hidden="true"></div>
+      <img class="hero__couple hero-in" src="assets/hero-couple.webp" alt="Жених и невеста" />
+      <video class="hero__live" id="heroLive" data-src="assets/hero-live.mp4" data-poster="assets/hero-live-poster.webp"
+             muted playsinline webkit-playsinline preload="none" disablepictureinpicture disableremoteplayback
+             aria-hidden="true" tabindex="-1"></video>
+      <!-- кремовый рваный край поверх видео: низ кадра всегда цвета страницы -->
+      <img class="hero__edge" src="assets/hero-edge.webp" alt="" />
       <p class="hero__label hero-in" data-edit="heroTitle">приглашение на свадьбу</p>
       <h1 class="hero__names hero-in">
         <span data-name="groom">Даниил</span> <span class="hero__amp">&amp;</span> <span data-name="bride">Ольга</span>
       </h1>
-      <img class="hero__couple hero-in" src="assets/hero-couple.webp" alt="Жених и невеста" />
       <img class="hero__flowers hero__flowers--l" src="assets/hero-flowers-left.webp" alt="" />
       <img class="hero__flowers hero__flowers--r" src="assets/hero-flowers-right.webp" alt="" />
     </section>

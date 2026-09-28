@@ -197,6 +197,8 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
 
 /* ============================================================
    1 — ОБЛОЖКА (макет: 0–2208)
+   Слои: сцена → затемнение сада → пара → видео (у гостя) →
+   рваный край → надпись и имена → цветы.
    ============================================================ */
 .hero {
   position: relative; z-index: 2;
@@ -206,6 +208,29 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
   position: absolute; left: 0; top: 0;
   width: 100%; height: 100%;
   display: block;
+}
+/* Сад за парой темнеет перед появлением имён. Три правых столбца сцены
+   прозрачные (там был тёмный край снимка Canva) — их не затемняем,
+   низ закрывает рваный край */
+.hero__dim {
+  position: absolute; left: 0; top: 0; bottom: 0; right: calc(3 * var(--u));
+  background: linear-gradient(180deg, rgba(26, 15, 6, .5) 0%, rgba(26, 15, 6, .36) 42%, rgba(26, 15, 6, .2) 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+/* Видео 1080×1746 — в пропорции обложки, кадр = сцена целиком */
+.hero__live {
+  display: none;
+  position: absolute; left: 0; top: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 0;
+  pointer-events: none;
+}
+.hero__edge {
+  position: absolute; left: 0; top: calc(2064 * var(--u));
+  width: 100%; height: calc(144 * var(--u));
+  display: block;
+  pointer-events: none;
 }
 .hero__label {
   position: absolute; left: 0; right: 0;
@@ -242,11 +267,24 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
 .hero__flowers--l { left: 0; top: calc(1992 * var(--u)); width: calc(490 * var(--u)); }
 .hero__flowers--r { left: calc(824 * var(--u)); top: calc(2029 * var(--u)); width: calc(542 * var(--u)); }
 
-/* Появление обложки: после конверта (или сразу — в редакторе) */
+/* Появление обложки (класс hero-go): у гостя — после видео, без видео —
+   после конверта, в редакторе — сразу. Сад темнеет, надпись проявляется,
+   имена пишутся */
 .hero-in { opacity: 0; }
+.hero__dim { transition: opacity 1.8s ease; }
+html.hero-go .hero__dim { opacity: 1; }
 html.hero-go .hero__label { animation: heroFade 1.4s ease .25s both; }
 html.hero-go .hero__names { animation: heroWrite 1.9s cubic-bezier(.35, .45, .25, 1) .7s both; }
 html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1) .1s both; }
+
+/* Видео у гостя (hero-live): пока оно идёт, пара — в самом видео.
+   В конце видео гаснет поверх тех же сцены и пары, затем темнеет сад */
+html.hero-live .hero__live { display: block; transition: opacity 1.1s ease; }
+html.hero-live.hero-go .hero__live { opacity: 0; }
+html.hero-live.hero-go .hero__couple { opacity: 1; animation: none; }
+html.hero-live.hero-go .hero__dim { transition-delay: .2s; }
+html.hero-live.hero-go .hero__label { animation-delay: .8s; }
+html.hero-live.hero-go .hero__names { animation-delay: 1.3s; }
 .hero__names {
   -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
           mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
@@ -269,6 +307,7 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-in { opacity: 1 !important; animation: none !important; }
+  .hero__dim { opacity: 1; transition: none; }
 }
 
 /* ============================================================
