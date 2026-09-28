@@ -303,17 +303,20 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
 .letter > img, .letter__slot { position: absolute; display: block; height: auto; }
 .letter__edge  { left: 0; top: calc(946 * var(--u)); width: 100%; z-index: 1; }
 .letter__back  { left: calc(215 * var(--u)); top: calc(27 * var(--u)); width: calc(976 * var(--u)); z-index: 2; }
-/* прорезь: всё, что ниже дна конверта, обрезано — бумага прячется внутри */
-.letter__slot  { left: 0; top: 0; width: 100%; height: calc(943 * var(--u)); overflow: hidden; z-index: 3; }
+/* прорезь: всё, что ниже дна конверта, обрезано — бумага прячется внутри;
+   сверху запас, чтобы выдвинутая бумага поднималась над конвертом */
+.letter__slot  { left: 0; top: calc(-300 * var(--u)); width: 100%; height: calc(1243 * var(--u)); overflow: hidden; z-index: 3; }
+/* бумага с датой: в конверте (560u ниже места макета) → выдвинута на 250u
+   выше места макета; дата напечатана на бумаге и едет вместе с ней */
 .letter__card {
   position: absolute;
-  left: calc(243 * var(--u)); top: calc(128 * var(--u));
+  left: calc(243 * var(--u)); top: calc(428 * var(--u));
   width: calc(920 * var(--u));
   transform: translateY(calc(560 * var(--u)));
-  transition: transform 1.7s cubic-bezier(.2, .75, .2, 1) .2s;
+  transition: transform 2s cubic-bezier(.22, .7, .2, 1) .2s;
   will-change: transform;
 }
-.letter.is-open .letter__card { transform: none; }
+.letter.is-open .letter__card { transform: translateY(calc(-250 * var(--u))); }
 .letter__paper { display: block; width: 100%; height: auto; }
 .letter__front { left: calc(201 * var(--u)); top: calc(358 * var(--u)); width: calc(995 * var(--u)); z-index: 4; }
 .letter__seal  { left: calc(584 * var(--u)); top: calc(501 * var(--u)); width: calc(259 * var(--u)); z-index: 5; }
@@ -331,18 +334,9 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
   line-height: 1.2;
   color: var(--pink);
   white-space: nowrap;
-  /* дата «пишется», когда бумага уже выехала */
-  opacity: 0;
-  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
-          mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
-  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
-  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-  -webkit-mask-position: 100% 0; mask-position: 100% 0;
 }
-.letter.is-open .letter__date { animation: write 1.6s cubic-bezier(.35, .45, .25, 1) 1.35s both; }
 @media (prefers-reduced-motion: reduce) {
-  .letter__card { transform: none; transition: none; }
-  .letter__date { opacity: 1; animation: none !important; -webkit-mask-image: none; mask-image: none; }
+  .letter__card { transform: translateY(calc(-250 * var(--u))); transition: none; }
 }
 
 /* ============================================================
