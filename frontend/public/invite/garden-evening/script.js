@@ -220,13 +220,18 @@
       return n.offsetTop + (icon ? icon.offsetTop + icon.offsetHeight / 2 : n.offsetHeight / 2);
     });
     // Как в макете: сердце стоит рядом с первым пунктом на уровне его подписи,
-    // трек вьётся между колонками и заканчивается у последнего пункта
-    var pts = [[608 * u, centers[0] + 296 * u]];
+    // трек вьётся между колонками и заканчивается у последнего пункта.
+    // Начало и конец — в свободном коридоре между колонками пунктов
+    // (левая 0–560, правая 780–1340): на уровне подписей там нет текста.
+    // Изгибы у каждого пункта уходят к противоположной колонке, а она на
+    // этой высоте пустая — пункты стоят лесенкой.
+    var MID = 670;
+    var pts = [[(MID - 20) * u, centers[0] + 296 * u]];
     for (var i = 1; i < nodes.length; i++) {
       pts.push([(nodes[i].classList.contains('is-right') ? 585 : 785) * u, centers[i]]);
     }
-    var lastRight = nodes[nodes.length - 1].classList.contains('is-right');
-    pts.push([(lastRight ? 825 : 540) * u, centers[centers.length - 1] + 250 * u]);
+    var endY = Math.max(centers[centers.length - 1] + 200 * u, pts[pts.length - 1][1] + 160 * u);
+    pts.push([(MID + 10) * u, endY]);
 
     var d = 'M ' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
     for (var k = 1; k < pts.length; k++) {
