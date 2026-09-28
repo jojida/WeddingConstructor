@@ -597,11 +597,10 @@ html.hero-go .hero__date { animation: heroFade 1.4s ease 1.8s both; }
   width: calc(22 * var(--u)); height: calc(20 * var(--u));
   margin: calc(-10 * var(--u)) 0 0 calc(-11 * var(--u));
   transform: translateY(var(--hy, 0px));
-  transition: transform .18s linear;
   color: #111;
   filter: drop-shadow(0 calc(2 * var(--u)) calc(3 * var(--u)) rgba(0, 0, 0, .3));
 }
-.prog__heart svg { display: block; width: 100%; height: 100%; fill: currentColor; animation: beat 1.8s ease-in-out infinite; }
+.prog__heart svg { display: block; width: 100%; height: 100%; fill: currentColor; }
 
 @keyframes beat {
   0%, 100% { transform: scale(1); }
@@ -611,8 +610,7 @@ html.hero-go .hero__date { animation: heroFade 1.4s ease 1.8s both; }
   70%      { transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .prog__heart { transition: none; }
-  .prog__heart svg, .cal__heart { animation: none; }
+  .cal__heart { animation: none; }
 }
 
 /* ============================================================

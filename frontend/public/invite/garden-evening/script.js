@@ -165,7 +165,7 @@
   }
 
   /* ─── Программа дня: пункты-серпантин + сердце на треке ── */
-  var TL = { prog: null, path: null, svg: null, len: 0, y0: 0, y1: 0 };
+  var TL = { prog: null, path: null, svg: null, heart: null, len: 0, y0: 0, y1: 0, u: 1 };
 
   function applySchedule(list) {
     if (!Array.isArray(list) || !list.length) return;
@@ -209,11 +209,12 @@
     var prog = TL.prog = document.getElementById('prog');
     var svg = TL.svg = document.getElementById('progSvg');
     var path = TL.path = document.getElementById('progPath');
+    TL.heart = document.getElementById('progHeart');
     if (!prog || !svg || !path) return;
     var nodes = [].slice.call(prog.querySelectorAll('.prog__node'));
     var W = prog.clientWidth, H = prog.offsetHeight;
     if (!nodes.length || !W || !H) return;
-    var u = W / 1366;
+    var u = TL.u = W / 1366;
     var centers = nodes.map(function (n) {
       var icon = n.querySelector('.prog__icon');
       return n.offsetTop + (icon ? icon.offsetTop + icon.offsetHeight / 2 : n.offsetHeight / 2);
@@ -242,18 +243,20 @@
     updateHeart();
   }
 
+  // Как в других шаблонах: позиция — прямо за прокруткой, без переходов;
+  // сердце (124×112 в единицах макета) ставим центром на точку трека
   function updateHeart() {
-    var prog = TL.prog, path = TL.path;
-    if (!prog || !path || !TL.len) return;
+    var prog = TL.prog, path = TL.path, heart = TL.heart;
+    if (!prog || !path || !heart || !TL.len) return;
     var top = prog.getBoundingClientRect().top;
     var span = TL.y1 - TL.y0;
-    // сердце держится чуть ниже середины экрана и едет по треку вместе с прокруткой
-    var p = span > 0 ? (window.innerHeight * 0.56 - (top + TL.y0)) / span : 0;
+    var p = span > 0 ? (window.innerHeight * 0.5 - (top + TL.y0)) / span : 0;
     p = Math.max(0, Math.min(1, p));
     var pt;
     try { pt = path.getPointAtLength(p * TL.len); } catch (e) { return; }
-    prog.style.setProperty('--hx', pt.x.toFixed(1) + 'px');
-    prog.style.setProperty('--hy', pt.y.toFixed(1) + 'px');
+    var u = TL.u;
+    heart.setAttribute('transform',
+      'translate(' + (pt.x - 62 * u).toFixed(1) + ' ' + (pt.y - 56 * u).toFixed(1) + ') scale(' + u.toFixed(4) + ')');
   }
 
   function initTrack() {

@@ -412,7 +412,7 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
   pointer-events: none;
   opacity: 0; transition: opacity .8s ease;
 }
-.prog.is-ready .prog__svg, .prog.is-ready .prog__heart { opacity: 1; }
+.prog.is-ready .prog__svg { opacity: 1; }
 .prog__path {
   fill: none;
   stroke: var(--dash);
@@ -420,24 +420,7 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
   stroke-linecap: butt;
   stroke-dasharray: calc(30 * var(--u)) calc(15 * var(--u));
 }
-.prog__heart {
-  position: absolute; left: 0; top: 0; z-index: 2;
-  width: calc(124 * var(--u)); height: calc(112 * var(--u));
-  margin: calc(-56 * var(--u)) 0 0 calc(-62 * var(--u));
-  color: var(--heart);
-  opacity: 0;
-  transform: translate(var(--hx, 0px), var(--hy, 0px));
-  transition: transform .18s linear, opacity .8s ease;
-  filter: drop-shadow(0 calc(6 * var(--u)) calc(8 * var(--u)) rgba(98, 71, 37, .25));
-}
-.prog__heart svg { display: block; width: 100%; height: 100%; fill: currentColor; animation: beat 1.8s ease-in-out infinite; }
-@keyframes beat {
-  0%, 100% { transform: scale(1); }
-  14%      { transform: scale(1.12); }
-  28%      { transform: scale(1); }
-  42%      { transform: scale(1.06); }
-  70%      { transform: scale(1); }
-}
+.prog__heart { fill: var(--heart); }
 .program__sign {
   display: block;
   width: calc(440 * var(--u)); height: auto;
@@ -445,10 +428,6 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
 }
 /* последний пункт справа — табличка встаёт слева рядом с ним, как в макете */
 .program.end-right .program__sign { margin-top: calc(-360 * var(--u)); }
-@media (prefers-reduced-motion: reduce) {
-  .prog__heart { transition: none; }
-  .prog__heart svg { animation: none; }
-}
 
 /* ============================================================
    6 — ДРЕСС-КОД (подложка: 11919–14443)
