@@ -69,6 +69,18 @@ export function demoMapPoint(address?: string): { q: string; lat: number; lon: n
 
 const HANDMADE_TEMPLATES = [
   {
+    id: 'garden-evening',
+    name: 'Вечер в саду',
+    description: 'Акварельный вечерний сад с гирляндами и видео раскрытия конверта с сургучом. Программа дня с сердцем на треке, дресс-код с палитрой, табличка с днями до свадьбы, свиток пожеланий и анкета для гостей.',
+    tags: ['Акварель', 'Сад', 'Гирлянды', 'Конверт', 'Нежный'],
+    colors: ['#f7f0e0', '#c3881e', '#9a824f'],
+    preview: '/invite/garden-evening/assets/preview.jpg',
+    defaultCover: '/invite/garden-evening/assets/preview.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Ольга',
+    sampleGroom: 'Даниил',
+  },
+  {
     id: 'ivory',
     name: 'Айвори',
     description: 'Видео раскрытия конверта с сургучом, чёрно-белое фото на обложке, рельефная бумага с пионами и каллиграфия. Календарь дня, программа с сердцем на треке, дресс-код, таймер и анкета для гостей.',
@@ -417,6 +429,7 @@ export const formatDrinkChoice = (choice: string, labels: Record<string, string>
 
 /** Ключ data-edit строки-приветствия в каждом шаблоне (для персонализации гостя). */
 export const TEMPLATE_GREETING_KEY: Record<string, string> = {
+  'garden-evening': 'greetingTitle',
   ivory: 'greetingTitle',
   calla: 'greetingTitle',
   sketch: 'guestsTitle',
@@ -464,6 +477,17 @@ export interface TemplateSection {
 
 /* Наборы иконок для пикера в «Программе дня» */
 export const ICON_SETS: Record<string, string[]> = {
+  'garden-evening': [
+    '/invite/garden-evening/assets/icon-champagne.webp',
+    '/invite/garden-evening/assets/icon-rings.webp',
+    '/invite/garden-evening/assets/icon-bouquet.webp',
+    '/invite/garden-evening/assets/icon-candelabra.webp',
+    '/invite/garden-evening/assets/icon-cake.webp',
+    '/invite/garden-evening/assets/icon-lamp.webp',
+    '/invite/garden-evening/assets/icon-signpost.webp',
+    '/invite/garden-evening/assets/doves.webp',
+    '/invite/garden-evening/assets/swans.webp',
+  ],
   calla: [
     '/invite/calla/assets/couple-illustration.webp',
     '/invite/calla/assets/champagne.webp',
@@ -606,6 +630,68 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 }
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
+  'garden-evening': [
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'heroTitle', type: 'text', label: 'Надпись над именами', scope: 'custom', maxLength: 40 },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения (абзацы с новой строки)', scope: 'data', maxLength: 420 },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Дворцовая усадьба', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', iconSet: 'garden-evening' },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры',       scope: 'data' },
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Образ для дам 1',     scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Образ для дам 2',     scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Образ для джентльменов 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Образ для джентльменов 2', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Пожелания и детали', icon: '💌',
+      fields: [
+        { id: 'story', type: 'textarea', label: 'Текст в свитке (абзацы с новой строки)', hint: 'Поместится в свиток', scope: 'data', maxLength: 380 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'closingLove',  type: 'text', label: 'Надпись над подписью', scope: 'custom', maxLength: 30 },
+        { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
   ivory: [
     {
       title: 'Обложка', icon: '🖼',
@@ -1055,6 +1141,46 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = Object.fromEnt
 );
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
+  'garden-evening': {
+    inviteText:
+      'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
+      'рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.\n' +
+      'Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.',
+    venue: 'Дворцовая усадьба',
+    story:
+      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
+      'Просим не дарить букеты — мы не успеем насладиться ими в полной мере.',
+    schedule: [
+      { time: '15:00', title: 'Welcome',           icon: '/invite/garden-evening/assets/icon-champagne.webp' },
+      { time: '17:00', title: 'Церемония',         icon: '/invite/garden-evening/assets/icon-rings.webp' },
+      { time: '19:00', title: 'Начало банкета',    icon: '/invite/garden-evening/assets/icon-bouquet.webp' },
+      { time: '21:00', title: 'Банкет',            icon: '/invite/garden-evening/assets/icon-candelabra.webp' },
+      { time: '22:00', title: 'Торт',              icon: '/invite/garden-evening/assets/icon-cake.webp' },
+      { time: '22:00', title: 'Завершение вечера', icon: '/invite/garden-evening/assets/icon-lamp.webp' },
+    ],
+    dressCodeColors: ['#e09ba2', '#9a824f', '#af8162', '#c3881e'],
+    dressCodePhoto: '/invite/garden-evening/assets/dress-w1.jpg',
+    drinks: [
+      { value: 'sparkling',  label: 'Игристое' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'cognac',     label: 'Коньяк' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      heroTitle:     'приглашение на свадьбу',
+      greetingTitle: 'Дорогие Друзья',
+      dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей палитры',
+      dressPhoto2:   '/invite/garden-evening/assets/dress-w2.jpg',
+      dressMan1:     '/invite/garden-evening/assets/dress-m1.jpg',
+      dressMan2:     '/invite/garden-evening/assets/dress-m2.jpg',
+      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
+      closingTitle:  'До новых встреч!',
+      closingLove:   'С любовью!',
+      closingSign:   '', // Пустое поле — имена пары.
+    },
+  },
+
   ivory: {
     inviteText:
       'Приглашаем вас разделить радость того особенного для нас события и стать частью начала семейной истории',

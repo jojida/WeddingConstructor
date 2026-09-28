@@ -168,7 +168,7 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
 /* На широком экране по бокам — размытый кадр того же конверта */
 .env__backdrop {
   position: absolute; inset: -60px;
-  background: url("assets/envelope-poster.jpg") center / cover;
+  background: url("../assets/envelope-wave-poster.jpg") center / cover;
   filter: blur(26px) brightness(.9);
 }
 .env__video {

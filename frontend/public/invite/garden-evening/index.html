@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Даниил &amp; Ольга — приглашение на свадьбу</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Forum&family=Great+Vibes&family=Open+Sans:wght@300&display=swap" rel="stylesheet" />
+  <!-- цифры на табличке «Дней до свадьбы» — из шрифта нужны только они -->
+  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&text=0123456789&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Без скриптов конверт не открыть и появление при прокрутке не сработает —
+       показываем приглашение сразу -->
+  <noscript><style>
+    .env { display: none !important; }
+    .rv, .rv-soft, .rv-write, .hero-in {
+      opacity: 1 !important; transform: none !important; filter: none !important;
+      -webkit-mask-image: none !important; mask-image: none !important;
+    }
+  </style></noscript>
+</head>
+<body>
+
+  <!-- 0 — КОНВЕРТ: видео раскрытия (../assets/envelope.js — общий модуль).
+       Позже первый экран станет анимацией. -->
+  <div class="env" id="envelope" role="button" tabindex="0" aria-label="Открыть приглашение">
+    <div class="env__backdrop" aria-hidden="true"></div>
+    <video class="env__video" id="envelopeVideo" src="../assets/envelope-wave.mp4" poster="../assets/envelope-wave-poster.jpg"
+           muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+    <div class="env__names" aria-hidden="true">
+      <span data-env-name="groom">Даниил</span><span class="env__amp">&amp;</span><span data-env-name="bride">Ольга</span>
+    </div>
+    <p class="env__hint">Нажмите, чтобы открыть</p>
+    <div class="env__glow" aria-hidden="true"></div>
+  </div>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА: вечерний сад, гирлянды, пара -->
+    <section class="hero" id="hero">
+      <img class="hero__scene" src="assets/hero-scene.webp" alt="" />
+      <p class="hero__label hero-in" data-edit="heroTitle">приглашение на свадьбу</p>
+      <h1 class="hero__names hero-in">
+        <span data-name="groom">Даниил</span> <span class="hero__amp">&amp;</span> <span data-name="bride">Ольга</span>
+      </h1>
+      <img class="hero__couple hero-in" src="assets/hero-couple.webp" alt="Жених и невеста" />
+      <img class="hero__flowers hero__flowers--l" src="assets/hero-flowers-left.webp" alt="" />
+      <img class="hero__flowers hero__flowers--r" src="assets/hero-flowers-right.webp" alt="" />
+    </section>
+
+    <!-- 2 — ДОРОГИЕ ДРУЗЬЯ -->
+    <section class="greet" id="greeting">
+      <h2 class="title rv-write" data-edit="greetingTitle">Дорогие Друзья</h2>
+      <div class="greet__text rv" data-edit="inviteText">
+        <p>Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.</p>
+        <p>Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.</p>
+      </div>
+    </section>
+
+    <!-- 3 — КОНВЕРТ С ДАТОЙ (картинка: конверт, печать, листва, край подложки) -->
+    <section class="letter" id="date">
+      <img class="letter__plate rv-soft" src="assets/envelope.webp" alt="" />
+      <p class="letter__date rv-write" data-edit="letterDate">28 .01.27</p>
+    </section>
+
+    <!-- 4 — МЕСТО ПРОВЕДЕНИЯ -->
+    <section class="venue" id="venue">
+      <h2 class="title rv-write" data-edit="venueTitle">Место проведения</h2>
+      <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
+      <div class="wc-map garden-map" data-wc-map hidden></div>
+      <p class="venue__name rv" data-edit="venue">Дворцовая усадьба</p>
+      <p class="venue__addr rv" data-edit="venueAddress"></p>
+      <img class="venue__bottom" src="assets/venue-bottom.webp" alt="" />
+    </section>
+
+    <!-- 5 — ПРОГРАММА ДНЯ: серпантин с сердцем -->
+    <section class="program" id="program">
+      <h2 class="title rv-write" data-edit="programTitle">Программа дня</h2>
+      <div class="prog" id="prog">
+        <svg class="prog__svg" id="progSvg" aria-hidden="true" preserveAspectRatio="none"><path id="progPath" class="prog__path" d="" /></svg>
+        <div class="prog__heart" id="progHeart" aria-hidden="true">
+          <svg viewBox="0 0 124 112"><path d="M62 111C22 82 1 60 1 33 1 14 15 1 32 1c13 0 24 7 30 18C68 8 79 1 92 1c17 0 31 13 31 32 0 27-21 49-61 78z" /></svg>
+        </div>
+        <!-- пункты .prog__node строит script.js из расписания -->
+      </div>
+      <img class="program__sign rv-soft" src="assets/icon-signpost.webp" alt="" />
+    </section>
+
+    <!-- 6 — ДРЕСС-КОД -->
+    <section class="dress" id="dresscode">
+      <div class="dress__top">
+        <img class="dress__plate" src="assets/dress-top.webp" alt="" />
+        <h2 class="title dress__title rv-write" data-edit="dressTitle">Дресс код</h2>
+      </div>
+      <div class="dress__body">
+        <div class="palette rv" data-edit="palette">
+          <span style="--c:#e09ba2"></span><span style="--c:#9a824f"></span><span style="--c:#af8162"></span><span style="--c:#c3881e"></span>
+        </div>
+        <p class="dress__text rv" data-edit="dressText">Будем рады, если в ваших нарядах найдутся оттенки нашей палитры</p>
+        <div class="looks">
+          <p class="looks__label rv">Для дам</p>
+          <figure class="look rv-soft"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для дам 1" /></figure>
+          <figure class="look rv-soft"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для дам 2" /></figure>
+          <p class="looks__label rv">Для джентльменов</p>
+          <figure class="look rv-soft"><img src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для джентльменов 1" /></figure>
+          <figure class="look rv-soft"><img src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для джентльменов 2" /></figure>
+        </div>
+      </div>
+      <img class="dress__bottom" src="assets/dress-bottom.webp" alt="" />
+    </section>
+
+    <!-- 7 — ДНЕЙ ДО СВАДЬБЫ: табличка на ветке -->
+    <section class="cd" id="countdown">
+      <h2 class="title rv-write" data-edit="countdownTitle">Дней до свадьбы</h2>
+      <div class="cd__tree rv-soft">
+        <img class="cd__img" src="assets/tree-sign.webp" alt="" />
+        <svg class="cd__num" viewBox="0 0 660 260" aria-live="off">
+          <text id="cdDays" x="330" y="215" text-anchor="middle">21</text>
+        </svg>
+      </div>
+    </section>
+
+    <!-- 8 — ПОЖЕЛАНИЯ И ДЕТАЛИ: свиток -->
+    <section class="wish" id="wishes">
+      <img class="wish__doves rv-soft" src="assets/doves.webp" alt="" />
+      <div class="scroll rv-soft">
+        <img class="scroll__img" src="assets/scroll.webp" alt="" />
+        <div class="scroll__box">
+          <div class="scroll__text" data-edit="story">
+            <p>Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.</p>
+            <p>Просим не дарить букеты — мы не успеем насладиться ими в полной мере.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 — АНКЕТА -->
+    <section class="rsvp" id="rsvp">
+      <h2 class="title rv-write" data-edit="surveyTitle">Анкета</h2>
+      <p class="rsvp__lead rv" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету заранее</p>
+      <form class="rsvp__form rv" id="rsvpForm" novalidate>
+        <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+        <fieldset class="rsvp__group">
+          <legend>Будете ли вы на празднике?</legend>
+          <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, с радостью приду</label>
+          <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+        </fieldset>
+        <fieldset class="rsvp__group" data-rsvp-count>
+          <legend>Сколько вас будет?</legend>
+          <div class="wc-count" data-wc-count>
+            <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+            <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+            <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+          </div>
+        </fieldset>
+        <fieldset class="rsvp__group" data-edit="drinks">
+          <legend>Что предпочитаете из напитков?</legend>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Игристое</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+        </fieldset>
+        <button class="rsvp__submit" type="submit">Отправить</button>
+        <p class="rsvp__error" id="rsvpError" role="alert"></p>
+      </form>
+      <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен</p>
+    </section>
+
+    <!-- 10 — ДО НОВЫХ ВСТРЕЧ -->
+    <section class="fin" id="final">
+      <img class="fin__swans rv-soft" src="assets/swans.webp" alt="" />
+      <h2 class="title rv-write" data-edit="closingTitle">До новых встреч!</h2>
+      <img class="fin__lights rv-soft" src="assets/lights.webp" alt="" />
+      <p class="title fin__love rv-write" data-edit="closingLove">С любовью!</p>
+      <p class="fin__names rv" data-edit="closingSign">Даниил &amp; Ольга</p>
+      <img class="fin__couple rv-soft" src="assets/couple-back.webp" alt="Жених и невеста" />
+    </section>
+
+  </main>
+
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="../assets/envelope.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

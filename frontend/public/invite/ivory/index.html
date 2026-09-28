@@ -23,10 +23,10 @@
 <body>
 
   <!-- 0 — КОНВЕРТ: видео раскрытия. Позже заменится анимацией первого экрана
-       (envelope.js — отдельный файл, чтобы заменить его целиком). -->
+       (../assets/envelope.js — общий модуль конверта). -->
   <div class="env" id="envelope" role="button" tabindex="0" aria-label="Открыть приглашение">
     <div class="env__backdrop" aria-hidden="true"></div>
-    <video class="env__video" id="envelopeVideo" src="assets/envelope.mp4" poster="assets/envelope-poster.jpg"
+    <video class="env__video" id="envelopeVideo" src="../assets/envelope-wave.mp4" poster="../assets/envelope-wave-poster.jpg"
            muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
     <div class="env__names" aria-hidden="true">
       <span data-env-name="groom">Вадим</span><span class="env__amp">&amp;</span><span data-env-name="bride">Дарья</span>
@@ -196,7 +196,7 @@
   <script src="../assets/venue-map.js"></script>
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
-  <script src="envelope.js"></script>
+  <script src="../assets/envelope.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
