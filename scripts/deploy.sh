@@ -71,6 +71,7 @@ if ! git diff --quiet "$local_rev" "$remote_rev" -- backend; then
   log "менялся бэкенд — пересобираю"
   cd "$REPO/backend"
   npm ci --no-audit --no-fund
+  npx prisma generate
   npm run build
   pm2 restart wedding-api --update-env
   cd "$REPO"

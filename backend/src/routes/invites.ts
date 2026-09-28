@@ -24,7 +24,7 @@ const parseObj = (s: any): Record<string, any> => {
 // Слова, которые нельзя использовать как slug, чтобы не конфликтовать
 // с маршрутами фронтенда (weddingcraft.ru/<slug>).
 const RESERVED_SLUGS = new Set([
-  'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment',
+  'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment', 'print',
   'templates', 'admin', 'login', 'register', 'signup', 'about', 'pricing', 'help',
   'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads', 'studio', 'privacy', 'oferta',
 ]);

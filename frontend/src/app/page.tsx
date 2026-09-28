@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
+import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
 import PreviewScale from '@/components/PreviewScale';
 import MediterraneanTemplate from '@/components/MediterraneanTemplate';
 import styles from './page.module.css';
@@ -31,6 +32,7 @@ function Header() {
 
         <nav className={styles.nav}>
           <Link href="/templates" className={styles.navLink}>Шаблоны</Link>
+          <Link href="/print" className={styles.navLink}>Для печати</Link>
           <a href="#features" className={styles.navLink}>Возможности</a>
           <a href="#rsvp" className={styles.navLink}>Управление</a>
           <a href="#pricing" className={styles.navLink}>Цены</a>
@@ -60,6 +62,7 @@ function Header() {
       {menuOpen && (
         <div className={styles.mobileMenu}>
           <Link href="/templates" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Шаблоны</Link>
+          <Link href="/print" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Печатные приглашения · 290 ₽</Link>
           <a href="#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</a>
           <a href="#rsvp" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Управление</a>
           <a href="#pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Цены</a>
@@ -513,6 +516,7 @@ function Footer() {
               <li><Link href="/templates" className={styles.footerLink}>Цифровые приглашения</Link></li>
               <li><Link href="/templates" className={styles.footerLink}>Digital Save the Date</Link></li>
               <li><Link href="/templates" className={styles.footerLink}>Свадебные сайты</Link></li>
+              <li><Link href="/print" className={styles.footerLink}>Печатные приглашения · 290 ₽</Link></li>
               <li><a href="#rsvp" className={styles.footerLink}>Управление</a></li>
             </ul>
           </div>
@@ -805,6 +809,7 @@ export default function HomePage() {
       <Header />
       <Hero />
       <TemplatesSection />
+      <PrintInvitationsTeaser />
       <HowItWorks />
       <CompareSection />
       <Features />

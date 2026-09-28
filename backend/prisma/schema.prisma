@@ -14,6 +14,23 @@ model User {
   name          String?
   createdAt     DateTime   @default(now())
   invitations   Invitation[]
+  printOrders   PrintOrder[]
+}
+
+model PrintOrder {
+  id String @id @default(uuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  templateId String
+  data String
+  status String @default("draft")
+  paymentId String @default("")
+  paymentKey String @default(uuid())
+  paidAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model VerificationCode {

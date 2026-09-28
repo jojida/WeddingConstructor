@@ -147,7 +147,7 @@
 .mobileBtnCreate:hover { opacity: 0.88; }
 
 /* ── Responsive ────────────────────────────────────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .links, .actions { display: none; }
   .burger { display: block; }
   .mobileMenu { display: flex; }

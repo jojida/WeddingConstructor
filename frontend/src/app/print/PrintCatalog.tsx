@@ -1,0 +1,40 @@
+'use client';
+import { useState } from 'react';
+import Link from 'next/link';
+import { ArrowDown, ArrowUpRight, Check, FileDown, Printer, Sparkles } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import { PRINT_TEMPLATES, PRINT_PRICE } from '@/lib/print';
+import styles from './print.module.css';
+
+export default function PrintCatalog() {
+  const [filter, setFilter] = useState('Все дизайны');
+  return <><Navbar /><main className={styles.page}>
+    <section className={styles.hero}>
+      <div className={styles.heroText}><span className={styles.eyebrow}>WEDDINGCRAFT · БУМАЖНАЯ КОЛЛЕКЦИЯ</span>
+        <h1>Ваша история.<br /><em>На красивой бумаге.</em></h1>
+        <p>Приглашение, которое хочется сохранить.<br />Выберите дизайн, добавьте ваши слова и распечатайте — дома или в любимой типографии.</p>
+        <div className={styles.heroActions}><a className={styles.primary} href="#collection">Выбрать приглашение <ArrowDown size={17} /></a><span><b>{PRINT_PRICE} ₽</b> за готовый макет</span></div>
+        <div className={styles.benefits}><span><Check size={14} /> PDF для печати</span><span><Check size={14} /> Без подписки</span><span><Check size={14} /> Любой тираж</span></div>
+      </div>
+      <div className={styles.heroArt} aria-label="Примеры печатных приглашений"><div className={styles.paperBack}><img src="/print/olive.svg" alt="Приглашение с оливковой ветвью" /></div><div className={styles.paperFront}><img src="/print/vow.svg" alt="Минималистичное приглашение Тихое да" /></div><span className={styles.seal}>с любовью<br />к деталям</span><span className={styles.artCaption}>маленькая деталь большого дня</span></div>
+    </section>
+    <section className={styles.steps} aria-label="Как это работает">{[
+      ['01', 'Найдите ваш дизайн', 'Шесть настроений для особенного дня.', Sparkles],
+      ['02', 'Добавьте ваши слова', 'Имена, дата и место — в простом редакторе.', Check],
+      ['03', 'Скачайте и распечатайте', 'Оплатите 290 ₽ и получите готовый PDF.', FileDown],
+    ].map(([n, title, description, Icon]) => <div key={String(n)}><span className={styles.stepNumber}>{String(n)}</span><div><h3>{String(title)}</h3><p>{String(description)}</p></div>{typeof Icon !== 'string' && <Icon size={22} strokeWidth={1} />}</div>)}</section>
+    <section id="collection" className={styles.collection}><div className={styles.sectionHeading}><div><span className={styles.eyebrow}>ВЫБЕРИТЕ ВАШЕ НАСТРОЕНИЕ</span><h2>Бумага. Чувства. Вы.</h2></div><p>Один дизайн — {PRINT_PRICE} ₽<br /><span>Редактирование и предпросмотр бесплатно</span></p></div>
+      <div className={styles.filters} aria-label="Стиль приглашения">{['Все дизайны', 'Минимализм', 'Ботаника', 'Романтика', 'Классика'].map(f => <button key={f} aria-pressed={filter === f} className={filter === f ? styles.selected : ''} onClick={() => setFilter(f)}>{f}</button>)}</div>
+      <div className={styles.grid}>{PRINT_TEMPLATES.filter(t => filter === 'Все дизайны' || t.category === filter).map(t => <Link href={`/print/editor?template=${t.id}`} key={t.id} className={styles.card}><div className={styles.cardArt} style={{ background: t.color }}><span className={styles.tag}>{t.category}</span><img src={`/print/${t.id}.svg`} alt={`Печатное приглашение «${t.name}»`} loading="lazy" /><span className={styles.cardHint}>Настроить приглашение <ArrowUpRight size={17} /></span></div><div className={styles.cardTitle}><h3>{t.name}</h3><span>{PRINT_PRICE} ₽</span></div><p>{t.description}</p><span className={styles.cardMeta}>A6 · 105 × 148 мм · PDF <span>0{PRINT_TEMPLATES.indexOf(t) + 1}</span></span></Link>)}</div>
+    </section>
+    <section className={styles.printNote}><Printer size={38} strokeWidth={1} /><div><span className={styles.eyebrow}>ОТ ЭКРАНА К ТЁПЛЫМ ВСТРЕЧАМ</span><h2>Красиво в руках.<br /><em>Просто в печати.</em></h2></div><div><p>После оплаты — PDF без водяного знака. Размер A6 для домашней печати и отдельный файл с вылетами 3 мм для типографии.</p><p>Вы покупаете цифровой макет одного дизайна. Меняйте текст и скачивайте его повторно в аккаунте. Бумага, печать и доставка оплачиваются самостоятельно.</p></div></section>
+    <section className={styles.faq}><h2>Осталось несколько вопросов?</h2>{[
+      ['Что входит в 290 ₽?', 'Один выбранный дизайн приглашения, редактирование текста и повторное скачивание PDF без водяного знака. Можно напечатать столько экземпляров для вашей свадьбы, сколько нужно.'],
+      ['Можно посмотреть до оплаты?', 'Да. Заполните данные в редакторе и посмотрите готовую композицию. Оплата нужна только для скачивания PDF.'],
+      ['Какую бумагу выбрать?', 'Плотную матовую бумагу, например 250–300 г/м². Сначала уточните допустимую плотность для вашего принтера или типографии и сделайте пробный отпечаток.'],
+      ['Как правильно распечатать?', 'Для дома скачайте A6 и выберите масштаб 100% (реальный размер), без подгонки. Для типографии используйте вариант с вылетами: 111 × 154 мм, после обрезки — 105 × 148 мм. Цвет может отличаться от экрана; согласуйте пробу с типографией.'],
+      ['Нужно ли покупать сайт-приглашение?', 'Нет. Печатные приглашения — отдельный продукт за 290 ₽. Для сохранения покупки и повторного скачивания понадобится вход по email.'],
+    ].map(([q, a]) => <details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</section>
+    <footer className={styles.footer}><Link href="/">WeddingCraft</Link><Link href="/print/orders">Мои печатные приглашения</Link><Link href="/oferta">Оферта</Link><a href="mailto:support@weddingcraft.ru">Помощь</a></footer>
+  </main></>;
+}

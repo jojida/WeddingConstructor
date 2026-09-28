@@ -1,4 +1,6 @@
 import prisma from './prisma';
+import fs from 'fs';
+import path from 'path';
 
 /* Добавочные колонки, которых может не быть в рабочей базе.
 
@@ -16,6 +18,8 @@ const COLUMNS: { table: string; column: string; ddl: string }[] = [
 ];
 
 export async function ensureSchema(): Promise<void> {
+  const printSchema = fs.readFileSync(path.join(__dirname, '../../prisma/migrations/20260928160000_print_orders/migration.sql'), 'utf8');
+  for (const statement of printSchema.split(';').filter(s => s.trim())) await prisma.$executeRawUnsafe(statement);
   for (const c of COLUMNS) {
     const cols = await prisma.$queryRawUnsafe<{ name: string }[]>(`PRAGMA table_info("${c.table}")`);
     if (cols.some((x) => x.name === c.column)) continue;

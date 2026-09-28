@@ -136,6 +136,13 @@
 }
 .mobileCta:hover { opacity: 0.88; }
 
+@media (max-width: 1100px) {
+  .nav, .headerActions { display: none; }
+  .burger { display: flex; }
+  .mobileMenu { display: flex; }
+  .headerInner, .headerScrolled .headerInner { padding-left: 24px; padding-right: 24px; }
+}
+
 /* ── Hero ───────────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;

@@ -31,6 +31,7 @@ export default function Navbar() {
             Шаблоны
           </Link>
           <Link href="/#features" className={styles.link}>Возможности</Link>
+          <Link href="/print" className={`${styles.link} ${pathname.startsWith('/print') ? styles.active : ''}`}>Для печати</Link>
           <Link href="/#examples" className={styles.link}>Примеры</Link>
           <Link href="/#pricing" className={styles.link}>Цены</Link>
         </nav>
@@ -58,6 +59,7 @@ export default function Navbar() {
         <div className={styles.mobileMenu}>
           <Link href="/templates" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Шаблоны</Link>
           <Link href="/#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</Link>
+          <Link href="/print" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Печатные приглашения · 290 ₽</Link>
           <Link href="/#examples" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Примеры</Link>
           <Link href="/#pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Цены</Link>
           <div className={styles.mobileDivider} />

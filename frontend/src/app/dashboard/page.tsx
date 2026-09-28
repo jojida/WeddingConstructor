@@ -134,6 +134,7 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        <p style={{ margin: '0 0 24px' }}><Link href="/print/orders" className="btn-secondary">Печатные приглашения — мои макеты и PDF →</Link></p>
         {invites.length === 0 ? (
           <div className={styles.empty}>
             <div className={styles.emptyIcon}>💌</div>

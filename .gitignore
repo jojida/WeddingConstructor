@@ -18,4 +18,6 @@ backend/.env.production
 **/*.db-journal
 backend/uploads/
 backend/.test-tmp/
+**/.npm-cache/
+.checks/
 .claude/settings.local.json

@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isFreeAccount } from '../lib/freeAccounts';
+import { confirmPrintPayment } from '../lib/printPayment';
 
 const router = Router();
 
@@ -35,21 +36,21 @@ function promoPercent(code: unknown): number | null {
    ломать уже настроенный env на сервере. */
 const YOOKASSA_API = 'https://api.yookassa.ru/v3';
 
-const kassaAuth = () => {
+export const kassaAuth = () => {
   const shopId = process.env.YOOKASSA_SHOP_ID || process.env.YUMONEY_SHOP_ID || '';
   const secretKey = process.env.YOOKASSA_SECRET_KEY || process.env.YUMONEY_SECRET_KEY || '';
   const configured = Boolean(shopId && secretKey && shopId !== 'your_shop_id');
   return { shopId, secretKey, configured };
 };
 
-async function kassaRequest(method: 'GET' | 'POST', path: string, body?: unknown) {
+export async function kassaRequest(method: 'GET' | 'POST', path: string, body?: unknown, idempotenceKey?: string) {
   const { shopId, secretKey } = kassaAuth();
   const headers: Record<string, string> = {
     Authorization: 'Basic ' + Buffer.from(`${shopId}:${secretKey}`).toString('base64'),
   };
   if (method === 'POST') {
     headers['Content-Type'] = 'application/json';
-    headers['Idempotence-Key'] = crypto.randomUUID();
+    headers['Idempotence-Key'] = idempotenceKey || crypto.randomUUID();
   }
   const res = await fetch(`${YOOKASSA_API}${path}`, {
     method,
@@ -211,6 +212,10 @@ router.post('/webhook', async (req: Request, res: Response) => {
       return res.status(200).send('OK'); // API оплату не подтвердил — игнорируем
     }
 
+    if (payment.metadata?.product === 'print') {
+      await confirmPrintPayment(payment);
+      return res.status(200).send('OK');
+    }
     const inviteId = payment.metadata?.inviteId;
     if (inviteId) await markPaid(inviteId, payment.metadata?.plan || 'premium', payment.id);
     return res.status(200).send('OK');
