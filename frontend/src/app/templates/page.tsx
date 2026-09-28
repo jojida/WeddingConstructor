@@ -5,7 +5,7 @@ import Navbar from '@/components/Navbar';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PreviewScale from '@/components/PreviewScale';
-import { LEGAL, TEMPLATES, sampleWeddingDate } from '@/lib/constants';
+import { LEGAL, TEMPLATES, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import styles from './page.module.css';
 
 function useScrollReveal(count: number) {
@@ -99,6 +99,7 @@ export default function TemplatesPage() {
                       brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
                       groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
                       templateId: tpl.id,
+                      weddingDate: templateSampleDate(tpl),
                       coverPhoto: tpl.defaultCover,
                       galleryPhotos: tpl.defaultGallery
                     }}

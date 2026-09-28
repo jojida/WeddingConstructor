@@ -119,7 +119,7 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
   const cover = !data.coverPhoto ? '/invite/ivory/assets/couple.jpg'
     : data.coverPhoto.startsWith('/uploads') ? `${apiBase}${data.coverPhoto}` : data.coverPhoto;
   const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-  let day = '18', month = 'июля', year = '2026';
+  let day = '12', month = 'июня', year = '2027';
   if (data.weddingDate) {
     const [yy, mm, dd] = data.weddingDate.split('-').map(Number);
     if (yy && mm && dd) { day = String(dd); month = MONTHS[mm - 1]; year = String(yy); }

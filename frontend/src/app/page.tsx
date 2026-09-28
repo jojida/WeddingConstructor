@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PreviewScale from '@/components/PreviewScale';
@@ -255,6 +255,7 @@ function TemplatesSection() {
                         brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
                         groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
                         templateId: tpl.id,
+                        weddingDate: templateSampleDate(tpl),
                         coverPhoto: tpl.defaultCover,
                         galleryPhotos: tpl.defaultGallery
                       }}

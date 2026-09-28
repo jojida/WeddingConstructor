@@ -12,7 +12,7 @@
 
   var STATE = {
     apiBase: '', slug: '', guestToken: '', guestName: '',
-    date: '2026-07-18', time: '15:00',
+    date: '2027-06-12', time: '16:00',
     groom: 'Марк', bride: 'Алиса',
     signUser: false,        // подпись финала задала пара (иначе — из имён)
     scheduleSig: ''
@@ -155,7 +155,7 @@
     if (cdTimer) clearInterval(cdTimer);
     var t = STATE.time.length === 4 ? '0' + STATE.time : STATE.time;
     var target = new Date(STATE.date + 'T' + t + ':00');
-    if (isNaN(target.getTime())) target = new Date('2026-07-18T15:00:00');
+    if (isNaN(target.getTime())) target = new Date('2027-06-12T16:00:00');
     function put(id, text) { var el = document.getElementById(id); if (el) el.textContent = text; }
     function tick() {
       var diff = Math.max(0, target.getTime() - Date.now());

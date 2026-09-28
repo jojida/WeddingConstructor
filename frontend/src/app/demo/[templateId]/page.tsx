@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import TemplatePreview from '@/components/TemplatePreview';
-import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
 import DemoActions from './DemoActions';
 
 interface Props {
@@ -45,6 +45,7 @@ export default async function DemoPage({ params }: Props) {
      иконками-SVG) берём из TEMPLATE_DEFAULTS — иначе превью показывало бы
      общий эмодзи-плейсхолдер вместо иконок дизайна. */
   const defs = TEMPLATE_DEFAULTS[template.id] || {};
+  const weddingDate = templateSampleDate(template);
 
   return (
     <div style={{ minHeight: '100vh', background: '#ececec', position: 'relative', display: 'flex', justifyContent: 'center' }}>
@@ -57,6 +58,7 @@ export default async function DemoPage({ params }: Props) {
           brideName: (template as any).sampleBride || SAMPLE_DATA.brideName,
           groomName: (template as any).sampleGroom || SAMPLE_DATA.groomName,
           templateId: template.id,
+          weddingDate,
           coverPhoto: template.defaultCover,
           galleryPhotos: template.defaultGallery,
           inviteText:      defs.inviteText      ?? SAMPLE_DATA.inviteText,
@@ -67,7 +69,7 @@ export default async function DemoPage({ params }: Props) {
           dressCodeColors: defs.dressCodeColors ?? SAMPLE_DATA.dressCodeColors,
           dressCodePhoto:  defs.dressCodePhoto  ?? SAMPLE_DATA.dressCodePhoto,
           customData: {
-            ...templateCustomDefaults(template.id, SAMPLE_DATA.weddingDate),
+            ...templateCustomDefaults(template.id, weddingDate),
             mapPoint: demoMapPoint(defs.venueAddress ?? SAMPLE_DATA.venueAddress),
           },
         }}

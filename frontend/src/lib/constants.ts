@@ -28,6 +28,13 @@ export function sampleWeddingDate(daysAhead = 90): string {
   return new Date(Date.now() + daysAhead * 86400000).toISOString().slice(0, 10);
 }
 
+/** Дата свадьбы в демо и карточке шаблона: у шаблона может быть своя
+    (sampleDaysAhead в TEMPLATES), чтобы демо не показывали одну и ту же. */
+export function templateSampleDate(tpl?: unknown): string {
+  const days = (tpl as { sampleDaysAhead?: number } | undefined)?.sampleDaysAhead;
+  return sampleWeddingDate(typeof days === 'number' ? days : 90);
+}
+
 /** Дедлайн ответа гостей по умолчанию: за 3 недели до свадьбы, формат ДД.ММ.ГГ.
     Никогда не отдаёт дату в прошлом — иначе шаблон просит ответить «до вчера». */
 export function rsvpDeadline(weddingDate?: string): string {
@@ -92,6 +99,7 @@ const HANDMADE_TEMPLATES = [
     defaultGallery: [] as string[],
     sampleBride: 'Алиса',
     sampleGroom: 'Марк',
+    sampleDaysAhead: 200,
   },
   {
     id: 'calla',
