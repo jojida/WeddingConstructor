@@ -260,7 +260,7 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
   width: 100%;
   height: calc(765 / 874 * 100%);
   object-fit: cover;
-  object-position: 52.6% 0%;
+  object-position: 50% 0%;
   /* Край фото растворяется в чёрном — светлые фото пары не дают резкой полосы */
   -webkit-mask-image: linear-gradient(to bottom, #000 84%, transparent 100%);
           mask-image: linear-gradient(to bottom, #000 84%, transparent 100%);
@@ -276,7 +276,10 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
 }
 .hero__shade {
   position: absolute; inset: 0; z-index: 2;
-  background: linear-gradient(176deg, rgba(102, 102, 102, 0) 31.6%, rgba(0, 0, 0, .68) 82.5%);
+  /* сверху — лёгкая тень под надпись: у фото со светлым небом она иначе теряется */
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, .42) 0%, rgba(0, 0, 0, 0) 24%),
+    linear-gradient(176deg, rgba(102, 102, 102, 0) 31.6%, rgba(0, 0, 0, .68) 82.5%);
   pointer-events: none;
 }
 .hero__label {

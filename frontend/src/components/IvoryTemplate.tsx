@@ -132,12 +132,12 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#000', containerType: 'inline-size' }}>
       <img src={cover} alt=""
-        style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: y(765), objectFit: 'cover', objectPosition: '52.6% 20%' }} />
+        style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: y(765), objectFit: 'cover', objectPosition: '50% 20%' }} />
       <span style={{
         position: 'absolute', left: u(128), top: `calc(${y(383)} - ${u(40)})`, zIndex: 1, fontFamily: "'Script Thin Pen', 'Pinyon Script', cursive",
         fontSize: u(200), lineHeight: 'normal', color: 'rgba(255,255,255,.77)',
       }}>&amp;</span>
-      <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(176deg, rgba(102,102,102,0) 31.6%, rgba(0,0,0,.68) 82.5%)' }} />
+      <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,0) 24%), linear-gradient(176deg, rgba(102,102,102,0) 31.6%, rgba(0,0,0,.68) 82.5%)' }} />
       <p style={{
         position: 'absolute', left: 0, right: 0, top: y(63), margin: 0, zIndex: 3, textAlign: 'center',
         fontFamily: "'Cormorant Garamond', Georgia, serif", fontVariant: 'small-caps', fontSize: u(22), color: '#fff',
