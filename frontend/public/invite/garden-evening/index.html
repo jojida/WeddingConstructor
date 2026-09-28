@@ -58,10 +58,21 @@
       </div>
     </section>
 
-    <!-- 3 — КОНВЕРТ С ДАТОЙ (картинка: конверт, печать, листва, край подложки) -->
+    <!-- 3 — КОНВЕРТ С ДАТОЙ: бумага с датой выезжает из конверта, когда
+         блок доходит до экрана (слои макета: задник, бумага, карман, печать) -->
     <section class="letter" id="date">
-      <img class="letter__plate rv-soft" src="assets/envelope.webp" alt="" />
-      <p class="letter__date rv-write" data-edit="letterDate">28 .01.27</p>
+      <img class="letter__edge" src="assets/letter-edge.webp" alt="" />
+      <img class="letter__back" src="assets/env-back.webp" alt="" />
+      <div class="letter__slot">
+        <div class="letter__card">
+          <img class="letter__paper" src="assets/env-card.webp" alt="" />
+          <p class="letter__date" data-edit="letterDate">28 .01.27</p>
+        </div>
+      </div>
+      <img class="letter__front" src="assets/env-front.webp" alt="" />
+      <img class="letter__seal" src="assets/env-seal.webp" alt="" />
+      <img class="letter__gold letter__gold--l" src="assets/gold-left.webp" alt="" />
+      <img class="letter__gold letter__gold--r" src="assets/gold-right.webp" alt="" />
     </section>
 
     <!-- 4 — МЕСТО ПРОВЕДЕНИЯ -->

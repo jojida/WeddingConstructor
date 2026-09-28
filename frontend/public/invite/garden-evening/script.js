@@ -436,6 +436,7 @@
   function initReveal() {
     if (REDUCED || !('IntersectionObserver' in window)) {
       document.querySelectorAll('.rv, .rv-soft, .rv-write').forEach(function (el) { el.classList.add('in', 'done'); });
+      document.querySelectorAll('.letter').forEach(function (el) { el.classList.add('is-open'); });
       return;
     }
     io = new IntersectionObserver(function (entries) {
@@ -449,6 +450,17 @@
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
     observeReveal(document);
+
+    // Конверт: бумага с датой выезжает, когда конверт почти целиком на экране
+    var letter = document.querySelector('.letter');
+    if (letter) {
+      var lio = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) { letter.classList.add('is-open'); lio.disconnect(); }
+        });
+      }, { threshold: 0.45 });
+      lio.observe(letter);
+    }
   }
 
   function observeReveal(scope) {
