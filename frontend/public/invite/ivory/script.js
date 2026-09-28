@@ -176,11 +176,19 @@
     cdTimer = setInterval(tick, 1000);
   }
 
-  /* ─── Место: название всегда в кавычках макета ─────── */
+  /* ─── Место: название в кавычках макета ─────────────
+     Пара пишет «Белая роща» или "Белая роща" — снимаем только внешнюю пару;
+     если кавычки есть внутри (Ресторан «Прага») — выводим как есть,
+     без вторых кавычек */
   function applyVenue(v) {
     if (typeof v !== 'string' || !v.trim()) return;
-    var clean = v.trim().replace(/^[«"“„'‘]+/, '').replace(/[»"”“'’]+$/, '').trim();
-    if (clean) setAll('[data-edit="venue"]', '“' + clean + '”');
+    var t = v.trim();
+    var OPEN = '«"“„\'‘', CLOSE = '»"”“\'’';
+    if (t.length > 1 && OPEN.indexOf(t.charAt(0)) >= 0 && CLOSE.indexOf(t.charAt(t.length - 1)) >= 0) {
+      t = t.slice(1, -1).trim();
+    }
+    if (!t) return;
+    setAll('[data-edit="venue"]', /[«»"“”„]/.test(t) ? t : '“' + t + '”');
   }
 
   /* ─── Программа дня: пункты + трек с сердцем ──────── */

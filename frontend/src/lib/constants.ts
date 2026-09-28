@@ -61,6 +61,7 @@ export function templateCustomDefaults(templateId: string, weddingDate?: string)
 const DEMO_MAP_POINTS: Record<string, { lat: number; lon: number }> = {
   'Москва, ул. Крымский Вал, 9': { lat: 55.73144, lon: 37.60342 },   // главный вход Парка Горького
   'г. Сочи, ул. Приморская, 15': { lat: 43.57367, lon: 39.72640 },
+  'Москва, ул. Дольская, 1': { lat: 55.61548, lon: 37.68214 },       // усадьба Царицыно («Айвори»)
 };
 export function demoMapPoint(address?: string): { q: string; lat: number; lon: number } | undefined {
   const p = address ? DEMO_MAP_POINTS[address] : undefined;
@@ -711,7 +712,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venueLabel', type: 'text', label: 'Надпись над местом', hint: 'Например: Ждем вас в', scope: 'custom', maxLength: 30 },
-        { id: 'venue',      type: 'text', label: 'Место проведения', hint: 'Например: Артурс Спа Отель — кавычки добавятся сами', scope: 'data', maxLength: 50 },
+        { id: 'venue',      type: 'text', label: 'Место проведения', hint: 'Например: Белая роща — кавычки добавятся сами', scope: 'data', maxLength: 50 },
         MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
         { id: 'venuePhoto', type: 'image', label: 'Фото места', scope: 'custom' },
       ],
@@ -1184,7 +1185,8 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
   ivory: {
     inviteText:
       'Приглашаем вас разделить радость того особенного для нас события и стать частью начала семейной истории',
-    venue: 'Артурс Спа Отель',
+    venue: 'Белая роща',
+    venueAddress: 'Москва, ул. Дольская, 1',
     story:
       'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
       'Просим не дарить букеты — мы не успеем насладиться ими в полной мере.',

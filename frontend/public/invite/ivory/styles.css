@@ -302,6 +302,8 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
   line-height: normal;
   color: #fff;
   white-space: nowrap;
+  /* на светлых фото пары имена не теряются */
+  text-shadow: 0 calc(2 * var(--u)) calc(14 * var(--u)) rgba(0, 0, 0, .35);
 }
 .hero__name--groom { left: calc(41 * var(--u)); top: calc(473 * var(--u)); }
 .hero__name--bride { left: calc(199 * var(--u)); top: calc(582 * var(--u)); }
