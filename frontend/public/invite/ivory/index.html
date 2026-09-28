@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Вадим &amp; Дарья — приглашение на свадьбу</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400&family=Spectral+SC:wght@400&family=Tinos:ital,wght@1,400&display=swap" rel="stylesheet" />
+  <link rel="preload" href="assets/fonts/caslon-becker.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/calligraphia-one.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Без скриптов: конверт не открыть, появление при прокрутке не сработает —
+       показываем приглашение сразу -->
+  <noscript><style>
+    .env { display: none !important; }
+    .rv, .rv-soft, .rv-write, .hero-in, .hero__photo {
+      opacity: 1 !important; transform: none !important; filter: none !important;
+      -webkit-mask-image: none !important; mask-image: none !important;
+    }
+  </style></noscript>
+</head>
+<body>
+
+  <!-- 0 — КОНВЕРТ: видео раскрытия. Позже заменится анимацией первого экрана
+       (envelope.js — отдельный файл, чтобы заменить его целиком). -->
+  <div class="env" id="envelope" role="button" tabindex="0" aria-label="Открыть приглашение">
+    <div class="env__backdrop" aria-hidden="true"></div>
+    <video class="env__video" id="envelopeVideo" src="assets/envelope.mp4" poster="assets/envelope-poster.jpg"
+           muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
+    <div class="env__names" aria-hidden="true">
+      <span data-env-name="groom">Вадим</span><span class="env__amp">&amp;</span><span data-env-name="bride">Дарья</span>
+    </div>
+    <p class="env__hint">Нажмите, чтобы открыть</p>
+    <div class="env__glow" aria-hidden="true"></div>
+  </div>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА -->
+    <section class="hero" id="hero">
+      <img class="hero__photo" src="assets/couple.jpg" data-edit="coverPhoto" alt="Жених и невеста" />
+      <span class="hero__amp hero-in" aria-hidden="true">&amp;</span>
+      <div class="hero__shade" aria-hidden="true"></div>
+      <p class="hero__label hero-in" data-edit="heroTitle">Приглашение на свадьбу</p>
+      <h1 class="hero__names">
+        <span class="hero__name hero__name--groom hero-in" data-name="groom">Вадим</span>
+        <span class="visually-hidden"> и </span>
+        <span class="hero__name hero__name--bride hero-in" data-name="bride">Дарья</span>
+      </h1>
+      <p class="hero__date hero-in" data-edit="heroDate">
+        <span data-date="day">18</span><span data-date="month">июля</span><span data-date="year">2026</span>
+      </p>
+    </section>
+
+    <!-- 2 — ДОРОГИЕ ГОСТИ: приглашение, календарь, место -->
+    <section class="guests paper" id="guests">
+      <div class="card rv-soft">
+        <div class="card__inner">
+          <h2 class="guests__title rv-write" data-edit="greetingTitle">Дорогие гости!</h2>
+          <p class="guests__text rv" data-edit="inviteText">Приглашаем вас разделить радость того особенного для нас события и стать частью начала семейной истории</p>
+
+          <div class="cal rv" data-edit="calendar">
+            <p class="cal__month" data-cal="month">Июль</p>
+            <div class="cal__days">
+              <span class="cal__d cal__d--far" data-cal="d-2">16</span>
+              <span class="cal__d cal__d--near" data-cal="d-1">17</span>
+              <span class="cal__d cal__d--main"><img class="cal__heart" src="assets/heart.webp" alt="" /><b data-cal="d0">18</b></span>
+              <span class="cal__d cal__d--near" data-cal="d1">19</span>
+              <span class="cal__d cal__d--far" data-cal="d2">20</span>
+            </div>
+          </div>
+
+          <p class="venue__label rv" data-edit="venueLabel">Ждем вас в</p>
+          <p class="venue__name rv" data-edit="venue">“Артурс Спа Отель”</p>
+          <p class="venue__addr rv" data-edit="venueAddress"></p>
+          <div class="venue__frame rv-soft">
+            <img class="venue__photo" src="assets/venue.jpg" data-edit="venuePhoto" alt="Место проведения" />
+          </div>
+        </div>
+      </div>
+      <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
+      <div class="wc-map ivory-map" data-wc-map hidden></div>
+    </section>
+
+    <!-- 3 — ПРОГРАММА ДНЯ: трек с сердцем -->
+    <section class="program" id="program">
+      <img class="program__doves rv-soft" src="assets/doves.webp" alt="" />
+      <h2 class="title rv-write" data-edit="programTitle">Программа дня</h2>
+      <div class="prog" id="prog">
+        <div class="prog__track" aria-hidden="true">
+          <span class="prog__rail"></span>
+          <span class="prog__fill"></span>
+          <span class="prog__heart">
+            <svg viewBox="0 0 24 22"><path d="M12 21.2 10.3 19.6C4.4 14.3.5 10.8.5 6.4.5 2.9 3.2.2 6.7.2c2 0 3.9.9 5.3 2.4C13.4 1.1 15.3.2 17.3.2c3.5 0 6.2 2.7 6.2 6.2 0 4.4-3.9 7.9-9.8 13.2L12 21.2z"/></svg>
+          </span>
+        </div>
+        <!-- пункты .prog__item строит script.js из расписания -->
+      </div>
+    </section>
+
+    <!-- 4 — ДРЕСС-КОД -->
+    <section class="dress paper" id="dresscode">
+      <h2 class="title rv-write" data-edit="dressTitle">Дресс-код</h2>
+      <p class="dress__text rv" data-edit="dressText">Будем рады, если вы поддержите сдержанную палитру нашего праздника</p>
+      <div class="palette rv" data-edit="palette">
+        <span style="--c:#f4efe6"></span><span style="--c:#e3d9c9"></span><span style="--c:#c8b8a2"></span>
+        <span style="--c:#9c8b78"></span><span style="--c:#8e8e8e"></span><span style="--c:#2b2b2b"></span>
+      </div>
+      <div class="looks rv-soft">
+        <p class="looks__label">Для дам</p>
+        <figure class="look"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для дам 1" /></figure>
+        <figure class="look"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для дам 2" /></figure>
+        <p class="looks__label">Для джентльменов</p>
+        <figure class="look"><img src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для джентльменов 1" /></figure>
+        <figure class="look"><img src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для джентльменов 2" /></figure>
+      </div>
+    </section>
+
+    <!-- 5 — СВАДЬБА ЧЕРЕЗ -->
+    <section class="cd" id="countdown">
+      <span class="cd__amp" aria-hidden="true">&amp;</span>
+      <h2 class="title title--light rv-write" data-edit="countdownTitle">Свадьба через</h2>
+      <div class="cd__grid rv">
+        <div class="cd__cell"><b id="cd-days">0</b><span id="cd-days-l">дней</span></div>
+        <div class="cd__cell"><b id="cd-hours">00</b><span id="cd-hours-l">часов</span></div>
+        <div class="cd__cell"><b id="cd-mins">00</b><span id="cd-mins-l">минут</span></div>
+        <div class="cd__cell"><b id="cd-secs">00</b><span id="cd-secs-l">секунд</span></div>
+      </div>
+      <p class="cd__date rv" data-cd="date">18 июля 2026 · 15:00</p>
+    </section>
+
+    <!-- 6 — ПОЖЕЛАНИЯ И ДЕТАЛИ -->
+    <section class="wish" id="wishes">
+      <img class="wish__heart rv-soft" src="assets/heart.webp" alt="" />
+      <h2 class="title rv-write" data-edit="wishesTitle">Пожелания</h2>
+      <div class="wish__box rv">
+        <div class="wish__text" data-edit="story">
+          <p>Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.</p>
+          <p>Просим не дарить букеты — мы не успеем насладиться ими в полной мере.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 — АНКЕТА ГОСТЯ -->
+    <section class="rsvp paper" id="rsvp">
+      <div class="rsvp__card rv-soft">
+        <h2 class="title rv-write" data-edit="surveyTitle">Анкета гостя</h2>
+        <p class="rsvp__lead rv" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету заранее</p>
+        <form class="rsvp__form rv" id="rsvpForm" novalidate>
+          <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+          <fieldset class="rsvp__group">
+            <legend>Будете ли вы на празднике?</legend>
+            <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, с удовольствием приду</label>
+            <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+          </fieldset>
+          <fieldset class="rsvp__group" data-rsvp-count>
+            <legend>Сколько вас будет?</legend>
+            <div class="wc-count" data-wc-count>
+              <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+              <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+              <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+            </div>
+          </fieldset>
+          <fieldset class="rsvp__group" data-edit="drinks">
+            <legend>Что предпочитаете из напитков?</legend>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Игристое</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+          </fieldset>
+          <button class="rsvp__submit" type="submit">Отправить</button>
+          <p class="rsvp__error" id="rsvpError" role="alert"></p>
+        </form>
+        <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен</p>
+      </div>
+    </section>
+
+    <!-- 8 — ФИНАЛ -->
+    <section class="fin" id="final">
+      <div class="fin__frame rv-soft">
+        <img class="fin__photo" src="assets/final.jpg" data-edit="finalPhoto" alt="Жених и невеста" />
+      </div>
+      <h2 class="title title--light rv-write" data-edit="closingTitle">Будем ждать вас!</h2>
+      <p class="fin__sign rv" data-edit="closingSign">Ваши Вадим и Дарья</p>
+      <div class="fin__mono rv-soft" aria-hidden="true">
+        <span class="fin__letter" data-mono="groom">В</span><span class="fin__amp">&amp;</span><span class="fin__letter" data-mono="bride">Д</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="envelope.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* «Айвори»: шрифты макета для карточки-превью (сам шаблон грузит их сам) */
+@font-face {
+  font-family: 'Caslon Becker';
+  src: url('/invite/ivory/assets/fonts/caslon-becker.woff2') format('woff2');
+  font-weight: 400; font-style: italic; font-display: swap;
+}
+@font-face {
+  font-family: 'Script Thin Pen';
+  src: url('/invite/ivory/assets/fonts/script-thin-pen.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+
 /* Gogol — имена на карточке «Средиземноморье» (совпадение с самим шаблоном).
    Только кириллица: латиница/& подхватятся фоллбэком. */
 @font-face {

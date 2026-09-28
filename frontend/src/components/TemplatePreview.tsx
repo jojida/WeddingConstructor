@@ -7,6 +7,7 @@ import FloralTemplate from './FloralTemplate';
 import GardenArchTemplate from './GardenArchTemplate';
 import SketchTemplate from './SketchTemplate';
 import CallaTemplate from './CallaTemplate';
+import IvoryTemplate from './IvoryTemplate';
 import StudioTemplate from './StudioTemplate';
 import { isStudioTemplate } from '@/lib/studioTemplates';
 
@@ -64,6 +65,9 @@ export default function TemplatePreview({ data, apiBase, fullPage, slug, editing
   }
   if (data.templateId === 'calla') {
     return <CallaTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
+  }
+  if (data.templateId === 'ivory') {
+    return <IvoryTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
   }
   if (data.templateId === 'floral') {
     return <FloralTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;

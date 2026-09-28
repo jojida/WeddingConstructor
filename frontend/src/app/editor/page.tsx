@@ -978,7 +978,7 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, upl
         </Field>
       );
     case 'schedule':
-      return <ScheduleEditor value={value || []} onChange={onChange} iconSet={field.iconSet} withDesc={field.withDesc} />;
+      return <ScheduleEditor value={value || []} onChange={onChange} iconSet={field.iconSet} withDesc={field.withDesc} noIcon={field.noIcon} />;
     case 'drinks':
       return <DrinksEditor value={value || []} onChange={onChange} />;
     case 'toggle': {
@@ -1255,8 +1255,8 @@ function ColorListEditor({ value, onChange }: { value: string[]; onChange: (v: s
   );
 }
 
-function ScheduleEditor({ value, onChange, iconSet, withDesc }: {
-  value: ScheduleItem[]; onChange: (v: ScheduleItem[]) => void; iconSet?: string; withDesc?: boolean;
+function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon }: {
+  value: ScheduleItem[]; onChange: (v: ScheduleItem[]) => void; iconSet?: string; withDesc?: boolean; noIcon?: boolean;
 }) {
   const items = Array.isArray(value) ? value : [];
   const icons = (iconSet && ICON_SETS[iconSet]) || [];
@@ -1285,9 +1285,9 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc }: {
                 ))}
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: icons.length > 0 ? '78px 1fr auto' : '78px 44px 1fr auto', gap: 6, alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: icons.length > 0 || noIcon ? '78px 1fr auto' : '78px 44px 1fr auto', gap: 6, alignItems: 'center' }}>
               <input className="input-field" type="time" style={{ padding: '6px 4px', fontSize: 12, textAlign: 'center' }} value={item.time} onChange={e => update(i, { time: e.target.value })} />
-              {icons.length === 0 && (
+              {icons.length === 0 && !noIcon && (
                 <input className="input-field" style={{ padding: '6px 2px', fontSize: 16, textAlign: 'center' }} placeholder="✦" value={item.icon} onChange={e => update(i, { icon: e.target.value })} title="Эмодзи (необязательно)" />
               )}
               <input className="input-field" style={{ padding: '6px 8px', fontSize: 12 }} placeholder="Событие" value={item.title} onChange={e => update(i, { title: e.target.value })} />

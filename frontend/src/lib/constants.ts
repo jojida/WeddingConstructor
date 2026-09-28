@@ -69,6 +69,18 @@ export function demoMapPoint(address?: string): { q: string; lat: number; lon: n
 
 const HANDMADE_TEMPLATES = [
   {
+    id: 'ivory',
+    name: 'Айвори',
+    description: 'Видео раскрытия конверта с сургучом, чёрно-белое фото на обложке, рельефная бумага с пионами и каллиграфия. Календарь дня, программа с сердцем на треке, дресс-код, таймер и анкета для гостей.',
+    tags: ['Конверт', 'Чёрно-белый', 'Элегантный', 'Каллиграфия', 'Видео'],
+    colors: ['#000000', '#c9c9c9', '#f4efe6'],
+    preview: '/invite/ivory/assets/couple.jpg',
+    defaultCover: '/invite/ivory/assets/couple.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Дарья',
+    sampleGroom: 'Вадим',
+  },
+  {
     id: 'calla',
     name: 'Каллы',
     description: 'Акварельные каллы, жемчуг и тёплая бежевая палитра. Календарь дня, серпантинная программа с жемчужиной на треке, дресс-код с каруселью образов, таймер и анкета для гостей.',
@@ -405,6 +417,7 @@ export const formatDrinkChoice = (choice: string, labels: Record<string, string>
 
 /** Ключ data-edit строки-приветствия в каждом шаблоне (для персонализации гостя). */
 export const TEMPLATE_GREETING_KEY: Record<string, string> = {
+  ivory: 'greetingTitle',
   calla: 'greetingTitle',
   sketch: 'guestsTitle',
   floral: 'dearGuests',
@@ -438,6 +451,7 @@ export interface TemplateField {
   scope: 'data' | 'custom';   // где лежит значение
   iconSet?: string;           // для schedule — набор иконок-картинок (иначе ввод эмодзи)
   withDesc?: boolean;         // для schedule — показывать поле описания пункта
+  noIcon?: boolean;           // для schedule — у пунктов нет иконок (не показывать ввод эмодзи)
   maxLength?: number;         // ограничение длины для text/textarea
   defaultOff?: boolean;       // для toggle — не задано значит выключено
 }
@@ -592,6 +606,71 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 }
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
+  ivory: [
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'coverPhoto', type: 'image', label: 'Фото на обложке', hint: 'Лучше вертикальное — в дизайне оно чёрно-белое', scope: 'data' },
+        { id: 'heroTitle',  type: 'text',  label: 'Надпись над фото', scope: 'custom', maxLength: 40 },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения', scope: 'data', maxLength: 220 },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venueLabel', type: 'text', label: 'Надпись над местом', hint: 'Например: Ждем вас в', scope: 'custom', maxLength: 30 },
+        { id: 'venue',      type: 'text', label: 'Место проведения', hint: 'Например: Артурс Спа Отель — кавычки добавятся сами', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        { id: 'venuePhoto', type: 'image', label: 'Фото места', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', withDesc: true, noIcon: true },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры',       scope: 'data' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Образ для дам 1',     scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Образ для дам 2',     scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Образ для джентльменов 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Образ для джентльменов 2', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Пожелания и детали', icon: '💌',
+      fields: [
+        { id: 'story', type: 'textarea', label: 'Текст в рамке (абзацы с новой строки)', scope: 'data', maxLength: 400 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'finalPhoto',   type: 'image', label: 'Фото в финале',       scope: 'custom' },
+        { id: 'closingTitle', type: 'text',  label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'closingSign',  type: 'text',  label: 'Подпись (Ваши …)', hint: 'Пусто — подпись из ваших имён', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
   calla: [
     {
       title: 'Приветствие', icon: '✍️',
@@ -976,6 +1055,43 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = Object.fromEnt
 );
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
+  ivory: {
+    inviteText:
+      'Приглашаем вас разделить радость того особенного для нас события и стать частью начала семейной истории',
+    venue: 'Артурс Спа Отель',
+    story:
+      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
+      'Просим не дарить букеты — мы не успеем насладиться ими в полной мере.',
+    schedule: [
+      { time: '15:00', title: 'Сбор гостей', icon: '', desc: 'Встречаемся, наслаждаемся фуршетом, настраиваемся на весёлую свадьбу' },
+      { time: '16:00', title: 'Церемония',   icon: '', desc: 'Немного радостных, трогательных формальностей' },
+      { time: '17:00', title: 'Банкет',      icon: '', desc: 'Время вкусной еды, музыки, приятных пожеланий и танцев' },
+    ],
+    dressCodeColors: ['#f4efe6', '#e3d9c9', '#c8b8a2', '#9c8b78', '#8e8e8e', '#2b2b2b'],
+    dressCodePhoto: '/invite/ivory/assets/dress-w1.jpg',
+    drinks: [
+      { value: 'sparkling',  label: 'Игристое' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'cognac',     label: 'Коньяк' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      heroTitle:     'Приглашение на свадьбу',
+      greetingTitle: 'Дорогие гости!',
+      venueLabel:    'Ждем вас в',
+      venuePhoto:    '/invite/ivory/assets/venue.jpg',
+      dressText:     'Будем рады, если вы поддержите сдержанную палитру нашего праздника',
+      dressPhoto2:   '/invite/ivory/assets/dress-w2.jpg',
+      dressMan1:     '/invite/ivory/assets/dress-m1.jpg',
+      dressMan2:     '/invite/ivory/assets/dress-m2.jpg',
+      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
+      closingTitle:  'Будем ждать вас!',
+      closingSign:   '', // Пустое поле — подпись из имён пары.
+      finalPhoto:    '/invite/ivory/assets/final.jpg',
+    },
+  },
+
   calla: {
     inviteText:
       'Мы безмерно рады пригласить вас разделить с нами одно из самых значимых и счастливых ' +
