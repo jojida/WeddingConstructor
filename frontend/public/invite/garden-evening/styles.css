@@ -306,17 +306,18 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
 /* прорезь: всё, что ниже дна конверта, обрезано — бумага прячется внутри;
    сверху запас, чтобы выдвинутая бумага поднималась над конвертом */
 .letter__slot  { left: 0; top: calc(-300 * var(--u)); width: 100%; height: calc(1243 * var(--u)); overflow: hidden; z-index: 3; }
-/* бумага с датой: в конверте (560u ниже места макета) → выдвинута на 250u
-   выше места макета; дата напечатана на бумаге и едет вместе с ней */
+/* бумага с датой: сначала выглядывает из конверта (140u ниже места макета),
+   затем выдвигается на 120u выше места макета; дата напечатана на бумаге
+   и едет вместе с ней */
 .letter__card {
   position: absolute;
   left: calc(243 * var(--u)); top: calc(428 * var(--u));
   width: calc(920 * var(--u));
-  transform: translateY(calc(560 * var(--u)));
-  transition: transform 2s cubic-bezier(.22, .7, .2, 1) .2s;
+  transform: translateY(calc(140 * var(--u)));
+  transition: transform 1.8s cubic-bezier(.3, .6, .25, 1) .25s;
   will-change: transform;
 }
-.letter.is-open .letter__card { transform: translateY(calc(-250 * var(--u))); }
+.letter.is-open .letter__card { transform: translateY(calc(-120 * var(--u))); }
 .letter__paper { display: block; width: 100%; height: auto; }
 .letter__front { left: calc(201 * var(--u)); top: calc(358 * var(--u)); width: calc(995 * var(--u)); z-index: 4; }
 .letter__seal  { left: calc(584 * var(--u)); top: calc(501 * var(--u)); width: calc(259 * var(--u)); z-index: 5; }
@@ -336,7 +337,7 @@ html.hero-go .hero__couple { animation: heroRise 1.8s cubic-bezier(.2, .7, .2, 1
   white-space: nowrap;
 }
 @media (prefers-reduced-motion: reduce) {
-  .letter__card { transform: translateY(calc(-250 * var(--u))); transition: none; }
+  .letter__card { transform: translateY(calc(-120 * var(--u))); transition: none; }
 }
 
 /* ============================================================
