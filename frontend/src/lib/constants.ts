@@ -90,8 +90,8 @@ const HANDMADE_TEMPLATES = [
     preview: '/invite/ivory/assets/couple.jpg',
     defaultCover: '/invite/ivory/assets/couple.jpg',
     defaultGallery: [] as string[],
-    sampleBride: 'Дарья',
-    sampleGroom: 'Вадим',
+    sampleBride: 'Алиса',
+    sampleGroom: 'Марк',
   },
   {
     id: 'calla',

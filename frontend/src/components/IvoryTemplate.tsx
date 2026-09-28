@@ -114,8 +114,8 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
      дата) сжимаем по вертикали, чтобы в карточке была видна целиком. */
   const u = (n: number) => `calc(${n} * 100cqw / 411)`;
   const y = (n: number) => `${(n / 874 * 100).toFixed(2)}%`;
-  const groom = data.groomName || 'Вадим';
-  const bride = data.brideName || 'Дарья';
+  const groom = data.groomName || 'Марк';
+  const bride = data.brideName || 'Алиса';
   const cover = !data.coverPhoto ? '/invite/ivory/assets/couple.jpg'
     : data.coverPhoto.startsWith('/uploads') ? `${apiBase}${data.coverPhoto}` : data.coverPhoto;
   const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];

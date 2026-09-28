@@ -13,7 +13,7 @@
   var STATE = {
     apiBase: '', slug: '', guestToken: '', guestName: '',
     date: '2026-07-18', time: '15:00',
-    groom: 'Вадим', bride: 'Дарья',
+    groom: 'Марк', bride: 'Алиса',
     signUser: false,        // подпись финала задала пара (иначе — из имён)
     scheduleSig: ''
   };
