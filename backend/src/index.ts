@@ -64,8 +64,12 @@ app.use('/api', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
-  setHeaders(res) {
+  setHeaders(res, filePath) {
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
+    // Each upload receives a fresh UUID; legacy filenames remain revalidated.
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpg|png|gif|webp|mp3|m4a|ogg|wav|aac|webm)$/i.test(path.basename(filePath))) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
   },
 }));
 

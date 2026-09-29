@@ -1,16 +1,19 @@
 'use client';
 import { TEMPLATE_DEFAULTS } from '@/lib/constants';
-import SimpleTemplate from './SimpleTemplate';
-import VadimDaryaTemplate from './VadimDaryaTemplate';
-import MediterraneanTemplate from './MediterraneanTemplate';
-import FloralTemplate from './FloralTemplate';
-import GardenArchTemplate from './GardenArchTemplate';
-import SketchTemplate from './SketchTemplate';
-import CallaTemplate from './CallaTemplate';
-import IvoryTemplate from './IvoryTemplate';
-import GardenEveningTemplate from './GardenEveningTemplate';
-import StudioTemplate from './StudioTemplate';
+import dynamic from 'next/dynamic';
 import { isStudioTemplate } from '@/lib/studioTemplates';
+
+// Keep server rendering; only the selected design needs client JavaScript.
+const SimpleTemplate = dynamic(() => import('./SimpleTemplate'));
+const VadimDaryaTemplate = dynamic(() => import('./VadimDaryaTemplate'));
+const MediterraneanTemplate = dynamic(() => import('./MediterraneanTemplate'));
+const FloralTemplate = dynamic(() => import('./FloralTemplate'));
+const GardenArchTemplate = dynamic(() => import('./GardenArchTemplate'));
+const SketchTemplate = dynamic(() => import('./SketchTemplate'));
+const CallaTemplate = dynamic(() => import('./CallaTemplate'));
+const IvoryTemplate = dynamic(() => import('./IvoryTemplate'));
+const GardenEveningTemplate = dynamic(() => import('./GardenEveningTemplate'));
+const StudioTemplate = dynamic(() => import('./StudioTemplate'));
 
 export interface ScheduleItem { time: string; title: string; icon: string; }
 

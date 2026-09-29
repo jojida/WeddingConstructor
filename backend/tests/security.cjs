@@ -110,6 +110,19 @@ test('security and functional regressions on an isolated migrated database', asy
     const served = await fetch(base + url);
     assert.equal(served.headers.get('x-content-type-options'), 'nosniff');
     assert.match(served.headers.get('content-security-policy'), /sandbox/);
+    assert.equal(served.headers.get('cache-control'), 'public, max-age=31536000, immutable');
+    assert.deepEqual(Buffer.from(await served.arrayBuffer()), image);
+    const cached = await fetch(base + url, { cache: 'no-cache', headers: { 'If-None-Match': served.headers.get('etag') } });
+    assert.equal(cached.status, 304);
+    const range = await fetch(base + url, { headers: { Range: 'bytes=0-7' } });
+    assert.equal(range.status, 206);
+    assert.deepEqual(Buffer.from(await range.arrayBuffer()), image.subarray(0, 8));
+    assert.equal((await request('/api/health')).headers.get('cache-control'), 'no-store');
+    const legacy = path.join(root, 'uploads', 'cache-regression-legacy.png');
+    fs.writeFileSync(legacy, image); uploaded.push(legacy);
+    const legacyResponse = await fetch(base + '/uploads/cache-regression-legacy.png');
+    assert.equal(legacyResponse.headers.get('cache-control'), 'public, max-age=0');
+
   });
   await t.test('telegram spoofing and implicit test payments are blocked', async () => {
     assert.equal((await request('/api/telegram/webhook', 'POST', { message: {} })).status, 403);
