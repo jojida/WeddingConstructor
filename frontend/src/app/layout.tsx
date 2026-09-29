@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   // Подтверждение прав на домен в Pinterest (бизнес-аккаунт) — тег должен
   // оставаться, иначе Pinterest снимет подтверждение.
   verification: {
-    other: { "p:domain_verify": "2f238d702f6e919c0173fe32749da8f8" },
+    other: { "p:domain_verify": "6669026571aa855f7db664555c544c3f" },
   },
   robots: {
     index: true,
