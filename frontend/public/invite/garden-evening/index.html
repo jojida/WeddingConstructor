@@ -36,16 +36,17 @@
   <main class="invite" id="invite">
 
     <!-- 1 — ОБЛОЖКА: вечерний сад, гирлянды, пара.
-         У гостя после конверта играет видео: сад оживает, пара идёт к зрителю
-         и замирает в позе обложки. Последний кадр видео совпадает со слоями
-         сцены и пары, поэтому видео гаснет поверх них, сад за парой темнеет
-         и появляются надпись и имена. Видео подключает script.js
-         (data-src, data-poster) — в редакторе оно не грузится. -->
+         У гостя после конверта играет видео (5 с): из дерева вылетают птицы,
+         сад оживает, пара подходит к зрителю и замирает в позе обложки.
+         Последний кадр видео совпадает со слоями сцены и пары, поэтому видео
+         гаснет поверх них, сад за парой темнеет и появляются надпись и имена.
+         Видео подключает script.js (data-src, data-poster) — в редакторе оно
+         не грузится. ?v= — медиа кэшируются на час, при замене меняем версию. -->
     <section class="hero" id="hero">
       <img class="hero__scene" src="assets/hero-scene.webp" alt="" />
       <div class="hero__dim" aria-hidden="true"></div>
       <img class="hero__couple hero-in" src="assets/hero-couple.webp" alt="Жених и невеста" />
-      <video class="hero__live" id="heroLive" data-src="assets/hero-live.mp4" data-poster="assets/hero-live-poster.webp"
+      <video class="hero__live" id="heroLive" data-src="assets/hero-live.mp4?v=2" data-poster="assets/hero-live-poster.webp?v=2"
              muted playsinline webkit-playsinline preload="none" disablepictureinpicture disableremoteplayback
              aria-hidden="true" tabindex="-1"></video>
       <!-- кремовый рваный край поверх видео: низ кадра всегда цвета страницы -->
