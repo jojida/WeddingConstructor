@@ -77,7 +77,7 @@
     });
   }
 
-  /* ─── Имена: обложка, конверт, подпись, монограмма ── */
+  /* ─── Имена: обложка, подпись, монограмма ─────────── */
   function autoSign() { return 'Ваши ' + STATE.groom + ' и ' + STATE.bride; }
 
   function applyNames(groom, bride) {
@@ -85,8 +85,8 @@
     bride = typeof bride === 'string' ? bride.trim() : '';
     if (groom) STATE.groom = groom;
     if (bride) STATE.bride = bride;
-    setAll('[data-name="groom"], [data-env-name="groom"]', STATE.groom);
-    setAll('[data-name="bride"], [data-env-name="bride"]', STATE.bride);
+    setAll('[data-name="groom"]', STATE.groom);
+    setAll('[data-name="bride"]', STATE.bride);
     setAll('[data-mono="groom"]', STATE.groom.charAt(0).toUpperCase());
     setAll('[data-mono="bride"]', STATE.bride.charAt(0).toUpperCase());
     if (!STATE.signUser) setAll('[data-edit="closingSign"]', autoSign());
@@ -445,18 +445,14 @@
     });
   }
 
-  /* ─── Обложка появляется после конверта (в редакторе — сразу) ── */
+  /* ─── Появление обложки ────────────────────────────── */
   function startHero() {
     fitNames();
     ROOT.classList.add('hero-go');
   }
 
   function initHero() {
-    if (window.WCEnvelope && window.WCEnvelope.active) {
-      window.addEventListener('wc:envelope-open', startHero);
-      return;
-    }
-    // Без конверта ждём шрифты (не дольше секунды), чтобы имена не мигнули запасным
+    // Ждём шрифты (не дольше секунды), чтобы имена не мигнули запасным
     var started = false;
     var go = function () { if (!started) { started = true; startHero(); } };
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);

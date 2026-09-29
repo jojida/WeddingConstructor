@@ -151,99 +151,6 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
 }
 
 /* ============================================================
-   0 — КОНВЕРТ (видео раскрытия)
-   ============================================================ */
-html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
-
-.env {
-  position: fixed; inset: 0; z-index: 60;
-  overflow: hidden;
-  background: #9d8b77;
-  cursor: pointer;
-  outline: none;
-  touch-action: none;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none; user-select: none;
-}
-/* На широком экране по бокам — размытый кадр того же конверта */
-.env__backdrop {
-  position: absolute; inset: -60px;
-  background: url("../assets/envelope-wave-poster.jpg") center / cover;
-  filter: blur(26px) brightness(.9);
-}
-.env__video {
-  position: absolute; top: 0; left: 50%;
-  height: 100%; width: auto;
-  aspect-ratio: 9 / 16;
-  transform: translateX(-50%);
-  object-fit: cover;
-  background: transparent;
-  pointer-events: none;
-}
-.env__names {
-  position: absolute; left: 0; right: 0; top: 9%;
-  display: flex; align-items: center; justify-content: center; gap: .1em;
-  font-family: var(--f-caslon); font-style: italic;
-  font-size: clamp(30px, 10vw, 50px);
-  color: #fffaf1;
-  text-shadow: 0 2px 18px rgba(70, 48, 24, .55), 0 0 2px rgba(70, 48, 24, .25);
-  pointer-events: none;
-  transition: opacity .6s ease, transform .9s ease;
-}
-.env__amp {
-  font-family: var(--f-amp); font-style: normal;
-  font-size: 1.6em; line-height: .6;
-  margin: 0 .05em; opacity: .85;
-}
-.env__hint {
-  /* под печатью: видео во всю высоту экрана, печать всегда на ~53% */
-  position: absolute; left: 0; right: 0; top: 67%;
-  margin: 0; text-align: center;
-  font-family: var(--f-sc);
-  font-size: 15px; letter-spacing: .14em;
-  color: #fffaf1;
-  text-shadow: 0 1px 12px rgba(60, 40, 20, .7);
-  pointer-events: none;
-  animation: hint 2.4s ease-in-out infinite;
-  transition: opacity .5s ease;
-}
-@keyframes hint { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
-
-.env__glow {
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 30%, #fffaf0 0%, #fff1dc 45%, #f6e2c3 100%);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .75s ease;
-}
-.env.is-playing .env__hint { opacity: 0; animation: none; }
-.env.is-playing .env__names { opacity: 0; transform: translateY(-12px); }
-.env.is-light .env__glow { opacity: 1; }
-.env:focus-visible .env__hint { opacity: 1; text-decoration: underline; text-underline-offset: 6px; }
-
-/* Свет раскрывается кругом от центра — под ним уже обложка. Радиус круга
-   анимируется через @property; где его нет (старые браузеры) — просто
-   растворение (класс no-iris ставит envelope.js). */
-@property --hole {
-  syntax: "<percentage>";
-  inherits: false;
-  initial-value: 0%;
-}
-.env { --hole: 0%; }
-.env.is-out {
-  --hole: 110%;
-  pointer-events: none;
-  -webkit-mask-image: radial-gradient(circle at 50% 46%, transparent var(--hole), #000 calc(var(--hole) + 24%));
-          mask-image: radial-gradient(circle at 50% 46%, transparent var(--hole), #000 calc(var(--hole) + 24%));
-  transition: --hole 1.7s cubic-bezier(.55, 0, .25, 1);
-}
-.env.no-iris.is-out {
-  -webkit-mask-image: none; mask-image: none;
-  opacity: 0;
-  transition: opacity 1.2s ease;
-}
-
-/* ============================================================
    1 — ОБЛОЖКА (макет: 0–874)
    ============================================================ */
 .hero {
@@ -323,11 +230,9 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
   font-variant-numeric: lining-nums;
 }
 
-/* Появление обложки: после конверта (или сразу — в редакторе) */
+/* Появление обложки: когда подгрузились шрифты (не дольше секунды) */
 .hero-in, .hero__photo { opacity: 0; }
 html.hero-go .hero__photo { animation: heroPhoto 2.8s cubic-bezier(.2, .6, .2, 1) both; }
-/* После конверта фото уже на месте — свет раскрывается прямо на пару */
-html.hero-go.from-env .hero__photo { animation: heroZoom 3.4s cubic-bezier(.2, .6, .2, 1) both; }
 html.hero-go .hero__label { animation: heroFade 1.4s ease .2s both; }
 html.hero-go .hero__name--groom { animation: heroWrite 1.7s cubic-bezier(.35, .45, .25, 1) .6s both; }
 html.hero-go .hero__amp { animation: heroAmp 2.2s ease 1s both; }
@@ -342,10 +247,6 @@ html.hero-go .hero__date { animation: heroFade 1.4s ease 1.8s both; }
 }
 @keyframes heroPhoto {
   from { opacity: 0; transform: scale(1.07); }
-  to   { opacity: 1; transform: scale(1); }
-}
-@keyframes heroZoom {
-  from { opacity: 1; transform: scale(1.08); }
   to   { opacity: 1; transform: scale(1); }
 }
 @keyframes heroFade {

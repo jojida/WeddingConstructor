@@ -10,10 +10,8 @@
   <link rel="preload" href="assets/fonts/caslon-becker.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/calligraphia-one.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
-  <!-- Без скриптов: конверт не открыть, появление при прокрутке не сработает —
-       показываем приглашение сразу -->
+  <!-- Без скриптов появление при прокрутке не сработает — показываем приглашение сразу -->
   <noscript><style>
-    .env { display: none !important; }
     .rv, .rv-soft, .rv-write, .hero-in, .hero__photo {
       opacity: 1 !important; transform: none !important; filter: none !important;
       -webkit-mask-image: none !important; mask-image: none !important;
@@ -21,19 +19,6 @@
   </style></noscript>
 </head>
 <body>
-
-  <!-- 0 — КОНВЕРТ: видео раскрытия. Позже заменится анимацией первого экрана
-       (../assets/envelope.js — общий модуль конверта). -->
-  <div class="env" id="envelope" role="button" tabindex="0" aria-label="Открыть приглашение">
-    <div class="env__backdrop" aria-hidden="true"></div>
-    <video class="env__video" id="envelopeVideo" src="../assets/envelope-wave.mp4" poster="../assets/envelope-wave-poster.jpg"
-           muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
-    <div class="env__names" aria-hidden="true">
-      <span data-env-name="groom">Марк</span><span class="env__amp">&amp;</span><span data-env-name="bride">Алиса</span>
-    </div>
-    <p class="env__hint">Нажмите, чтобы открыть</p>
-    <div class="env__glow" aria-hidden="true"></div>
-  </div>
 
   <main class="invite" id="invite">
 
@@ -196,7 +181,6 @@
   <script src="../assets/venue-map.js"></script>
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
-  <script src="../assets/envelope.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

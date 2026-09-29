@@ -23,15 +23,12 @@
 </head>
 <body>
 
-  <!-- 0 — КОНВЕРТ: видео раскрытия (../assets/envelope.js — общий модуль).
-       Позже первый экран станет анимацией. -->
+  <!-- 0 — КОНВЕРТ: видео раскрытия (../assets/envelope.js). Видео обрезано
+       на 1,83 с: дальше на правом пионе появлялось лишнее свечение -->
   <div class="env" id="envelope" role="button" tabindex="0" aria-label="Открыть приглашение">
     <div class="env__backdrop" aria-hidden="true"></div>
-    <video class="env__video" id="envelopeVideo" src="../assets/envelope-wave.mp4" poster="../assets/envelope-wave-poster.jpg"
+    <video class="env__video" id="envelopeVideo" src="../assets/envelope-wave.mp4?v=2" poster="../assets/envelope-wave-poster.jpg"
            muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
-    <div class="env__names" aria-hidden="true">
-      <span data-env-name="groom">Даниил</span><span class="env__amp">&amp;</span><span data-env-name="bride">Ольга</span>
-    </div>
     <p class="env__hint">Нажмите, чтобы открыть</p>
     <div class="env__glow" aria-hidden="true"></div>
   </div>

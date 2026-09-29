@@ -101,7 +101,7 @@
     });
   }
 
-  /* ─── Имена: обложка, конверт, финал ─────────────── */
+  /* ─── Имена: обложка и финал ─────────────────────── */
   function autoSign() { return STATE.groom + ' & ' + STATE.bride; }
 
   function applyNames(groom, bride) {
@@ -109,8 +109,8 @@
     bride = typeof bride === 'string' ? bride.trim() : '';
     if (groom) STATE.groom = groom;
     if (bride) STATE.bride = bride;
-    setAll('[data-name="groom"], [data-env-name="groom"]', STATE.groom);
-    setAll('[data-name="bride"], [data-env-name="bride"]', STATE.bride);
+    setAll('[data-name="groom"]', STATE.groom);
+    setAll('[data-name="bride"]', STATE.bride);
     if (!STATE.signUser) setAll('[data-edit="closingSign"]', autoSign());
     document.title = STATE.groom + ' & ' + STATE.bride + ' — приглашение на свадьбу';
     fitNames();
