@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, MUSIC_LIBRARY, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import AuthModal from '@/components/AuthModal';
@@ -420,13 +420,22 @@ function EditorContent() {
     if (!defs) return;
     setData(prev => {
       const cd = (prev.customData || {}) as any;
+      // Мелодия шаблона ставится один раз (__musicSeeded): удалённая парой не
+      // возвращается. Опубликованным сайтам музыку сами не добавляем.
+      const published = prev.status === 'paid' || prev.status === 'published';
+      const seedMusic = () => prev.musicUrl || (published ? '' : templateMusic(prev.templateId));
       if (cd.__seededTemplate === prev.templateId) {
+        let next = prev;
         // Уже засеяно, но «Программа дня» не должна оставаться пустой
         // (битые/старые данные в БД) — добираем дефолты дизайна шаблона.
         if ((!Array.isArray(prev.schedule) || prev.schedule.length === 0) && defs.schedule?.length) {
-          return { ...prev, schedule: defs.schedule };
+          next = { ...next, schedule: defs.schedule };
         }
-        return prev;
+        // Черновики, засеянные до появления готовых мелодий
+        if (!cd.__musicSeeded) {
+          next = { ...next, musicUrl: seedMusic(), customData: { ...cd, __musicSeeded: true } };
+        }
+        return next;
       }
       // wasOther — данные пришли от ДРУГОГО шаблона → сбрасываем на дефолты текущего
       const wasOther = !!cd.__seededTemplate && cd.__seededTemplate !== prev.templateId;
@@ -447,9 +456,16 @@ function EditorContent() {
         ...templateCustomDefaults(prev.templateId, prev.weddingDate),
         ...(wasOther ? keepRsvp : cd), // в рамках того же/нового пустого — сохранённое имеет приоритет
         __seededTemplate: prev.templateId,
+        __musicSeeded: true,
       };
+      // Мелодия прошлого шаблона меняется на мелодию нового; выбранная из
+      // списка или своя остаётся, удалённая — не возвращается
+      const musicUrl = !cd.__musicSeeded ? seedMusic()
+        : (wasOther && prev.musicUrl === templateMusic(cd.__seededTemplate)) ? templateMusic(prev.templateId)
+          : prev.musicUrl;
       return {
         ...prev,
+        musicUrl,
         inviteText: (!wasOther && prev.inviteText && prev.inviteText !== EMPTY.inviteText)
           ? prev.inviteText : (defs.inviteText ?? prev.inviteText),
         venue: ownOr(prev.venue, oldDefs?.venue, defs.venue),
@@ -1101,15 +1117,61 @@ function scrollPreviewTo(frame: HTMLIFrameElement | null | undefined, ids: strin
   setTimeout(() => target.classList.remove('wc-editor-flash'), 1300);
 }
 
+/* Фоновая мелодия: готовые мелодии (MUSIC_LIBRARY) с прослушиванием,
+   своя мелодия (загрузить / заменить) и «Без музыки». */
 function AudioPicker({ value, onChange, apiBase, uploadAudio, hint }: {
   value: string; onChange: (v: string) => void; apiBase: string;
   uploadAudio: (f: File) => Promise<string | null>; hint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const src = !value ? ''
-    : /^https?:\/\//.test(value) ? value
-      : value.startsWith('/') ? apiBase + value : value;
-  const fileName = value ? decodeURIComponent(value.split('/').pop() || 'мелодия') : '';
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const [playing, setPlaying] = useState('');   // какая мелодия сейчас звучит в прослушивании
+  // Готовые мелодии лежат во фронтенде (/invite/…), загруженные — на API
+  const resolve = (url: string) => !url ? ''
+    : (/^https?:\/\//.test(url) || url.startsWith('/invite/')) ? url
+      : url.startsWith('/') ? apiBase + url : url;
+  const own = value && !musicTrackByUrl(value) ? value : '';
+  const ownName = own ? decodeURIComponent(own.split('/').pop() || 'мелодия') : '';
+
+  useEffect(() => () => { audioRef.current?.pause(); }, []);
+
+  const toggle = (url: string) => {
+    const a = audioRef.current;
+    if (!a) return;
+    if (playing === url) { a.pause(); return; }
+    a.src = resolve(url);
+    a.play().then(() => setPlaying(url)).catch(() => setPlaying(''));
+  };
+
+  const row = (key: string, url: string, title: string, sub: string, onSelect?: () => void) => {
+    const selected = value === url;
+    const isPlaying = playing === url;
+    return (
+      <div key={key} role="radio" aria-checked={selected} tabIndex={0}
+        onClick={onSelect}
+        onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && onSelect) { e.preventDefault(); onSelect(); } }}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10, cursor: onSelect ? 'pointer' : 'default',
+          border: selected ? '1px solid #685d4a' : '1px solid rgba(206,197,186,0.6)',
+          background: selected ? '#efe3d2' : 'transparent', fontFamily: 'var(--font-inter)',
+        }}>
+        <button type="button" aria-label={isPlaying ? `Остановить «${title}»` : `Послушать «${title}»`}
+          onClick={e => { e.stopPropagation(); toggle(url); }}
+          style={{ flex: 'none', width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(104,93,74,0.35)', background: '#fff', color: '#4b463d', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
+          {isPlaying
+            ? <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" rx="1" fill="currentColor" /><rect x="7" y="1.5" width="3" height="9" rx="1" fill="currentColor" /></svg>
+            : <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.6v8.8L10.2 6z" fill="currentColor" /></svg>}
+        </button>
+        <span style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ display: 'block', fontSize: 13, color: '#2f2b25', lineHeight: 1.25 }}>{title}</span>
+          <span style={{ display: 'block', fontSize: 11, color: '#8a8175', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</span>
+        </span>
+        {selected && <span aria-hidden="true" style={{ flex: 'none', fontSize: 13, color: '#685d4a' }}>✓</span>}
+      </div>
+    );
+  };
+
+  const btn: React.CSSProperties = { flex: 1, padding: 7, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' };
   return (
     <div>
       <input ref={inputRef} type="file" accept="audio/*" style={{ display: 'none' }}
@@ -1118,32 +1180,26 @@ function AudioPicker({ value, onChange, apiBase, uploadAudio, hint }: {
           if (f) { const u = await uploadAudio(f); if (u) onChange(u); }
           if (inputRef.current) inputRef.current.value = '';
         }} />
-      {value ? (
-        <div style={{ border: '1px solid rgba(206,197,186,0.6)', borderRadius: 10, padding: 10 }}>
-          <div style={{ fontSize: 12, color: '#4b463d', fontFamily: 'var(--font-inter)', marginBottom: 8, wordBreak: 'break-all' }}>
-            🎵 {fileName}
-          </div>
-          <audio src={src} controls preload="none" style={{ width: '100%', height: 32 }} />
-          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-            <button type="button" onClick={() => inputRef.current?.click()}
-              style={{ flex: 1, padding: 7, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
-              Заменить
-            </button>
-            <button type="button" onClick={() => onChange('')}
-              style={{ flex: 1, padding: 7, border: '1px solid rgba(231,76,60,0.3)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#e74c3c', cursor: 'pointer' }}>
-              Удалить
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className={styles.dropzone} onClick={() => inputRef.current?.click()}>
-          <div className={styles.dropzoneInner}>
-            <span className={styles.dropzoneIcon}>🎵</span>
-            <span>Загрузить мелодию</span>
-            <span className={styles.dropzoneHint}>{hint || 'MP3 до 15 MB'}</span>
-          </div>
-        </div>
+      <audio ref={audioRef} preload="none" onPause={() => setPlaying('')} onEnded={() => setPlaying('')} />
+      <div role="radiogroup" aria-label="Фоновая мелодия" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {MUSIC_LIBRARY.map(t => row(t.id, t.url, t.title, `${t.author} · ${t.kind} · ${t.duration}`, () => onChange(t.url)))}
+        {own && row('own', own, 'Своя мелодия', ownName)}
+      </div>
+      {!value && (
+        <p style={{ margin: '8px 0 0', fontSize: 12, color: '#8a8175', fontFamily: 'var(--font-inter)' }}>Сейчас сайт без музыки</p>
       )}
+      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+        <button type="button" onClick={() => inputRef.current?.click()} style={btn}>
+          {own ? 'Заменить свою' : 'Загрузить свою'}
+        </button>
+        {value && (
+          <button type="button" onClick={() => { audioRef.current?.pause(); onChange(''); }}
+            style={{ ...btn, border: '1px solid rgba(231,76,60,0.3)', color: '#e74c3c' }}>
+            Без музыки
+          </button>
+        )}
+      </div>
+      {hint && <p style={{ margin: '8px 0 0', fontSize: 11, lineHeight: 1.4, color: '#8a8175', fontFamily: 'var(--font-inter)' }}>{hint}</p>}
     </div>
   );
 }

@@ -580,12 +580,54 @@ export const BUILTIN_GALLERY: string[] = [
   '/invite/assets/dresscode-man2.jpg',
 ];
 
+/* ─── Фоновая музыка: готовые мелодии ─────────────────────────────────
+   Записи в общественном достоянии и CC0 с Wikimedia Commons, источники —
+   public/invite/assets/music/SOURCES.txt. Путь /invite/… отдаёт фронтенд,
+   так их понимают imageUrl() в скриптах шаблонов. */
+export interface MusicTrack {
+  id: string;
+  title: string;
+  author: string;
+  kind: string;
+  duration: string;
+  url: string;
+}
+
+export const MUSIC_LIBRARY: MusicTrack[] = [
+  { id: 'canon',    title: 'Канон ре мажор',          author: 'Пахельбель', kind: 'струнные',   duration: '3:00', url: '/invite/assets/music/canon-pachelbel.mp3' },
+  { id: 'air',      title: 'Ария',                    author: 'Бах',        kind: 'струнные',   duration: '2:55', url: '/invite/assets/music/air-bach.mp3' },
+  { id: 'clair',    title: 'Лунный свет',             author: 'Дебюсси',    kind: 'фортепиано', duration: '3:18', url: '/invite/assets/music/clair-de-lune-debussy.mp3' },
+  { id: 'nocturne', title: 'Ноктюрн ми-бемоль мажор', author: 'Шопен',      kind: 'фортепиано', duration: '3:19', url: '/invite/assets/music/nocturne-chopin.mp3' },
+  { id: 'wagner',   title: 'Свадебный хор',           author: 'Вагнер',     kind: 'оркестр',    duration: '1:44', url: '/invite/assets/music/bridal-chorus-wagner.mp3' },
+];
+
+/** Мелодия, с которой шаблон открывается у новой пары (остальные — «Канон») */
+const TEMPLATE_MUSIC: Record<string, string> = {
+  'garden-evening': 'canon',
+  ivory: 'clair',
+  calla: 'nocturne',
+  sketch: 'air',
+  floral: 'air',
+  'garden-arch': 'canon',
+  mediterranean: 'clair',
+  vadimdarya: 'nocturne',
+};
+
+export function templateMusic(templateId: string): string {
+  const id = TEMPLATE_MUSIC[templateId] || 'canon';
+  return (MUSIC_LIBRARY.find((t) => t.id === id) || MUSIC_LIBRARY[0]).url;
+}
+
+export function musicTrackByUrl(url: string | undefined): MusicTrack | undefined {
+  return url ? MUSIC_LIBRARY.find((t) => t.url === url) : undefined;
+}
+
 /* Схема полей по шаблонам (имена/дата/время правятся в отдельном окне) */
 /** Фоновая мелодия — секция одинаковая во всех шаблонах. */
 const MUSIC_SECTION: TemplateSection = {
   title: 'Музыка', icon: '🎵',
   fields: [
-    { id: 'musicUrl', type: 'audio', label: 'Фоновая мелодия', hint: 'MP3 до 15 МБ. Гость включает её кнопкой в углу сайта', scope: 'data' },
+    { id: 'musicUrl', type: 'audio', label: 'Фоновая мелодия', hint: 'Своя мелодия — MP3 до 15 МБ. Музыка включится, когда гость коснётся экрана, выключить её можно кнопкой в углу', scope: 'data' },
   ],
 };
 

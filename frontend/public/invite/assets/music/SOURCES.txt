@@ -1,0 +1,29 @@
+Готовые фоновые мелодии приглашений (список в редакторе — MUSIC_LIBRARY в src/lib/constants.ts).
+Все записи — общественное достояние или CC0, указывать автора не нужно.
+Источник — Wikimedia Commons, скачано 29.09.2026. Файлы обрезаны (до ~3 мин, затухание в конце),
+громкость выровнена до -18 LUFS, MP3 VBR q5.
+
+canon-pachelbel.mp3
+  И. Пахельбель — Канон ре мажор. United States Air Force Band, Strolling Strings (2004), аранж. Frank Hudson.
+  Public domain (работа правительства США).
+  https://commons.wikimedia.org/wiki/File:Canon_(2004)_-_Strolling_Strings_-_United_States_Air_Force_Band.mp3
+
+air-bach.mp3
+  И. С. Бах — Ария из оркестровой сюиты № 3. United States Air Force Band, Air Force Strings.
+  Public domain (работа правительства США).
+  https://commons.wikimedia.org/wiki/File:Air_-_Air_Force_Strings_-_United_States_Air_Force_Band.mp3
+
+clair-de-lune-debussy.mp3
+  К. Дебюсси — «Лунный свет» из «Бергамасской сюиты», фортепиано.
+  Public domain.
+  https://commons.wikimedia.org/wiki/File:Clair_de_lune_(Claude_Debussy)_Suite_bergamasque.ogg
+
+nocturne-chopin.mp3
+  Ф. Шопен — Ноктюрн ми-бемоль мажор, op. 9 № 2. Frank Lévy, фортепиано (Musopen).
+  Public domain.
+  https://commons.wikimedia.org/wiki/File:Chopin_-_Nocturne_No._2_in_E-flat_major,_Op._9_No._2_(Frank_Levy).flac
+
+bridal-chorus-wagner.mp3
+  Р. Вагнер — Свадебный хор из «Лоэнгрина» (Treulich geführt). Musopen.
+  CC0.
+  https://commons.wikimedia.org/wiki/File:Richard_Wagner_-_Treulich_geführt.ogg

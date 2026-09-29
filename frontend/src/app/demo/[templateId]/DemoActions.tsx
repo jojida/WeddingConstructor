@@ -11,7 +11,8 @@ export default function DemoActions({ templateId }: { templateId: string }) {
       left: '32px',
       display: 'flex',
       flexWrap: 'wrap',
-      maxWidth: 'calc(100vw - 64px)',
+      // справа внизу — кнопка музыки шаблона (44px в 16px от края), не закрываем её
+      maxWidth: 'calc(100vw - 108px)',
       gap: '12px',
       zIndex: 100,
       background: 'rgba(0,0,0,0.5)',

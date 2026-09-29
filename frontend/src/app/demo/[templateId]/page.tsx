@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import TemplatePreview from '@/components/TemplatePreview';
-import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint, templateMusic } from '@/lib/constants';
 import DemoActions from './DemoActions';
 
 interface Props {
@@ -68,6 +68,7 @@ export default async function DemoPage({ params }: Props) {
           schedule:        defs.schedule        ?? SAMPLE_DATA.schedule,
           dressCodeColors: defs.dressCodeColors ?? SAMPLE_DATA.dressCodeColors,
           dressCodePhoto:  defs.dressCodePhoto  ?? SAMPLE_DATA.dressCodePhoto,
+          musicUrl:        templateMusic(template.id),
           customData: {
             ...templateCustomDefaults(template.id, weddingDate),
             mapPoint: demoMapPoint(defs.venueAddress ?? SAMPLE_DATA.venueAddress),
