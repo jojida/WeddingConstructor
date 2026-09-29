@@ -5,6 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
 import api from '@/lib/api';
+import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, MUSIC_LIBRARY, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
@@ -245,7 +246,7 @@ function SetupField({ label, htmlFor, required, note, hint, error, children }: {
 function EditorContent() {
   const searchParams  = useSearchParams();
   const router        = useRouter();
-  const { user }      = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
 
   const templateIdFromUrl = searchParams.get('template') || 'vadimdarya';
   const idFromUrl         = searchParams.get('id');
@@ -255,6 +256,7 @@ function EditorContent() {
   const [draftChecked,  setDraftChecked]  = useState(!!idFromUrl);
   const [activeSection, setActiveSection] = useState<string>('couple');
   const [data,          setData]          = useState<InviteData>({ ...EMPTY, templateId: templateIdFromUrl });
+  const [guestDraftReady, setGuestDraftReady] = useState(false);
   const [saving,        setSaving]        = useState(false);
   const [uploading,     setUploading]     = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -358,7 +360,7 @@ function EditorContent() {
     if (draftChecked) return;
     try {
       const saved = JSON.parse(localStorage.getItem(GUEST_DRAFT_KEY) || 'null');
-      if (saved && saved.groomName && saved.brideName && saved.weddingDate) {
+      if (canResumeDraft(saved, templateIdFromUrl) && saved.groomName && saved.brideName && saved.weddingDate) {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- разовое решение после монтирования, см. выше
         setStep('editor');
         toast.success('Черновик восстановлен', { id: 'draft-restored' });
@@ -370,7 +372,7 @@ function EditorContent() {
 
   // ── Load draft ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (step !== 'editor') return;
+    if (step !== 'editor' || authLoading || (idFromUrl && !user)) return;
     const setup = pendingSetupRef.current;
     pendingSetupRef.current = null;
 
@@ -386,28 +388,32 @@ function EditorContent() {
     if (user) {
       const savedId  = sessionStorage.getItem('wc_draft_id');
       const guestRaw = localStorage.getItem(GUEST_DRAFT_KEY);
-      let guestData: Partial<InviteData> = {};
-      if (guestRaw) { try { guestData = JSON.parse(guestRaw); } catch {} }
+      const guestData = readGuestDraft<InviteData>(guestRaw, templateIdFromUrl);
       const mergedGuest = { ...guestData, ...(setup || {}) };
       if (savedId) {
         api.get(`/api/invites/${savedId}`)
-          .then(res => setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: Array.isArray(res.data.dressCodeColors) ? res.data.dressCodeColors : [], schedule: Array.isArray(res.data.schedule) ? res.data.schedule : [], galleryPhotos: Array.isArray(res.data.galleryPhotos) ? res.data.galleryPhotos : [], customData: res.data.customData || {} })))
+          .then(res => {
+            if (!canResumeDraft(res.data, templateIdFromUrl)) {
+              return createDraft(templateIdFromUrl, mergedGuest);
+            }
+            setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: Array.isArray(res.data.dressCodeColors) ? res.data.dressCodeColors : [], schedule: Array.isArray(res.data.schedule) ? res.data.schedule : [], galleryPhotos: Array.isArray(res.data.galleryPhotos) ? res.data.galleryPhotos : [], customData: res.data.customData || {} }));
+          })
           .catch(() => { sessionStorage.removeItem('wc_draft_id'); createDraft(templateIdFromUrl, mergedGuest); });
       } else {
         createDraft(templateIdFromUrl, mergedGuest);
       }
     } else {
       const raw = localStorage.getItem(GUEST_DRAFT_KEY);
-      let saved: Partial<InviteData> = {};
-      if (raw) { try { saved = JSON.parse(raw) as Partial<InviteData>; } catch {} }
+      const saved = readGuestDraft<InviteData>(raw, templateIdFromUrl);
+      setGuestDraftReady(true);
       setData(prev => ({ ...prev, ...saved, ...(setup || {}), templateId: templateIdFromUrl, dressCodeColors: (setup?.dressCodeColors || saved.dressCodeColors || []) }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, user]);
+  }, [step, user, authLoading]);
 
   useEffect(() => {
-    if (!user && step === 'editor') localStorage.setItem(GUEST_DRAFT_KEY, JSON.stringify(data));
-  }, [data, user, step]);
+    if (!authLoading && !user && !idFromUrl && guestDraftReady && step === 'editor') localStorage.setItem(GUEST_DRAFT_KEY, JSON.stringify(data));
+  }, [data, user, step, authLoading, idFromUrl, guestDraftReady]);
 
   // ── Заполнение полей значениями по умолчанию (= содержимое дизайна) ──────────
   // Делает редактор сразу заполненным реальным текстом/фото без изменения вида.
@@ -487,7 +493,7 @@ function EditorContent() {
       const res    = await api.post('/api/invites', { templateId });
       const newId  = res.data.id;
       sessionStorage.setItem('wc_draft_id', newId);
-      const merged = { ...EMPTY, ...res.data, ...guestData, id: newId, dressCodeColors: guestData.dressCodeColors || [] };
+      const merged = { ...EMPTY, ...res.data, ...guestData, id: newId, templateId, status: res.data.status, slug: res.data.slug, dressCodeColors: guestData.dressCodeColors || [] };
       if (Object.keys(guestData).length > 0) {
         await api.put(`/api/invites/${newId}`, merged);
         localStorage.removeItem(GUEST_DRAFT_KEY);
@@ -1407,6 +1413,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function EditorForSelection() {
+  const params = useSearchParams();
+  const key = params.get('id') ? 'id:' + params.get('id') : 'template:' + (params.get('template') || 'vadimdarya');
+  return <EditorContent key={key} />;
+}
+
 export default function EditorPage() {
   return (
     <Suspense fallback={
@@ -1414,7 +1426,7 @@ export default function EditorPage() {
         <div style={{ width: 36, height: 36, border: '2px solid rgba(206,197,186,0.4)', borderTopColor: '#685d4a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
       </div>
     }>
-      <EditorContent />
+      <EditorForSelection />
     </Suspense>
   );
 }
