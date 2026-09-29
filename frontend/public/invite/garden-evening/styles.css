@@ -132,11 +132,13 @@ html.env-lock, html.env-lock body { overflow: hidden; height: 100%; }
   filter: blur(26px) brightness(.9);
 }
 .env__video {
-  position: absolute; top: 0; left: 50%;
-  height: 100%; width: auto;
-  aspect-ratio: 9 / 16;
-  transform: translateX(-50%);
+  position: absolute; inset: 0;
+  height: 100%; width: 100%;
+  /* Заполняем экран и чуть убираем края самого кадра без растяжения. */
+  transform: scale(1.06);
+  transform-origin: 50% 53%;
   object-fit: cover;
+  object-position: 50% 53%;
   pointer-events: none;
 }
 .env__hint {
