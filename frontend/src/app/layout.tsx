@@ -59,6 +59,11 @@ export const metadata: Metadata = {
     description: "Электронные свадебные приглашения: шаблоны, анкета для гостей, уведомления в Telegram.",
     images: ["/invite/calla/assets/couple-photo.jpg"],
   },
+  // Подтверждение прав на домен в Pinterest (бизнес-аккаунт) — тег должен
+  // оставаться, иначе Pinterest снимет подтверждение.
+  verification: {
+    other: { "p:domain_verify": "2f238d702f6e919c0173fe32749da8f8" },
+  },
   robots: {
     index: true,
     follow: true,
