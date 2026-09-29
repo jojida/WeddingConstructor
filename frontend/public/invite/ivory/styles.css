@@ -174,7 +174,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
 }
 .hero__amp {
   position: absolute; z-index: 1;
-  left: calc(128 * var(--u)); top: calc(383 * var(--u));
+  left: calc(128 * var(--u)); top: calc(298 * var(--u));
   font-family: var(--f-amp);
   font-size: calc(200 * var(--u));
   line-height: normal;
@@ -215,8 +215,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   /* на светлых фото пары имена не теряются */
   text-shadow: 0 calc(2 * var(--u)) calc(14 * var(--u)) rgba(0, 0, 0, .35);
 }
-.hero__name--groom { left: calc(41 * var(--u)); top: calc(473 * var(--u)); }
-.hero__name--bride { left: calc(199 * var(--u)); top: calc(582 * var(--u)); }
+.hero__name--groom { left: calc(41 * var(--u)); top: calc(388 * var(--u)); }
+.hero__name--bride { left: calc(199 * var(--u)); top: calc(497 * var(--u)); }
 .hero__date {
   position: absolute; z-index: 3;
   left: 0; right: 0; top: calc(772 * var(--u));
