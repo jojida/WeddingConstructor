@@ -146,15 +146,13 @@ img { max-width: none; }
   from { transform: translateX(-6%); }
   to   { transform: translateX(6%); }
 }
-/* Деревья в 1,4 раза крупнее, чем в макете: голый ствол ушёл за края экрана
-   и под край бумаги, кроны обрамляют имена там же, где в макете.
-   Центр поворота и масштаба — основание ствола (он за кадром), поэтому и
-   при сомкнутых деревьях ствол не показывается. */
+/* Деревья в 1,4 раза крупнее, чем в макете: голый ствол ушёл ниже обложки
+   (под край бумаги) и за края экрана, кроны обрамляют имена там же, где
+   в макете. Деревья всегда стоят прямо — только разъезжаются в стороны. */
 .hero__tree {
   position: absolute; display: block; height: auto;
   pointer-events: none;
   will-change: transform;
-  transform-origin: 43.8% 93.6%;
 }
 .hero__tree--l {
   left: calc(-1010 * var(--u)); top: calc(28 * var(--u));
@@ -203,11 +201,11 @@ img { max-width: none; }
 .hero__corner--r { left: calc(923 * var(--u)); top: calc(1651 * var(--u)); width: calc(443 * var(--u)); }
 
 /* ── Раскрытие обложки (класс hero-go на <html>) ──
-   До старта: деревья наклонены друг к другу и сомкнуты кронами, имена прячутся.
-   Старт: деревья выпрямляются и расходятся, за ними проявляются
-   имена, затем передние имена — поверх крон, и выплывают цветы. */
-.hero__tree--l { transform: rotate(9deg) scale(1.12); }
-.hero__tree--r { transform: rotate(-9deg) scale(1.12); }
+   До старта: деревья сдвинуты к центру и сомкнуты кронами, имена прячутся.
+   Старт: деревья расходятся в стороны, за ними проявляются имена,
+   затем передние имена — поверх крон, и выплывают цветы. */
+.hero__tree--l { transform: translateX(calc(330 * var(--u))); }
+.hero__tree--r { transform: translateX(calc(-330 * var(--u))); }
 .hero__bg { transform: scale(1.1); }
 .hero__names--back  { opacity: 0; transform: scale(.94); filter: blur(6px); }
 .hero__names--front { opacity: 0; }
