@@ -2,7 +2,9 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
-import GalleryPreview from '@/components/GalleryPreview';
+import TemplatePreview from '@/components/TemplatePreview';
+import LazyMount from '@/components/LazyMount';
+import PreviewScale from '@/components/PreviewScale';
 import { LEGAL, TEMPLATES, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import styles from './page.module.css';
 
@@ -89,18 +91,22 @@ export default function TemplatesPage() {
             }}
           >
             <div className={styles.cardImageWrapper}>
-              <GalleryPreview className={styles.previewScale}
-                data={{
-                  ...SAMPLE_DATA,
-                  brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                  groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                  templateId: tpl.id,
-                  weddingDate: templateSampleDate(tpl),
-                  coverPhoto: tpl.defaultCover,
-                  galleryPhotos: tpl.defaultGallery
-                }}
-                apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-              />
+              <PreviewScale className={styles.previewScale}>
+                <LazyMount>
+                  <TemplatePreview
+                    data={{
+                      ...SAMPLE_DATA,
+                      brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
+                      groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
+                      templateId: tpl.id,
+                      weddingDate: templateSampleDate(tpl),
+                      coverPhoto: tpl.defaultCover,
+                      galleryPhotos: tpl.defaultGallery
+                    }}
+                    apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+                  />
+                </LazyMount>
+              </PreviewScale>
             </div>
 
             <div className={styles.cardInfo}>

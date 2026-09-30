@@ -44,5 +44,5 @@ export default function PreviewScale({ className, children }: {
     return () => ro.disconnect();
   }, []);
 
-  return <div ref={ref} className={className} data-preview-viewport>{children}</div>;
+  return <div ref={ref} className={className}>{children}</div>;
 }
