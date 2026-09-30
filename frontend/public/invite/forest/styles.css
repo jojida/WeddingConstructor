@@ -504,7 +504,8 @@ html.no-anim .hero__mist { animation: none; }
   top: 0; height: 0;
   pointer-events: none;
 }
-.sched__line { background: #1d1f1b; }
+/* линия — цвета ромбов: непройденная как ромбы впереди, пройденная (fill) как пройденные */
+.sched__line { background: var(--ink); }
 .sched__fill { background: var(--moss); width: calc(8 * var(--u)); left: calc(911 * var(--u)); border-radius: 99px; }
 .sched__acorn {
   position: absolute; z-index: 2; left: 0; top: 0;
