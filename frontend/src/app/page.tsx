@@ -3,10 +3,8 @@ import Link from 'next/link';
 import { useState, useEffect, useMemo } from 'react';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
-import TemplatePreview from '@/components/TemplatePreview';
-import LazyMount from '@/components/LazyMount';
 import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
-import PreviewScale from '@/components/PreviewScale';
+import GalleryPreview from '@/components/GalleryPreview';
 import MediterraneanTemplate from '@/components/MediterraneanTemplate';
 import styles from './page.module.css';
 
@@ -250,22 +248,18 @@ function TemplatesSection() {
           {TEMPLATES.map((tpl) => (
             <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}>
               <div className={styles.mosaicCard}>
-                <PreviewScale className={styles.previewScale}>
-                  <LazyMount>
-                    <TemplatePreview
-                      data={{
-                        ...SAMPLE_DATA,
-                        brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                        groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                        templateId: tpl.id,
-                        weddingDate: templateSampleDate(tpl),
-                        coverPhoto: tpl.defaultCover,
-                        galleryPhotos: tpl.defaultGallery
-                      }}
-                      apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                    />
-                  </LazyMount>
-                </PreviewScale>
+                <GalleryPreview className={styles.previewScale}
+                  data={{
+                    ...SAMPLE_DATA,
+                    brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
+                    groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
+                    templateId: tpl.id,
+                    weddingDate: templateSampleDate(tpl),
+                    coverPhoto: tpl.defaultCover,
+                    galleryPhotos: tpl.defaultGallery
+                  }}
+                  apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+                />
                 <div className={styles.mosaicOverlay} />
                 <div className={styles.mosaicInfo}>
                   <h3 className={styles.mosaicTitle}>{tpl.name}</h3>

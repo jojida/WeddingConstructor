@@ -112,7 +112,7 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
     assert.equal((await request(`/orders/${sample.id}/pay`, 'POST')).status, 200);
     assert.equal(paymentCalls, callsBefore);
   });
-  await t.test('all six designs produce downloadable PDFs with correct page boxes', async () => {
+  await t.test('all designs produce downloadable PDFs with correct page boxes', async () => {
     const output = path.join(root, '.test-tmp/print-samples'); fs.mkdirSync(output, { recursive: true });
     for (const template of PRINT_TEMPLATES) {
       const sample = await prisma.printOrder.create({ data: { userId: owner.id, templateId: template.id, data: JSON.stringify(PRINT_SAMPLE), status: 'paid' } });

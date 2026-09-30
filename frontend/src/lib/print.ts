@@ -1,5 +1,9 @@
 export const PRINT_PRICE = 290;
 export const PRINT_TEMPLATES = [
+  { id: 'newspaper', name: 'Свадебный вестник', category: 'Редакционный', color: '#e7d8c3', description: 'Ваша главная новость на первой полосе' },
+  { id: 'petals', name: 'Шёпот лепестков', category: 'Романтика', color: '#ecded9', description: 'Объёмные цветы, жемчуг и пудровые оттенки' },
+  { id: 'editorial', name: 'Наша история', category: 'Редакционный', color: '#dfd5d4', description: 'Обложка журнала о вашей любви' },
+  { id: 'boarding', name: 'Рейс в счастье', category: 'Путешествия', color: '#d9e2e4', description: 'Иллюминатор и билет в новую жизнь' },
   { id: 'vow', name: 'Тихое «да»', category: 'Минимализм', color: '#e7dfd1', description: 'Чистые линии и тёплая бумага' },
   { id: 'olive', name: 'Оливковая ветвь', category: 'Ботаника', color: '#e1e5da', description: 'Нежная графика в природных оттенках' },
   { id: 'arch', name: 'Нежная арка', category: 'Романтика', color: '#e9d8d3', description: 'Пудровые тона и мягкая геометрия' },
