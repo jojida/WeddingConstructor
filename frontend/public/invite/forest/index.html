@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Антон и Мария — приглашение на свадьбу</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="preload" as="image" href="assets/hero-bg.webp" />
+  <link rel="preload" as="image" href="assets/tree.webp" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Без скриптов деревья не расступятся и появление при прокрутке не сработает —
+       показываем приглашение сразу -->
+  <noscript><style>
+    .hero__tree, .hero__bg, .hero__corner, .hero__names { transform: none !important; opacity: 1 !important; filter: none !important; }
+    .rv, .rv-soft, .rv-write, .rv-brush span {
+      opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important;
+      -webkit-mask-image: none !important; mask-image: none !important;
+    }
+    .rv-brush span { -webkit-mask-image: url("assets/brush.svg") !important; mask-image: url("assets/brush.svg") !important; }
+  </style></noscript>
+</head>
+<body>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА: туманный лес. Деревья сначала сомкнуты, потом
+         расступаются, и из-за них выглядывают имена. Имена — два слоя:
+         задний стоит за деревьями (его открывают расходящиеся кроны),
+         передний проявляется поверх, когда деревья остановились, — чтобы
+         имена читались целиком, как в макете -->
+    <section class="hero" id="hero">
+      <div class="hero__stage">
+        <img class="hero__bg" src="assets/hero-bg.webp" alt="" />
+        <div class="hero__mist" aria-hidden="true"></div>
+        <div class="hero__names hero__names--back" aria-hidden="true">
+          <span class="hero__line hero__line--g" data-name="groom">Антон</span>
+          <span class="hero__line hero__line--and">и</span>
+          <span class="hero__line hero__line--b" data-name="bride">Мария</span>
+        </div>
+        <img class="hero__tree hero__tree--l" src="assets/tree.webp" alt="" />
+        <img class="hero__tree hero__tree--r" src="assets/tree.webp" alt="" />
+        <h1 class="hero__names hero__names--front">
+          <span class="hero__line hero__line--g" data-name="groom">Антон</span>
+          <span class="hero__line hero__line--and">и</span>
+          <span class="hero__line hero__line--b" data-name="bride">Мария</span>
+        </h1>
+      </div>
+      <!-- рваный край бумаги поверх низа фото -->
+      <img class="hero__edge" src="assets/hero-edge.webp" alt="" />
+      <img class="hero__corner hero__corner--l" src="assets/corner-l.webp" alt="" />
+      <img class="hero__corner hero__corner--r" src="assets/corner-r.webp" alt="" />
+    </section>
+
+    <!-- 2 — ДОРОГИЕ ГОСТИ -->
+    <section class="greet" id="greeting">
+      <h2 class="title rv-write" data-edit="greetingTitle">Дорогие гости</h2>
+      <div class="greet__text rv" data-edit="inviteText">
+        <p>Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.</p>
+        <p>Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.</p>
+      </div>
+    </section>
+
+    <!-- 3 — ФОТО ПАРЫ: овальная рамка макета, фото листаются стрелками
+         (и свайпом). Рамка в макете повёрнута на −3° — фото вместе с ней -->
+    <section class="album" id="album" aria-label="Наши фото">
+      <div class="album__frame rv-soft">
+        <div class="album__photos" id="albumPhotos">
+          <img class="album__img is-active" src="assets/album-1.jpg" data-edit="coverPhoto" alt="Наше фото 1" />
+          <img class="album__img" src="assets/album-2.jpg" data-edit="albumPhoto2" alt="Наше фото 2" />
+          <img class="album__img" src="assets/album-3.jpg" data-edit="albumPhoto3" alt="Наше фото 3" />
+        </div>
+        <img class="album__border" src="assets/frame.webp" alt="" />
+      </div>
+      <button class="album__nav album__nav--prev rv-soft" type="button" aria-label="Предыдущее фото">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M.6 50 50.2.4v24.8h49.6v49.6H50.2v24.8z" /></svg>
+      </button>
+      <button class="album__nav album__nav--next rv-soft" type="button" aria-label="Следующее фото">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M99.4 50 49.8.4v24.8H.2v49.6h49.6v24.8z" /></svg>
+      </button>
+    </section>
+
+    <!-- 4 — ДАТА: пять дней, день свадьбы — в сердце (строит script.js) -->
+    <section class="dates" id="date">
+      <div class="dates__row" id="datesRow" aria-hidden="true">
+        <span class="dates__day rv-soft">17</span>
+        <span class="dates__day rv-soft">18</span>
+        <span class="dates__heart rv-soft">
+          <svg viewBox="-2 0 206 180"><path d="M201.3 38.3C194.9 17.3 174.1.7 149.6.7c-20.6 0-38.6 11.2-47.6 27.6C92.9 11.9 75 .7 54.4.7 28.7.7 6.2 17.3 1.8 41.3-9 102.2 61.5 149.9 102.1 178.4c37.5-26.3 117-80.1 99.2-140.1z" /></svg>
+          <span class="dates__num">19</span>
+        </span>
+        <span class="dates__day rv-soft">20</span>
+        <span class="dates__day rv-soft">21</span>
+      </div>
+      <p class="dates__month rv" id="datesMonth">июнь 2027</p>
+    </section>
+
+    <!-- 5 — МЕСТО ПРОВЕДЕНИЯ: серая рваная бумага, ветка со мхом над ней -->
+    <section class="venue" id="venue">
+      <img class="venue__branch" src="assets/branch.webp" alt="" />
+      <h2 class="title rv-write" data-edit="venueTitle">Место проведения</h2>
+      <img class="venue__gazebo rv-soft" src="assets/gazebo.webp" alt="" />
+      <p class="venue__name rv" data-edit="venue">Усадьба Кусково</p>
+      <p class="venue__addr rv" data-edit="venueAddress">Москва, ул. Юности, 2</p>
+      <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
+      <div class="wc-map forest-map" data-wc-map hidden></div>
+    </section>
+
+    <!-- 6 — РАСПИСАНИЕ: жёлудь едет по треку за прокруткой -->
+    <section class="program" id="program">
+      <h2 class="title rv-write" data-edit="programTitle">Расписание</h2>
+      <img class="program__pine rv-soft" src="assets/pine.webp" alt="" />
+      <div class="sched" id="sched">
+        <span class="sched__line" id="schedLine" aria-hidden="true"></span>
+        <span class="sched__fill" id="schedFill" aria-hidden="true"></span>
+        <!-- пункты .sched__row строит script.js из расписания -->
+        <img class="sched__acorn" id="schedAcorn" src="assets/acorn.webp" alt="" />
+      </div>
+    </section>
+
+    <!-- 7 — ОТСЧЁТ -->
+    <section class="cd" id="countdown">
+      <h2 class="title cd__title rv-write" data-edit="countdownTitle">До свадьбы осталось</h2>
+      <div class="cd__row rv" aria-live="off">
+        <div class="cd__cell"><span class="cd__num" id="cdD">122</span><span class="cd__lbl" id="cdDl">дня</span></div>
+        <span class="cd__sep">:</span>
+        <div class="cd__cell"><span class="cd__num" id="cdH">08</span><span class="cd__lbl" id="cdHl">часов</span></div>
+        <span class="cd__sep">:</span>
+        <div class="cd__cell"><span class="cd__num" id="cdM">32</span><span class="cd__lbl" id="cdMl">минуты</span></div>
+        <span class="cd__sep">:</span>
+        <div class="cd__cell"><span class="cd__num" id="cdS">12</span><span class="cd__lbl" id="cdSl">секунд</span></div>
+      </div>
+    </section>
+
+    <!-- 8 — ДРЕСС-КОД: мазки кистью, цвета — из палитры пары -->
+    <section class="dress" id="dresscode">
+      <h2 class="title rv-write" data-edit="dressTitle">Дресс код</h2>
+      <div class="brushes rv-brush" data-edit="palette">
+        <span style="--c:#738445"></span><span style="--c:#4a552d"></span><span style="--c:#b39c7e"></span><span style="--c:#925c2d"></span><span style="--c:#44200d"></span>
+      </div>
+      <p class="dress__text rv" data-edit="dressText">Будем рады, если в ваших нарядах найдутся оттенки нашей лесной палитры</p>
+    </section>
+
+    <!-- 9 — ПОЖЕЛАНИЯ: текст слева, ель справа -->
+    <section class="wish" id="wishes">
+      <img class="wish__spruce rv-soft" src="assets/spruce.webp" alt="" />
+      <h2 class="title wish__title rv-write" data-edit="wishTitle">Пожелания</h2>
+      <div class="wish__text rv" data-edit="story">
+        <p>Самый ценный подарок для нас — ваше присутствие. Если захотите порадовать нас чем-то ещё, мы будем благодарны за вклад в бюджет нашей молодой семьи.</p>
+        <p>Просим не дарить живые цветы — мы не успеем насладиться ими в полной мере.</p>
+      </div>
+    </section>
+
+    <!-- 10 — АНКЕТА: серая рваная бумага тянется под форму -->
+    <section class="rsvp" id="rsvp">
+      <h2 class="title rv-write" data-edit="surveyTitle">Анкета гостя</h2>
+      <p class="rsvp__lead rv" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету заранее</p>
+      <form class="rsvp__form rv" id="rsvpForm" novalidate>
+        <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+        <fieldset class="rsvp__group">
+          <legend>Будете ли вы на празднике?</legend>
+          <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, с радостью приду</label>
+          <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+        </fieldset>
+        <fieldset class="rsvp__group" data-rsvp-count>
+          <legend>Сколько вас будет?</legend>
+          <div class="wc-count" data-wc-count>
+            <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+            <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+            <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+          </div>
+        </fieldset>
+        <fieldset class="rsvp__group" data-edit="drinks">
+          <legend>Что предпочитаете из напитков?</legend>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Игристое</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+        </fieldset>
+        <button class="rsvp__submit" type="submit">Отправить</button>
+        <p class="rsvp__error" id="rsvpError" role="alert"></p>
+      </form>
+      <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен</p>
+    </section>
+
+    <!-- 11 — ДО СКОРЫХ ВСТРЕЧ: горы в тумане -->
+    <section class="fin" id="final">
+      <h2 class="title fin__title rv-write" data-edit="closingTitle">До скорых встреч!</h2>
+      <p class="title fin__sign rv-write" data-edit="closingSign">Ваши Антон и Мария</p>
+      <img class="fin__scene rv-soft" src="assets/fin-scene.webp" alt="" />
+    </section>
+
+  </main>
+
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

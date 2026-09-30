@@ -69,6 +69,7 @@ const DEMO_MAP_POINTS: Record<string, { lat: number; lon: number }> = {
   'Москва, ул. Крымский Вал, 9': { lat: 55.73144, lon: 37.60342 },   // главный вход Парка Горького
   'г. Сочи, ул. Приморская, 15': { lat: 43.57367, lon: 39.72640 },
   'Москва, ул. Дольская, 1': { lat: 55.61548, lon: 37.68214 },       // усадьба Царицыно («Айвори»)
+  'Москва, ул. Юности, 2': { lat: 55.73494, lon: 37.80898 },         // усадьба Кусково («Туманный лес»)
 };
 export function demoMapPoint(address?: string): { q: string; lat: number; lon: number } | undefined {
   const p = address ? DEMO_MAP_POINTS[address] : undefined;
@@ -76,6 +77,19 @@ export function demoMapPoint(address?: string): { q: string; lat: number; lon: n
 }
 
 const HANDMADE_TEMPLATES = [
+  {
+    id: 'forest',
+    name: 'Туманный лес',
+    description: 'Туманный лес на обложке: деревья расступаются, и из-за них появляются имена пары. Фото в винтажной овальной рамке, календарь дня с сердцем, беседка в розах и карта, расписание с жёлудем на треке, таймер, дресс-код мазками кисти и анкета для гостей.',
+    tags: ['Лес', 'Природа', 'Винтаж', 'Зелёный', 'Анимация'],
+    colors: ['#f7f2ed', '#4a552d', '#a0a496'],
+    preview: '/invite/forest/assets/preview.jpg',
+    defaultCover: '/invite/forest/assets/album-1.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Мария',
+    sampleGroom: 'Антон',
+    sampleDaysAhead: 140,
+  },
   {
     id: 'garden-evening',
     name: 'Вечер в саду',
@@ -438,6 +452,7 @@ export const formatDrinkChoice = (choice: string, labels: Record<string, string>
 
 /** Ключ data-edit строки-приветствия в каждом шаблоне (для персонализации гостя). */
 export const TEMPLATE_GREETING_KEY: Record<string, string> = {
+  forest: 'greetingTitle',
   'garden-evening': 'greetingTitle',
   ivory: 'greetingTitle',
   calla: 'greetingTitle',
@@ -603,6 +618,7 @@ export const MUSIC_LIBRARY: MusicTrack[] = [
 
 /** Мелодия, с которой шаблон открывается у новой пары (остальные — «Канон») */
 const TEMPLATE_MUSIC: Record<string, string> = {
+  forest: 'air',
   'garden-evening': 'canon',
   ivory: 'clair',
   calla: 'nocturne',
@@ -681,6 +697,65 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 }
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
+  forest: [
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения (абзацы с новой строки)', scope: 'data', maxLength: 420 },
+      ],
+    },
+    {
+      title: 'Фото в рамке', icon: '🖼',
+      fields: [
+        { id: 'coverPhoto',  type: 'image', label: 'Фото 1', hint: 'Фото в овальной рамке листаются стрелками. Лучше вертикальные', scope: 'data' },
+        { id: 'albumPhoto2', type: 'image', label: 'Фото 2', scope: 'custom' },
+        { id: 'albumPhoto3', type: 'image', label: 'Фото 3', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Усадьба Кусково', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', noIcon: true },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры (мазки кистью)', scope: 'data' },
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+      ],
+    },
+    {
+      title: 'Пожелания', icon: '💌',
+      fields: [
+        { id: 'story', type: 'textarea', label: 'Текст пожеланий (абзацы с новой строки)', scope: 'data', maxLength: 400 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — «Ваши …» из ваших имён', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
   'garden-evening': [
     {
       title: 'Обложка', icon: '🖼',
@@ -1192,6 +1267,44 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = Object.fromEnt
 );
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
+  forest: {
+    inviteText:
+      'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
+      'рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.\n' +
+      'Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.',
+    venue: 'Усадьба Кусково',
+    venueAddress: 'Москва, ул. Юности, 2',
+    story:
+      'Самый ценный подарок для нас — ваше присутствие. Если захотите порадовать нас чем-то ещё, ' +
+      'мы будем благодарны за вклад в бюджет нашей молодой семьи.\n' +
+      'Просим не дарить живые цветы — мы не успеем насладиться ими в полной мере.',
+    schedule: [
+      { time: '15:00', title: 'Сбор гостей',      icon: '' },
+      { time: '16:00', title: 'Церемония',        icon: '' },
+      { time: '17:00', title: 'Фуршет',           icon: '' },
+      { time: '21:00', title: 'Торт',             icon: '' },
+      { time: '22:00', title: 'Танцы',            icon: '' },
+      { time: '23:00', title: 'Окончание вечера', icon: '' },
+    ],
+    dressCodeColors: ['#738445', '#4a552d', '#b39c7e', '#925c2d', '#44200d'],
+    drinks: [
+      { value: 'sparkling',  label: 'Игристое' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'cognac',     label: 'Коньяк' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      greetingTitle: 'Дорогие гости',
+      albumPhoto2:   '/invite/forest/assets/album-2.jpg',
+      albumPhoto3:   '/invite/forest/assets/album-3.jpg',
+      dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей лесной палитры',
+      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
+      closingTitle:  'До скорых встреч!',
+      closingSign:   '', // Пустое поле — «Ваши …» из имён пары.
+    },
+  },
+
   'garden-evening': {
     inviteText:
       'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
