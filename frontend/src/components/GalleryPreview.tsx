@@ -4,6 +4,23 @@ import TemplatePreview, { type InviteData } from './TemplatePreview';
 import PreviewScale from './PreviewScale';
 import LazyMount from './LazyMount';
 
+// Applied only inside the gallery frame, never to the guest invitation/editor.
+const GALLERY_STILL_CSS = `
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .rv, .rv-soft, .rv-write, .rv-brush, .reveal, .anim, .fu,
+  .fade-up, .fade-soft, .hero-in, .hero__photo {
+    opacity: 1 !important; transform: none !important; filter: none !important;
+    mask-image: none !important; -webkit-mask-image: none !important;
+  }
+  #envelope, #envelope-screen, .hero__live { display: none !important; }
+`;
+
 /** Only the hovered card mounts a live invitation. Touch keeps the light cover. */
 export default function GalleryPreview({ className, data, apiBase }: {
   className?: string;
@@ -20,11 +37,9 @@ export default function GalleryPreview({ className, data, apiBase }: {
     if (!card) return;
     const pointer = matchMedia('(hover: hover) and (pointer: fine)');
     const motion = matchMedia('(prefers-reduced-motion: reduce)');
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const stop = () => { clearTimeout(timer); setActive(false); };
+    const stop = () => setActive(false);
     const start = () => {
-      clearTimeout(timer);
-      if (pointer.matches && !motion.matches) timer = setTimeout(() => setActive(true), 250);
+      if (pointer.matches && !motion.matches) setActive(true);
     };
     const visibility = () => { if (document.hidden) stop(); };
     card.addEventListener('mouseenter', start);
@@ -35,7 +50,6 @@ export default function GalleryPreview({ className, data, apiBase }: {
     const observer = new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) stop(); });
     observer.observe(card);
     return () => {
-      clearTimeout(timer);
       card.removeEventListener('mouseenter', start);
       card.removeEventListener('mouseleave', stop);
       motion.removeEventListener('change', stop);
@@ -50,24 +64,31 @@ export default function GalleryPreview({ className, data, apiBase }: {
     let frame = 0;
     let previous = 0;
     let position = 0;
-    let readyAt = 0;
+    let preparedDocument: Document | null = null;
     const animate = (now: number) => {
       const layer = live.current;
       const iframe = layer?.querySelector('iframe');
       // Local invitation frames are same-origin. Never move the gallery page.
       let viewport: Element | null = null;
       try {
+        const doc = iframe?.contentDocument;
+        if (doc?.head && doc.body?.children.length && doc !== preparedDocument) {
+          const style = doc.createElement('style');
+          style.dataset.galleryStill = 'true';
+          style.textContent = GALLERY_STILL_CSS;
+          doc.head.append(style);
+          preparedDocument = doc;
+        }
         viewport = iframe
           ? (iframe.contentDocument?.body?.children.length
             ? iframe.contentDocument.scrollingElement : null)
           : layer?.querySelector('[data-preview-viewport] > div') || null;
       } catch { /* An unavailable frame keeps its static cover. */ }
       if (viewport && viewport.scrollHeight > viewport.clientHeight) {
-        if (!readyAt) readyAt = now + 800;
         if (layer) layer.style.opacity = '1';
-        // 45 visible pixels/sec, regardless of card width or display refresh rate.
+        // 150 visible pixels/sec, with no intro pause, at any card width.
         const scale = (host.current?.clientWidth || 480) / 480;
-        if (now > readyAt && previous) position += Math.min(now - previous, 50) * .045 / scale;
+        if (previous) position += Math.min(now - previous, 50) * .15 / scale;
         viewport.scrollTo({ top: Math.min(position, viewport.scrollHeight - viewport.clientHeight), behavior: 'instant' });
       }
       previous = now;
@@ -79,7 +100,7 @@ export default function GalleryPreview({ className, data, apiBase }: {
 
   return <div ref={host} data-gallery-preview style={{ position: 'relative', width: '100%', height: '100%', pointerEvents: 'none' }}>
     <PreviewScale className={className}><LazyMount><TemplatePreview data={data} apiBase={apiBase} /></LazyMount></PreviewScale>
-    {active && <div ref={live} data-gallery-live aria-hidden="true" inert style={{ position: 'absolute', inset: 0, opacity: 0, transition: 'opacity .2s', pointerEvents: 'none' }}>
+    {active && <div ref={live} data-gallery-live aria-hidden="true" inert style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none' }}>
       <PreviewScale className={className}><div style={{ width: '100%', height: '100%' }}><TemplatePreview data={data} apiBase={apiBase} editing /></div></PreviewScale>
     </div>}
   </div>;
