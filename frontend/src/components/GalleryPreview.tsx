@@ -4,104 +4,78 @@ import TemplatePreview, { type InviteData } from './TemplatePreview';
 import PreviewScale from './PreviewScale';
 import LazyMount from './LazyMount';
 
-// Applied only inside the gallery frame, never to the guest invitation/editor.
-const GALLERY_STILL_CSS = `
-  *, *::before, *::after {
-    animation-duration: .001ms !important;
-    animation-delay: 0s !important;
-    animation-iteration-count: 1 !important;
-    transition: none !important;
-    scroll-behavior: auto !important;
-  }
-  .rv, .rv-soft, .rv-write, .rv-brush, .reveal, .anim, .fu,
-  .fade-up, .fade-soft, .hero-in, .hero__photo {
-    opacity: 1 !important; transform: none !important; filter: none !important;
-    mask-image: none !important; -webkit-mask-image: none !important;
-  }
-  #envelope, #envelope-screen, .hero__live { display: none !important; }
-`;
+/* Hover scrolling slides a pre-rendered long screenshot of the invitation
+   (scripts/generate-gallery-scrolls.cjs → public/gallery-scroll/<id>.webp).
+   A live invitation would boot its intro, flash and load on every hover;
+   the image is fetched and decoded ahead of time, so motion starts at once.
+   Bump the version after regenerating the images. */
+const SCROLL_VERSION = '1';
+const BASE_WIDTH = 480;
+/** Invitation pixels per second, as if a guest were scrolling. */
+const SPEED = 150;
 
-/** Only the hovered card mounts a live invitation. Touch keeps the light cover. */
 export default function GalleryPreview({ className, data, apiBase }: {
   className?: string;
   data: InviteData;
   apiBase: string;
 }) {
   const host = useRef<HTMLDivElement>(null);
-  const live = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(false);
+  const strip = useRef<HTMLImageElement>(null);
+  const [src, setSrc] = useState<string | null>(null);
+
+  // Preload only on devices with hover, once the card is close to the screen.
+  useEffect(() => {
+    const element = host.current;
+    if (!element) return;
+    const pointer = matchMedia('(hover: hover) and (pointer: fine)');
+    const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    if (!pointer.matches || motion.matches) return;
+    let cancelled = false;
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      const url = `/gallery-scroll/${data.templateId}.webp?v=${SCROLL_VERSION}`;
+      const image = new Image();
+      image.src = url;
+      image.decode().then(() => { if (!cancelled) setSrc(url); }, () => { /* no strip: static cover stays */ });
+    }, { rootMargin: '400px' });
+    observer.observe(element);
+    return () => { cancelled = true; observer.disconnect(); };
+  }, [data.templateId]);
 
   useEffect(() => {
     const element = host.current;
+    const image = strip.current;
     const card = element?.closest('a') || element?.parentElement?.parentElement;
-    if (!card) return;
-    const pointer = matchMedia('(hover: hover) and (pointer: fine)');
-    const motion = matchMedia('(prefers-reduced-motion: reduce)');
-    const stop = () => setActive(false);
+    if (!src || !element || !image || !card) return;
     const start = () => {
-      if (pointer.matches && !motion.matches) setActive(true);
+      const scale = element.clientWidth / BASE_WIDTH;
+      const distance = image.offsetHeight - element.clientHeight;
+      if (distance <= 0) return;
+      image.style.opacity = '1';
+      image.style.transition = `transform ${distance / scale / SPEED}s linear`;
+      image.style.transform = `translate3d(0, ${-distance}px, 0)`;
+    };
+    const stop = () => {
+      image.style.opacity = '0';
+      image.style.transition = 'none';
+      image.style.transform = 'translate3d(0, 0, 0)';
     };
     const visibility = () => { if (document.hidden) stop(); };
     card.addEventListener('mouseenter', start);
     card.addEventListener('mouseleave', stop);
-    motion.addEventListener('change', stop);
-    pointer.addEventListener('change', stop);
     document.addEventListener('visibilitychange', visibility);
-    const observer = new IntersectionObserver(([entry]) => { if (!entry.isIntersecting) stop(); });
-    observer.observe(card);
+    if (card.matches(':hover')) start();
     return () => {
       card.removeEventListener('mouseenter', start);
       card.removeEventListener('mouseleave', stop);
-      motion.removeEventListener('change', stop);
-      pointer.removeEventListener('change', stop);
       document.removeEventListener('visibilitychange', visibility);
-      observer.disconnect();
     };
-  }, []);
+  }, [src]);
 
-  useEffect(() => {
-    if (!active) return;
-    let frame = 0;
-    let previous = 0;
-    let position = 0;
-    let preparedDocument: Document | null = null;
-    const animate = (now: number) => {
-      const layer = live.current;
-      const iframe = layer?.querySelector('iframe');
-      // Local invitation frames are same-origin. Never move the gallery page.
-      let viewport: Element | null = null;
-      try {
-        const doc = iframe?.contentDocument;
-        if (doc?.head && doc.body?.children.length && doc !== preparedDocument) {
-          const style = doc.createElement('style');
-          style.dataset.galleryStill = 'true';
-          style.textContent = GALLERY_STILL_CSS;
-          doc.head.append(style);
-          preparedDocument = doc;
-        }
-        viewport = iframe
-          ? (iframe.contentDocument?.body?.children.length
-            ? iframe.contentDocument.scrollingElement : null)
-          : layer?.querySelector('[data-preview-viewport] > div') || null;
-      } catch { /* An unavailable frame keeps its static cover. */ }
-      if (viewport && viewport.scrollHeight > viewport.clientHeight) {
-        if (layer) layer.style.opacity = '1';
-        // 150 visible pixels/sec, with no intro pause, at any card width.
-        const scale = (host.current?.clientWidth || 480) / 480;
-        if (previous) position += Math.min(now - previous, 50) * .15 / scale;
-        viewport.scrollTo({ top: Math.min(position, viewport.scrollHeight - viewport.clientHeight), behavior: 'instant' });
-      }
-      previous = now;
-      frame = requestAnimationFrame(animate);
-    };
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [active]);
-
-  return <div ref={host} data-gallery-preview style={{ position: 'relative', width: '100%', height: '100%', pointerEvents: 'none' }}>
+  return <div ref={host} data-gallery-preview style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', pointerEvents: 'none' }}>
     <PreviewScale className={className}><LazyMount><TemplatePreview data={data} apiBase={apiBase} /></LazyMount></PreviewScale>
-    {active && <div ref={live} data-gallery-live aria-hidden="true" inert style={{ position: 'absolute', inset: 0, opacity: 0, pointerEvents: 'none' }}>
-      <PreviewScale className={className}><div style={{ width: '100%', height: '100%' }}><TemplatePreview data={data} apiBase={apiBase} editing /></div></PreviewScale>
-    </div>}
+    {src && <img ref={strip} src={src} alt="" aria-hidden="true" decoding="async" draggable={false}
+      style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', maxWidth: 'none', opacity: 0, willChange: 'transform', pointerEvents: 'none' }} />}
   </div>;
 }
