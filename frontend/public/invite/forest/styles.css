@@ -146,21 +146,23 @@ img { max-width: none; }
   from { transform: translateX(-6%); }
   to   { transform: translateX(6%); }
 }
+/* Деревья в 1,4 раза крупнее, чем в макете: голый ствол ушёл за края экрана
+   и под край бумаги, кроны обрамляют имена там же, где в макете.
+   Центр поворота и масштаба — основание ствола (он за кадром), поэтому и
+   при сомкнутых деревьях ствол не показывается. */
 .hero__tree {
   position: absolute; display: block; height: auto;
   pointer-events: none;
   will-change: transform;
+  transform-origin: 43.8% 93.6%;
 }
-/* Места деревьев — из макета; кроны вне страницы видны, пока деревья сомкнуты */
 .hero__tree--l {
-  left: calc(-631.4 * var(--u)); top: calc(115.3 * var(--u));
-  width: calc(1312.4 * var(--u));
-  transform-origin: 43% 100%;
+  left: calc(-1010 * var(--u)); top: calc(28 * var(--u));
+  width: calc(1839.6 * var(--u));
 }
 .hero__tree--r {
-  left: calc(667.4 * var(--u)); top: calc(124.9 * var(--u));
-  width: calc(1367.3 * var(--u));
-  transform-origin: 57% 100%;
+  left: calc(601 * var(--u)); top: calc(-59 * var(--u));
+  width: calc(1917.1 * var(--u));
 }
 
 /* Имена: три строки лесенкой, как в макете (жених левее, невеста правее) */
@@ -201,11 +203,11 @@ img { max-width: none; }
 .hero__corner--r { left: calc(923 * var(--u)); top: calc(1651 * var(--u)); width: calc(443 * var(--u)); }
 
 /* ── Раскрытие обложки (класс hero-go на <html>) ──
-   До старта: деревья сомкнуты посередине и чуть крупнее, имена прячутся.
-   Старт: деревья расходятся по местам макета, за ними проявляются
+   До старта: деревья наклонены друг к другу и сомкнуты кронами, имена прячутся.
+   Старт: деревья выпрямляются и расходятся, за ними проявляются
    имена, затем передние имена — поверх крон, и выплывают цветы. */
-.hero__tree--l { transform: translateX(calc(360 * var(--u))) scale(1.07); }
-.hero__tree--r { transform: translateX(calc(-360 * var(--u))) scale(1.07); }
+.hero__tree--l { transform: rotate(9deg) scale(1.12); }
+.hero__tree--r { transform: rotate(-9deg) scale(1.12); }
 .hero__bg { transform: scale(1.1); }
 .hero__names--back  { opacity: 0; transform: scale(.94); filter: blur(6px); }
 .hero__names--front { opacity: 0; }

@@ -83,7 +83,7 @@ const HANDMADE_TEMPLATES = [
     description: 'Туманный лес на обложке: деревья расступаются, и из-за них появляются имена пары. Фото в винтажной овальной рамке, календарь дня с сердцем, беседка в розах и карта, расписание с жёлудем на треке, таймер, дресс-код мазками кисти и анкета для гостей.',
     tags: ['Лес', 'Природа', 'Винтаж', 'Зелёный', 'Анимация'],
     colors: ['#f7f2ed', '#4a552d', '#a0a496'],
-    preview: '/invite/forest/assets/preview.jpg',
+    preview: '/invite/forest/assets/preview.jpg?v=2',
     defaultCover: '/invite/forest/assets/album-1.jpg',
     defaultGallery: [] as string[],
     sampleBride: 'Мария',
