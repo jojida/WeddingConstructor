@@ -731,6 +731,10 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры (мазки кистью)', scope: 'data' },
         { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Образ для дам 1',     scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Образ для дам 2',     scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Образ для джентльменов 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Образ для джентльменов 2', scope: 'custom' },
       ],
     },
     {
@@ -749,6 +753,9 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Завершение', icon: '💍',
       fields: [
+        { id: 'finalPhoto1',  type: 'image', label: 'Фото пары слева', scope: 'custom' },
+        { id: 'finalPhoto2',  type: 'image', label: 'Фото пары в центре', scope: 'custom' },
+        { id: 'finalPhoto3',  type: 'image', label: 'Фото пары справа', scope: 'custom' },
         { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
         { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — «Ваши …» из ваших имён', scope: 'custom', maxLength: 60 },
       ],
@@ -1287,6 +1294,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { time: '23:00', title: 'Окончание вечера', icon: '' },
     ],
     dressCodeColors: ['#738445', '#4a552d', '#b39c7e', '#925c2d', '#44200d'],
+    dressCodePhoto: '/invite/forest/assets/dress-w1.jpg',
     drinks: [
       { value: 'sparkling',  label: 'Игристое' },
       { value: 'red',        label: 'Красное вино' },
@@ -1299,6 +1307,12 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       albumPhoto2:   '/invite/forest/assets/album-2.jpg',
       albumPhoto3:   '/invite/forest/assets/album-3.jpg',
       dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей лесной палитры',
+      dressPhoto2:   '/invite/forest/assets/dress-w2.jpg',
+      dressMan1:     '/invite/forest/assets/dress-m1.jpg',
+      dressMan2:     '/invite/forest/assets/dress-m2.jpg',
+      finalPhoto1:   '/invite/forest/assets/final-1.jpg',
+      finalPhoto2:   '/invite/forest/assets/final-2.jpg',
+      finalPhoto3:   '/invite/forest/assets/final-3.jpg',
       surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
       closingTitle:  'До скорых встреч!',
       closingSign:   '', // Пустое поле — «Ваши …» из имён пары.

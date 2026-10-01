@@ -243,7 +243,7 @@ html.no-anim .hero__mist { animation: none; }
    ============================================================ */
 .greet {
   position: relative; z-index: 2;
-  padding: calc(66 * var(--u)) calc(150 * var(--u)) 0;
+  padding: calc(190 * var(--u)) calc(150 * var(--u)) 0;
   text-align: center;
 }
 .greet__text {
@@ -262,7 +262,7 @@ html.no-anim .hero__mist { animation: none; }
 .album {
   position: relative;
   height: calc(1237 * var(--u));
-  margin-top: calc(84 * var(--u));
+  margin-top: calc(200 * var(--u));
 }
 .album__frame {
   position: absolute;
@@ -318,7 +318,7 @@ html.no-anim .hero__mist { animation: none; }
    ============================================================ */
 .dates {
   position: relative; z-index: 1;
-  padding-top: calc(176 * var(--u));
+  padding-top: calc(290 * var(--u));
   text-align: center;
 }
 .dates__row {
@@ -380,7 +380,7 @@ html.no-anim .hero__mist { animation: none; }
    ============================================================ */
 .venue {
   position: relative; z-index: 1;
-  margin-top: calc(660 * var(--u));
+  margin-top: calc(800 * var(--u));
   padding: 0 calc(90 * var(--u));
   text-align: center;
   border-style: solid;
@@ -445,7 +445,7 @@ html.no-anim .hero__mist { animation: none; }
    ============================================================ */
 .program {
   position: relative;
-  padding-top: calc(118 * var(--u));
+  padding-top: calc(230 * var(--u));
   text-align: center;
 }
 .program__pine {
@@ -521,7 +521,7 @@ html.no-anim .hero__mist { animation: none; }
    ============================================================ */
 .cd {
   position: relative; z-index: 1;
-  padding-top: calc(170 * var(--u));
+  padding-top: calc(300 * var(--u));
   text-align: center;
 }
 .cd__title { font-size: calc(112 * var(--u)); }
@@ -558,7 +558,7 @@ html.no-anim .hero__mist { animation: none; }
    ============================================================ */
 .dress {
   position: relative; z-index: 1;
-  padding: calc(300 * var(--u)) calc(110 * var(--u)) 0;
+  padding: calc(380 * var(--u)) calc(110 * var(--u)) 0;
   text-align: center;
 }
 .brushes {
@@ -602,6 +602,39 @@ html.no-anim .hero__mist { animation: none; }
   color: var(--ink);
 }
 .dress__text:empty { display: none; }
+/* Образы гостей — арки в тонкой оливковой рамке, по две в ряд */
+.looks {
+  margin-top: calc(50 * var(--u));
+  display: grid;
+  grid-template-columns: repeat(2, calc(470 * var(--u)));
+  justify-content: center;
+  column-gap: calc(56 * var(--u));
+  row-gap: calc(40 * var(--u));
+}
+.looks__label {
+  grid-column: 1 / -1;
+  margin: calc(50 * var(--u)) 0 0;
+  font-family: var(--f-script);
+  font-size: calc(100 * var(--u));
+  line-height: 1.2;
+  color: var(--olive);
+}
+.look {
+  margin: 0;
+  aspect-ratio: 470 / 700;
+  padding: calc(12 * var(--u));
+  background: #fbf8f2;
+  border: calc(3 * var(--u)) solid var(--sage);
+  border-radius: 9999px 9999px calc(22 * var(--u)) calc(22 * var(--u));
+  box-shadow: 0 calc(12 * var(--u)) calc(34 * var(--u)) rgba(60, 70, 40, .16);
+}
+.look img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  border-radius: 9999px 9999px calc(12 * var(--u)) calc(12 * var(--u));
+}
 
 /* ============================================================
    9 — ПОЖЕЛАНИЯ (макет: 12425–13832): текст слева, ель справа
@@ -609,7 +642,7 @@ html.no-anim .hero__mist { animation: none; }
 .wish {
   position: relative; z-index: 0;
   min-height: calc(1520 * var(--u));
-  padding: calc(480 * var(--u)) 0 calc(330 * var(--u));
+  padding: calc(560 * var(--u)) 0 calc(330 * var(--u));
 }
 .wish__spruce {
   position: absolute; z-index: 0;
@@ -647,7 +680,7 @@ html.no-anim .hero__mist { animation: none; }
   border-width: calc(250 * var(--u)) 0 calc(300 * var(--u));
   border-image: url("assets/band-rsvp.webp") 250 0 300 0 fill / calc(250 * var(--u)) 0 calc(300 * var(--u)) stretch;
 }
-.rsvp .title { margin-top: calc(-120 * var(--u)); }
+.rsvp .title { margin-top: 0; }
 .rsvp__lead {
   margin: calc(40 * var(--u)) auto 0;
   max-width: calc(1000 * var(--u));
@@ -755,9 +788,25 @@ html.no-anim .hero__mist { animation: none; }
    ============================================================ */
 .fin {
   position: relative;
-  padding-top: calc(380 * var(--u));
+  padding-top: calc(300 * var(--u));
   text-align: center;
 }
+/* Три фото — отпечатки с белыми полями, разложенные веером */
+.fin__photos {
+  position: relative;
+  height: calc(820 * var(--u));
+  margin-bottom: calc(140 * var(--u));
+}
+.fin__print {
+  position: absolute; margin: 0;
+  padding: calc(18 * var(--u)) calc(18 * var(--u)) calc(56 * var(--u));
+  background: #fffdf8;
+  box-shadow: 0 calc(16 * var(--u)) calc(40 * var(--u)) rgba(50, 55, 35, .22);
+}
+.fin__print img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fin__print--l { left: calc(90 * var(--u)); top: calc(110 * var(--u)); width: calc(420 * var(--u)); height: calc(560 * var(--u)); transform: rotate(-7deg); }
+.fin__print--r { right: calc(90 * var(--u)); top: calc(130 * var(--u)); width: calc(420 * var(--u)); height: calc(560 * var(--u)); transform: rotate(6deg); }
+.fin__print--c { left: calc(423 * var(--u)); top: 0; z-index: 1; width: calc(520 * var(--u)); height: calc(700 * var(--u)); transform: rotate(-1.5deg); }
 .fin__title { font-size: calc(128 * var(--u)); line-height: 1.2; padding: 0 calc(60 * var(--u)); }
 .fin__sign {
   margin: calc(4 * var(--u)) auto 0;

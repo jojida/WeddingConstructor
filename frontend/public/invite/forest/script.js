@@ -599,6 +599,8 @@
     ['coverPhoto', 'albumPhoto2', 'albumPhoto3'].forEach(function (key, i) {
       if (setImg(key, d[key]) && EDITING) albumShow(i);
     });
+    ['dressCodePhoto', 'dressPhoto2', 'dressMan1', 'dressMan2', 'finalPhoto1', 'finalPhoto2', 'finalPhoto3']
+      .forEach(function (key) { setImg(key, d[key]); });
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     rebuildPalette(d.dressCodeColors);
