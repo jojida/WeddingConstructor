@@ -613,9 +613,21 @@ export const MUSIC_LIBRARY: MusicTrack[] = [
   { id: 'air',      title: 'Ария',                    author: 'Бах',        kind: 'струнные',   duration: '2:55', url: '/invite/assets/music/air-bach.mp3' },
   { id: 'clair',    title: 'Лунный свет',             author: 'Дебюсси',    kind: 'фортепиано', duration: '3:18', url: '/invite/assets/music/clair-de-lune-debussy.mp3' },
   { id: 'nocturne', title: 'Ноктюрн ми-бемоль мажор', author: 'Шопен',      kind: 'фортепиано', duration: '3:19', url: '/invite/assets/music/nocturne-chopin.mp3' },
-  { id: 'thousand', title: 'A Thousand Years',        author: 'Christina Perri', kind: 'песня', duration: '4:00', url: '/invite/assets/music/a-thousand-years-perri.mp3' },
   { id: 'wagner',   title: 'Свадебный хор',           author: 'Вагнер',     kind: 'оркестр',    duration: '1:44', url: '/invite/assets/music/bridal-chorus-wagner.mp3' },
 ];
+
+/** Мелодии, доступные только в своём шаблоне: в общей библиотеке их нет,
+    в редакторе они показываются лишь у этого шаблона. */
+const TEMPLATE_ONLY_MUSIC: Record<string, MusicTrack[]> = {
+  forest: [
+    { id: 'thousand', title: 'A Thousand Years', author: 'Christina Perri', kind: 'песня', duration: '4:00', url: '/invite/assets/music/a-thousand-years-perri.mp3' },
+  ],
+};
+
+/** Готовые мелодии для выбора в редакторе: своя мелодия шаблона + общая библиотека */
+export function musicLibraryFor(templateId?: string): MusicTrack[] {
+  return [...((templateId && TEMPLATE_ONLY_MUSIC[templateId]) || []), ...MUSIC_LIBRARY];
+}
 
 /** Мелодия, с которой шаблон открывается у новой пары (остальные — «Канон») */
 const TEMPLATE_MUSIC: Record<string, string> = {
@@ -632,11 +644,11 @@ const TEMPLATE_MUSIC: Record<string, string> = {
 
 export function templateMusic(templateId: string): string {
   const id = TEMPLATE_MUSIC[templateId] || 'canon';
-  return (MUSIC_LIBRARY.find((t) => t.id === id) || MUSIC_LIBRARY[0]).url;
+  return (musicLibraryFor(templateId).find((t) => t.id === id) || MUSIC_LIBRARY[0]).url;
 }
 
 export function musicTrackByUrl(url: string | undefined): MusicTrack | undefined {
-  return url ? MUSIC_LIBRARY.find((t) => t.url === url) : undefined;
+  return url ? [...Object.values(TEMPLATE_ONLY_MUSIC).flat(), ...MUSIC_LIBRARY].find((t) => t.url === url) : undefined;
 }
 
 /* Схема полей по шаблонам (имена/дата/время правятся в отдельном окне) */

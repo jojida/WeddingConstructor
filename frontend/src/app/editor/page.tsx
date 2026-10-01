@@ -7,7 +7,7 @@ import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximiz
 import api from '@/lib/api';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, MUSIC_LIBRARY, musicTrackByUrl } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import dynamic from 'next/dynamic';
@@ -767,6 +767,7 @@ function EditorContent() {
                               value={f.scope === 'data' ? (data as any)[f.id] : (data.customData || {})[f.id]}
                               onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
                               apiBase={apiBase}
+                              templateId={data.templateId}
                               uploadImage={uploadImage}
                               uploadAudio={uploadAudio}
                               frame={(data.customData?.photoFrames || {})[f.id] ?? null}
@@ -945,8 +946,9 @@ function CharCounter({ value, max }: { value: string; max: number }) {
   );
 }
 
-function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, uploadAudio, frame, slot, onFrame }: {
+function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uploadImage, uploadAudio, frame, slot, onFrame }: {
   field: TemplateField;
+  templateId?: string;
   value: any;
   onChange: (v: any) => void;
   apiBase: string;
@@ -993,7 +995,7 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, uploadImage, upl
     case 'audio':
       return (
         <Field label={field.label}>
-          <AudioPicker value={value || ''} onChange={onChange} apiBase={apiBase} uploadAudio={uploadAudio} hint={field.hint} />
+          <AudioPicker value={value || ''} onChange={onChange} apiBase={apiBase} templateId={templateId} uploadAudio={uploadAudio} hint={field.hint} />
         </Field>
       );
     case 'colorList':
@@ -1128,8 +1130,8 @@ function scrollPreviewTo(frame: HTMLIFrameElement | null | undefined, ids: strin
 
 /* Фоновая мелодия: готовые мелодии (MUSIC_LIBRARY) с прослушиванием,
    своя мелодия (загрузить / заменить) и «Без музыки». */
-function AudioPicker({ value, onChange, apiBase, uploadAudio, hint }: {
-  value: string; onChange: (v: string) => void; apiBase: string;
+function AudioPicker({ value, onChange, apiBase, templateId, uploadAudio, hint }: {
+  value: string; onChange: (v: string) => void; apiBase: string; templateId?: string;
   uploadAudio: (f: File) => Promise<string | null>; hint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -1191,7 +1193,7 @@ function AudioPicker({ value, onChange, apiBase, uploadAudio, hint }: {
         }} />
       <audio ref={audioRef} preload="none" onPause={() => setPlaying('')} onEnded={() => setPlaying('')} />
       <div role="radiogroup" aria-label="Фоновая мелодия" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {MUSIC_LIBRARY.map(t => row(t.id, t.url, t.title, `${t.author} · ${t.kind} · ${t.duration}`, () => onChange(t.url)))}
+        {musicLibraryFor(templateId).map(t => row(t.id, t.url, t.title, `${t.author} · ${t.kind} · ${t.duration}`, () => onChange(t.url)))}
         {own && row('own', own, 'Своя мелодия', ownName)}
       </div>
       {!value && (
