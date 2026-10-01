@@ -6,7 +6,7 @@ import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { kassaAuth, kassaRequest } from './payment';
 import { confirmPrintPayment } from '../lib/printPayment';
-import { PRINT_PRICE, PRINT_TEMPLATES, renderPrintSvg, validatePrintData, printFont } from '../lib/printDesign';
+import { PRINT_PRICE, PRINT_TEMPLATES, renderPrintSvg, validatePrintData, printFont, printSize } from '../lib/printDesign';
 
 const router = Router();
 router.post('/preview', (req, res) => {
@@ -87,8 +87,12 @@ router.get('/orders/:id/pdf', async (req: AuthRequest, res) => {
   if (!order) return res.status(404).json({ error: 'Заказ не найден' });
   if (order.status !== 'paid') return res.status(402).json({ error: 'Скачивание доступно после оплаты' });
   const bleed = req.query.bleed === '1' ? 3 : 0;
+  const size = printSize(order.templateId);
+  let svg: string;
+  try { svg = renderPrintSvg(order.templateId, JSON.parse(order.data), false, false, bleed); }
+  catch { return res.status(400).json({ error: 'Не удалось прочитать макет или фотографию. Загрузите фотографию заново.' }); }
   const mm = 72 / 25.4;
-  const doc = new PDFDocument({ size: [(105 + bleed * 2) * mm, (148 + bleed * 2) * mm], margin: 0, info: { Title: 'WeddingCraft — приглашение A6', Creator: 'WeddingCraft' } });
+  const doc = new PDFDocument({ size: [(size.width + bleed * 2) * mm, (size.height + bleed * 2) * mm], margin: 0, info: { Title: 'WeddingCraft — приглашение A6', Creator: 'WeddingCraft' } });
   doc.registerFont('PrintCyr', printFont());
   doc.registerFont('PrintLatin', printFont(true));
   const chunks: Buffer[] = [];
@@ -99,11 +103,11 @@ router.get('/orders/:id/pdf', async (req: AuthRequest, res) => {
     res.type('application/pdf').set('Content-Disposition', `attachment; filename="weddingcraft-${order.templateId}${bleed ? '-bleed' : '-a6'}.pdf"`).send(Buffer.concat(chunks));
   });
   const template = PRINT_TEMPLATES.find(t => t.id === order.templateId)!;
-  doc.rect(0, 0, (105 + bleed * 2) * mm, (148 + bleed * 2) * mm).fill(template.background);
-  SVGtoPDF(doc, renderPrintSvg(order.templateId, JSON.parse(order.data), false, false, bleed), 0, 0, { width: (105 + bleed * 2) * mm, height: (148 + bleed * 2) * mm, fontCallback: name => name === 'PrintLatin' ? 'PrintLatin' : 'PrintCyr' });
+  doc.rect(0, 0, (size.width + bleed * 2) * mm, (size.height + bleed * 2) * mm).fill(template.background);
+  SVGtoPDF(doc, svg, 0, 0, { width: (size.width + bleed * 2) * mm, height: (size.height + bleed * 2) * mm, fontCallback: name => name === 'PrintLatin' ? 'PrintLatin' : 'PrintCyr' });
   // Explicit trim/bleed boxes let a print shop crop to A6 without scaling.
-  (doc.page.dictionary.data as Record<string, unknown>).TrimBox = [bleed * mm, bleed * mm, (105 + bleed) * mm, (148 + bleed) * mm];
-  (doc.page.dictionary.data as Record<string, unknown>).BleedBox = [0, 0, (105 + bleed * 2) * mm, (148 + bleed * 2) * mm];
+  (doc.page.dictionary.data as Record<string, unknown>).TrimBox = [bleed * mm, bleed * mm, (size.width + bleed) * mm, (size.height + bleed) * mm];
+  (doc.page.dictionary.data as Record<string, unknown>).BleedBox = [0, 0, (size.width + bleed * 2) * mm, (size.height + bleed * 2) * mm];
   doc.end();
 });
 export default router;

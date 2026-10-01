@@ -21,7 +21,7 @@ for (const dir of fs.readdirSync(path.join(root, 'prisma/migrations')).sort()) {
 }
 db.close();
 const prisma = require('../dist/lib/prisma').default;
-const { PRINT_SAMPLE, PRINT_TEMPLATES, validatePrintData } = require('../dist/lib/printDesign');
+const { PRINT_SAMPLE, PRINT_TEMPLATES, printSize, validatePrintData } = require('../dist/lib/printDesign');
 const { confirmPrintPayment } = require('../dist/lib/printPayment');
 const app = require('../dist/index').default;
 const realFetch = global.fetch;
@@ -112,6 +112,27 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
     assert.equal((await request(`/orders/${sample.id}/pay`, 'POST')).status, 200);
     assert.equal(paymentCalls, callsBefore);
   });
+  await t.test('uploaded photo persists, renders and resets', async () => {
+    assert.throws(() => validatePrintData({ ...PRINT_SAMPLE, photo: 'https://example.com/photo.jpg' }));
+    assert.throws(() => validatePrintData({ ...PRINT_SAMPLE, photoPosition: 'invalid' }));
+    const bytes = fs.readFileSync(path.join(root, 'assets/print-art/azure-photo.jpg'));
+    const form = new FormData(); form.append('image', new Blob([bytes], { type: 'image/jpeg' }), 'photo.jpg');
+    const upload = await realFetch(base + '/api/upload/image', { method: 'POST', body: form });
+    assert.equal(upload.status, 200);
+    const { url } = await upload.json();
+    try {
+      const data = { ...PRINT_SAMPLE, photo: url, photoPosition: 'xMinYMax' };
+      const preview = await request('/preview', 'POST', { templateId: 'azure-bloom', data }, '');
+      assert.equal(preview.status, 200); assert.ok((await preview.text()).includes('xMinYMax slice'));
+      const sample = await prisma.printOrder.create({ data: { userId: owner.id, templateId: 'azure-bloom', data: JSON.stringify(PRINT_SAMPLE), status: 'paid' } });
+      assert.equal((await request(`/orders/${sample.id}`, 'PUT', { data })).status, 200);
+      assert.equal((await (await request(`/orders/${sample.id}`)).json()).data.photo, url);
+      const result = await request(`/orders/${sample.id}/pdf`); assert.equal(result.status, 200);
+      assert.ok(Buffer.from(await result.arrayBuffer()).includes(bytes));
+      assert.equal((await request(`/orders/${sample.id}`, 'PUT', { data: { ...data, photo: '' } })).status, 200);
+      assert.ok(!(await (await request(`/orders/${sample.id}`)).json()).data.photo);
+    } finally { fs.unlinkSync(path.join(root, 'uploads', path.basename(url))); }
+  });
   await t.test('all designs produce downloadable PDFs with correct page boxes', async () => {
     const output = path.join(root, '.test-tmp/print-samples'); fs.mkdirSync(output, { recursive: true });
     for (const template of PRINT_TEMPLATES) {
@@ -120,9 +141,14 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
         const result = await request(`/orders/${sample.id}/pdf?bleed=${bleed}`);
         assert.equal(result.status, 200); assert.equal(result.headers.get('content-type'), 'application/pdf');
         const pdf = Buffer.from(await result.arrayBuffer()); assert.equal(pdf.subarray(0, 5).toString(), '%PDF-');
-        const text = pdf.toString('latin1'); assert.match(text, /\/TrimBox/); assert.match(text, /\/FontFile/);
+        const text = pdf.toString('latin1'); assert.match(text, /\/TrimBox/);
+        // This design converts personalized lettering to vector outlines;
+        // all other designs continue to embed their font files.
+        if (['floral-gold', 'azure-bloom'].includes(template.id)) assert.match(text, /\/Subtype \/Image/);
+        else assert.match(text, /\/FontFile/);
         const box = text.match(/\/MediaBox \[0 0 ([\d.]+) ([\d.]+)\]/); assert.ok(box);
-        assert.ok(Math.abs(Number(box[1]) - (105 + bleed * 6) * 72 / 25.4) < .01);
+        assert.ok(Math.abs(Number(box[1]) - (printSize(template.id).width + bleed * 6) * 72 / 25.4) < .01);
+        assert.ok(Math.abs(Number(box[2]) - (printSize(template.id).height + bleed * 6) * 72 / 25.4) < .01);
         fs.writeFileSync(path.join(output, `${template.id}${bleed ? '-bleed' : ''}.pdf`), pdf);
       }
     }

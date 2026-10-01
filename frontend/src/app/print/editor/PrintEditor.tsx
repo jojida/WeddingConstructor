@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { Download, ArrowLeft, LockKeyhole } from 'lucide-react';
 import axios from 'axios';
 import api from '@/lib/api';
-import { PRINT_FIELDS, PRINT_PRICE, PRINT_SAMPLE, PRINT_TEMPLATES, type PrintData, type PrintOrder } from '@/lib/print';
+import { PRINT_FIELDS, PRINT_PRICE, getPrintSample, PRINT_TEMPLATES, PRINT_PHOTO_TEMPLATES, printDimensions, type PrintData, type PrintOrder } from '@/lib/print';
+import PrintPhotoPicker from './PrintPhotoPicker';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
 import AuthModal from '@/components/AuthModal';
@@ -22,11 +23,12 @@ function EditorSession() {
   const orderId = params.get('order');
   const requestedTemplate = params.get('template') || 'vow';
   const { user, loading: authLoading } = useAuthStore();
-  const [data, setData] = useState<PrintData>(PRINT_SAMPLE);
+  const [data, setData] = useState<PrintData>(() => getPrintSample(requestedTemplate));
   const [order, setOrder] = useState<PrintOrder | null>(null);
   const [ready, setReady] = useState(false);
   const [preview, setPreview] = useState('');
   const [previewError, setPreviewError] = useState('');
+  const [photoBusy, setPhotoBusy] = useState(false);
   const [error, setError] = useState(params.get('checkout') === 'retry' ? 'Макет сохранён. Оплату не удалось открыть — попробуйте ещё раз позже.' : ''); const [busy, setBusy] = useState(false);
   const [showAuth, setShowAuth] = useState(false); const [saved, setSaved] = useState(false);
   const templateId = order?.templateId || requestedTemplate;
@@ -40,7 +42,7 @@ function EditorSession() {
       // Hydrate the browser-only draft after the server render; the session key resets navigation.
       queueMicrotask(() => {
         if (!active) return;
-        try { const raw = localStorage.getItem(`wc_print_${requestedTemplate}`); const cached = raw ? JSON.parse(raw) : null; setData(cached && PRINT_FIELDS.every(f => typeof cached[f.key] === 'string') ? cached : PRINT_SAMPLE); } catch { setData(PRINT_SAMPLE); }
+        try { const raw = localStorage.getItem(`wc_print_${requestedTemplate}`); const cached = raw ? JSON.parse(raw) : null; setData(cached && PRINT_FIELDS.every(f => typeof cached[f.key] === 'string') ? cached : getPrintSample(requestedTemplate)); } catch { setData(getPrintSample(requestedTemplate)); }
         setReady(true);
       });
     }
@@ -78,6 +80,7 @@ function EditorSession() {
   }
   async function purchase(event: React.FormEvent) {
     event.preventDefault();
+    if (photoBusy) return;
     if (!user) { setShowAuth(true); return; }
     setBusy(true); setError('');
     let id: string | undefined;
@@ -86,7 +89,7 @@ function EditorSession() {
     if (id && !orderId) router.replace(`/print/editor?order=${id}&checkout=retry`);
   }
   async function download(bleed: boolean) {
-    if (!orderId || busy) return;
+    if (!orderId || busy || photoBusy) return;
     setBusy(true); setError('');
     try {
       await persist();
@@ -98,16 +101,17 @@ function EditorSession() {
   return <><Navbar /><main className={styles.page}><div className={styles.editor}>
     <div className={styles.editorHeader}><div><Link href="/print" className={styles.back}><ArrowLeft size={12} /> Все дизайны</Link><h1>{template?.name || 'Ваше приглашение'}</h1></div><Link href="/print/orders" className={styles.secondary}>Мои приглашения</Link></div>
     {orderId && !user ? <div className={styles.notice}><h1>Ваш макет сохранён</h1><p className={styles.muted}>Войдите с email, который использовали при покупке, чтобы открыть приглашение и скачать PDF.</p><button className={styles.primary} disabled={authLoading} onClick={() => setShowAuth(true)}>Войти по email</button></div> : !ready ? <div className={styles.notice}><p role="status">{error || 'Загружаем макет…'}</p><Link href="/print/orders">Мои приглашения</Link></div> : <div className={styles.editorGrid}>
-      <div className={styles.previewPanel}><div className={styles.previewMat}>{previewError ? <p className={styles.error} role="alert">{previewError}</p> : <img src={preview || `/print/${templateId}.svg`} alt="Предпросмотр вашего приглашения" />}</div><p className={styles.previewCaption}>A6 · 105 × 148 мм · В скачанном PDF водяного знака нет</p></div>
+      <div className={styles.previewPanel}><div className={styles.previewMat}>{previewError ? <p className={styles.error} role="alert">{previewError}</p> : <img src={preview || `/print/${templateId}.svg`} alt="Предпросмотр вашего приглашения" />}</div><p className={styles.previewCaption}>A6 · {printDimensions(templateId)} · В скачанном PDF водяного знака нет</p></div>
       <form className={styles.form} onSubmit={purchase}><h2>Всё начинается с ваших слов</h2><p className={styles.muted}>Заполните детали — приглашение обновится рядом.</p>
+        {PRINT_PHOTO_TEMPLATES.includes(templateId) && <PrintPhotoPicker data={data} onBusy={setPhotoBusy} onChange={patch => { setData(d => ({ ...d, ...patch })); setSaved(false); }} />}
         <div className={styles.fields}>{PRINT_FIELDS.map((field, i) => <label key={field.key} className={`${styles.field} ${i > 3 ? styles.wide : ''}`}><span>{field.label}</span>{'type' in field && field.type === 'textarea' ? <textarea value={data[field.key]} maxLength={field.max} onChange={e => { setData(d => ({ ...d, [field.key]: e.target.value })); setSaved(false); }} /> : <input type={'type' in field ? field.type : 'text'} value={data[field.key]} maxLength={field.max} required={['groom', 'bride', 'date', 'time', 'venue'].includes(field.key)} onChange={e => { setData(d => ({ ...d, [field.key]: e.target.value })); setSaved(false); }} />}{i > 3 && <small>{data[field.key].length} / {field.max}</small>}</label>)}</div>
         <div className={styles.checkout}>
           {error && <p className={styles.error} role="alert">{error}</p>}
-          {order?.status === 'paid' ? <><p className={styles.success}>Оплачено. Ваш PDF готов к печати.{saved && ' Изменения сохранены.'}</p><button type="button" className={styles.primary} disabled={busy || !!previewError} onClick={() => download(false)}><Download size={16} /> {busy ? 'Готовим файл…' : 'Скачать PDF · A6'}</button><button type="button" className={styles.secondary} disabled={busy || !!previewError} onClick={() => download(true)}>PDF для типографии · вылеты 3 мм</button><p className={styles.muted}>Домашняя печать: масштаб 100%, без подгонки. Типография: файл 111 × 154 мм, обрезка до A6. Текст сохраняется при скачивании.</p></> : <>
+          {order?.status === 'paid' ? <><p className={styles.success}>Оплачено. Ваш PDF готов к печати.{saved && ' Изменения сохранены.'}</p><button type="button" className={styles.primary} disabled={busy || photoBusy || !!previewError} onClick={() => download(false)}><Download size={16} /> {busy ? 'Готовим файл…' : 'Скачать PDF · A6'}</button><button type="button" className={styles.secondary} disabled={busy || photoBusy || !!previewError} onClick={() => download(true)}>PDF для типографии · вылеты 3 мм</button><p className={styles.muted}>Домашняя печать: масштаб 100%, без подгонки. Типография: вылеты по 3 мм с каждой стороны, обрезка до A6. Текст и фото сохраняются при скачивании.</p></> : <>
             {order?.paymentStatus === 'pending' && <p className={styles.success}>Ожидаем оплату. После подтверждения здесь появится скачивание. Если окно оплаты закрыто — нажмите кнопку ниже.</p>}
             {order?.paymentStatus === 'canceled' && <p className={styles.error}>Платёж отменён. Макет сохранён, можно попробовать оплатить ещё раз.</p>}
             {order?.paymentStatus === 'unavailable' && <p className={styles.error}>Проверка оплаты временно недоступна. Мы повторим её автоматически.</p>}
-            <div className={styles.priceLine}><span>Ваш дизайн · навсегда в аккаунте</span><b>{PRINT_PRICE} ₽</b></div><button className={styles.primary} disabled={busy || !!previewError || authLoading}><LockKeyhole size={15} />{busy ? 'Подготавливаем оплату…' : `Купить PDF за ${PRINT_PRICE} ₽`}</button><p className={styles.muted}>Разовая оплата за один дизайн. Повторные скачивания и правки текста включены. Печать и доставка не входят. Нажимая «Купить», вы принимаете <Link href="/oferta">оферту</Link>.</p>
+            <div className={styles.priceLine}><span>Ваш дизайн · навсегда в аккаунте</span><b>{PRINT_PRICE} ₽</b></div><button className={styles.primary} disabled={busy || photoBusy || !!previewError || authLoading}><LockKeyhole size={15} />{busy ? 'Подготавливаем оплату…' : `Купить PDF за ${PRINT_PRICE} ₽`}</button><p className={styles.muted}>Разовая оплата за один дизайн. Повторные скачивания, правки текста и замена фото включены. Печать и доставка не входят. Нажимая «Купить», вы принимаете <Link href="/oferta">оферту</Link>.</p>
           </>}
         </div>
       </form>

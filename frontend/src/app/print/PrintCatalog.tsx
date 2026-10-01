@@ -3,7 +3,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowDown, ArrowUpRight, Check, FileDown, Printer, Sparkles } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { PRINT_TEMPLATES, PRINT_PRICE } from '@/lib/print';
+import { PRINT_TEMPLATES, PRINT_PRICE, printDimensions } from '@/lib/print';
 import styles from './print.module.css';
 
 export default function PrintCatalog() {
@@ -25,7 +25,7 @@ export default function PrintCatalog() {
     ].map(([n, title, description, Icon]) => <div key={String(n)}><span className={styles.stepNumber}>{String(n)}</span><div><h3>{String(title)}</h3><p>{String(description)}</p></div>{typeof Icon !== 'string' && <Icon size={22} strokeWidth={1} />}</div>)}</section>
     <section id="collection" className={styles.collection}><div className={styles.sectionHeading}><div><span className={styles.eyebrow}>ВЫБЕРИТЕ ВАШЕ НАСТРОЕНИЕ</span><h2>Бумага. Чувства. Вы.</h2></div><p>Один дизайн — {PRINT_PRICE} ₽<br /><span>Редактирование и предпросмотр бесплатно</span></p></div>
       <div className={styles.filters} aria-label="Стиль приглашения">{['Все дизайны', 'Минимализм', 'Ботаника', 'Романтика', 'Классика', 'Редакционный', 'Путешествия'].map(f => <button key={f} aria-pressed={filter === f} className={filter === f ? styles.selected : ''} onClick={() => setFilter(f)}>{f}</button>)}</div>
-      <div className={styles.grid}>{PRINT_TEMPLATES.filter(t => filter === 'Все дизайны' || t.category === filter).map(t => <Link href={`/print/editor?template=${t.id}`} key={t.id} className={styles.card}><div className={styles.cardArt} style={{ background: t.color }}><span className={styles.tag}>{t.category}</span><img src={`/print/${t.id}.svg`} alt={`Печатное приглашение «${t.name}»`} loading="lazy" /><span className={styles.cardHint}>Настроить приглашение <ArrowUpRight size={17} /></span></div><div className={styles.cardTitle}><h3>{t.name}</h3><span>{PRINT_PRICE} ₽</span></div><p>{t.description}</p><span className={styles.cardMeta}>A6 · 105 × 148 мм · PDF <span>{String(PRINT_TEMPLATES.indexOf(t) + 1).padStart(2, '0')}</span></span></Link>)}</div>
+      <div className={styles.grid}>{PRINT_TEMPLATES.filter(t => filter === 'Все дизайны' || t.category === filter).map(t => <Link href={`/print/editor?template=${t.id}`} key={t.id} className={styles.card}><div className={styles.cardArt} style={{ background: t.color }}><span className={styles.tag}>{t.category}</span><img src={`/print/${t.id}.svg`} alt={`Печатное приглашение «${t.name}»`} loading="lazy" /><span className={styles.cardHint}>Настроить приглашение <ArrowUpRight size={17} /></span></div><div className={styles.cardTitle}><h3>{t.name}</h3><span>{PRINT_PRICE} ₽</span></div><p>{t.description}</p><span className={styles.cardMeta}>A6 · {printDimensions(t.id)} · PDF <span>{String(PRINT_TEMPLATES.indexOf(t) + 1).padStart(2, '0')}</span></span></Link>)}</div>
     </section>
     <section className={styles.printNote}><Printer size={38} strokeWidth={1} /><div><span className={styles.eyebrow}>ОТ ЭКРАНА К ТЁПЛЫМ ВСТРЕЧАМ</span><h2>Красиво в руках.<br /><em>Просто в печати.</em></h2></div><div><p>После оплаты — PDF без водяного знака. Размер A6 для домашней печати и отдельный файл с вылетами 3 мм для типографии.</p><p>Вы покупаете цифровой макет одного дизайна. Меняйте текст и скачивайте его повторно в аккаунте. Бумага, печать и доставка оплачиваются самостоятельно.</p></div></section>
     <section className={styles.faq}><h2>Осталось несколько вопросов?</h2>{[

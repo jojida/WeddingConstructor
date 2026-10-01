@@ -1,5 +1,7 @@
 export const PRINT_PRICE = 290;
 export const PRINT_TEMPLATES = [
+  { id: 'azure-bloom', name: 'Голубая акварель', category: 'Романтика', color: '#dcebf4', description: 'Горизонтальная карточка с цветами и вашей фотографией' },
+  { id: 'floral-gold', name: 'Цветы и золото', category: 'Романтика', color: '#e8e4d9', description: 'Акварельные цветы, золотая рамка и каллиграфия' },
   { id: 'newspaper', name: 'Свадебный вестник', category: 'Редакционный', color: '#e7d8c3', description: 'Ваша главная новость на первой полосе' },
   { id: 'petals', name: 'Шёпот лепестков', category: 'Романтика', color: '#ecded9', description: 'Объёмные цветы, жемчуг и пудровые оттенки' },
   { id: 'editorial', name: 'Наша история', category: 'Редакционный', color: '#dfd5d4', description: 'Обложка журнала о вашей любви' },
@@ -17,6 +19,12 @@ export const PRINT_FIELDS = [
   { key: 'greeting', label: 'Обращение к гостям', max: 55 }, { key: 'message', label: 'Текст приглашения', max: 220, type: 'textarea' },
   { key: 'venue', label: 'Место торжества', max: 65 }, { key: 'address', label: 'Адрес', max: 90 }, { key: 'footer', label: 'Подпись', max: 75 },
 ] as const;
-export type PrintData = Record<(typeof PRINT_FIELDS)[number]['key'], string>;
+export type PrintData = Record<(typeof PRINT_FIELDS)[number]['key'], string> & { photo?: string; photoPosition?: string };
+export const PRINT_PHOTO_TEMPLATES = ['azure-bloom', 'floral-gold', 'newspaper', 'editorial'];
+export const printDimensions = (id: string) => id === 'azure-bloom' ? '148 × 105 мм' : '105 × 148 мм';
 export const PRINT_SAMPLE: PrintData = { groom: 'Александр', bride: 'Анастасия', date: '2027-06-19', time: '16:00', greeting: 'Дорогие родные и друзья!', message: 'Есть моменты, которые хочется разделить с самыми близкими. Приглашаем вас стать частью нашей истории и отпраздновать день нашей свадьбы.', venue: 'Усадьба «Архангельское»', address: 'Московская область, посёлок Архангельское', footer: 'С любовью и в ожидании встречи' };
+export function getPrintSample(id: string): PrintData {
+  if (id === 'azure-bloom') return { ...PRINT_SAMPLE, groom: 'Себастьян', bride: 'Юлиана', date: '2027-05-23', time: '09:00', greeting: '', message: 'Приглашаем вас на нашу свадьбу', venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', footer: 'Праздник продолжится за ужином' };
+  return id === 'floral-gold' ? { ...PRINT_SAMPLE, groom: 'Даниил', bride: 'Оливия', date: '2027-03-27', time: '09:00', greeting: '', message: 'Приглашаем вас разделить радость нашего свадебного торжества', venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', footer: '' } : PRINT_SAMPLE;
+}
 export interface PrintOrder { id: string; templateId: string; data: PrintData; status: string; paymentStatus?: string }
