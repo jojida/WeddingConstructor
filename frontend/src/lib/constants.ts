@@ -613,12 +613,13 @@ export const MUSIC_LIBRARY: MusicTrack[] = [
   { id: 'air',      title: 'Ария',                    author: 'Бах',        kind: 'струнные',   duration: '2:55', url: '/invite/assets/music/air-bach.mp3' },
   { id: 'clair',    title: 'Лунный свет',             author: 'Дебюсси',    kind: 'фортепиано', duration: '3:18', url: '/invite/assets/music/clair-de-lune-debussy.mp3' },
   { id: 'nocturne', title: 'Ноктюрн ми-бемоль мажор', author: 'Шопен',      kind: 'фортепиано', duration: '3:19', url: '/invite/assets/music/nocturne-chopin.mp3' },
+  { id: 'thousand', title: 'A Thousand Years',        author: 'Christina Perri', kind: 'песня', duration: '4:00', url: '/invite/assets/music/a-thousand-years-perri.mp3' },
   { id: 'wagner',   title: 'Свадебный хор',           author: 'Вагнер',     kind: 'оркестр',    duration: '1:44', url: '/invite/assets/music/bridal-chorus-wagner.mp3' },
 ];
 
 /** Мелодия, с которой шаблон открывается у новой пары (остальные — «Канон») */
 const TEMPLATE_MUSIC: Record<string, string> = {
-  forest: 'air',
+  forest: 'thousand',
   'garden-evening': 'canon',
   ivory: 'clair',
   calla: 'nocturne',

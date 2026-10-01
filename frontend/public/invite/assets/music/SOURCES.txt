@@ -27,3 +27,8 @@ bridal-chorus-wagner.mp3
   Р. Вагнер — Свадебный хор из «Лоэнгрина» (Treulich geführt). Musopen.
   CC0.
   https://commons.wikimedia.org/wiki/File:Richard_Wagner_-_Treulich_geführt.ogg
+
+a-thousand-years-perri.mp3
+  Christina Perri — A Thousand Years. Добавлено 01.10.2026 по просьбе владельца сайта (файл от него),
+  мелодия «Туманного леса» по умолчанию. НЕ общественное достояние: коммерческая запись,
+  права у правообладателей. Громкость выровнена до -18 LUFS, MP3 VBR q5, длина полная (4:00).
