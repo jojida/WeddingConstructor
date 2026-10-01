@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Марк &amp; Алиса — приглашение на свадьбу</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400&family=Spectral+SC:wght@400&family=Tinos:ital,wght@1,400&display=swap" rel="stylesheet" />
+  <link href="/invite/assets/fonts/google/2077acbfbb4fcfa3d141.css" rel="stylesheet" />
   <link rel="preload" href="assets/fonts/caslon-becker.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="preload" href="assets/fonts/calligraphia-one.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
@@ -24,7 +22,7 @@
 
     <!-- 1 — ОБЛОЖКА -->
     <section class="hero" id="hero">
-      <img class="hero__photo" src="assets/couple.jpg" data-edit="coverPhoto" alt="Жених и невеста" />
+      <img decoding="async" class="hero__photo" src="assets/couple.jpg" data-edit="coverPhoto" alt="Жених и невеста" />
       <span class="hero__amp hero-in" aria-hidden="true">&amp;</span>
       <div class="hero__shade" aria-hidden="true"></div>
       <p class="hero__label hero-in" data-edit="heroTitle">Приглашение на свадьбу</p>
@@ -50,7 +48,7 @@
             <div class="cal__days">
               <span class="cal__d cal__d--far" data-cal="d-2">10</span>
               <span class="cal__d cal__d--near" data-cal="d-1">11</span>
-              <span class="cal__d cal__d--main"><img class="cal__heart" src="assets/heart.webp" alt="" /><b data-cal="d0">12</b></span>
+              <span class="cal__d cal__d--main"><img decoding="async" loading="lazy" class="cal__heart" src="assets/heart.webp" alt="" /><b data-cal="d0">12</b></span>
               <span class="cal__d cal__d--near" data-cal="d1">13</span>
               <span class="cal__d cal__d--far" data-cal="d2">14</span>
             </div>
@@ -60,7 +58,7 @@
           <p class="venue__name rv" data-edit="venue">“Белая роща”</p>
           <p class="venue__addr rv" data-edit="venueAddress"></p>
           <div class="venue__frame rv-soft">
-            <img class="venue__photo" src="assets/venue.jpg" data-edit="venuePhoto" alt="Место проведения" />
+            <img decoding="async" loading="lazy" class="venue__photo" src="assets/venue.jpg" data-edit="venuePhoto" alt="Место проведения" />
           </div>
         </div>
       </div>
@@ -70,7 +68,7 @@
 
     <!-- 3 — ПРОГРАММА ДНЯ: трек с сердцем -->
     <section class="program" id="program">
-      <img class="program__doves rv-soft" src="assets/doves.webp" alt="" />
+      <img decoding="async" loading="lazy" class="program__doves rv-soft" src="assets/doves.webp" alt="" />
       <h2 class="title rv-write" data-edit="programTitle">Программа дня</h2>
       <div class="prog" id="prog">
         <div class="prog__track" aria-hidden="true">
@@ -94,11 +92,11 @@
       </div>
       <div class="looks rv-soft">
         <p class="looks__label">Для дам</p>
-        <figure class="look"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для дам 1" /></figure>
-        <figure class="look"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для дам 2" /></figure>
+        <figure class="look"><img decoding="async" loading="lazy" src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для дам 1" /></figure>
+        <figure class="look"><img decoding="async" loading="lazy" src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для дам 2" /></figure>
         <p class="looks__label">Для джентльменов</p>
-        <figure class="look"><img src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для джентльменов 1" /></figure>
-        <figure class="look"><img src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для джентльменов 2" /></figure>
+        <figure class="look"><img decoding="async" loading="lazy" src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для джентльменов 1" /></figure>
+        <figure class="look"><img decoding="async" loading="lazy" src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для джентльменов 2" /></figure>
       </div>
     </section>
 
@@ -117,7 +115,7 @@
 
     <!-- 6 — ПОЖЕЛАНИЯ И ДЕТАЛИ -->
     <section class="wish" id="wishes">
-      <img class="wish__heart rv-soft" src="assets/heart.webp" alt="" />
+      <img decoding="async" loading="lazy" class="wish__heart rv-soft" src="assets/heart.webp" alt="" />
       <h2 class="title rv-write" data-edit="wishesTitle">Пожелания</h2>
       <div class="wish__box rv">
         <div class="wish__text" data-edit="story">
@@ -165,7 +163,7 @@
     <!-- 8 — ФИНАЛ -->
     <section class="fin" id="final">
       <div class="fin__frame rv-soft">
-        <img class="fin__photo" src="assets/final.jpg" data-edit="finalPhoto" alt="Жених и невеста" />
+        <img decoding="async" loading="lazy" class="fin__photo" src="assets/final.jpg" data-edit="finalPhoto" alt="Жених и невеста" />
       </div>
       <h2 class="title title--light rv-write" data-edit="closingTitle">Будем ждать вас!</h2>
       <p class="fin__sign rv" data-edit="closingSign">Ваши Марк и Алиса</p>

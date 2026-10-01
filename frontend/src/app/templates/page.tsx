@@ -1,38 +1,11 @@
 'use client';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PreviewScale from '@/components/PreviewScale';
 import { LEGAL, TEMPLATES, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import styles from './page.module.css';
-
-function useScrollReveal(count: number) {
-  const refs = useRef<(HTMLDivElement | null)[]>([]);
-  const [visible, setVisible] = useState<boolean[]>(() => new Array(count).fill(false));
-
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    refs.current.forEach((el, i) => {
-      if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setVisible(prev => { const next = [...prev]; next[i] = true; return next; });
-            obs.disconnect();
-          }
-        },
-        { threshold: 0.12 }
-      );
-      obs.observe(el);
-      observers.push(obs);
-    });
-    return () => observers.forEach(o => o.disconnect());
-  }, [count]);
-
-  return { refs, visible };
-}
 
 const SAMPLE_DATA = {
   brideName: 'Дарья',
@@ -59,8 +32,6 @@ const SAMPLE_DATA = {
 };
 
 export default function TemplatesPage() {
-  const { refs, visible } = useScrollReveal(TEMPLATES.length);
-
   return (
     <div className={styles.page}>
       <Navbar />
@@ -82,17 +53,12 @@ export default function TemplatesPage() {
         {TEMPLATES.map((tpl, i) => (
           <div
             key={tpl.id}
-            ref={el => { refs.current[i] = el; }}
+            data-animate
             className={styles.card}
-            style={{
-              opacity: visible[i] ? 1 : 0,
-              transform: visible[i] ? 'translateY(0)' : 'translateY(36px)',
-              transition: `opacity 0.55s ease ${i * 0.1}s, transform 0.55s ease ${i * 0.1}s`,
-            }}
           >
             <div className={styles.cardImageWrapper}>
               <PreviewScale className={styles.previewScale}>
-                <LazyMount>
+                <LazyMount initialVisible={i < 3}>
                   <TemplatePreview
                     data={{
                       ...SAMPLE_DATA,

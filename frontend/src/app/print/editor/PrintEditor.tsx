@@ -9,8 +9,10 @@ import { PRINT_FIELDS, PRINT_PRICE, getPrintSample, PRINT_TEMPLATES, PRINT_PHOTO
 import PrintPhotoPicker from './PrintPhotoPicker';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import AuthModal from '@/components/AuthModal';
+import dynamic from 'next/dynamic';
 import styles from '../print.module.css';
+
+const AuthModal = dynamic(() => import('@/components/AuthModal'));
 
 const errorMessage = (error: unknown) => axios.isAxiosError(error) ? error.response?.data?.error || 'Не удалось соединиться с сервером. Попробуйте ещё раз.' : 'Не удалось выполнить действие. Попробуйте ещё раз.';
 export default function PrintEditor() {

@@ -4,11 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Даниил &amp; Ольга — приглашение на свадьбу</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Forum&family=Great+Vibes&family=Open+Sans:wght@300&display=swap" rel="stylesheet" />
+  <link href="/invite/assets/fonts/google/04c9e4655297b20fc124.css" rel="stylesheet" />
   <!-- цифры на табличке «Дней до свадьбы» — из шрифта нужны только они -->
-  <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&text=0123456789&display=swap" rel="stylesheet" />
+  <link href="/invite/assets/fonts/google/3ae13a38cd3de58f367e.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <!-- Без скриптов конверт не открыть и появление при прокрутке не сработает —
        показываем приглашение сразу -->
@@ -27,7 +25,7 @@
        на 1,83 с: дальше на правом пионе появлялось лишнее свечение -->
   <div class="env" id="envelope" role="button" tabindex="0" aria-label="Открыть приглашение">
     <div class="env__backdrop" aria-hidden="true"></div>
-    <video class="env__video" id="envelopeVideo" src="../assets/envelope-wave.mp4?v=2" poster="../assets/envelope-wave-poster.jpg"
+    <video class="env__video" id="envelopeVideo" data-src="../assets/envelope-wave.mp4?v=2" poster="../assets/envelope-wave-poster.jpg"
            muted playsinline webkit-playsinline preload="auto" disablepictureinpicture></video>
     <p class="env__hint">Нажмите, чтобы открыть</p>
     <div class="env__glow" aria-hidden="true"></div>
@@ -43,20 +41,20 @@
          Видео подключает script.js (data-src, data-poster) — в редакторе оно
          не грузится. ?v= — медиа кэшируются на час, при замене меняем версию. -->
     <section class="hero" id="hero">
-      <img class="hero__scene" src="assets/hero-scene.webp" alt="" />
+      <img decoding="async" class="hero__scene" src="assets/hero-scene.webp" alt="" />
       <div class="hero__dim" aria-hidden="true"></div>
-      <img class="hero__couple hero-in" src="assets/hero-couple.webp" alt="Жених и невеста" />
+      <img decoding="async" class="hero__couple hero-in" src="assets/hero-couple.webp" alt="Жених и невеста" />
       <video class="hero__live" id="heroLive" data-src="assets/hero-live.mp4?v=2" data-poster="assets/hero-live-poster.webp?v=2"
              muted playsinline webkit-playsinline preload="none" disablepictureinpicture disableremoteplayback
              aria-hidden="true" tabindex="-1"></video>
       <!-- кремовый рваный край поверх видео: низ кадра всегда цвета страницы -->
-      <img class="hero__edge" src="assets/hero-edge.webp" alt="" />
+      <img decoding="async" class="hero__edge" src="assets/hero-edge.webp" alt="" />
       <p class="hero__label hero-in" data-edit="heroTitle">приглашение на свадьбу</p>
       <h1 class="hero__names hero-in">
         <span data-name="groom">Даниил</span> <span class="hero__amp">&amp;</span> <span data-name="bride">Ольга</span>
       </h1>
-      <img class="hero__flowers hero__flowers--l" src="assets/hero-flowers-left.webp" alt="" />
-      <img class="hero__flowers hero__flowers--r" src="assets/hero-flowers-right.webp" alt="" />
+      <img decoding="async" class="hero__flowers hero__flowers--l" src="assets/hero-flowers-left.webp" alt="" />
+      <img decoding="async" class="hero__flowers hero__flowers--r" src="assets/hero-flowers-right.webp" alt="" />
     </section>
 
     <!-- 2 — ДОРОГИЕ ДРУЗЬЯ -->
@@ -71,18 +69,18 @@
     <!-- 3 — КОНВЕРТ С ДАТОЙ: бумага с датой выезжает из конверта, когда
          блок доходит до экрана (слои макета: задник, бумага, карман, печать) -->
     <section class="letter" id="date">
-      <img class="letter__edge" src="assets/letter-edge.webp" alt="" />
-      <img class="letter__back" src="assets/env-back.webp" alt="" />
+      <img decoding="async" loading="lazy" class="letter__edge" src="assets/letter-edge.webp" alt="" />
+      <img decoding="async" loading="lazy" class="letter__back" src="assets/env-back.webp" alt="" />
       <div class="letter__slot">
         <div class="letter__card">
-          <img class="letter__paper" src="assets/env-card.webp" alt="" />
+          <img decoding="async" loading="lazy" class="letter__paper" src="assets/env-card.webp" alt="" />
           <p class="letter__date" data-edit="letterDate">28 .01.27</p>
         </div>
       </div>
-      <img class="letter__front" src="assets/env-front.webp" alt="" />
-      <img class="letter__seal" src="assets/env-seal.webp" alt="" />
-      <img class="letter__gold letter__gold--l" src="assets/gold-left.webp" alt="" />
-      <img class="letter__gold letter__gold--r" src="assets/gold-right.webp" alt="" />
+      <img decoding="async" loading="lazy" class="letter__front" src="assets/env-front.webp" alt="" />
+      <img decoding="async" loading="lazy" class="letter__seal" src="assets/env-seal.webp" alt="" />
+      <img decoding="async" loading="lazy" class="letter__gold letter__gold--l" src="assets/gold-left.webp" alt="" />
+      <img decoding="async" loading="lazy" class="letter__gold letter__gold--r" src="assets/gold-right.webp" alt="" />
     </section>
 
     <!-- 4 — МЕСТО ПРОВЕДЕНИЯ -->
@@ -92,7 +90,7 @@
       <div class="wc-map garden-map" data-wc-map hidden></div>
       <p class="venue__name rv" data-edit="venue">Дворцовая усадьба</p>
       <p class="venue__addr rv" data-edit="venueAddress"></p>
-      <img class="venue__bottom" src="assets/venue-bottom.webp" alt="" />
+      <img decoding="async" loading="lazy" class="venue__bottom" src="assets/venue-bottom.webp" alt="" />
     </section>
 
     <!-- 5 — ПРОГРАММА ДНЯ: серпантин с сердцем -->
@@ -107,13 +105,13 @@
         </svg>
         <!-- пункты .prog__node строит script.js из расписания -->
       </div>
-      <img class="program__sign rv-soft" src="assets/icon-signpost.webp" alt="" />
+      <img decoding="async" loading="lazy" class="program__sign rv-soft" src="assets/icon-signpost.webp" alt="" />
     </section>
 
     <!-- 6 — ДРЕСС-КОД -->
     <section class="dress" id="dresscode">
       <div class="dress__top">
-        <img class="dress__plate" src="assets/dress-top.webp" alt="" />
+        <img decoding="async" loading="lazy" class="dress__plate" src="assets/dress-top.webp" alt="" />
         <h2 class="title dress__title rv-write" data-edit="dressTitle">Дресс код</h2>
       </div>
       <div class="dress__body">
@@ -123,21 +121,21 @@
         <p class="dress__text rv" data-edit="dressText">Будем рады, если в ваших нарядах найдутся оттенки нашей палитры</p>
         <div class="looks">
           <p class="looks__label rv">Для дам</p>
-          <figure class="look rv-soft"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для дам 1" /></figure>
-          <figure class="look rv-soft"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для дам 2" /></figure>
+          <figure class="look rv-soft"><img decoding="async" loading="lazy" src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для дам 1" /></figure>
+          <figure class="look rv-soft"><img decoding="async" loading="lazy" src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для дам 2" /></figure>
           <p class="looks__label rv">Для джентльменов</p>
-          <figure class="look rv-soft"><img src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для джентльменов 1" /></figure>
-          <figure class="look rv-soft"><img src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для джентльменов 2" /></figure>
+          <figure class="look rv-soft"><img decoding="async" loading="lazy" src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для джентльменов 1" /></figure>
+          <figure class="look rv-soft"><img decoding="async" loading="lazy" src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для джентльменов 2" /></figure>
         </div>
       </div>
-      <img class="dress__bottom" src="assets/dress-bottom.webp" alt="" />
+      <img decoding="async" loading="lazy" class="dress__bottom" src="assets/dress-bottom.webp" alt="" />
     </section>
 
     <!-- 7 — ДНЕЙ ДО СВАДЬБЫ: табличка на ветке -->
     <section class="cd" id="countdown">
       <h2 class="title rv-write" data-edit="countdownTitle">Дней до свадьбы</h2>
       <div class="cd__tree rv-soft">
-        <img class="cd__img" src="assets/tree-sign.webp" alt="" />
+        <img decoding="async" loading="lazy" class="cd__img" src="assets/tree-sign.webp" alt="" />
         <svg class="cd__num" viewBox="0 0 660 260" aria-live="off">
           <text id="cdDays" x="330" y="215" text-anchor="middle">21</text>
         </svg>
@@ -146,9 +144,9 @@
 
     <!-- 8 — ПОЖЕЛАНИЯ И ДЕТАЛИ: свиток -->
     <section class="wish" id="wishes">
-      <img class="wish__doves rv-soft" src="assets/doves.webp" alt="" />
+      <img decoding="async" loading="lazy" class="wish__doves rv-soft" src="assets/doves.webp" alt="" />
       <div class="scroll rv-soft">
-        <img class="scroll__img" src="assets/scroll.webp" alt="" />
+        <img decoding="async" loading="lazy" class="scroll__img" src="assets/scroll.webp" alt="" />
         <div class="scroll__box">
           <div class="scroll__text" data-edit="story">
             <p>Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.</p>
@@ -193,12 +191,12 @@
 
     <!-- 10 — ДО НОВЫХ ВСТРЕЧ -->
     <section class="fin" id="final">
-      <img class="fin__swans rv-soft" src="assets/swans.webp" alt="" />
+      <img decoding="async" loading="lazy" class="fin__swans rv-soft" src="assets/swans.webp" alt="" />
       <h2 class="title rv-write" data-edit="closingTitle">До новых встреч!</h2>
-      <img class="fin__lights rv-soft" src="assets/lights.webp" alt="" />
+      <img decoding="async" loading="lazy" class="fin__lights rv-soft" src="assets/lights.webp" alt="" />
       <p class="title fin__love rv-write" data-edit="closingLove">С любовью!</p>
       <p class="fin__names rv" data-edit="closingSign">Даниил &amp; Ольга</p>
-      <img class="fin__couple rv-soft" src="assets/couple-back.webp" alt="Жених и невеста" />
+      <img decoding="async" loading="lazy" class="fin__couple rv-soft" src="assets/couple-back.webp" alt="Жених и невеста" />
     </section>
 
   </main>

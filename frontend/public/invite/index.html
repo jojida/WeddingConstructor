@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Свадьба Катерины и Максима</title>
   <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Marck+Script&family=Raleway:wght@100;200;300;400&display=swap" rel="stylesheet">
+  <link href="/invite/assets/fonts/google/450eafd6ffefbeb06855.css" rel="stylesheet">
 
   <!-- SVG defs: black-bg removal filter + wavy clip-path -->
   <svg width="0" height="0" style="position:absolute">
@@ -49,8 +49,7 @@
   ════════════════════════════════════ -->
   <div id="intro-wrap" class="intro-wrap">
     <video id="intro-vid" class="intro-vid"
-           autoplay muted playsinline preload="auto">
-      <source src="assets/intro.mp4" type="video/mp4">
+           autoplay muted playsinline preload="none" data-src="assets/intro.mp4">
     </video>
     <button class="intro-skip" id="intro-skip">пропустить ›</button>
   </div>
@@ -60,7 +59,7 @@
     <!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
     <section class="hero">
       <div class="hero-image-wrap">
-        <img src="assets/window.jpg" alt="Средиземноморское окно с видом на море" class="hero-img">
+        <img decoding="async" src="assets/window.jpg" alt="Средиземноморское окно с видом на море" class="hero-img">
 
         <!-- ── Blue shutters (close→open on page load) ── -->
         <div class="win-shutters" aria-hidden="true">
@@ -100,8 +99,8 @@
             </div>
           </div>
         </div>
-        <img src="assets/flower-single.png" class="hero-deco hero-deco-left" alt="">
-        <img src="assets/flower-single.png" class="hero-deco hero-deco-right" alt="">
+        <img decoding="async" src="assets/flower-single.lossless.webp" class="hero-deco hero-deco-left" alt="">
+        <img decoding="async" src="assets/flower-single.lossless.webp" class="hero-deco hero-deco-right" alt="">
 
       </div>
     </section>
@@ -134,11 +133,11 @@
     <!-- ═══════════════════════════════════════ VENUE ═══════════════════════════════════════ -->
     <section class="venue-section fade-up">
       <div class="venue-stripes">
-        <img src="assets/branch.webp" class="venue-branch venue-branch-tl" alt="">
-        <img src="assets/branch.webp" class="venue-branch venue-branch-br" alt="">
+        <img decoding="async" loading="lazy" src="assets/branch.webp" class="venue-branch venue-branch-tl" alt="">
+        <img decoding="async" loading="lazy" src="assets/branch.webp" class="venue-branch venue-branch-br" alt="">
 
         <div class="venue-chair-wrap">
-          <img src="assets/icons/chair.svg" class="chair-svg" alt="">
+          <img decoding="async" loading="lazy" src="assets/icons/chair.svg" class="chair-svg" alt="">
         </div>
 
         <div class="venue-oval-wrap">
@@ -148,7 +147,7 @@
               <p class="venue-name" data-edit="venue">СПА Отель</p>
               <p class="venue-address" data-edit="venueAddress">г. Сочи, ул. Приморская, 15</p>
               <div class="venue-divider"></div>
-              <img src="assets/icons/anchor.svg" class="anchor-icon" alt="">
+              <img decoding="async" loading="lazy" src="assets/icons/anchor.svg" class="anchor-icon" alt="">
             </div>
           </div>
         </div>
@@ -180,7 +179,7 @@
 
         <!-- Node 1 – church – LEFT  WP(110, 60) -->
         <div class="tl-node tl-nl tl-n1 fade-up">
-          <img src="assets/icons/church.svg" class="tl-icon-node" alt="">
+          <img decoding="async" loading="lazy" src="assets/icons/church.svg" class="tl-icon-node" alt="">
           <div class="tl-node-info">
             <time class="tl-time">11:00 AM</time>
             <p class="tl-text">Ceremony at the church</p>
@@ -189,7 +188,7 @@
 
         <!-- Node 2 – rings  – RIGHT WP(330,220) -->
         <div class="tl-node tl-nr tl-n2 fade-up">
-          <img src="assets/icons/rings.svg" class="tl-icon-node" alt="">
+          <img decoding="async" loading="lazy" src="assets/icons/rings.svg" class="tl-icon-node" alt="">
           <div class="tl-node-info">
             <time class="tl-time">12:00 AM</time>
             <p class="tl-text">Say yes, I do!</p>
@@ -198,7 +197,7 @@
 
         <!-- Node 3 – plate  – LEFT  WP(110,380) -->
         <div class="tl-node tl-nl tl-n3 fade-up">
-          <img src="assets/icons/plate.svg" class="tl-icon-node" alt="">
+          <img decoding="async" loading="lazy" src="assets/icons/plate.svg" class="tl-icon-node" alt="">
           <div class="tl-node-info">
             <time class="tl-time">13:00 AM</time>
             <p class="tl-text">Wedding lunch</p>
@@ -207,7 +206,7 @@
 
         <!-- Node 4 – bottles – RIGHT WP(330,540) -->
         <div class="tl-node tl-nr tl-n4 fade-up">
-          <img src="assets/icons/botles.svg" class="tl-icon-node" alt="">
+          <img decoding="async" loading="lazy" src="assets/icons/botles.svg" class="tl-icon-node" alt="">
           <div class="tl-node-info">
             <time class="tl-time">14:00 AM</time>
             <p class="tl-text">Cheer for the couple</p>
@@ -216,7 +215,7 @@
 
         <!-- Node 5 – globe  – LEFT  WP(110,680) -->
         <div class="tl-node tl-nl tl-n5 fade-up">
-          <img src="assets/icons/globe.svg" class="tl-icon-node" alt="">
+          <img decoding="async" loading="lazy" src="assets/icons/globe.svg" class="tl-icon-node" alt="">
           <div class="tl-node-info">
             <time class="tl-time">6:00 PM</time>
             <p class="tl-text">Evening party</p>
@@ -345,7 +344,7 @@
 
     <!-- ═══════════════════════════════════════ WISHES ═══════════════════════════════════════ -->
     <section class="wishes-section fade-up">
-      <img src="assets/icons/gift.svg" class="gift-icon" alt="">
+      <img decoding="async" loading="lazy" src="assets/icons/gift.svg" class="gift-icon" alt="">
 
       <h2 class="wishes-title">Пожелания и детали</h2>
       <div data-edit="story">
@@ -353,7 +352,7 @@
         <p class="wishes-text">Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.</p>
       </div>
 
-      <img src="assets/icons/two-rings.svg" class="rings-deco" alt="">
+      <img decoding="async" loading="lazy" src="assets/icons/two-rings.svg" class="rings-deco" alt="">
     </section>
 
     <!-- ═══════════════════════════════════════ ORGANIZER ═══════════════════════════════════════ -->
@@ -484,7 +483,7 @@
       <!-- Monogram with wreath -->
       <div class="monogram">
         <div class="monogram-wreath">
-          <img src="assets/wreath.svg" alt="" class="wreath-img">
+          <img decoding="async" loading="lazy" src="assets/wreath.svg" alt="" class="wreath-img">
           <div class="monogram-initials">
             <span class="mono-letter">К</span>
             <span class="mono-amp">&amp;</span>
@@ -515,6 +514,13 @@
         // remove from DOM after fade so it doesn't block interaction
         setTimeout(remove, 900);
       }
+
+      // The editor and landing-page preview need the invitation itself. Avoid
+      // downloading the guest intro behind their non-interactive preview.
+      if (new URLSearchParams(location.search).get('editing') === '1') { remove(); return; }
+      vid.src = vid.getAttribute('data-src');
+      var playback = vid.play();
+      if (playback && playback.catch) playback.catch(remove);
 
       // Dismiss when video ends
       vid.addEventListener('ended', dismiss);

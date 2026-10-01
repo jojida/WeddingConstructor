@@ -33,6 +33,8 @@
   }
 
   window.WCEnvelope = { active: true };
+  // Attach only for guests: editing=1 must not fetch an invisible intro.
+  if (video && video.getAttribute('data-src')) video.src = video.getAttribute('data-src');
   root.classList.add('env-lock');
 
   var state = 'idle';   // idle → playing → done

@@ -75,10 +75,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ru" suppressHydrationWarning>
       <head>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marck+Script&display=swap" />
+        <link rel="stylesheet" href="/invite/assets/fonts/google/758c70af13ec1d31ff6b.css" />
         {/* Caveat и Alice — карточка шаблона «Скетч» (те же шрифты, что и в самом шаблоне) */}
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alice&family=Caveat:wght@400..700&display=swap" />
+        <link rel="stylesheet" href="/invite/assets/fonts/google/c125798b2a99adcb4bf4.css" />
       </head>
       <body suppressHydrationWarning>
         {/* Метрика без JS: сам счётчик инициализируется в instrumentation-client.ts,

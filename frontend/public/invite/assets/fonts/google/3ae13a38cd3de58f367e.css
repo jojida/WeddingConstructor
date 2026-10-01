@@ -1,0 +1,9 @@
+/* Source: https://fonts.googleapis.com/css2?family=Alfa+Slab+One&text=0123456789&display=swap — locally served without changing font faces. */
+@font-face {
+  font-family: 'Alfa Slab One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./4066f5b865017140a228) format('woff2');
+  unicode-range: U+30-39;
+}

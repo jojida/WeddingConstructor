@@ -4,13 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 /* Монтирует детей, только когда контейнер приблизился к вьюпорту.
    Нужен для тяжёлых превью шаблонов (iframe + анимации): без него лендинг
    монтирует все приглашения разом и заметно тормозит на мобильных. */
-export default function LazyMount({ children, rootMargin = '600px', placeholder }: {
+export default function LazyMount({ children, rootMargin = '600px', placeholder, initialVisible = false }: {
   children: React.ReactNode;
   rootMargin?: string;
   placeholder?: React.ReactNode;
+  initialVisible?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(initialVisible);
 
   useEffect(() => {
     const el = ref.current;

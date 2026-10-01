@@ -4,9 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Антон и Мария — приглашение на свадьбу</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link href="/invite/assets/fonts/google/0f1ebb90d8209a2657ff.css" rel="stylesheet" />
   <link rel="preload" as="image" href="assets/hero-bg.webp" />
   <link rel="preload" as="image" href="assets/tree.webp?v=2" />
   <link rel="stylesheet" href="styles.css?v=3" />
@@ -32,15 +30,15 @@
          имена читались целиком, как в макете -->
     <section class="hero" id="hero">
       <div class="hero__stage">
-        <img class="hero__bg" src="assets/hero-bg.webp" alt="" />
+        <img decoding="async" class="hero__bg" src="assets/hero-bg.webp" alt="" />
         <div class="hero__mist" aria-hidden="true"></div>
         <div class="hero__names hero__names--back" aria-hidden="true">
           <span class="hero__line hero__line--g" data-name="groom">Антон</span>
           <span class="hero__line hero__line--and">и</span>
           <span class="hero__line hero__line--b" data-name="bride">Мария</span>
         </div>
-        <img class="hero__tree hero__tree--l" src="assets/tree.webp?v=2" alt="" />
-        <img class="hero__tree hero__tree--r" src="assets/tree.webp?v=2" alt="" />
+        <img decoding="async" class="hero__tree hero__tree--l" src="assets/tree.webp?v=2" alt="" />
+        <img decoding="async" class="hero__tree hero__tree--r" src="assets/tree.webp?v=2" alt="" />
         <h1 class="hero__names hero__names--front">
           <span class="hero__line hero__line--g" data-name="groom">Антон</span>
           <span class="hero__line hero__line--and">и</span>
@@ -48,9 +46,9 @@
         </h1>
       </div>
       <!-- рваный край бумаги поверх низа фото -->
-      <img class="hero__edge" src="assets/hero-edge.webp" alt="" />
-      <img class="hero__corner hero__corner--l" src="assets/corner-l.webp" alt="" />
-      <img class="hero__corner hero__corner--r" src="assets/corner-r.webp" alt="" />
+      <img decoding="async" class="hero__edge" src="assets/hero-edge.webp" alt="" />
+      <img decoding="async" class="hero__corner hero__corner--l" src="assets/corner-l.webp" alt="" />
+      <img decoding="async" class="hero__corner hero__corner--r" src="assets/corner-r.webp" alt="" />
     </section>
 
     <!-- 2 — ДОРОГИЕ ГОСТИ -->
@@ -67,11 +65,11 @@
     <section class="album" id="album" aria-label="Наши фото">
       <div class="album__frame rv-soft">
         <div class="album__photos" id="albumPhotos">
-          <img class="album__img is-active" src="assets/album-1.jpg" data-edit="coverPhoto" alt="Наше фото 1" />
-          <img class="album__img" src="assets/album-2.jpg" data-edit="albumPhoto2" alt="Наше фото 2" />
-          <img class="album__img" src="assets/album-3.jpg" data-edit="albumPhoto3" alt="Наше фото 3" />
+          <img decoding="async" loading="lazy" class="album__img is-active" src="assets/album-1.jpg" data-edit="coverPhoto" alt="Наше фото 1" />
+          <img decoding="async" loading="lazy" class="album__img" src="assets/album-2.jpg" data-edit="albumPhoto2" alt="Наше фото 2" />
+          <img decoding="async" loading="lazy" class="album__img" src="assets/album-3.jpg" data-edit="albumPhoto3" alt="Наше фото 3" />
         </div>
-        <img class="album__border" src="assets/frame.webp" alt="" />
+        <img decoding="async" loading="lazy" class="album__border" src="assets/frame.webp" alt="" />
       </div>
       <button class="album__nav album__nav--prev rv-soft" type="button" aria-label="Предыдущее фото">
         <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M.6 50 50.2.4v24.8h49.6v49.6H50.2v24.8z" /></svg>
@@ -98,9 +96,9 @@
 
     <!-- 5 — МЕСТО ПРОВЕДЕНИЯ: серая рваная бумага, ветка со мхом над ней -->
     <section class="venue" id="venue">
-      <img class="venue__branch" src="assets/branch.webp" alt="" />
+      <img decoding="async" loading="lazy" class="venue__branch" src="assets/branch.webp" alt="" />
       <h2 class="title rv-write" data-edit="venueTitle">Место проведения</h2>
-      <img class="venue__gazebo rv-soft" src="assets/gazebo.webp" alt="" />
+      <img decoding="async" loading="lazy" class="venue__gazebo rv-soft" src="assets/gazebo.webp" alt="" />
       <p class="venue__name rv" data-edit="venue">Усадьба Кусково</p>
       <p class="venue__addr rv" data-edit="venueAddress">Москва, ул. Юности, 2</p>
       <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
@@ -110,12 +108,12 @@
     <!-- 6 — РАСПИСАНИЕ: жёлудь едет по треку за прокруткой -->
     <section class="program" id="program">
       <h2 class="title rv-write" data-edit="programTitle">Расписание</h2>
-      <img class="program__pine rv-soft" src="assets/pine.webp" alt="" />
+      <img decoding="async" loading="lazy" class="program__pine rv-soft" src="assets/pine.webp" alt="" />
       <div class="sched" id="sched">
         <span class="sched__line" id="schedLine" aria-hidden="true"></span>
         <span class="sched__fill" id="schedFill" aria-hidden="true"></span>
         <!-- пункты .sched__row строит script.js из расписания -->
-        <img class="sched__acorn" id="schedAcorn" src="assets/acorn.webp" alt="" />
+        <img decoding="async" loading="lazy" class="sched__acorn" id="schedAcorn" src="assets/acorn.webp" alt="" />
       </div>
     </section>
 
@@ -146,19 +144,19 @@
           <button class="looks__tab" type="button" role="tab" aria-selected="false" data-look="men">Для джентльменов</button>
         </div>
         <div class="looks__panel is-active" role="tabpanel" data-look="women">
-          <figure class="look"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" data-def="assets/dress-w1.jpg" alt="Образ для дам 1" loading="lazy" /></figure>
-          <figure class="look"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" data-def="assets/dress-w2.jpg" alt="Образ для дам 2" loading="lazy" /></figure>
+          <figure class="look"><img decoding="async" src="assets/dress-w1.jpg" data-edit="dressCodePhoto" data-def="assets/dress-w1.jpg" alt="Образ для дам 1" loading="lazy" /></figure>
+          <figure class="look"><img decoding="async" src="assets/dress-w2.jpg" data-edit="dressPhoto2" data-def="assets/dress-w2.jpg" alt="Образ для дам 2" loading="lazy" /></figure>
         </div>
         <div class="looks__panel" role="tabpanel" data-look="men">
-          <figure class="look"><img src="assets/dress-m1.jpg" data-edit="dressMan1" data-def="assets/dress-m1.jpg" alt="Образ для джентльменов 1" loading="lazy" /></figure>
-          <figure class="look"><img src="assets/dress-m2.jpg" data-edit="dressMan2" data-def="assets/dress-m2.jpg" alt="Образ для джентльменов 2" loading="lazy" /></figure>
+          <figure class="look"><img decoding="async" src="assets/dress-m1.jpg" data-edit="dressMan1" data-def="assets/dress-m1.jpg" alt="Образ для джентльменов 1" loading="lazy" /></figure>
+          <figure class="look"><img decoding="async" src="assets/dress-m2.jpg" data-edit="dressMan2" data-def="assets/dress-m2.jpg" alt="Образ для джентльменов 2" loading="lazy" /></figure>
         </div>
       </div>
     </section>
 
     <!-- 9 — ПОЖЕЛАНИЯ: текст слева, ель справа -->
     <section class="wish" id="wishes">
-      <img class="wish__spruce rv-soft" src="assets/spruce.webp" alt="" />
+      <img decoding="async" loading="lazy" class="wish__spruce rv-soft" src="assets/spruce.webp" alt="" />
       <h2 class="title wish__title rv-write" data-edit="wishTitle">Пожелания</h2>
       <div class="wish__text rv" data-edit="story">
         <p>Самый ценный подарок для нас — ваше присутствие. Если захотите порадовать нас чем-то ещё, мы будем благодарны за вклад в бюджет нашей молодой семьи.</p>
@@ -203,13 +201,13 @@
     <section class="fin" id="final">
       <!-- три фото пары, как отпечатки, разложенные на бумаге -->
       <div class="fin__photos">
-        <figure class="fin__print fin__print--l rv-soft"><img src="assets/final-1.jpg" data-edit="finalPhoto1" data-def="assets/final-1.jpg" alt="Наше фото" loading="lazy" /></figure>
-        <figure class="fin__print fin__print--c rv-soft"><img src="assets/final-2.jpg" data-edit="finalPhoto2" data-def="assets/final-2.jpg" alt="Наше фото" loading="lazy" /></figure>
-        <figure class="fin__print fin__print--r rv-soft"><img src="assets/final-3.jpg" data-edit="finalPhoto3" data-def="assets/final-3.jpg" alt="Наше фото" loading="lazy" /></figure>
+        <figure class="fin__print fin__print--l rv-soft"><img decoding="async" src="assets/final-1.jpg" data-edit="finalPhoto1" data-def="assets/final-1.jpg" alt="Наше фото" loading="lazy" /></figure>
+        <figure class="fin__print fin__print--c rv-soft"><img decoding="async" src="assets/final-2.jpg" data-edit="finalPhoto2" data-def="assets/final-2.jpg" alt="Наше фото" loading="lazy" /></figure>
+        <figure class="fin__print fin__print--r rv-soft"><img decoding="async" src="assets/final-3.jpg" data-edit="finalPhoto3" data-def="assets/final-3.jpg" alt="Наше фото" loading="lazy" /></figure>
       </div>
       <h2 class="title fin__title rv-write" data-edit="closingTitle">До скорых встреч!</h2>
       <p class="title fin__sign rv-write" data-edit="closingSign">Ваши Антон и Мария</p>
-      <img class="fin__scene rv-soft" src="assets/fin-scene.webp" alt="" />
+      <img decoding="async" loading="lazy" class="fin__scene rv-soft" src="assets/fin-scene.webp" alt="" />
     </section>
 
   </main>

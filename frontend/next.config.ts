@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
       // Mutable public assets get a bounded cache; HTML and code stay revalidated.
       source: '/:asset((?:invite|envelope|brand|print)/.+\\.(?:webp|png|jpg|jpeg|gif|svg|avif|mp4|webm|mp3|m4a|ogg|wav|woff|woff2))',
       headers: [{ key: 'Cache-Control', value: 'public, max-age=3600' }],
+    }, {
+      // Content-hashed font files can be reused across pages and invitations.
+      source: '/invite/assets/fonts/google/:asset([a-f0-9]{20}\\.(?:css|woff2|ttf))',
+      headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
     }];
   },
   /* В разработке Next пропускает к себе только localhost. Для работы со

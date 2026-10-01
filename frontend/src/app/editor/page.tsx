@@ -10,9 +10,12 @@ import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, MUSIC_LIBRARY, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
-import AuthModal from '@/components/AuthModal';
-import PhotoFrameEditor, { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
+import dynamic from 'next/dynamic';
+import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import styles from './page.module.css';
+
+const AuthModal = dynamic(() => import('@/components/AuthModal'));
+const PhotoFrameEditor = dynamic(() => import('./PhotoFrameEditor'));
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export interface InviteData {

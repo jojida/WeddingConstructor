@@ -136,7 +136,14 @@
     injectCss();
     boxes.forEach(function (box) {
       box.hidden = !visible;
-      if (!visible || box.__wcMapKey === key) return;
+      if (!visible) {
+        if (box.__wcMapObserver) box.__wcMapObserver.disconnect();
+        box.innerHTML = '';
+        box.__wcMapKey = '';
+        return;
+      }
+      if (box.__wcMapKey === key) return;
+      if (box.__wcMapObserver) box.__wcMapObserver.disconnect();
       box.__wcMapKey = key;
       var title = 'Карта: ' + (state.venue || address || 'место проведения');
       // Своя ссылка пары без точки (короткая ссылка, 2ГИС…) — её и открываем
@@ -144,8 +151,22 @@
         ? '<a class="wc-map__route" href="' + esc(link) + '" target="_blank" rel="noopener">' + PIN + 'Открыть карту</a>'
         : '<a class="wc-map__route" href="' + esc(routeUrl(q, point)) + '" target="_blank" rel="noopener">' + PIN + 'Построить маршрут</a>';
       box.innerHTML =
-        '<div class="wc-map__frame"><iframe src="' + esc(widgetUrl(q, point)) + '" title="' + esc(title) + '"' +
+        '<div class="wc-map__frame"><iframe title="' + esc(title) + '"' +
         ' loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>' + go;
+      // Native lazy loading may fetch maps several screens ahead. Wait until
+      // the map is near the viewport, also inside the editor's iframe.
+      var frame = box.querySelector('iframe');
+      var src = widgetUrl(q, point);
+      if (!('IntersectionObserver' in window)) { frame.src = src; return; }
+      var observer = new IntersectionObserver(function (entries) {
+        if (box.__wcMapObserver !== observer) return;
+        if (entries.some(function (entry) { return entry.isIntersecting; }) && !box.hidden) {
+          frame.src = src;
+          observer.disconnect();
+        }
+      }, { rootMargin: '400px' });
+      box.__wcMapObserver = observer;
+      observer.observe(box);
     });
   }
 
