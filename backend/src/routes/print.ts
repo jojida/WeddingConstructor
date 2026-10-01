@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import crypto from 'crypto';
+import { isFreeAccount } from '../lib/freeAccounts';
 import PDFDocument from 'pdfkit';
 import SVGtoPDF from 'svg-to-pdfkit';
 import prisma from '../lib/prisma';
@@ -56,6 +57,11 @@ router.post('/orders/:id/pay', async (req: AuthRequest, res) => {
   if (!order) return res.status(404).json({ error: 'Заказ не найден' });
   const returnUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/print/editor?order=${encodeURIComponent(order.id)}`;
   if (order.status === 'paid') return res.json({ paymentUrl: returnUrl });
+  const buyer = await prisma.user.findUnique({ where: { id: req.userId! } });
+  if (isFreeAccount(buyer?.email)) {
+    await prisma.printOrder.update({ where: { id: order.id }, data: { status: 'paid', paidAt: order.paidAt ?? new Date(), paymentId: 'free_account' } });
+    return res.json({ free: true, paymentUrl: returnUrl });
+  }
   if (!kassaAuth().configured) return res.status(503).json({ error: 'Оплата временно недоступна. Макет сохранён — попробуйте позже.' });
   try {
     if (order.paymentId) {

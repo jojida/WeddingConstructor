@@ -37,6 +37,20 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
   const otherToken = jwt.sign({ userId: other.id }, process.env.JWT_SECRET);
   const request = (url, method = 'GET', body, auth = token) => realFetch(base + '/api/print' + url, { method, headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(auth ? { Authorization: `Bearer ${auth}` } : {}) }, body: body ? JSON.stringify(body) : undefined });
   let order;
+  await t.test('test account unlocks own print PDF without a gateway', async () => {
+    const previous = process.env.FREE_ACCOUNTS;
+    process.env.FREE_ACCOUNTS = 'print-other@example.test';
+    try {
+      const created = await request('/orders', 'POST', { templateId: 'olive', data: PRINT_SAMPLE }, otherToken);
+      const item = await created.json();
+      assert.equal((await request(`/orders/${item.id}/pay`, 'POST', {}, token)).status, 404);
+      const unlocked = await request(`/orders/${item.id}/pay`, 'POST', {}, otherToken);
+      assert.equal(unlocked.status, 200);
+      assert.equal((await unlocked.json()).free, true);
+      assert.equal((await request(`/orders/${item.id}/pdf`, 'GET', undefined, otherToken)).status, 200);
+      assert.equal((await request(`/orders/${item.id}/pdf`, 'GET', undefined, token)).status, 404);
+    } finally { if (previous === undefined) delete process.env.FREE_ACCOUNTS; else process.env.FREE_ACCOUNTS = previous; }
+  });
   await t.test('validates templates and dates; previews escape markup', async () => {
     assert.throws(() => validatePrintData({ ...PRINT_SAMPLE, date: '2027-02-31' }));
     assert.throws(() => validatePrintData({ ...PRINT_SAMPLE, groom: 'x'.repeat(25) }));
