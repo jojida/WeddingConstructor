@@ -15,3 +15,9 @@ Create a photorealistic luxury wedding stationery background, portrait aspect ra
 ### porthole.jpg
 
 Use case: photorealistic-natural. Asset for premium wedding travel invitation. Portrait 3:4 photograph of one complete airplane porthole window frame, straight on, warm ivory rounded thick sculptural plastic rim on a flat warm ivory cabin wall. Through the window a silver aircraft wing stretches toward a peaceful pastel blue sky above fluffy clouds with soft peach sunset horizon. Entire window rim visible, centered, filling most of image with small margins. Realistic tactile details, quiet romantic editorial photography, no people, no text, no letters, no watermark.
+
+## Supplied collection update
+
+The five `*-supplied.jpg` backgrounds preserve user-supplied SVG artwork, with original text outlines removed and editable Russian text rendered separately. Mapping: blue = Blue and White Floral Wedding Invitation (4).svg; clay = Светлое Акварель Бохо Цветы Свадебное Пригласительное.svg; arch = Фиолетовое и Розовое Цветок Геометрический Цветочное Свадебное Приглашение.svg; vow = Beige Watercolor Illustrated Wedding Invitation.svg; noir = White & Grey Floral Watercolor Wedding Save the Date Invitation (1).svg.
+
+Nickainley names use the original Cyrillic-capable Fontfabric font. Vow uses Great Vibes as the user-approved temporary substitute for Anastasia Scr. Noir uses Cormorant Garamond, including the editable initials. Backgrounds are 1240 × 1748 pixels for A6 at 300 dpi.

@@ -9,8 +9,8 @@ export const PRINT_TEMPLATES = [
   { id: 'vow', name: 'Тихое «да»', category: 'Минимализм', color: '#e7dfd1', description: 'Чистые линии и тёплая бумага' },
   { id: 'olive', name: 'Оливковая ветвь', category: 'Ботаника', color: '#e1e5da', description: 'Нежная графика в природных оттенках' },
   { id: 'arch', name: 'Нежная арка', category: 'Романтика', color: '#e9d8d3', description: 'Пудровые тона и мягкая геометрия' },
-  { id: 'clay', name: 'Тёплая терракота', category: 'Минимализм', color: '#ebd8c9', description: 'Южное солнце и фактура земли' },
-  { id: 'blue', name: 'Французский сад', category: 'Романтика', color: '#dce2ea', description: 'Тонкие линии и фарфоровый синий' },
+  { id: 'clay', name: 'Тёплая терракота', category: 'Минимализм', color: '#ebd8c9', description: 'Пудровые розы и акварельные травы' },
+  { id: 'blue', name: 'Французский сад', category: 'Романтика', color: '#dce2ea', description: 'Голубые розы и тонкая классическая рамка' },
   { id: 'noir', name: 'Вечер в шёлке', category: 'Классика', color: '#b9c1b8', description: 'Глубокий зелёный и оттенок шампанского' },
 ];
 export const PRINT_FIELDS = [
@@ -19,11 +19,20 @@ export const PRINT_FIELDS = [
   { key: 'greeting', label: 'Обращение к гостям', max: 55 }, { key: 'message', label: 'Текст приглашения', max: 220, type: 'textarea' },
   { key: 'venue', label: 'Место торжества', max: 65 }, { key: 'address', label: 'Адрес', max: 90 }, { key: 'footer', label: 'Подпись', max: 75 },
 ] as const;
-export type PrintData = Record<(typeof PRINT_FIELDS)[number]['key'], string> & { photo?: string; photoPosition?: string };
+export type PrintData = Record<(typeof PRINT_FIELDS)[number]['key'], string> & { photo?: string; photoPosition?: string; photoFrame?: { x: number; y: number; z: number; r?: number } };
 export const PRINT_PHOTO_TEMPLATES = ['azure-bloom', 'floral-gold', 'newspaper', 'editorial'];
 export const printDimensions = (id: string) => id === 'azure-bloom' ? '148 × 105 мм' : '105 × 148 мм';
 export const PRINT_SAMPLE: PrintData = { groom: 'Александр', bride: 'Анастасия', date: '2027-06-19', time: '16:00', greeting: 'Дорогие родные и друзья!', message: 'Есть моменты, которые хочется разделить с самыми близкими. Приглашаем вас стать частью нашей истории и отпраздновать день нашей свадьбы.', venue: 'Усадьба «Архангельское»', address: 'Московская область, посёлок Архангельское', footer: 'С любовью и в ожидании встречи' };
 export function getPrintSample(id: string): PrintData {
+  const supplied: Record<string, Partial<PrintData>> = {
+    blue: { groom: 'Кирилл', bride: 'Дарья', greeting: '', message: 'Разделите нашу радость — приглашаем вас на день рождения нашей семьи.', footer: 'Будем счастливы видеть вас!' },
+    clay: { groom: 'Николай', bride: 'Анна', greeting: 'Дорогие родные и друзья!', message: 'Ждём вас на нашем тёплом семейном празднике.', footer: '' },
+    arch: { groom: 'Борис', bride: 'Фрося', greeting: 'Дорогие гости!', message: 'Приглашаем вас на нашу свадьбу', footer: 'С любовью и в ожидании встречи' },
+    vow: { groom: 'Евгений', bride: 'Надежда', greeting: '', message: 'Будем рады разделить этот день с вами.', footer: 'С любовью' },
+    noir: { groom: 'Дмитрий', bride: 'Анна', greeting: '', message: 'Приглашаем вас разделить радость нашего особенного дня.', footer: '' },
+  };
+  if (supplied[id]) return { ...PRINT_SAMPLE, venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', ...supplied[id] };
+
   if (id === 'azure-bloom') return { ...PRINT_SAMPLE, groom: 'Себастьян', bride: 'Юлиана', date: '2027-05-23', time: '09:00', greeting: '', message: 'Приглашаем вас на нашу свадьбу', venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', footer: 'Праздник продолжится за ужином' };
   return id === 'floral-gold' ? { ...PRINT_SAMPLE, groom: 'Даниил', bride: 'Оливия', date: '2027-03-27', time: '09:00', greeting: '', message: 'Приглашаем вас разделить радость нашего свадебного торжества', venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', footer: '' } : PRINT_SAMPLE;
 }

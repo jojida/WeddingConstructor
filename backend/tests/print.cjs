@@ -129,6 +129,17 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
       assert.equal((await (await request(`/orders/${sample.id}`)).json()).data.photo, url);
       const result = await request(`/orders/${sample.id}/pdf`); assert.equal(result.status, 200);
       assert.ok(Buffer.from(await result.arrayBuffer()).includes(bytes));
+      const photoFrame = { x: 23.4, y: 78.1, z: 1.75, r: 32 };
+      assert.throws(() => validatePrintData({ ...data, photoFrame: { ...photoFrame, z: 20 } }));
+      assert.throws(() => validatePrintData({ ...data, photoFrame: { ...photoFrame, x: -1 } }));
+      assert.equal((await request(`/orders/${sample.id}`, 'PUT', { data: { ...data, photoFrame } })).status, 200);
+      assert.deepEqual((await (await request(`/orders/${sample.id}`)).json()).data.photoFrame, photoFrame);
+      const cropped = await request('/preview', 'POST', { templateId: 'azure-bloom', data: { ...data, photoFrame } }, '');
+      assert.equal(cropped.status, 200);
+      assert.match(await cropped.text(), /rotate\(32\)/);
+      const croppedPdf = await request(`/orders/${sample.id}/pdf`);
+      assert.equal(croppedPdf.status, 200);
+      assert.ok(Buffer.from(await croppedPdf.arrayBuffer()).includes(bytes));
       assert.equal((await request(`/orders/${sample.id}`, 'PUT', { data: { ...data, photo: '' } })).status, 200);
       assert.ok(!(await (await request(`/orders/${sample.id}`)).json()).data.photo);
     } finally { fs.unlinkSync(path.join(root, 'uploads', path.basename(url))); }

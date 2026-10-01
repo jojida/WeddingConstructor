@@ -1,12 +1,14 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
+import PhotoFrameEditor from '../../editor/PhotoFrameEditor';
 import type { PrintData } from '@/lib/print';
 import styles from '../print.module.css';
 
-export default function PrintPhotoPicker({ data, onChange, onBusy }: {
+export default function PrintPhotoPicker({ data, templateId, onChange, onBusy }: {
   data: PrintData;
-  onChange: (patch: Pick<PrintData, 'photo' | 'photoPosition'>) => void;
+  templateId: string;
+  onChange: (patch: Pick<PrintData, 'photo' | 'photoPosition' | 'photoFrame'>) => void;
   onBusy: (busy: boolean) => void;
 }) {
   const [uploading, setUploading] = useState(false);
@@ -36,7 +38,7 @@ export default function PrintPhotoPicker({ data, onChange, onBusy }: {
       const jpeg = await new Promise<Blob>((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('image')), 'image/jpeg', .94));
       const form = new FormData(); form.append('image', jpeg, 'print-photo.jpg');
       const response = await api.post<{ url: string }>('/api/upload/image', form);
-      if (generation.current === job) onChange({ photo: response.data.url, photoPosition: 'xMidYMid' });
+      if (generation.current === job) onChange({ photo: response.data.url, photoPosition: 'xMidYMid', photoFrame: { x: 50, y: 50, z: 1, r: 0 } });
     } catch {
       if (generation.current === job) setError('Не удалось загрузить фотографию. Попробуйте ещё раз или выберите другой файл.');
     } finally {
@@ -53,12 +55,14 @@ export default function PrintPhotoPicker({ data, onChange, onBusy }: {
     {uploading && <p role="status">Загружаем фотографию…</p>}
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {data.photo && <>
-      <label className={styles.field}><span>Положение фото в рамке</span>
-        <select value={data.photoPosition || 'xMidYMid'} disabled={uploading} onChange={e => onChange({ photo: data.photo, photoPosition: e.target.value })}>
-          {['Верх', 'Середина', 'Низ'].flatMap((row, y) => ['Слева', 'По центру', 'Справа'].map((column, x) => <option key={`${x}-${y}`} value={`x${['Min', 'Mid', 'Max'][x]}Y${['Min', 'Mid', 'Max'][y]}`}>{row} · {column.toLowerCase()}</option>))}
-        </select>
-      </label>
-      <button className={styles.secondary} type="button" disabled={uploading} onClick={() => { setError(''); onChange({ photo: '', photoPosition: 'xMidYMid' }); }}>Вернуть фото шаблона</button>
+      <p className={styles.muted}>Перетаскивайте фото мышью или пальцем. Масштаб и поворот можно настроить ниже.</p>
+      <PhotoFrameEditor
+        src={new URL(data.photo, api.defaults.baseURL).href}
+        frame={data.photoFrame || { x: data.photoPosition?.startsWith('xMin') ? 0 : data.photoPosition?.startsWith('xMax') ? 100 : 50, y: data.photoPosition?.endsWith('YMin') ? 0 : data.photoPosition?.endsWith('YMax') ? 100 : 50, z: 1, r: 0 }}
+        slot={{ w: templateId === 'azure-bloom' ? 256.4 : templateId === 'floral-gold' ? 261.9 : templateId === 'newspaper' ? 248 : 525, h: templateId === 'azure-bloom' ? 422.2 : templateId === 'floral-gold' ? 262.2 : templateId === 'newspaper' ? 304 : 740, x: 50, y: 50 }}
+        onChange={frame => onChange({ photo: data.photo, photoFrame: frame || { x: 50, y: 50, z: 1, r: 0 } })}
+      />
+      <button className={styles.secondary} type="button" disabled={uploading} onClick={() => { setError(''); onChange({ photo: '', photoPosition: 'xMidYMid', photoFrame: { x: 50, y: 50, z: 1, r: 0 } }); }}>Вернуть фото шаблона</button>
     </>}
   </fieldset>;
 }

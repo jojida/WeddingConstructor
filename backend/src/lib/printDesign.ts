@@ -20,10 +20,19 @@ export const PRINT_TEMPLATES = [
   { id: 'noir', name: 'Вечер в шёлке', category: 'Классика', background: '#24392f', ink: '#f7edda', accent: '#c3b18b' },
 ];
 export const PRINT_FIELDS = { groom: 24, bride: 24, date: 10, time: 5, greeting: 55, message: 220, venue: 65, address: 90, footer: 75 };
-export type PrintData = Record<keyof typeof PRINT_FIELDS, string> & { photo?: string; photoPosition?: string };
+export type PrintData = Record<keyof typeof PRINT_FIELDS, string> & { photo?: string; photoPosition?: string; photoFrame?: { x: number; y: number; z: number; r?: number } };
 export const printSize = (id: string) => id === 'azure-bloom' ? { width: 148, height: 105 } : { width: 105, height: 148 };
 export const PRINT_SAMPLE: PrintData = { groom: 'Александр', bride: 'Анастасия', date: '2027-06-19', time: '16:00', greeting: 'Дорогие родные и друзья!', message: 'Есть моменты, которые хочется разделить с самыми близкими. Приглашаем вас стать частью нашей истории и отпраздновать день нашей свадьбы.', venue: 'Усадьба «Архангельское»', address: 'Московская область, посёлок Архангельское', footer: 'С любовью и в ожидании встречи' };
 export function getPrintSample(id: string): PrintData {
+  const supplied: Record<string, Partial<PrintData>> = {
+    blue: { groom: 'Кирилл', bride: 'Дарья', greeting: '', message: 'Разделите нашу радость — приглашаем вас на день рождения нашей семьи.', footer: 'Будем счастливы видеть вас!' },
+    clay: { groom: 'Николай', bride: 'Анна', greeting: 'Дорогие родные и друзья!', message: 'Ждём вас на нашем тёплом семейном празднике.', footer: '' },
+    arch: { groom: 'Борис', bride: 'Фрося', greeting: 'Дорогие гости!', message: 'Приглашаем вас на нашу свадьбу', footer: 'С любовью и в ожидании встречи' },
+    vow: { groom: 'Евгений', bride: 'Надежда', greeting: '', message: 'Будем рады разделить этот день с вами.', footer: 'С любовью' },
+    noir: { groom: 'Дмитрий', bride: 'Анна', greeting: '', message: 'Приглашаем вас разделить радость нашего особенного дня.', footer: '' },
+  };
+  if (supplied[id]) return { ...PRINT_SAMPLE, venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', ...supplied[id] };
+
   if (id === 'azure-bloom') return { ...PRINT_SAMPLE, groom: 'Себастьян', bride: 'Юлиана', date: '2027-05-23', time: '09:00', greeting: '', message: 'Приглашаем вас на нашу свадьбу', venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', footer: 'Праздник продолжится за ужином' };
   return id === 'floral-gold' ? { ...PRINT_SAMPLE, groom: 'Даниил', bride: 'Оливия', date: '2027-03-27', time: '09:00', greeting: '', message: 'Приглашаем вас разделить радость нашего свадебного торжества', venue: 'Усадьба «Белый сад»', address: 'Москва, ул. Садовая, 12', footer: '' } : PRINT_SAMPLE;
 }
@@ -33,12 +42,17 @@ export function validatePrintData(value: unknown): PrintData {
   for (const [key, max] of Object.entries(PRINT_FIELDS)) {
     const field = (value as Record<string, unknown>)[key];
     if (typeof field !== 'string' || field.length > max || /[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(field)) throw new Error(`Проверьте поле «${key}» (до ${max} символов)`);
-    output[key as keyof PrintData] = field.trim();
+    output[key as keyof typeof PRINT_FIELDS] = field.trim();
   }
   if (!output.groom || !output.bride || !output.venue) throw new Error('Укажите имена и место торжества');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(output.date) || !Number.isFinite(Date.parse(output.date)) || new Date(output.date).toISOString().slice(0, 10) !== output.date) throw new Error('Укажите корректную дату');
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(output.time)) throw new Error('Укажите время');
   const extra = value as Record<string, unknown>;
+  if (extra.photoFrame !== undefined) {
+    const f = extra.photoFrame as NonNullable<PrintData['photoFrame']>;
+    if (!f || typeof f !== 'object' || ![f.x, f.y, f.z, f.r ?? 0].every(n => typeof n === 'number' && Number.isFinite(n)) || f.x < 0 || f.x > 100 || f.y < 0 || f.y > 100 || f.z < 1 || f.z > 4 || Math.abs(f.r ?? 0) > 180) throw new Error('Проверьте кадрирование фотографии');
+    output.photoFrame = { x: f.x, y: f.y, z: f.z, r: f.r ?? 0 };
+  }
   if (extra.photo !== undefined && extra.photo !== '') {
     if (typeof extra.photo !== 'string') throw new Error('Проверьте фотографию');
     readPrintPhoto(extra.photo);
@@ -65,10 +79,10 @@ const measureFonts: ReturnType<typeof fontkit.openSync>[] = [];
 const decorativeFonts = new Map<string, ReturnType<typeof fontkit.openSync>>();
 // Outlines preserve the supplied card's calligraphy identically in browsers/PDFs.
 // Personalization still happens from editable order fields, never baked into art.
-function outlinedText(value: string, x: number, baseline: number, width: number, size: number, family: 'script' | 'sans', color: string) {
+function outlinedText(value: string, x: number, baseline: number, width: number, size: number, family: 'script' | 'sans' | 'nickainley', color: string) {
   const runs = (value.match(/[\u0400-\u052f]+|[^\u0400-\u052f]+/g) || []).map(chunk => {
     const key = `${family}-${/[\u0400-\u052f]/.test(chunk) ? 'cyrillic' : 'latin'}`;
-    if (!decorativeFonts.has(key)) decorativeFonts.set(key, fontkit.openSync(path.join(fontsDir, `${key}.woff`)));
+    if (!decorativeFonts.has(key)) decorativeFonts.set(key, fontkit.openSync(path.join(fontsDir, family === 'nickainley' ? 'nickainley.woff2' : `${key}.woff`)));
     const font = decorativeFonts.get(key)!;
     return { font, run: font.layout(chunk) };
   });
@@ -91,6 +105,19 @@ function printImage(file: string, x: number, y: number, width: number, height: n
   return `<image x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice" href="data:image/${file.endsWith('.png') ? 'png' : 'jpeg'};base64,${artCache.get(file)}"/>`;
 }
 function photoImage(data: PrintData, fallback: string, x: number, y: number, width: number, height: number, clip?: string) {
+  if (data.photo && data.photoFrame) {
+    const bytes = readPrintPhoto(data.photo);
+    let offset = 2;
+    while (![0xc0, 0xc1, 0xc2].includes(bytes[offset + 1])) offset += bytes.readUInt16BE(offset + 2) + 2;
+    const iw = bytes.readUInt16BE(offset + 7), ih = bytes.readUInt16BE(offset + 5);
+    const f = data.photoFrame, angle = f.r || 0, th = angle * Math.PI / 180;
+    const c = Math.abs(Math.cos(th)), s = Math.abs(Math.sin(th));
+    const bw = width * c + height * s, bh = width * s + height * c;
+    const scale = Math.max(bw / iw, bh / ih) * f.z;
+    const w = iw * scale, h = ih * scale;
+    const left = -bw / 2 - (w - bw) * f.x / 100, top = -bh / 2 - (h - bh) * f.y / 100;
+    return `<defs><clipPath id="personal-photo">${clip || `<rect x="${x}" y="${y}" width="${width}" height="${height}"/>`}</clipPath></defs><g clip-path="url(#personal-photo)"><g transform="translate(${x + width / 2} ${y + height / 2}) rotate(${angle})"><image x="${left}" y="${top}" width="${w}" height="${h}" preserveAspectRatio="none" href="data:image/jpeg;base64,${bytes.toString('base64')}"/></g></g>`;
+  }
   const image = data.photo
     ? `<image x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="${/^x(Min|Mid|Max)Y(Min|Mid|Max)$/.test(data.photoPosition || '') ? data.photoPosition : 'xMidYMid'} slice" href="data:image/jpeg;base64,${readPrintPhoto(data.photo).toString('base64')}"/>`
     : printImage(fallback, x, y, width, height);
@@ -152,6 +179,73 @@ export function renderPrintSvg(id: string, data: PrintData, preview = true, embe
   const rule = (x: number, y: number, width: number, color = t.ink) => `<path d="M${x} ${y}h${width}" stroke="${color}" stroke-width=".9"/>`;
   const numericDate = data.date.split('-').reverse().join('.');
   let composition = '';
+  if (['blue', 'clay', 'arch', 'vow', 'noir'].includes(id)) {
+    composition = printImage(id + '-supplied.jpg', 0, 0, 525, 740);
+    const name = (value: string, y: number, x: number, width: number, size: number, color: string, family: 'script' | 'nickainley' = 'script') => outlinedText(value, x, y, width, size, family, color);
+    if (id === 'blue') {
+      const ink = '#4d5785';
+      composition += box('МЫ ОФИЦИАЛЬНО ЖЕНИМСЯ!', 145, 150, 270, 22, 13, ink)
+        + name(data.groom, 245, 140, 275, 58, ink, 'nickainley')
+        + name('+', 288, 140, 275, 34, ink, 'nickainley')
+        + name(data.bride, 355, 140, 275, 58, ink, 'nickainley')
+        + box(data.greeting, 150, 370, 260, 33, 17, ink)
+        + box(data.message, 150, 409, 260, 67, 16, ink)
+        + box(numericDate + ' · ' + data.time, 150, 479, 260, 26, 19, ink)
+        + box(data.venue, 150, 510, 260, 29, 17, ink)
+        + box(data.address, 150, 546, 255, 27, 13, ink)
+        + box(data.footer, 150, 577, 245, 24, 12, ink);
+    }
+    if (id === 'clay') {
+      composition += box(data.greeting, 80, 265, 365, 30, 17, '#534a40')
+        + box('ПРИГЛАШАЕМ', 80, 305, 365, 45, 37, '#797c3e')
+        + name('на нашу свадьбу', 390, 80, 365, 39, '#b07f69')
+        + box(data.message, 125, 411, 280, 54, 16, '#534a40')
+        + box(numericDate + ' · ' + data.time, 125, 475, 280, 24, 21, '#797c3e')
+        + box(data.venue, 125, 507, 280, 28, 16, '#534a40')
+        + box(data.address, 125, 540, 280, 30, 14, '#534a40')
+        + name(data.bride + ' и ' + data.groom, 608, 170, 260, 32, '#b07f69')
+        + box(data.footer, 155, 625, 230, 30, 12, '#797c3e');
+    }
+    if (id === 'arch') {
+      const ink = '#916c87';
+      composition += box(data.greeting, 115, 175, 290, 31, 18, ink)
+        + box(data.message, 140, 214, 260, 48, 15, ink)
+        + name(data.groom, 327, 110, 305, 60, ink, 'nickainley')
+        + name('и ' + data.bride, 411, 110, 305, 60, ink, 'nickainley')
+        + box(numericDate + ' · ' + data.time, 110, 443, 300, 26, 20, ink)
+        + box(data.venue, 110, 481, 300, 32, 18, ink)
+        + box(data.address, 110, 520, 300, 35, 15, ink)
+        + box(data.footer, 115, 564, 285, 33, 15, ink);
+    }
+    if (id === 'vow') {
+      const ink = '#6b4f2f';
+      composition += box('ПРИГЛАШЕНИЕ\nНА СВАДЬБУ', 172, 100, 205, 44, 18, ink)
+        + name(data.groom, 248, 100, 340, 65, ink)
+        + name('&', 292, 100, 340, 43, ink)
+        + name(data.bride, 360, 100, 340, 65, ink)
+        + box(data.greeting, 150, 380, 280, 29, 17, ink)
+        + box(new Date(data.date + 'T12:00:00Z').toLocaleDateString('ru-RU', {month:'long', timeZone:'UTC'}).toUpperCase(), 190, 426, 80, 18, 13, ink)
+        + box(String(Number(data.date.slice(-2))), 285, 414, 65, 40, 34, ink)
+        + box(data.time, 368, 426, 68, 18, 17, ink)
+        + box(data.message, 200, 474, 245, 46, 14, ink)
+        + box(data.venue, 224, 530, 220, 29, 16, ink)
+        + box(data.address, 224, 566, 220, 32, 13, ink)
+        + box(data.footer, 255, 608, 185, 32, 12, ink);
+    }
+    if (id === 'noir') {
+      const ink = '#ffeda3';
+      composition += box('ПРИГЛАШЕНИЕ НА СВАДЬБУ', 130, 79, 265, 39, 18, ink)
+        + box(data.groom.charAt(0).toUpperCase(), 162, 153, 120, 120, 106, ink)
+        + box(data.bride.charAt(0).toUpperCase(), 243, 195, 120, 110, 96, ink)
+        + box(data.groom.toUpperCase() + ' & ' + data.bride.toUpperCase(), 100, 295, 325, 60, 27, ink)
+        + box(data.greeting, 110, 365, 305, 24, 18, ink)
+        + box(data.message, 110, 399, 305, 46, 16, ink)
+        + box(date + ' · ' + data.time, 100, 454, 325, 24, 19, ink)
+        + box(data.venue, 115, 486, 295, 24, 18, ink)
+        + box(data.address, 120, 516, 285, 23, 14, ink)
+        + box(data.footer, 125, 543, 275, 20, 13, ink);
+    }
+  }
   if (id === 'azure-bloom') {
     const day = new Date(data.date + 'T12:00:00Z');
     const small = (value: string, y: number, height: number, initial: number) => {
