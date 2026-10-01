@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Open+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="preload" as="image" href="assets/hero-bg.webp" />
   <link rel="preload" as="image" href="assets/tree.webp?v=2" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
   <!-- Без скриптов деревья не расступятся и появление при прокрутке не сработает —
        показываем приглашение сразу -->
   <noscript><style>
@@ -140,13 +140,19 @@
         <span style="--c:#738445"></span><span style="--c:#4a552d"></span><span style="--c:#b39c7e"></span><span style="--c:#925c2d"></span><span style="--c:#44200d"></span>
       </div>
       <p class="dress__text rv" data-edit="dressText">Будем рады, если в ваших нарядах найдутся оттенки нашей лесной палитры</p>
-      <div class="looks">
-        <p class="looks__label rv">Для дам</p>
-        <figure class="look rv-soft"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" data-def="assets/dress-w1.jpg" alt="Образ для дам 1" loading="lazy" /></figure>
-        <figure class="look rv-soft"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" data-def="assets/dress-w2.jpg" alt="Образ для дам 2" loading="lazy" /></figure>
-        <p class="looks__label rv">Для джентльменов</p>
-        <figure class="look rv-soft"><img src="assets/dress-m1.jpg" data-edit="dressMan1" data-def="assets/dress-m1.jpg" alt="Образ для джентльменов 1" loading="lazy" /></figure>
-        <figure class="look rv-soft"><img src="assets/dress-m2.jpg" data-edit="dressMan2" data-def="assets/dress-m2.jpg" alt="Образ для джентльменов 2" loading="lazy" /></figure>
+      <div class="looks rv">
+        <div class="looks__tabs" role="tablist" aria-label="Образы гостей">
+          <button class="looks__tab is-active" type="button" role="tab" aria-selected="true" data-look="women">Для дам</button>
+          <button class="looks__tab" type="button" role="tab" aria-selected="false" data-look="men">Для джентльменов</button>
+        </div>
+        <div class="looks__panel is-active" role="tabpanel" data-look="women">
+          <figure class="look"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" data-def="assets/dress-w1.jpg" alt="Образ для дам 1" loading="lazy" /></figure>
+          <figure class="look"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" data-def="assets/dress-w2.jpg" alt="Образ для дам 2" loading="lazy" /></figure>
+        </div>
+        <div class="looks__panel" role="tabpanel" data-look="men">
+          <figure class="look"><img src="assets/dress-m1.jpg" data-edit="dressMan1" data-def="assets/dress-m1.jpg" alt="Образ для джентльменов 1" loading="lazy" /></figure>
+          <figure class="look"><img src="assets/dress-m2.jpg" data-edit="dressMan2" data-def="assets/dress-m2.jpg" alt="Образ для джентльменов 2" loading="lazy" /></figure>
+        </div>
       </div>
     </section>
 
@@ -213,6 +219,6 @@
   <script src="../assets/venue-map.js"></script>
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
-  <script src="script.js?v=2"></script>
+  <script src="script.js?v=3"></script>
 </body>
 </html>

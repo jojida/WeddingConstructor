@@ -85,6 +85,31 @@
     return true;
   }
 
+  /* ─── Дресс-код: вкладки «Для дам / Для джентльменов» ─── */
+  function showLooks(which) {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      var on = b.getAttribute('data-look') === which;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.looks__panel').forEach(function (p) {
+      p.classList.toggle('is-active', p.getAttribute('data-look') === which);
+    });
+  }
+  document.querySelectorAll('.looks__tab').forEach(function (b) {
+    b.addEventListener('click', function () { showLooks(b.getAttribute('data-look')); });
+  });
+  // В редакторе подсвеченное (правимое) фото образа — сразу на экране
+  if (EDITING && 'MutationObserver' in window) {
+    var looksMo = new MutationObserver(function (list) {
+      list.forEach(function (r) {
+        var panel = r.target.classList && r.target.classList.contains('wc-editor-flash') && r.target.closest('.looks__panel');
+        if (panel) showLooks(panel.getAttribute('data-look'));
+      });
+    });
+    document.querySelectorAll('.looks__panel img').forEach(function (img) { looksMo.observe(img, { attributes: true, attributeFilter: ['class'] }); });
+  }
+
   // Пустая строка — пара удалила фото: возвращаем фото дизайна.
   // Возвращает true, если фото сменилось
   function setImg(key, url) {
@@ -599,8 +624,10 @@
     ['coverPhoto', 'albumPhoto2', 'albumPhoto3'].forEach(function (key, i) {
       if (setImg(key, d[key]) && EDITING) albumShow(i);
     });
-    ['dressCodePhoto', 'dressPhoto2', 'dressMan1', 'dressMan2', 'finalPhoto1', 'finalPhoto2', 'finalPhoto3']
-      .forEach(function (key) { setImg(key, d[key]); });
+    ['dressCodePhoto', 'dressPhoto2', 'dressMan1', 'dressMan2'].forEach(function (key, i) {
+      if (setImg(key, d[key]) && EDITING) showLooks(i < 2 ? 'women' : 'men');   // сменилось фото — открываем его вкладку
+    });
+    ['finalPhoto1', 'finalPhoto2', 'finalPhoto3'].forEach(function (key) { setImg(key, d[key]); });
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     rebuildPalette(d.dressCodeColors);

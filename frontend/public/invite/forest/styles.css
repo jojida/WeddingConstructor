@@ -602,23 +602,40 @@ html.no-anim .hero__mist { animation: none; }
   color: var(--ink);
 }
 .dress__text:empty { display: none; }
-/* Образы гостей — арки в тонкой оливковой рамке, по две в ряд */
-.looks {
-  margin-top: calc(50 * var(--u));
-  display: grid;
+/* Образы гостей — две вкладки «Для дам / Для джентльменов»,
+   в каждой две арки в тонкой оливковой рамке */
+.looks { margin-top: calc(70 * var(--u)); }
+.looks__tabs {
+  display: inline-flex;
+  padding: calc(8 * var(--u));
+  border: calc(3 * var(--u)) solid var(--sage);
+  border-radius: 9999px;
+}
+.looks__tab {
+  margin: 0;
+  padding: calc(16 * var(--u)) calc(44 * var(--u));
+  border: 0; border-radius: 9999px;
+  background: transparent;
+  font-family: var(--f-text, inherit);
+  font-size: calc(42 * var(--u));
+  line-height: 1.2;
+  color: var(--olive);
+  cursor: pointer;
+  transition: background-color .3s, color .3s;
+  -webkit-tap-highlight-color: transparent;
+}
+.looks__tab.is-active { background: var(--moss); color: #fbf8f2; }
+.looks__tab:focus-visible { outline: calc(3 * var(--u)) solid var(--sage); outline-offset: calc(4 * var(--u)); }
+.looks__panel {
+  display: none;
   grid-template-columns: repeat(2, calc(470 * var(--u)));
   justify-content: center;
   column-gap: calc(56 * var(--u));
-  row-gap: calc(40 * var(--u));
+  margin-top: calc(56 * var(--u));
 }
-.looks__label {
-  grid-column: 1 / -1;
-  margin: calc(50 * var(--u)) 0 0;
-  font-family: var(--f-script);
-  font-size: calc(100 * var(--u));
-  line-height: 1.2;
-  color: var(--olive);
-}
+.looks__panel.is-active { display: grid; animation: lookIn .5s ease both; }
+@keyframes lookIn { from { opacity: 0; transform: translateY(calc(16 * var(--u))); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .looks__panel.is-active { animation: none; } }
 .look {
   margin: 0;
   aspect-ratio: 470 / 700;
