@@ -25,6 +25,7 @@ export const printDimensions = (id: string) => id === 'azure-bloom' ? '148 × 10
 export const PRINT_SAMPLE: PrintData = { groom: 'Александр', bride: 'Анастасия', date: '2027-06-19', time: '16:00', greeting: 'Дорогие родные и друзья!', message: 'Есть моменты, которые хочется разделить с самыми близкими. Приглашаем вас стать частью нашей истории и отпраздновать день нашей свадьбы.', venue: 'Усадьба «Архангельское»', address: 'Московская область, посёлок Архангельское', footer: 'С любовью и в ожидании встречи' };
 export function getPrintSample(id: string): PrintData {
   const supplied: Record<string, Partial<PrintData>> = {
+    olive: { groom: 'Андрей', bride: 'Мария', greeting: 'Дорогие родные и друзья!', message: 'Приглашаем вас на наше торжественное событие', footer: '' },
     blue: { groom: 'Кирилл', bride: 'Дарья', greeting: '', message: 'Разделите нашу радость — приглашаем вас на день рождения нашей семьи.', footer: 'Будем счастливы видеть вас!' },
     clay: { groom: 'Николай', bride: 'Анна', greeting: 'Дорогие родные и друзья!', message: 'Ждём вас на нашем тёплом семейном празднике.', footer: '' },
     arch: { groom: 'Борис', bride: 'Фрося', greeting: 'Дорогие гости!', message: 'Приглашаем вас на нашу свадьбу', footer: 'С любовью и в ожидании встречи' },

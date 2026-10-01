@@ -25,6 +25,7 @@ export const printSize = (id: string) => id === 'azure-bloom' ? { width: 148, he
 export const PRINT_SAMPLE: PrintData = { groom: 'Александр', bride: 'Анастасия', date: '2027-06-19', time: '16:00', greeting: 'Дорогие родные и друзья!', message: 'Есть моменты, которые хочется разделить с самыми близкими. Приглашаем вас стать частью нашей истории и отпраздновать день нашей свадьбы.', venue: 'Усадьба «Архангельское»', address: 'Московская область, посёлок Архангельское', footer: 'С любовью и в ожидании встречи' };
 export function getPrintSample(id: string): PrintData {
   const supplied: Record<string, Partial<PrintData>> = {
+    olive: { groom: 'Андрей', bride: 'Мария', greeting: 'Дорогие родные и друзья!', message: 'Приглашаем вас на наше торжественное событие', footer: '' },
     blue: { groom: 'Кирилл', bride: 'Дарья', greeting: '', message: 'Разделите нашу радость — приглашаем вас на день рождения нашей семьи.', footer: 'Будем счастливы видеть вас!' },
     clay: { groom: 'Николай', bride: 'Анна', greeting: 'Дорогие родные и друзья!', message: 'Ждём вас на нашем тёплом семейном празднике.', footer: '' },
     arch: { groom: 'Борис', bride: 'Фрося', greeting: 'Дорогие гости!', message: 'Приглашаем вас на нашу свадьбу', footer: 'С любовью и в ожидании встречи' },
@@ -179,9 +180,22 @@ export function renderPrintSvg(id: string, data: PrintData, preview = true, embe
   const rule = (x: number, y: number, width: number, color = t.ink) => `<path d="M${x} ${y}h${width}" stroke="${color}" stroke-width=".9"/>`;
   const numericDate = data.date.split('-').reverse().join('.');
   let composition = '';
-  if (['blue', 'clay', 'arch', 'vow', 'noir'].includes(id)) {
+  if (['blue', 'clay', 'arch', 'vow', 'noir', 'olive'].includes(id)) {
     composition = printImage(id + '-supplied.jpg', 0, 0, 525, 740);
     const name = (value: string, y: number, x: number, width: number, size: number, color: string, family: 'script' | 'nickainley' = 'script') => outlinedText(value, x, y, width, size, family, color);
+    if (id === 'olive') {
+      const ink = '#514f35';
+      composition += box('ПРИГЛАШЕНИЕ\nНА СВАДЬБУ', 200, 72, 125, 32, 14, ink)
+        + box(data.greeting, 75, 207, 375, 42, 26, ink)
+        + box(data.message, 95, 259, 335, 70, 18, ink)
+        + box('СВАДЬБА', 100, 346, 325, 28, 20, ink)
+        + box(data.groom.toUpperCase(), 65, 393, 395, 65, 55, ink)
+        + box('И ' + data.bride.toUpperCase(), 60, 461, 405, 65, 55, ink)
+        + box(date + ' · ' + data.time, 70, 609, 385, 28, 21, ink)
+        + box(data.venue, 80, 647, 365, 27, 18, ink)
+        + box(data.address, 80, 677, 365, 23, 15, ink)
+        + box(data.footer, 85, 707, 355, 20, 13, ink);
+    }
     if (id === 'blue') {
       const ink = '#4d5785';
       composition += box('МЫ ОФИЦИАЛЬНО ЖЕНИМСЯ!', 145, 150, 270, 22, 13, ink)
