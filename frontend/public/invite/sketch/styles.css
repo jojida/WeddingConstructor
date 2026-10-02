@@ -162,7 +162,7 @@ img, svg { display: block; max-width: 100%; }
 /* Слои: сменное фото + рамка-оверлей (прозрачная внутри).
    Меняется только фото внутри рамки — сама рамка остаётся на месте.
    Рамка — «марка» с волнистым краем (frame-stamp-*.svg), окно в ней
-   прямоугольное: x 9.1…138.9, y 10.8…191.2 при viewBox 148×201.5.
+   прямоугольное: x 6.6…141.2, y 6.9…194.8 при viewBox 148×201.5.
    Фото кладём чуть шире окна — край прячется под рамкой, без щелей. */
 .pol {
   position: relative;
@@ -173,7 +173,7 @@ img, svg { display: block; max-width: 100%; }
 }
 .pol .photo {
   position: absolute;
-  left: 5.6%; top: 4.8%; width: 88.8%; height: 90.4%;
+  left: 4.05%; top: 3%; width: 91.8%; height: 93.8%;
   object-fit: cover; object-position: center;
   z-index: 1;
 }
