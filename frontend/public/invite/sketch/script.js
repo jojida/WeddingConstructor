@@ -49,8 +49,18 @@
     });
   }
 
+  // Раньше фото по умолчанию были целыми полароидами (с рамкой и подписью
+  // в картинке). Рамка теперь отдельная — у сохранённых сайтов подменяем
+  // эти файлы на чистые снимки, иначе внутри рамки окажется ещё одна рамка.
+  var LEGACY_PHOTOS = {
+    'polaroid-groom.png': 'photo-groom.webp',
+    'polaroid-bride.png': 'photo-bride.webp',
+  };
+
   function setImg(key, url) {
     if (!url) return;
+    var m = /\/invite\/sketch\/assets\/(polaroid-(?:groom|bride)\.png)$/.exec(url);
+    if (m) url = url.replace(m[1], LEGACY_PHOTOS[m[1]]);
     document.querySelectorAll('img[data-edit="' + key + '"]').forEach(function (el) {
       el.src = imageUrl(url);
     });

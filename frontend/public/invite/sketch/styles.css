@@ -155,54 +155,42 @@ img, svg { display: block; max-width: 100%; }
 /* полароиды */
 .polaroids {
   display: flex; justify-content: center; align-items: flex-start;
-  gap: 10px; margin: 28px -14px 8px;   /* отрицательные поля — выходим за padding секции,
+  gap: 10px; margin: 28px -14px 44px;   /* отрицательные поля — выходим за padding секции,
                                           чтобы полароиды стали покрупнее */
   max-width: none;
 }
 /* Слои: сменное фото + рамка-оверлей (прозрачная внутри).
-   Меняется только фото внутри рамки — сам полароид остаётся на месте.
-   Окно рамки — НАКЛОННЫЙ четырёхугольник, поэтому фото обрезается ровно
-   по форме окна через clip-path (координаты окна из SVG, в % от габарита).
-   Так фото никогда не выходит за рамку, а кремовая рамка сверху прячет
-   любой край-излишек. */
+   Меняется только фото внутри рамки — сама рамка остаётся на месте.
+   Рамка — «марка» с волнистым краем (frame-stamp-*.svg), окно в ней
+   прямоугольное: x 9.1…138.9, y 10.8…191.2 при viewBox 148×201.5.
+   Фото кладём чуть шире окна — край прячется под рамкой, без щелей. */
 .pol {
   position: relative;
   flex: 1 1 0;
-  max-width: 230px;
-  aspect-ratio: 440 / 495;
-  container-type: inline-size;   /* подпись масштабируется вместе с полароидом */
+  max-width: 205px;
+  aspect-ratio: 148 / 201.5;
+  container-type: inline-size;   /* подпись масштабируется вместе с рамкой */
 }
 .pol .photo {
   position: absolute;
-  inset: 0; width: 100%; height: 100%;
+  left: 5.6%; top: 4.8%; width: 88.8%; height: 90.4%;
   object-fit: cover; object-position: center;
   z-index: 1;
-}
-/* Окно polaroid-frame-l.svg: 21.4,59.2 → 365.2,23.5 → 400.9,354.7 → 55.9,391.9
-   (viewBox 435×491) */
-.pol-l .photo {
-  clip-path: polygon(4.9% 12.1%, 84.0% 4.8%, 92.2% 72.2%, 12.8% 79.8%);
-}
-/* Окно polaroid-frame-r.svg: 74.3,23.4 → 417.2,67.8 → 375.8,398.4 → 31.3,355.1
-   (viewBox 445×500) */
-.pol-r .photo {
-  clip-path: polygon(16.7% 4.7%, 93.8% 13.6%, 84.5% 79.7%, 7.0% 71.0%);
 }
 .pol .frame {
   position: absolute;
   inset: 0; width: 100%; height: 100%;
   z-index: 2; pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .12));
 }
 .polaroids .pol-l { transform: rotate(-5deg); }
 .polaroids .pol-r { transform: rotate(4deg); margin-top: 18px; }
 
-/* Подпись в белой полосе под фото. Полароид нарисован наклонным внутри
-   самого SVG, поэтому подпись доворачиваем отдельно — иначе она ляжет не
-   параллельно краю рамки. Центр полосы и угол посчитаны по координатам
-   из polaroid-frame-l/r.svg (середина между нижним краем окна и нижним
-   краем рамки). */
+/* Подпись под рамкой, вместе с ней наклонена (поворот у .pol). */
 .pol .pol-cap {
   position: absolute;
+  left: 50%; top: 100%;
+  transform: translate(-50%, 18%);
   z-index: 3;
   font-family: var(--font-title);
   font-size: 13cqw;
@@ -211,8 +199,6 @@ img, svg { display: block; max-width: 100%; }
   white-space: nowrap;
   pointer-events: none;
 }
-.pol-l .pol-cap { left: 58%; top: 86.5%; transform: translate(-50%, -50%) rotate(-5.9deg); }
-.pol-r .pol-cap { left: 49%; top: 85.5%; transform: translate(-50%, -50%) rotate(7.4deg); }
 
 /* Наведение: полароид подрастает, сохраняя свой наклон, и выходит вперёд.
    Только там, где курсор есть, — на тачскрине ховер залипает после нажатия. */

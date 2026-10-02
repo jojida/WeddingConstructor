@@ -173,10 +173,18 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
         display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
         gap: 6, margin: '26px auto 4px', maxWidth: 400,
       }}>
-        <img src={`${A}/polaroid-groom.png`} alt=""
-          style={{ width: '49%', transform: 'rotate(-5deg)' }} />
-        <img src={`${A}/polaroid-bride.png`} alt=""
-          style={{ width: '49%', transform: 'rotate(4deg)', marginTop: 14 }} />
+        {([
+          ['photo-groom.webp', 'frame-stamp-red.svg',    'rotate(-5deg)', 0],
+          ['photo-bride.webp', 'frame-stamp-yellow.svg', 'rotate(4deg)',  14],
+        ] as const).map(([photo, frame, transform, marginTop]) => (
+          // Фото в окне рамки-«марки»: окно x 9.1…138.9, y 10.8…191.2 из 148×201.5
+          <div key={frame} style={{ position: 'relative', width: '42%', aspectRatio: '148 / 201.5', transform, marginTop }}>
+            <img src={`${A}/${photo}`} alt=""
+              style={{ position: 'absolute', left: '5.6%', top: '4.8%', width: '88.8%', height: '90.4%', objectFit: 'cover' }} />
+            <img src={`${A}/${frame}`} alt=""
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+          </div>
+        ))}
       </div>
     </div>
   );
