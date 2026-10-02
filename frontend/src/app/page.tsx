@@ -534,6 +534,7 @@ function Footer() {
             <ul className={styles.footerLinks}>
               <li><Link href="/privacy" className={styles.footerLink}>Политика конфиденциальности</Link></li>
               <li><Link href="/oferta" className={styles.footerLink}>Публичная оферта</Link></li>
+              <li><Link href="/contacts" className={styles.footerLink}>Контакты</Link></li>
               <li><Link href="/editor" className={styles.footerLink}>Помощь по редактору</Link></li>
               <li><a href="mailto:support@weddingcraft.ru" className={styles.footerLink}>Написать в поддержку</a></li>
             </ul>

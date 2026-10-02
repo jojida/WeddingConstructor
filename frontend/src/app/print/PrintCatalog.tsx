@@ -35,6 +35,6 @@ export default function PrintCatalog() {
       ['Как правильно распечатать?', 'Для дома скачайте A6 и выберите масштаб 100% (реальный размер), без подгонки. Для типографии используйте вариант с вылетами: 111 × 154 мм, после обрезки — 105 × 148 мм. Цвет может отличаться от экрана; согласуйте пробу с типографией.'],
       ['Нужно ли покупать сайт-приглашение?', 'Нет. Печатные приглашения — отдельный продукт за 290 ₽. Для сохранения покупки и повторного скачивания понадобится вход по email.'],
     ].map(([q, a]) => <details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</section>
-    <footer className={styles.footer}><Link href="/">WeddingCraft</Link><Link href="/print/orders">Мои печатные приглашения</Link><Link href="/oferta">Оферта</Link><a href="mailto:support@weddingcraft.ru">Помощь</a></footer>
+    <footer className={styles.footer}><Link href="/">WeddingCraft</Link><Link href="/print/orders">Мои печатные приглашения</Link><Link href="/oferta">Оферта</Link><Link href="/contacts">Контакты</Link><a href="mailto:support@weddingcraft.ru">Помощь</a></footer>
   </main></>;
 }

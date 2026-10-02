@@ -26,7 +26,7 @@ const parseObj = (s: any): Record<string, any> => {
 const RESERVED_SLUGS = new Set([
   'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment', 'print',
   'templates', 'admin', 'login', 'register', 'signup', 'about', 'pricing', 'help',
-  'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads', 'studio', 'privacy', 'oferta',
+  'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads', 'studio', 'privacy', 'oferta', 'contacts',
 ]);
 
 // Приватные поля приглашения — не отдавать в публичных ответах (by-slug/by-domain).
