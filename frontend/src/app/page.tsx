@@ -238,8 +238,8 @@ function TemplatesSection() {
       <div className={styles.sectionInner}>
         <div className={styles.sectionHeader} data-animate>
           <div>
-            <span className={styles.sectionLabel}>Цифровые шаблоны</span>
-            <h2 className={styles.sectionTitle}>Избранные стили</h2>
+            <span className={styles.sectionLabel}>Избранные стили</span>
+            <h2 className={styles.sectionTitle}>Шаблоны свадебных приглашений</h2>
           </div>
           <Link href="/templates" className={styles.seeAllBtn}>
             Смотреть все <span className={styles.arrowIcon}>→</span>
@@ -293,7 +293,7 @@ function HowItWorks() {
         </svg>
       ),
       title: 'Выберите шаблон',
-      text: 'Изучите нашу коллекцию адаптивных дизайнов, созданных для идеального отображения на любом экране.',
+      text: 'Выберите дизайн свадебного приглашения из коллекции: каждый шаблон одинаково красиво открывается на телефоне и компьютере.',
     },
     {
       icon: (
@@ -303,7 +303,7 @@ function HowItWorks() {
         </svg>
       ),
       title: 'Персонализируйте',
-      text: 'Добавьте музыку, карту проезда и анкету для гостей в нашем интуитивном редакторе за 5 минут.',
+      text: 'Впишите имена, дату и место, загрузите фото, добавьте музыку, карту проезда, программу дня и анкету для гостей.',
     },
     {
       icon: (
@@ -312,7 +312,7 @@ function HowItWorks() {
         </svg>
       ),
       title: 'Отправьте мгновенно',
-      text: 'Поделитесь приглашением через мессенджеры или по почте одной ссылкой.',
+      text: 'Отправьте приглашение на свадьбу одной ссылкой — в WhatsApp, Telegram, ВКонтакте, по SMS или почте.',
     },
   ];
 
@@ -401,7 +401,7 @@ function Features() {
     <section id="features" className={styles.featuresSection}>
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
-          <h2 className={styles.sectionTitle}>Всё что нужно</h2>
+          <h2 className={styles.sectionTitle}>Всё, что нужно в приглашении</h2>
           <p className={styles.howSubtitle}>Мы продумали каждую деталь</p>
         </div>
 
@@ -582,7 +582,7 @@ function RsvpSection() {
     <section id="rsvp" className={styles.featuresSection}>
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
-          <h2 className={styles.sectionTitle}>Умное управление гостями</h2>
+          <h2 className={styles.sectionTitle}>Анкета для гостей на свадьбу</h2>
           <p className={styles.howSubtitle}>Сайт сам собирает ответы гостей — вам остаётся встречать</p>
         </div>
 
@@ -638,7 +638,7 @@ function CompareSection() {
     <section className={styles.featuresSection}>
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
-          <h2 className={styles.sectionTitle}>Дешевле и удобнее бумаги</h2>
+          <h2 className={styles.sectionTitle}>Электронное приглашение или бумажное?</h2>
           <p className={styles.howSubtitle}>Сравните сами — до первого гостя, потерявшего открытку</p>
         </div>
 
@@ -694,8 +694,49 @@ function ReviewsSection() {
   );
 }
 
+// ─── SEO-текст: что такое электронное приглашение ───────────────────────────
+function AboutSection() {
+  const p: React.CSSProperties = { fontSize: 16, color: '#5b554c', lineHeight: 1.7, margin: '0 0 16px' };
+  return (
+    <section id="about" className={styles.featuresSection}>
+      <div className={styles.sectionInner}>
+        <div className={styles.howHeader} data-animate>
+          <h2 className={styles.sectionTitle}>Электронное приглашение на свадьбу онлайн</h2>
+        </div>
+        <div style={{ maxWidth: 760, margin: '0 auto' }} data-animate>
+          <p style={p}>
+            WeddingCraft — конструктор свадебных сайтов-приглашений. Вместо бумажных открыток вы отправляете
+            гостям одну ссылку, а по ней открывается красивый свадебный сайт: имена пары, дата и время,
+            место торжества на карте, программа дня, дресс-код с палитрой, ваши фото и музыка.
+          </p>
+          <p style={p}>
+            Главное отличие от картинки в мессенджере — анкета для гостей. Каждый гость отмечает, придёт ли он,
+            с кем и с детьми ли, какие напитки предпочитает. Ответы сразу приходят вам в Telegram или на почту
+            и собираются в списке гостей в личном кабинете — больше не нужно обзванивать всех и вести таблицу.
+          </p>
+          <p style={{ ...p, margin: 0 }}>
+            Создать онлайн-приглашение на свадьбу можно бесплатно и без регистрации: выберите{' '}
+            <Link href="/templates" style={{ color: '#9c7a3c' }}>шаблон свадебного приглашения</Link>, заполните данные
+            и посмотрите результат. Оплата разовая — {PLANS[0].price.toLocaleString('ru-RU')} ₽, только когда решите
+            опубликовать сайт. Нужны ещё и открытки на бумаге — есть{' '}
+            <Link href="/print" style={{ color: '#9c7a3c' }}>печатные приглашения на свадьбу</Link> в PDF.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── FAQ ─────────────────────────────────────────────────────────────────────
 const FAQ_ITEMS = [
+  {
+    q: 'Что такое сайт-приглашение на свадьбу?',
+    a: 'Это электронное приглашение на свадьбу в виде небольшого сайта: имена пары, дата, место на карте, программа дня, дресс-код, фото, музыка и анкета для гостей. Гости открывают его по ссылке с телефона, а ответы приходят вам автоматически.',
+  },
+  {
+    q: 'Как сделать электронное приглашение на свадьбу?',
+    a: 'Выберите шаблон, впишите имена, дату и место торжества, загрузите фото и включите нужные блоки — программу дня, дресс-код, анкету, музыку. Всё редактируется прямо на странице приглашения, без дизайнера и программиста. Обычно хватает одного вечера.',
+  },
   {
     q: 'Как гости получат приглашение?',
     a: 'Вы отправляете обычную ссылку — любым удобным способом: в мессенджере, по SMS, на почту или QR-кодом на карточке. Сайт открывается на любом телефоне и компьютере, гостям не нужно ничего устанавливать и регистрироваться.',
@@ -715,6 +756,14 @@ const FAQ_ITEMS = [
   {
     q: 'Что умеет анкета для гостей?',
     a: 'Гость отвечает, придёт ли он, и выбирает напитки. Ответы мгновенно приходят вам в Telegram или на email и собираются в личном кабинете. А ещё можно отправить каждому гостю персональную ссылку с именным обращением и видеть ответ по каждому.',
+  },
+  {
+    q: 'Как отправить приглашение гостям в WhatsApp или Telegram?',
+    a: 'Скопируйте ссылку на ваш сайт и отправьте её в любой мессенджер — WhatsApp, Telegram, ВКонтакте, Viber — или по SMS. Можно отправить одну общую ссылку или каждому гостю свою, с именным обращением.',
+  },
+  {
+    q: 'Есть ли печатные приглашения на свадьбу?',
+    a: 'Да. В разделе «Печатные приглашения» можно выбрать дизайн, вписать свои данные и скачать готовый PDF формата A6 для печати дома или в типографии. Это отдельный продукт — покупать сайт-приглашение для этого не нужно.',
   },
   {
     q: 'Можно ли подключить свой домен?',
@@ -826,6 +875,7 @@ export default function HomePage() {
       <RsvpSection />
       <ReviewsSection />
       <Pricing />
+      <AboutSection />
       <FaqSection />
       <Cta />
       <Footer />
