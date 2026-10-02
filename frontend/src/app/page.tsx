@@ -760,6 +760,8 @@ function JsonLd() {
         '@id': `${SITE_URL}/#organization`,
         name: 'WeddingCraft',
         url: SITE_URL,
+        logo: `${SITE_URL}/brand/avatar.png`,
+        email: LEGAL.contactEmail,
       },
       {
         '@type': 'WebSite',
@@ -774,6 +776,13 @@ function JsonLd() {
         name: 'Сайт-приглашение на свадьбу',
         description:
           'Электронное свадебное приглашение: готовые шаблоны, анкета для гостей, уведомления в Telegram и на Email, персональные ссылки и привязка своего домена.',
+        // image обязателен для расширенного сниппета Product (валидатор Яндекса —
+        // критичная ошибка без него): обложка с пары + превью шаблонов.
+        image: [
+          `${SITE_URL}/invite/calla/assets/couple-photo.jpg`,
+          ...TEMPLATES.map((tpl) => `${SITE_URL}${tpl.preview}`),
+        ],
+        url: SITE_URL,
         brand: { '@id': `${SITE_URL}/#organization` },
         offers: PLANS.map((plan) => ({
           '@type': 'Offer',
