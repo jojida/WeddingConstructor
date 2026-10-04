@@ -216,7 +216,9 @@
   });
 
   /* ─── Запуск движка ─── */
+  var mountedWith = null;
   import(BASE + 'engine.js').then(function (m) {
+    mountedWith = { l: letters().join(''), n: namesLine(), d: dateLine(), w: D.wax };
     return m.mountEnvelope(stage, {
       base: BASE,
       letters: letters(),
@@ -231,6 +233,11 @@
   }).then(function (api) {
     engine = api;
     if (phase === 'done') { api.destroy(); engine = null; return; }
+    // Данные, пришедшие, пока движок грузил шрифты и бумагу (цвет печати у гостя
+    // приходит только сообщением от обёртки)
+    if (letters().join('') !== mountedWith.l) api.setInitials(letters()[0], letters()[1]);
+    if (namesLine() !== mountedWith.n || dateLine() !== mountedWith.d) api.setNames(namesLine(), dateLine());
+    if (D.wax !== mountedWith.w) api.setWax(D.wax);
     el.classList.add('is-ready');
     if (wantOpen) { clearTimeout(waitTimer); beginOpen(); }
   }).catch(function (err) {
