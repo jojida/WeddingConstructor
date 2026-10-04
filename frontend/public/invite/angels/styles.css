@@ -370,6 +370,8 @@ html.no-anim .hero__names { -webkit-mask-image: none; mask-image: none; }
 .prog__row.is-right { flex-direction: row-reverse; }
 .prog__text { width: calc(560 * var(--u)); padding: 0 calc(20 * var(--u)); text-align: center; }
 .prog__row.is-right .prog__text { margin-left: auto; margin-right: calc(140 * var(--u)); }
+/* Время и подпись банкета — правее траектории Купидона. */
+.prog__row.is-right:nth-of-type(2) .prog__text { margin-right: calc(20 * var(--u)); }
 .prog__row:not(.is-right) .prog__text { margin-left: calc(10 * var(--u)); }
 .prog__time {
   margin: 0;
