@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Алексей и Ангелина — приглашение на свадьбу</title>
+  <link href="/invite/assets/fonts/google/09cf634f97cd1e649801.css" rel="stylesheet" />
+  <link rel="preload" as="image" href="assets/hero.jpg" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
+  <noscript><style>
+    .hero-in, .rv, .rv-soft, .rv-write, .rv-pop > *, .scroll, .polaroid {
+      opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important;
+      -webkit-mask-image: none !important; mask-image: none !important;
+    }
+    .polaroid { transform: rotate(7.86deg) !important; }
+  </style></noscript>
+</head>
+<body>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА: фото пары, под ним облака; Купидон, лента с именами,
+         ангел с арфой и голубь в лучах. При открытии облака поднимаются,
+         Купидон прилетает, лента разворачивается и пишутся имена -->
+    <section class="hero" id="hero">
+      <div class="hero__photo-wrap hero-in">
+        <img class="hero__photo" src="assets/hero.jpg" data-edit="coverPhoto" alt="Фото пары" />
+      </div>
+      <img class="hero__cloud hero-in" src="assets/cloud-hero.webp" alt="" />
+      <div class="hero__cupid hero-in"><img class="float" src="assets/cupid-bow.webp" alt="" /></div>
+      <div class="hero__ribbon hero-in">
+        <img class="hero__ribbon-img" src="assets/ribbon.webp" alt="" />
+        <h1 class="hero__names" id="heroNames"><span data-name="groom">Алексей</span> и <span data-name="bride">Ангелина</span></h1>
+      </div>
+      <div class="hero__harp hero-in"><img class="float float--slow" src="assets/cherub-harp.webp" alt="" /></div>
+      <img class="hero__dove hero-in" src="assets/dove-rays.webp" alt="" />
+    </section>
+
+    <!-- 2 — ДОРОГИЕ ГОСТИ: свиток разворачивается сверху вниз -->
+    <section class="greet" id="greeting">
+      <div class="scroll" id="scroll">
+        <h2 class="title rv-write" data-edit="greetingTitle">Дорогие Гости!</h2>
+        <div class="greet__text rv" data-edit="inviteText">
+          <p>Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.</p>
+          <p>Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 — ПОРТИК: колонны, полароид с фото пары, цветочная дорожка -->
+    <section class="portico" id="photo">
+      <img class="portico__aisle rv-soft" src="assets/aisle.webp" alt="" loading="lazy" decoding="async" />
+      <img class="portico__arch rv-soft" src="assets/portico.webp" alt="" loading="lazy" decoding="async" />
+      <figure class="polaroid" id="polaroid">
+        <img class="polaroid__img" src="assets/polaroid.jpg" data-edit="polaroidPhoto" alt="Наше фото" loading="lazy" decoding="async" />
+      </figure>
+      <img class="portico__urn portico__urn--l rv-soft" src="assets/urn-l.webp" alt="" loading="lazy" decoding="async" />
+      <img class="portico__urn portico__urn--r rv-soft" src="assets/urn-r.webp" alt="" loading="lazy" decoding="async" />
+      <img class="portico__dove rv-soft" src="assets/dove.webp" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 4 — ЛОКАЦИЯ -->
+    <section class="loc" id="venue">
+      <h2 class="title rv-write" data-edit="venueTitle">Локация</h2>
+      <p class="loc__name rv" data-edit="venue">Усадьба «Архангельское»</p>
+      <p class="loc__addr rv" data-edit="venueAddress">Московская обл., Красногорск, пос. Архангельское</p>
+      <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
+      <div class="wc-map angels-map" data-wc-map hidden></div>
+    </section>
+
+    <!-- 5 — ДАТА: ангел с мандолиной -->
+    <section class="date" id="date">
+      <img class="cloud cloud--a" src="assets/cloud-a.webp" alt="" loading="lazy" decoding="async" />
+      <p class="date__intro rv" data-edit="dateIntro">Наша свадьба состоится</p>
+      <p class="date__day rv-write" id="dateLine">12 июля 2027</p>
+      <div class="date__cherub rv-soft"><img class="float" src="assets/cherub-lute.webp" alt="" loading="lazy" decoding="async" /></div>
+      <img class="cloud cloud--b" src="assets/cloud-b.webp" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 6 — ПРОГРАММА ДНЯ: Купидон летит по пунктиру за прокруткой -->
+    <section class="program" id="program">
+      <h2 class="title program__title rv-write" data-edit="programTitle">Программа дня</h2>
+      <div class="prog" id="prog">
+        <!-- Трек и Купидон — в одном SVG: Купидон едет по пути атрибутом
+             transform при прокрутке, без CSS-переходов (как в других шаблонах) -->
+        <svg class="prog__svg" id="progSvg" aria-hidden="true">
+          <path id="progPath" class="prog__path" d="" />
+          <image id="progCupid" class="prog__cupid" href="assets/cupid-blue.webp" width="277" height="181" />
+        </svg>
+        <!-- пункты .prog__row строит script.js из расписания -->
+      </div>
+      <img class="cloud cloud--c" src="assets/cloud-c.webp" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 7 — ОТСЧЁТ: золотой картуш -->
+    <section class="cd" id="countdown">
+      <div class="cd__box rv-soft">
+        <img class="cd__img" src="assets/cartouche.webp" alt="" loading="lazy" decoding="async" />
+        <p class="cd__title" data-edit="countdownTitle">Осталось до свадьбы</p>
+        <div class="cd__row" aria-live="off">
+          <div class="cd__cell"><span class="cd__num" id="cdD">22</span><span class="cd__lbl" id="cdDl">дня</span></div>
+          <div class="cd__cell"><span class="cd__num" id="cdH">13</span><span class="cd__lbl" id="cdHl">часов</span></div>
+          <div class="cd__cell"><span class="cd__num" id="cdM">14</span><span class="cd__lbl" id="cdMl">минут</span></div>
+          <div class="cd__cell"><span class="cd__num" id="cdS">53</span><span class="cd__lbl" id="cdSl">секунды</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 — ПОЖЕЛАНИЯ: бант, ангел с лентой -->
+    <section class="wish" id="wishes">
+      <img class="wish__bow rv-soft" src="assets/bow.webp" alt="" loading="lazy" decoding="async" />
+      <img class="cloud cloud--d" src="assets/cloud-d.webp" alt="" loading="lazy" decoding="async" />
+      <div class="wish__cherub rv-soft"><img class="float float--slow" src="assets/cherub-ribbon.webp" alt="" loading="lazy" decoding="async" /></div>
+      <h2 class="wish__title rv" data-edit="wishTitle">Пожелания</h2>
+      <div class="wish__text rv" data-edit="story">
+        <p>Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.</p>
+        <p>Просим не дарить букеты — мы не успеем насладиться ими в полной мере.</p>
+      </div>
+    </section>
+
+    <!-- 9 — АНКЕТА ГОСТЕЙ -->
+    <section class="rsvp" id="rsvp">
+      <h2 class="title rv-write" data-edit="surveyTitle">Анкета Гостей</h2>
+      <p class="rsvp__lead rv" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету заранее</p>
+      <form class="rsvp__form rv" id="rsvpForm" novalidate>
+        <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+        <fieldset class="rsvp__group">
+          <legend>Будете ли вы на празднике?</legend>
+          <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, с радостью приду</label>
+          <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+        </fieldset>
+        <fieldset class="rsvp__group" data-rsvp-count>
+          <legend>Сколько вас будет?</legend>
+          <div class="wc-count" data-wc-count>
+            <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+            <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+            <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+          </div>
+        </fieldset>
+        <fieldset class="rsvp__group" data-edit="drinks">
+          <legend>Что предпочитаете из напитков?</legend>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Игристое</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+        </fieldset>
+        <button class="rsvp__submit" type="submit">Отправить</button>
+        <p class="rsvp__error" id="rsvpError" role="alert"></p>
+      </form>
+      <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен</p>
+    </section>
+
+    <!-- 10 — ДРЕСС-КОД: кружки палитры пары -->
+    <section class="dress" id="dresscode">
+      <div class="dress__cherub rv-soft"><img class="float" src="assets/cherub-bell.webp" alt="" loading="lazy" decoding="async" /></div>
+      <h2 class="title dress__title rv-write" data-edit="dressTitle">Дресс код</h2>
+      <div class="palette rv-pop" data-edit="palette">
+        <span style="--c:#f4dec2"></span><span style="--c:#c2a07d"></span><span style="--c:#867c5e"></span><span style="--c:#d69a67"></span>
+      </div>
+      <p class="dress__text rv" data-edit="dressText">Будем рады, если в ваших нарядах найдутся оттенки нашей палитры</p>
+    </section>
+
+    <!-- 11 — ДО НОВЫХ ВСТРЕЧ -->
+    <section class="fin" id="final">
+      <img class="cloud cloud--e" src="assets/cloud-e.webp" alt="" loading="lazy" decoding="async" />
+      <img class="cloud cloud--f" src="assets/cloud-f.webp" alt="" loading="lazy" decoding="async" />
+      <h2 class="title fin__title rv-write" data-edit="closingTitle">До новых встреч!</h2>
+      <p class="fin__sign rv" data-edit="closingSign">Алексей и Ангелина</p>
+      <div class="fin__cherub rv-soft"><img class="float float--slow" src="assets/cherub-final.webp" alt="" loading="lazy" decoding="async" /></div>
+    </section>
+
+  </main>
+
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

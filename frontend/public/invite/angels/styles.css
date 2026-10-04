@@ -1,0 +1,647 @@
+/* ============================================================
+   «Ангелы» — свадебное приглашение по макету Figma «Приглашение 1»
+   (фрейм «Ан 1», Canva-сайт шириной 1366px, 03.10.2026).
+   Размеры — в пикселях макета: calc(N * var(--u)).
+   Шрифты: Great Vibes (каллиграфия: заголовки, имена, дата) и
+   Old Standard TT (текст; в макете — CMU Serif, Old Standard ближе
+   всего из свободных Google Fonts).
+   ============================================================ */
+
+:root {
+  --col: 500px;
+  /* Единица макета. Колонка = min(ширина окна, --col), полоса прокрутки скрыта */
+  --u: calc(min(100vw, var(--col)) / 1366);
+
+  --sky: #ddf3ff;
+  --ink: #526c9f;
+  --ink-soft: #6f86b4;
+  --paper: #f2efdd;
+  --card: #f2f1eb;
+
+  --f-script: "Great Vibes", "Marck Script", cursive;
+  --f-text: "Old Standard TT", "Times New Roman", Georgia, serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #c9e3f3;
+  color: var(--ink);
+  font-family: var(--f-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+}
+html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+.invite {
+  position: relative;
+  width: 100%;
+  max-width: var(--col);
+  margin: 0 auto;
+  background: var(--sky);
+  overflow: hidden;
+}
+@media (min-width: 520px) {
+  .invite { box-shadow: 0 0 60px rgba(60, 90, 140, .22); }
+}
+
+img { max-width: none; }
+
+.title {
+  margin: 0;
+  font-family: var(--f-script);
+  font-weight: 400;
+  font-size: calc(140 * var(--u));
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+/* ============================================================
+   АНИМАЦИЯ ПОЯВЛЕНИЯ ПРИ ПРОКРУТКЕ (как в других шаблонах)
+   .rv       — текст: всплывает и проявляется из лёгкой дымки;
+   .rv-write — рукописные строки: «пишутся» слева направо;
+   .rv-soft  — картинки: проявляются;
+   .rv-pop   — кружки палитры: по очереди «вспыхивают».
+   Класс .in ставит script.js, когда блок доходит до экрана.
+   ============================================================ */
+.rv {
+  opacity: 0;
+  transform: translateY(calc(40 * var(--u)));
+  filter: blur(5px);
+  transition: opacity .9s ease, transform 1s cubic-bezier(.2, .7, .2, 1), filter .9s ease;
+  transition-delay: var(--d, 0ms);
+}
+.rv.in { opacity: 1; transform: none; filter: none; }
+
+.rv-soft {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  transition-delay: var(--d, 0ms);
+}
+.rv-soft.in { opacity: var(--o, 1); }
+
+.rv-write {
+  opacity: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+          mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+.rv-write.in { animation: write 1.7s cubic-bezier(.35, .45, .25, 1) var(--d, 0ms) both; }
+.rv-write.done { opacity: 1; -webkit-mask-image: none; mask-image: none; animation: none; }
+@keyframes write {
+  from { opacity: 0; -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  12%  { opacity: 1; }
+  to   { opacity: 1; -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
+
+.rv-pop > * {
+  opacity: 0;
+  transform: scale(.3);
+  transition: opacity .6s ease, transform .8s cubic-bezier(.3, 1.6, .5, 1);
+}
+.rv-pop > *:nth-child(2) { transition-delay: .15s; }
+.rv-pop > *:nth-child(3) { transition-delay: .3s; }
+.rv-pop > *:nth-child(4) { transition-delay: .45s; }
+.rv-pop > *:nth-child(5) { transition-delay: .6s; }
+.rv-pop > *:nth-child(6) { transition-delay: .75s; }
+.rv-pop > *:nth-child(7) { transition-delay: .9s; }
+.rv-pop > *:nth-child(8) { transition-delay: 1.05s; }
+.rv-pop.in > * { opacity: 1; transform: none; }
+
+/* Ангелы парят, облака плывут */
+.float { display: block; width: 100%; height: auto; animation: float 6s ease-in-out infinite alternate; }
+.float--slow { animation-duration: 8s; animation-delay: -2s; }
+@keyframes float {
+  from { transform: translateY(calc(-12 * var(--u))); }
+  to   { transform: translateY(calc(14 * var(--u))); }
+}
+.cloud { position: absolute; display: block; height: auto; pointer-events: none; animation: drift 17s ease-in-out infinite alternate; }
+@keyframes drift {
+  from { transform: translateX(calc(-16 * var(--u))); }
+  to   { transform: translateX(calc(18 * var(--u))); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv, .rv-soft, .rv-write, .rv-pop > * {
+    opacity: 1 !important; transform: none !important; filter: none !important;
+    -webkit-mask-image: none !important; mask-image: none !important;
+    transition: none !important; animation: none !important;
+  }
+  .rv-soft { opacity: var(--o, 1) !important; }
+  .float, .cloud { animation: none !important; }
+}
+
+/* ============================================================
+   1 — ОБЛОЖКА (макет: 0–2624, голубь и ангел с арфой — ниже, на свитке)
+   ============================================================ */
+.hero {
+  position: relative; z-index: 3;
+  height: calc(2624 * var(--u));
+}
+.hero > * { position: absolute; display: block; }
+.hero__photo-wrap {
+  left: 0; top: 0;
+  width: 100%; height: calc(1732 * var(--u));
+  overflow: hidden;
+  /* низ фото тает в небо — облака ложатся мягко */
+  -webkit-mask-image: linear-gradient(180deg, #000 86%, transparent 100%);
+          mask-image: linear-gradient(180deg, #000 86%, transparent 100%);
+}
+.hero__photo {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 30%;
+}
+.hero__cloud  { left: 0; top: calc(1370 * var(--u)); width: 100%; height: auto; }
+.hero__cupid  { left: calc(896 * var(--u)); top: calc(1299 * var(--u)); width: calc(423 * var(--u)); }
+.hero__ribbon { left: calc(232 * var(--u)); top: calc(1633 * var(--u)); width: calc(1134 * var(--u)); height: calc(760 * var(--u)); }
+.hero__ribbon-img { position: absolute; left: 0; top: 0; width: 100%; height: auto; display: block; }
+/* Имена — по ленте: центр строки в макете (749; 1993), наклон −6° */
+.hero__names {
+  position: absolute; left: calc(517 * var(--u)); top: calc(360 * var(--u));
+  margin: 0;
+  transform: translate(-50%, -50%) rotate(-6.04deg);
+  font-family: var(--f-script);
+  font-weight: 400;
+  font-size: calc(var(--nfs, 131) * var(--u));
+  line-height: 1.2;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.hero__harp { left: 0; top: calc(2069 * var(--u)); width: calc(519 * var(--u)); }
+.hero__dove { left: calc(427 * var(--u)); top: calc(2497 * var(--u)); width: calc(548 * var(--u)); height: auto; }
+
+/* ── Открытие обложки (класс hero-go на <html>) ──
+   Фото проявляется и чуть отдаляется, облака поднимаются снизу,
+   Купидон прилетает справа, лента разворачивается, пишутся имена,
+   ангел с арфой поднимается, голубь вспыхивает лучами */
+.hero-in { opacity: 0; }
+.hero__photo-wrap { transform: scale(1.06); transform-origin: 50% 30%; }
+.hero__cloud { transform: translateY(calc(220 * var(--u))); }
+.hero__cupid { transform: translate(calc(420 * var(--u)), calc(-140 * var(--u))) rotate(14deg); }
+.hero__ribbon { clip-path: inset(0 100% 0 0); }
+.hero__names {
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+          mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+.hero__harp { transform: translateY(calc(140 * var(--u))); }
+.hero__dove { transform: scale(.55); }
+
+html.hero-go .hero-in { opacity: 1; transform: none; }
+html.hero-go .hero__photo-wrap { transition: opacity 1.4s ease, transform 6s cubic-bezier(.2, .6, .2, 1); }
+html.hero-go .hero__cloud  { transition: opacity 1.6s ease .2s, transform 2.4s cubic-bezier(.2, .7, .2, 1) .2s; }
+html.hero-go .hero__cupid  { transition: opacity 1.2s ease .8s, transform 2.4s cubic-bezier(.25, .8, .25, 1) .8s; }
+html.hero-go .hero__ribbon { clip-path: inset(0 0 0 0); transition: opacity .5s ease 1.3s, clip-path 1.7s cubic-bezier(.5, .1, .3, 1) 1.3s; }
+html.hero-go .hero__names  { animation: write 1.9s cubic-bezier(.35, .45, .25, 1) 2.1s both; }
+html.hero-go .hero__harp   { transition: opacity 1.4s ease 1.5s, transform 2s cubic-bezier(.2, .7, .2, 1) 1.5s; }
+html.hero-go .hero__dove   { transition: opacity 1.4s ease 2.2s, transform 1.8s cubic-bezier(.3, 1.4, .5, 1) 2.2s; animation: glow 4.5s ease-in-out 4s infinite alternate; }
+@keyframes glow {
+  from { filter: drop-shadow(0 0 0 rgba(255, 244, 214, 0)); }
+  to   { filter: drop-shadow(0 0 calc(26 * var(--u)) rgba(255, 244, 214, .95)); }
+}
+/* Редактор и «меньше движения»: сразу финал, без переходов */
+html.no-anim .hero-in, html.no-anim .hero__ribbon, html.no-anim .hero__names { transition: none !important; animation: none !important; }
+html.no-anim .hero__names { -webkit-mask-image: none; mask-image: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-in { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .hero__ribbon { clip-path: none !important; }
+  .hero__names { -webkit-mask-image: none !important; mask-image: none !important; animation: none !important; }
+  .hero__dove { animation: none !important; }
+}
+
+/* ============================================================
+   2 — ДОРОГИЕ ГОСТИ: свиток (макет: 2714–4744)
+   Свиток — border-image: валики сверху и снизу, лист тянется под текст
+   ============================================================ */
+.greet { position: relative; z-index: 1; padding-top: calc(90 * var(--u)); }
+.scroll {
+  position: relative;
+  padding: calc(308 * var(--u)) calc(222 * var(--u)) calc(70 * var(--u));
+  text-align: center;
+  border-style: solid;
+  border-width: calc(130 * var(--u)) 0 calc(130 * var(--u));
+  border-image: url("assets/scroll.webp") 130 0 130 0 fill / calc(130 * var(--u)) 0 calc(130 * var(--u)) stretch;
+}
+/* свиток разворачивается сверху вниз: сначала виден только верхний валик */
+.scroll { clip-path: inset(0 0 calc(100% - 100 * var(--u)) 0); transition: clip-path 2s cubic-bezier(.45, .05, .25, 1); }
+.scroll.in { clip-path: inset(0 0 0 0); }
+@media (prefers-reduced-motion: reduce) { .scroll { clip-path: none !important; transition: none !important; } }
+.scroll .title { font-size: calc(129 * var(--u)); }
+.greet__text {
+  margin-top: calc(92 * var(--u));
+  font-size: calc(71 * var(--u));
+  line-height: calc(95 * var(--u));
+  color: var(--ink);
+}
+.greet__text p { margin: 0; }
+
+/* ============================================================
+   3 — ПОРТИК С ПОЛАРОИДОМ (макет: 5141–7447)
+   ============================================================ */
+.portico {
+  position: relative;
+  height: calc(2306 * var(--u));
+  margin-top: calc(397 * var(--u));
+}
+.portico > img { position: absolute; display: block; height: auto; pointer-events: none; }
+.portico__aisle { left: calc(119 * var(--u)); top: calc(1105 * var(--u)); width: calc(1091 * var(--u)); z-index: 1; }
+.portico__arch  { left: calc(21 * var(--u)); top: calc(128 * var(--u)); width: calc(1237 * var(--u)); z-index: 2; }
+.portico__urn   { z-index: 4; }
+.portico__urn--l { left: 0; top: calc(1333 * var(--u)); width: calc(437 * var(--u)); }
+.portico__urn--r { left: calc(896 * var(--u)); top: calc(1333 * var(--u)); width: calc(470 * var(--u)); }
+.portico__dove  { left: calc(13 * var(--u)); top: 0; width: calc(393 * var(--u)); z-index: 5; }
+/* Полароид: карточка 658×770, окно под фото 593×568, наклон 7,86° */
+.polaroid {
+  position: absolute; z-index: 3;
+  left: calc(303.75 * var(--u)); top: calc(635.25 * var(--u));
+  width: calc(658 * var(--u)); height: calc(770 * var(--u));
+  margin: 0;
+  padding: calc(36 * var(--u)) calc(35.7 * var(--u)) calc(165.7 * var(--u)) calc(29.5 * var(--u));
+  background: var(--card);
+  box-shadow: 0 calc(10 * var(--u)) calc(30 * var(--u)) rgba(50, 60, 80, .28), 0 0 0 calc(1.5 * var(--u)) rgba(60, 51, 51, .25);
+  transform: translateY(calc(-90 * var(--u))) rotate(-5deg);
+  opacity: 0;
+  transition: opacity .9s ease, transform 1.5s cubic-bezier(.3, 1.35, .5, 1);
+}
+.polaroid.in { opacity: 1; transform: rotate(7.86deg); }
+.polaroid__img { display: block; width: 100%; height: 100%; object-fit: cover; }
+@media (prefers-reduced-motion: reduce) { .polaroid { opacity: 1 !important; transform: rotate(7.86deg) !important; transition: none !important; } }
+
+/* ============================================================
+   4 — ЛОКАЦИЯ (макет: 7486–7860) + карта
+   ============================================================ */
+.loc {
+  position: relative; z-index: 2;
+  padding: calc(14 * var(--u)) calc(120 * var(--u)) 0;
+  text-align: center;
+}
+.loc .title { font-size: calc(140 * var(--u)); }
+.loc__name {
+  margin: calc(56 * var(--u)) 0 0;
+  font-size: calc(71 * var(--u));
+  line-height: 1.34;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.loc__addr {
+  margin: calc(10 * var(--u)) 0 0;
+  font-size: calc(58 * var(--u));
+  line-height: 1.34;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+.loc__name:empty, .loc__addr:empty { display: none; }
+.angels-map {
+  --wc-map-width: calc(1100 * var(--u));
+  --wc-map-h: calc(720 * var(--u));
+  --wc-map-radius: calc(26 * var(--u));
+  --wc-map-border: calc(10 * var(--u)) solid #fff;
+  --wc-map-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(60, 90, 140, .2);
+  --wc-map-accent: var(--ink);
+  --wc-map-accent-ink: #fff;
+  --wc-map-font: var(--f-text);
+  margin: calc(80 * var(--u)) auto 0;
+}
+.angels-map .wc-map__route {
+  margin-top: calc(34 * var(--u));
+  font-size: max(13px, calc(48 * var(--u)));
+  background: rgba(255, 255, 255, .6);
+}
+
+/* ============================================================
+   5 — ДАТА: «Наша свадьба состоится» + ангел с мандолиной
+   (макет: 8137–9843)
+   ============================================================ */
+.date {
+  position: relative;
+  min-height: calc(1720 * var(--u));
+  padding-top: calc(190 * var(--u));
+  text-align: center;
+}
+.cloud--a { left: 0; top: calc(11 * var(--u)); width: calc(227 * var(--u)); }
+.cloud--b { left: calc(1047 * var(--u)); top: calc(1473 * var(--u)); width: calc(319 * var(--u)); }
+.date__intro {
+  margin: 0;
+  font-size: calc(74 * var(--u));
+  line-height: 1.3;
+}
+.date__day {
+  margin: calc(6 * var(--u)) 0 0;
+  font-family: var(--f-script);
+  font-size: calc(196 * var(--u));
+  line-height: 1.2;
+  word-spacing: .3em;
+  white-space: nowrap;
+}
+.date__cherub {
+  position: absolute; left: calc(212 * var(--u)); top: calc(636 * var(--u));
+  width: calc(750 * var(--u));
+}
+
+/* ============================================================
+   6 — ПРОГРАММА ДНЯ (макет: 10000–12620): пункты лесенкой,
+   волнистый пунктир, Купидон едет по нему за прокруткой
+   ============================================================ */
+.program {
+  position: relative;
+  padding-top: calc(90 * var(--u));
+  padding-bottom: calc(260 * var(--u));
+  text-align: center;
+}
+.program__title { font-size: calc(214 * var(--u)); line-height: 1.15; }
+.prog { position: relative; margin-top: calc(240 * var(--u)); }
+.prog__row {
+  position: relative; z-index: 1;
+  display: flex; align-items: center;
+  min-height: calc(430 * var(--u));
+}
+.prog__row.is-right { flex-direction: row-reverse; }
+.prog__text { width: calc(560 * var(--u)); padding: 0 calc(20 * var(--u)); text-align: center; }
+.prog__row.is-right .prog__text { margin-left: auto; margin-right: calc(140 * var(--u)); }
+.prog__row:not(.is-right) .prog__text { margin-left: calc(10 * var(--u)); }
+.prog__time {
+  margin: 0;
+  font-size: calc(99 * var(--u));
+  line-height: 1.05;
+  color: var(--ink);
+  font-variant-numeric: lining-nums;
+}
+.prog__title {
+  margin: calc(14 * var(--u)) 0 0;
+  font-size: calc(74 * var(--u));
+  line-height: 1.2;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.prog__icon-box {
+  width: calc(420 * var(--u)); height: calc(380 * var(--u));
+  display: flex; align-items: center; justify-content: center;
+}
+.prog__row:not(.is-right) .prog__icon-box { margin-left: auto; margin-right: calc(70 * var(--u)); }
+.prog__row.is-right .prog__icon-box { margin-left: calc(20 * var(--u)); }
+.prog__icon {
+  display: block;
+  max-width: calc(360 * var(--u)); max-height: calc(360 * var(--u));
+  width: auto; height: auto;
+  object-fit: contain;
+}
+.prog__icon--emoji { font-size: calc(200 * var(--u)); line-height: 1; }
+/* Трек: пунктир и Купидон — координаты считает script.js */
+.prog__svg {
+  position: absolute; left: 0; top: 0; z-index: 0;
+  width: 100%; height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0; transition: opacity .8s ease;
+}
+.prog.is-ready .prog__svg { opacity: 1; }
+.prog__path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: calc(9 * var(--u));
+  stroke-linecap: butt;
+  stroke-dasharray: calc(36 * var(--u)) calc(22 * var(--u));
+}
+.cloud--c { left: 0; bottom: calc(-140 * var(--u)); width: calc(368 * var(--u)); }
+
+/* ============================================================
+   7 — ОТСЧЁТ: картуш (макет: 12899–13796)
+   ============================================================ */
+.cd { position: relative; z-index: 1; padding-top: calc(50 * var(--u)); }
+.cd__box {
+  position: relative;
+  margin-left: calc(111 * var(--u));
+  width: calc(1218 * var(--u)); height: calc(897 * var(--u));
+}
+.cd__img { position: absolute; left: 0; top: 0; width: 100%; height: auto; display: block; }
+.cd__title {
+  position: absolute; left: 0; right: 0; top: calc(300 * var(--u));
+  margin: 0;
+  padding-left: calc(24 * var(--u));
+  text-align: center;
+  font-family: var(--f-script);
+  font-size: calc(82 * var(--u));
+  line-height: 1.2;
+  color: var(--ink);
+}
+.cd__row {
+  position: absolute; left: 0; right: 0; top: calc(412 * var(--u));
+  display: flex; justify-content: center;
+  padding-left: calc(40 * var(--u));
+  color: var(--ink);
+}
+.cd__cell { width: calc(200 * var(--u)); display: flex; flex-direction: column; align-items: center; }
+.cd__num {
+  font-size: calc(100 * var(--u));
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.cd__lbl {
+  margin-top: calc(8 * var(--u));
+  font-size: calc(52 * var(--u));
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   8 — ПОЖЕЛАНИЯ (макет: 13850–15557): бант, ангел с лентой
+   ============================================================ */
+.wish {
+  position: relative;
+  padding: calc(1000 * var(--u)) calc(250 * var(--u)) 0;
+  text-align: center;
+}
+.wish > img, .wish__cherub { position: absolute; display: block; height: auto; }
+.wish__bow { left: calc(489 * var(--u)); top: calc(60 * var(--u)); width: calc(458 * var(--u)); }
+.cloud--d { left: calc(960 * var(--u)); top: calc(201 * var(--u)); width: calc(406 * var(--u)); }
+.wish__cherub { left: 0; top: calc(344 * var(--u)); width: calc(411 * var(--u)); }
+.wish__title {
+  margin: 0;
+  font-weight: 400;
+  font-size: calc(70 * var(--u));
+  line-height: 1.3;
+  color: var(--ink);
+}
+.wish__text {
+  margin-top: calc(100 * var(--u));
+  font-size: calc(72 * var(--u));
+  line-height: calc(95 * var(--u));
+  color: var(--ink);
+}
+.wish__text p { margin: 0; }
+.wish__text p + p { margin-top: calc(30 * var(--u)); }
+
+/* ============================================================
+   9 — АНКЕТА ГОСТЕЙ (макет: 15676 — форма под заголовком пустая)
+   ============================================================ */
+.rsvp {
+  position: relative; z-index: 2;
+  padding: calc(110 * var(--u)) calc(150 * var(--u)) 0;
+  text-align: center;
+}
+.rsvp .title { font-size: calc(150 * var(--u)); }
+.rsvp__lead {
+  margin: calc(40 * var(--u)) auto 0;
+  max-width: calc(1000 * var(--u));
+  font-size: calc(60 * var(--u));
+  line-height: 1.34;
+  color: var(--ink);
+}
+.rsvp__form {
+  margin: calc(80 * var(--u)) auto 0;
+  max-width: calc(1040 * var(--u));
+  padding: calc(70 * var(--u)) calc(70 * var(--u)) calc(80 * var(--u));
+  display: flex; flex-direction: column;
+  gap: calc(60 * var(--u));
+  text-align: left;
+  background: rgba(255, 255, 255, .55);
+  border-radius: calc(40 * var(--u));
+  box-shadow: 0 calc(16 * var(--u)) calc(50 * var(--u)) rgba(82, 108, 159, .14);
+}
+/* Поле имени — образец и для полей ответов, которые добавляет rsvp-count.js.
+   Не меньше 16px: иначе iPhone приближает страницу при вводе. */
+.rsvp__name {
+  width: 100%;
+  padding: calc(18 * var(--u)) calc(4 * var(--u));
+  border: 0;
+  border-bottom: calc(3 * var(--u)) solid rgba(82, 108, 159, .55);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--f-text);
+  font-size: max(16px, calc(56 * var(--u)));
+  line-height: 1.3;
+  color: #3a4f7c;
+  outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+.rsvp__name::placeholder { color: rgba(82, 108, 159, .55); }
+.rsvp__name:focus { border-bottom-color: var(--ink); }
+.rsvp__group { margin: 0; padding: 0; border: 0; min-width: 0; }
+.rsvp__group legend {
+  padding: 0;
+  margin: 0 0 calc(26 * var(--u));
+  font-family: var(--f-text);
+  font-weight: 700;
+  font-size: calc(54 * var(--u));
+  line-height: 1.25;
+  color: var(--ink);
+}
+.form-option {
+  position: relative;
+  display: flex; align-items: center; gap: calc(28 * var(--u));
+  margin: 0 0 calc(22 * var(--u));
+  font-family: var(--f-text);
+  font-size: calc(54 * var(--u));
+  line-height: 1.25;
+  color: #3a4f7c;
+  cursor: pointer;
+}
+.form-option:last-child { margin-bottom: 0; }
+.form-option input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.custom-radio, .custom-check {
+  flex: none;
+  width: calc(46 * var(--u)); height: calc(46 * var(--u));
+  min-width: 14px; min-height: 14px;
+  border: calc(4 * var(--u)) solid var(--ink);
+  background: rgba(255, 255, 255, .7);
+  transition: background .25s ease, box-shadow .25s ease;
+}
+.custom-radio { border-radius: 50%; }
+.custom-check { border-radius: calc(8 * var(--u)); }
+.custom-radio.checked { background: var(--ink); box-shadow: inset 0 0 0 calc(9 * var(--u)) #fff; }
+.custom-check.checked { background: var(--ink); box-shadow: inset 0 0 0 calc(8 * var(--u)) #fff; }
+.form-option:focus-within .custom-radio,
+.form-option:focus-within .custom-check { outline: 2px solid rgba(82, 108, 159, .45); outline-offset: 2px; }
+.rsvp__group .wc-count { font-family: var(--f-text); font-size: max(16px, calc(54 * var(--u))); color: var(--ink); }
+.rsvp__submit {
+  align-self: center;
+  margin-top: calc(10 * var(--u));
+  padding: calc(30 * var(--u)) calc(120 * var(--u));
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-family: var(--f-text);
+  font-size: max(15px, calc(56 * var(--u)));
+  letter-spacing: .05em;
+  cursor: pointer;
+  box-shadow: 0 calc(14 * var(--u)) calc(34 * var(--u)) rgba(82, 108, 159, .3);
+  transition: transform .25s ease, background .25s ease, opacity .25s ease;
+}
+.rsvp__submit:hover { background: #435b8c; transform: translateY(-2px); }
+.rsvp__submit:disabled { opacity: .55; cursor: default; transform: none; }
+.rsvp__error {
+  margin: calc(-30 * var(--u)) 0 0;
+  text-align: center;
+  font-size: max(14px, calc(48 * var(--u)));
+  color: #9c2f2f;
+}
+.rsvp__error:empty { display: none; }
+.rsvp__thanks {
+  margin: calc(70 * var(--u)) 0 0;
+  font-family: var(--f-script);
+  font-size: calc(120 * var(--u));
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+/* ============================================================
+   10 — ДРЕСС-КОД (макет: 16505–17293): ангел с колокольчиком справа
+   ============================================================ */
+.dress {
+  position: relative;
+  padding: calc(360 * var(--u)) calc(60 * var(--u)) 0;
+  text-align: center;
+}
+.dress__cherub {
+  position: absolute; left: calc(1032 * var(--u)); top: calc(100 * var(--u));
+  width: calc(334 * var(--u));
+}
+.dress__title { position: relative; font-size: calc(156 * var(--u)); }
+.palette {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: calc(34 * var(--u));
+  margin-top: calc(300 * var(--u));
+}
+.palette span {
+  width: calc(var(--s, 282) * var(--u)); height: calc(var(--s, 282) * var(--u));
+  border-radius: 50%;
+  background: var(--c);
+}
+.dress__text {
+  margin: calc(90 * var(--u)) auto 0;
+  max-width: calc(1000 * var(--u));
+  font-size: calc(60 * var(--u));
+  line-height: 1.34;
+  color: var(--ink);
+}
+.dress__text:empty { display: none; }
+
+/* ============================================================
+   11 — ДО НОВЫХ ВСТРЕЧ (макет: 19220–20544)
+   ============================================================ */
+.fin {
+  position: relative;
+  padding: calc(560 * var(--u)) calc(80 * var(--u)) calc(70 * var(--u));
+  text-align: center;
+}
+.cloud--e { left: 0; top: calc(130 * var(--u)); width: calc(347 * var(--u)); }
+.cloud--f { left: calc(1116 * var(--u)); top: calc(624 * var(--u)); width: calc(250 * var(--u)); }
+.fin__title { position: relative; font-size: calc(158 * var(--u)); }
+.fin__sign {
+  position: relative;
+  margin: calc(16 * var(--u)) 0 0;
+  font-family: var(--f-script);
+  font-size: calc(104 * var(--u));
+  line-height: 1.25;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.fin__cherub { width: calc(842 * var(--u)); margin: calc(40 * var(--u)) auto 0; }

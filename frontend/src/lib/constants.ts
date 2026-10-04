@@ -70,6 +70,7 @@ const DEMO_MAP_POINTS: Record<string, { lat: number; lon: number }> = {
   'г. Сочи, ул. Приморская, 15': { lat: 43.57367, lon: 39.72640 },
   'Москва, ул. Дольская, 1': { lat: 55.61548, lon: 37.68214 },       // усадьба Царицыно («Айвори»)
   'Москва, ул. Юности, 2': { lat: 55.73494, lon: 37.80898 },         // усадьба Кусково («Туманный лес»)
+  'Московская обл., Красногорск, пос. Архангельское': { lat: 55.78858, lon: 37.28593 }, // усадьба Архангельское («Ангелы»)
 };
 export function demoMapPoint(address?: string): { q: string; lat: number; lon: number } | undefined {
   const p = address ? DEMO_MAP_POINTS[address] : undefined;
@@ -77,6 +78,19 @@ export function demoMapPoint(address?: string): { q: string; lat: number; lon: n
 }
 
 const HANDMADE_TEMPLATES = [
+  {
+    id: 'angels',
+    name: 'Ангелы',
+    description: 'Небесно-голубое приглашение с ангелами и облаками: на обложке Купидон прилетает к ленте с именами пары. Свиток с приветствием, портик с полароидом, программа дня с Купидоном на пунктире, золотой картуш с таймером, дресс-код и анкета для гостей.',
+    tags: ['Ангелы', 'Облака', 'Голубой', 'Романтика', 'Анимация'],
+    colors: ['#ddf3ff', '#526c9f', '#f2efdd'],
+    preview: '/invite/angels/assets/preview.jpg',
+    defaultCover: '/invite/angels/assets/hero.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Ангелина',
+    sampleGroom: 'Алексей',
+    sampleDaysAhead: 260,
+  },
   {
     id: 'forest',
     name: 'Туманный лес',
@@ -452,6 +466,7 @@ export const formatDrinkChoice = (choice: string, labels: Record<string, string>
 
 /** Ключ data-edit строки-приветствия в каждом шаблоне (для персонализации гостя). */
 export const TEMPLATE_GREETING_KEY: Record<string, string> = {
+  angels: 'greetingTitle',
   forest: 'greetingTitle',
   'garden-evening': 'greetingTitle',
   ivory: 'greetingTitle',
@@ -501,6 +516,17 @@ export interface TemplateSection {
 
 /* Наборы иконок для пикера в «Программе дня» */
 export const ICON_SETS: Record<string, string[]> = {
+  angels: [
+    '/invite/angels/assets/icon-rings.webp',
+    '/invite/angels/assets/icon-champagne.webp',
+    '/invite/angels/assets/icon-plate.webp',
+    '/invite/angels/assets/icon-cake.webp',
+    '/invite/angels/assets/icon-camera.webp',
+    '/invite/angels/assets/bow.webp',
+    '/invite/angels/assets/dove.webp',
+    '/invite/angels/assets/cupid-bow.webp',
+    '/invite/angels/assets/cherub-harp.webp',
+  ],
   'garden-evening': [
     '/invite/garden-evening/assets/icon-champagne.webp',
     '/invite/garden-evening/assets/icon-rings.webp',
@@ -631,6 +657,7 @@ export function musicLibraryFor(templateId?: string): MusicTrack[] {
 
 /** Мелодия, с которой шаблон открывается у новой пары (остальные — «Канон») */
 const TEMPLATE_MUSIC: Record<string, string> = {
+  angels: 'air',
   forest: 'thousand',
   'garden-evening': 'canon',
   ivory: 'clair',
@@ -710,6 +737,70 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 }
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
+  angels: [
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'coverPhoto', type: 'image', label: 'Фото на обложке', hint: 'Лучше вертикальное: снизу его закрывают облака с лентой', scope: 'data' },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст на свитке (абзацы с новой строки)', scope: 'data', maxLength: 420 },
+      ],
+    },
+    {
+      title: 'Фото в полароиде', icon: '📷',
+      fields: [
+        { id: 'polaroidPhoto', type: 'image', label: 'Фото в портике', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Усадьба «Архангельское»', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        { id: 'dateIntro', type: 'text', label: 'Надпись над датой', hint: 'Например: Наша свадьба состоится', scope: 'custom', maxLength: 40 },
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', iconSet: 'angels' },
+      ],
+    },
+    {
+      title: 'Пожелания', icon: '💌',
+      fields: [
+        { id: 'story', type: 'textarea', label: 'Текст пожеланий (абзацы с новой строки)', scope: 'data', maxLength: 400 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры', scope: 'data' },
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
   forest: [
     {
       title: 'Приветствие', icon: '✍️',
@@ -1287,6 +1378,42 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = Object.fromEnt
 );
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
+  angels: {
+    inviteText:
+      'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
+      'рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.\n' +
+      'Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.',
+    venue: 'Усадьба «Архангельское»',
+    venueAddress: 'Московская обл., Красногорск, пос. Архангельское',
+    story:
+      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
+      'Просим не дарить букеты — мы не успеем насладиться ими в полной мере.',
+    schedule: [
+      { time: '12:00', title: 'Торжественная регистрация', icon: '/invite/angels/assets/icon-rings.webp' },
+      { time: '15:00', title: 'Начало банкета',            icon: '/invite/angels/assets/icon-champagne.webp' },
+      { time: '18:00', title: 'Банкет',                    icon: '/invite/angels/assets/icon-plate.webp' },
+      { time: '20:00', title: 'Торт',                      icon: '/invite/angels/assets/icon-cake.webp' },
+      { time: '22:00', title: 'Фотосессия',                icon: '/invite/angels/assets/icon-camera.webp' },
+    ],
+    dressCodeColors: ['#f4dec2', '#c2a07d', '#867c5e', '#d69a67'],
+    drinks: [
+      { value: 'sparkling',  label: 'Игристое' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'cognac',     label: 'Коньяк' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      greetingTitle: 'Дорогие Гости!',
+      polaroidPhoto: '/invite/angels/assets/polaroid.jpg',
+      dateIntro:     'Наша свадьба состоится',
+      dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей палитры',
+      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
+      closingTitle:  'До новых встреч!',
+      closingSign:   '', // Пустое поле — имена пары.
+    },
+  },
+
   forest: {
     inviteText:
       'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
