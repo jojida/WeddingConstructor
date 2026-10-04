@@ -119,6 +119,8 @@ img { max-width: none; }
   from { transform: translateY(calc(-12 * var(--u))); }
   to   { transform: translateY(calc(14 * var(--u))); }
 }
+/* Облака у краёв заходят за край колонки на 30 единиц — больше размаха
+   покачивания (±18), поэтому между облаком и краем не видно полосы неба */
 .cloud { position: absolute; display: block; height: auto; pointer-events: none; animation: drift 17s ease-in-out infinite alternate; }
 @keyframes drift {
   from { transform: translateX(calc(-16 * var(--u))); }
@@ -156,7 +158,7 @@ img { max-width: none; }
   width: 100%; height: 100%;
   object-fit: cover; object-position: 50% 30%;
 }
-.hero__cloud  { left: 0; top: calc(1370 * var(--u)); width: 100%; height: auto; }
+.hero__cloud  { left: calc(-12 * var(--u)); top: calc(1370 * var(--u)); width: calc(100% + 24 * var(--u)); height: auto; }
 .hero__cupid  { left: calc(896 * var(--u)); top: calc(1299 * var(--u)); width: calc(423 * var(--u)); }
 .hero__ribbon { left: calc(232 * var(--u)); top: calc(1633 * var(--u)); width: calc(1134 * var(--u)); height: calc(760 * var(--u)); }
 .hero__ribbon-img { position: absolute; left: 0; top: 0; width: 100%; height: auto; display: block; }
@@ -325,8 +327,8 @@ html.no-anim .hero__names { -webkit-mask-image: none; mask-image: none; }
   padding-top: calc(190 * var(--u));
   text-align: center;
 }
-.cloud--a { left: 0; top: calc(11 * var(--u)); width: calc(227 * var(--u)); }
-.cloud--b { left: calc(1047 * var(--u)); top: calc(1473 * var(--u)); width: calc(319 * var(--u)); }
+.cloud--a { left: calc(-30 * var(--u)); top: calc(11 * var(--u)); width: calc(227 * var(--u)); }
+.cloud--b { left: calc(1077 * var(--u)); top: calc(1473 * var(--u)); width: calc(319 * var(--u)); }
 .date__intro {
   margin: 0;
   font-size: calc(74 * var(--u));
@@ -409,7 +411,7 @@ html.no-anim .hero__names { -webkit-mask-image: none; mask-image: none; }
   stroke-linecap: butt;
   stroke-dasharray: calc(36 * var(--u)) calc(22 * var(--u));
 }
-.cloud--c { left: 0; bottom: calc(-140 * var(--u)); width: calc(368 * var(--u)); }
+.cloud--c { left: calc(-30 * var(--u)); bottom: calc(-140 * var(--u)); width: calc(368 * var(--u)); }
 
 /* ============================================================
    7 — ОТСЧЁТ: картуш (макет: 12899–13796)
@@ -460,7 +462,7 @@ html.no-anim .hero__names { -webkit-mask-image: none; mask-image: none; }
 }
 .wish > img, .wish__cherub { position: absolute; display: block; height: auto; }
 .wish__bow { left: calc(489 * var(--u)); top: calc(60 * var(--u)); width: calc(458 * var(--u)); }
-.cloud--d { left: calc(960 * var(--u)); top: calc(201 * var(--u)); width: calc(406 * var(--u)); }
+.cloud--d { left: calc(990 * var(--u)); top: calc(201 * var(--u)); width: calc(406 * var(--u)); }
 .wish__cherub { left: 0; top: calc(344 * var(--u)); width: calc(411 * var(--u)); }
 .wish__title {
   margin: 0;
@@ -632,8 +634,8 @@ html.no-anim .hero__names { -webkit-mask-image: none; mask-image: none; }
   padding: calc(560 * var(--u)) calc(80 * var(--u)) calc(70 * var(--u));
   text-align: center;
 }
-.cloud--e { left: 0; top: calc(130 * var(--u)); width: calc(347 * var(--u)); }
-.cloud--f { left: calc(1116 * var(--u)); top: calc(624 * var(--u)); width: calc(250 * var(--u)); }
+.cloud--e { left: calc(-30 * var(--u)); top: calc(130 * var(--u)); width: calc(347 * var(--u)); }
+.cloud--f { left: calc(1146 * var(--u)); top: calc(624 * var(--u)); width: calc(250 * var(--u)); }
 .fin__title { position: relative; font-size: calc(158 * var(--u)); }
 .fin__sign {
   position: relative;

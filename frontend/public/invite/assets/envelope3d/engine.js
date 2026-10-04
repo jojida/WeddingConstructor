@@ -1,4 +1,5 @@
-// Прототип 3D-конверта на WebGL2 без библиотек.
+// 3D-конверт на WebGL2 без библиотек — общий движок шаблонов
+// (подключает ../envelope3d.js, прототип — /envelope-3d/index.html).
 //
 // Сцена: плоскость конверта z=0 (мир в CSS-пикселях сцены, y вверх), клапан —
 // сетка, которая поворачивается вокруг верхнего сгиба, печать — сетка с картой
@@ -457,10 +458,16 @@ function buildCard(gl, tex, L, names, date, fonts) {
   const cy = (yw) => ((y1 - yw) / (y1 - y0)) * Hc;
   const yN = L.H - 0.16 * L.H;
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = `${Math.round(Wc * 0.085)}px "${fonts.script}"`;
+  // Имена должны поместиться в вырез кармана (~62% ширины карточки)
+  let fsN = Wc * 0.085;
+  g.font = `${Math.round(fsN)}px "${fonts.script}"`;
+  const wN = g.measureText(names).width;
+  if (wN > Wc * 0.62) { fsN *= (Wc * 0.62) / wN; g.font = `${Math.round(fsN)}px "${fonts.script}"`; }
   g.fillText(names, Wc / 2, cy(yN));
-  g.font = `500 ${Math.round(Wc * 0.04)}px "${fonts.serif}"`;
-  g.fillText(date, Wc / 2, cy(yN - 0.06 * L.H));
+  if (date) {
+    g.font = `500 ${Math.round(Wc * 0.04)}px "${fonts.serif}"`;
+    g.fillText(date, Wc / 2, cy(yN - 0.06 * L.H));
+  }
   gl.bindTexture(gl.TEXTURE_2D, tex);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
@@ -517,11 +524,43 @@ function grid(gl, nx, ny, x0, x1, y0, y1) {
 }
 
 export const WAXES = {
-  ivory: { col: [0.93, 0.895, 0.83], gloss: 1.0, gold: [0.80, 0.66, 0.43] },
-  gold: { col: [0.86, 0.73, 0.50], gloss: 1.5, gold: [0.72, 0.54, 0.28] },
-  burgundy: { col: [0.47, 0.11, 0.14], gloss: 1.2, gold: [0.84, 0.68, 0.42] },
-  sage: { col: [0.64, 0.69, 0.58], gloss: 1.0, gold: [0.82, 0.67, 0.43] },
+  beige: { label: 'Бежевый', col: [0.86, 0.78, 0.64], gloss: 1.1, gold: [0.74, 0.57, 0.33] },
+  ivory: { label: 'Айвори', col: [0.93, 0.895, 0.83], gloss: 1.0, gold: [0.80, 0.66, 0.43] },
+  gold: { label: 'Золото', col: [0.86, 0.73, 0.50], gloss: 1.5, gold: [0.72, 0.54, 0.28] },
+  burgundy: { label: 'Бордо', col: [0.47, 0.11, 0.14], gloss: 1.2, gold: [0.84, 0.68, 0.42] },
+  sage: { label: 'Шалфей', col: [0.64, 0.69, 0.58], gloss: 1.0, gold: [0.82, 0.67, 0.43] },
+  blue: { label: 'Голубой', col: [0.62, 0.72, 0.84], gloss: 1.1, gold: [0.84, 0.70, 0.46] },
 };
+
+// Открытие, секунды с касания: медленный подъём клапана, потом карточка
+// выезжает из кармана. reveal — пора показывать сайт под конвертом.
+export const TIMELINE = { press: [0, 0.45], flap: [0.35, 3.3], card: [2.5, 4.4], cam: [1.8, 4.7], reveal: 4.0, end: 4.8 };
+
+// «Нажмите, чтобы открыть» по дуге под кончиком клапана и рука — вёрсткой (SVG),
+// чтобы текст был чётким на любом экране.
+export function drawHint(svg, L, opts = {}) {
+  const { W, H, tipR } = L;
+  const color = opts.color || '#9a8462';
+  const cx = W / 2, cy = 0.553 * H, r = tipR + 0.058 * W;
+  const a0 = (157 * Math.PI) / 180, a1 = (23 * Math.PI) / 180;
+  const p0 = [cx + r * Math.cos(a0), cy + r * Math.sin(a0)], p1 = [cx + r * Math.cos(a1), cy + r * Math.sin(a1)];
+  const fs = Math.max(13, 0.05 * W);
+  const hs = 0.075 * W, hy = cy + r + 0.1 * W;
+  const id = 'wcEnvArc' + Math.random().toString(36).slice(2, 8);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `
+    <defs><path id="${id}" d="M ${p0[0]} ${p0[1]} A ${r} ${r} 0 0 0 ${p1[0]} ${p1[1]}" /></defs>
+    <text font-size="${fs}" fill="${color}" style="font-family:'${opts.font || 'Cormorant Garamond'}',serif;font-weight:500;letter-spacing:.03em">
+      <textPath href="#${id}" startOffset="50%" text-anchor="middle">${opts.text || 'Нажмите, чтобы открыть'}</textPath></text>
+    <g transform="translate(${cx - hs / 2} ${hy}) scale(${hs / 24})">
+      <g class="wc-env3d__hand" fill="none" stroke="${color}" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 11V5.6a1.5 1.5 0 0 1 3 0V11" />
+        <path d="M12 10.4V9.1a1.5 1.5 0 0 1 3 0v1.6" />
+        <path d="M15 10.6a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.1a5 5 0 0 1-3.9-1.9l-2.4-3.5a1.5 1.5 0 0 1 2.4-1.8L9 15.6" />
+        <path d="M10.5 1.4v1.5M6.9 2.9l1 1M14.1 2.9l-1 1" />
+      </g>
+    </g>`;
+}
 
 // ---------------------------------------------------------------- public
 export async function mountEnvelope(stage, opts = {}) {
@@ -529,7 +568,7 @@ export async function mountEnvelope(stage, opts = {}) {
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false, premultipliedAlpha: true });
   if (!gl) throw new Error('WebGL2 недоступен');
   const base = opts.base || '';
-  const fonts = { script: 'Great Vibes', serif: 'Cormorant Garamond' };
+  const fonts = { script: opts.scriptFont || 'Great Vibes', serif: opts.serifFont || 'Cormorant Garamond' };
   await Promise.all([
     document.fonts.load(`80px "${fonts.script}"`, 'АБВабвABC'),
     document.fonts.load(`500 40px "${fonts.serif}"`, 'АБВабвABC'),
@@ -547,12 +586,13 @@ export async function mountEnvelope(stage, opts = {}) {
   const texSeal = gl.createTexture();
   const texCard = gl.createTexture();
 
+  const TL = TIMELINE;
   const state = {
     letters: opts.letters || ['А', 'Д'],
     names: opts.names || 'Анна & Дмитрий',
     date: opts.date || '12 · 06 · 2027',
-    wax: WAXES[opts.wax] ? opts.wax : 'ivory',
-    openAt: null, t: 0, pointer: [0, 0], light: [0, 0], onDone: opts.onDone || null, done: false,
+    wax: WAXES[opts.wax] ? opts.wax : 'beige',
+    openAt: null, pointer: [0, 0], light: [0, 0], revealed: false, ended: false,
   };
   buildSeal(gl, texSeal, state.letters, fonts.script);
 
@@ -620,7 +660,6 @@ export async function mountEnvelope(stage, opts = {}) {
   }
 
   // Время сцены: t < 0 — конверт закрыт, t ≥ 0 — секунды с момента касания.
-  const TL = { press: [0, 0.32], flap: [0.25, 2.2], card: [1.6, 2.9], cam: [1.2, 3.0], fade: [2.7, 3.3] };
   const easeSine = (x) => (1 - Math.cos(Math.PI * x)) / 2;
   function sceneAt(t, time) {
     const s = { time };
@@ -684,41 +723,82 @@ export async function mountEnvelope(stage, opts = {}) {
     return s;
   }
 
+  // Кадры идут, только пока конверт на экране и вкладка видна: в редакторе
+  // он стоит первым экраном и не должен греть телефон, когда его пролистали.
   const t0 = performance.now();
-  let raf = 0;
-  function tick(now) {
+  let raf = 0, running = false, visible = true, destroyed = false;
+  const sceneT = (now) => (state.openAt == null ? -1 : (now - state.openAt) / 1000);
+  function frame(now) {
     const time = (now - t0) / 1000;
     state.light[0] += (state.pointer[0] - state.light[0]) * 0.06;
     state.light[1] += (state.pointer[1] - state.light[1]) * 0.06;
-    const t = state.openAt == null ? -1 : (now - state.openAt) / 1000;
+    const t = sceneT(now);
     draw(t, time);
-    if (t >= TL.fade[0] && !state.done) { state.done = true; if (state.onDone) state.onDone(); }
-    raf = requestAnimationFrame(tick);
+    if (t >= TL.reveal && !state.revealed) { state.revealed = true; if (opts.onReveal) opts.onReveal(); }
+    if (t >= TL.end && !state.ended) { state.ended = true; if (opts.onEnd) opts.onEnd(); }
   }
+  function loop(now) {
+    if (!running) return;
+    frame(now);
+    raf = requestAnimationFrame(loop);
+  }
+  function start() {
+    if (running || destroyed || !visible || document.hidden) return;
+    running = true;
+    raf = requestAnimationFrame(loop);
+  }
+  function stop() { running = false; cancelAnimationFrame(raf); raf = 0; }
+  // Изменение без живого цикла (например, конверт пролистан в превью) — один кадр.
+  function redraw() { if (!running && !destroyed) frame(performance.now()); }
 
-  layout();
-  const ro = new ResizeObserver(() => layout());
-  ro.observe(stage);
-  window.addEventListener('pointermove', (e) => {
+  const onPointer = (e) => {
     const r = stage.getBoundingClientRect();
     state.pointer = [clamp(((e.clientX - r.left) / r.width - 0.5) * 0.5, -0.3, 0.3), clamp((0.5 - (e.clientY - r.top) / r.height) * 0.5, -0.3, 0.3)];
-  });
-  window.addEventListener('deviceorientation', (e) => {
+  };
+  const onTilt = (e) => {
     if (e.gamma == null) return;
     state.pointer = [clamp(e.gamma / 90, -0.3, 0.3), clamp((45 - (e.beta || 45)) / 90, -0.3, 0.3)];
-  });
-  raf = requestAnimationFrame(tick);
+  };
+  const onVis = () => (document.hidden ? stop() : start());
+
+  layout();
+  const ro = new ResizeObserver(() => { layout(); redraw(); });
+  ro.observe(stage);
+  const io = 'IntersectionObserver' in window
+    ? new IntersectionObserver((es) => { visible = es[es.length - 1].isIntersecting; if (visible) start(); else stop(); })
+    : null;
+  if (io) io.observe(stage);
+  window.addEventListener('pointermove', onPointer);
+  window.addEventListener('deviceorientation', onTilt);
+  document.addEventListener('visibilitychange', onVis);
+  redraw();
+  start();
 
   return {
     layout: L,
-    open() { if (state.openAt == null) { state.openAt = performance.now(); state.done = false; } },
-    reset() { state.openAt = null; state.done = false; },
+    open() {
+      if (state.openAt != null) return;
+      state.openAt = performance.now(); state.revealed = false; state.ended = false;
+      start();
+    },
+    reset() { state.openAt = null; state.revealed = false; state.ended = false; redraw(); },
     isOpen: () => state.openAt != null,
-    setInitials(a, b) { state.letters = [a || ' ', b || ' ']; buildSeal(gl, texSeal, state.letters, fonts.script); },
-    setWax(name) { if (WAXES[name]) state.wax = name; },
-    setNames(names, date) { state.names = names; if (date) state.date = date; buildCard(gl, texCard, L, state.names, state.date, fonts); },
+    setInitials(a, b) { state.letters = [a || ' ', b || ' ']; buildSeal(gl, texSeal, state.letters, fonts.script); redraw(); },
+    setWax(name) { if (WAXES[name]) { state.wax = name; redraw(); } },
+    setNames(names, date) {
+      state.names = names || state.names; if (date) state.date = date;
+      buildCard(gl, texCard, L, state.names, state.date, fonts); redraw();
+    },
     // Для проверок без живого rAF: нарисовать кадр сцены в момент t.
     renderAt(t, time = 0) { draw(t, time); },
-    destroy() { cancelAnimationFrame(raf); ro.disconnect(); },
+    destroy() {
+      destroyed = true; stop(); ro.disconnect(); if (io) io.disconnect();
+      window.removeEventListener('pointermove', onPointer);
+      window.removeEventListener('deviceorientation', onTilt);
+      document.removeEventListener('visibilitychange', onVis);
+      // Освобождаем видеопамять телефона сразу, не дожидаясь сборщика мусора
+      const lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    },
   };
 }

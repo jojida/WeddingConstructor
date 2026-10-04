@@ -493,7 +493,10 @@ export interface DrinkOption  { value: string; label: string; }
 export type FieldType =
   | 'text' | 'textarea' | 'image' | 'audio' | 'colorList' | 'schedule' | 'drinks'
   | 'toggle'                  // галочка: значение true/false, по умолчанию включено (см. defaultOff)
+  | 'choice'                  // выбор одного варианта из options (кружки-образцы цвета)
   | 'rsvpQuestions';          // список готовых вопросов анкеты (RSVP_QUESTIONS)
+
+export interface ChoiceOption { value: string; label: string; color?: string; }
 
 export interface TemplateField {
   id: string;                 // data-edit ключ + ключ хранения
@@ -506,7 +509,20 @@ export interface TemplateField {
   noIcon?: boolean;           // для schedule — у пунктов нет иконок (не показывать ввод эмодзи)
   maxLength?: number;         // ограничение длины для text/textarea
   defaultOff?: boolean;       // для toggle — не задано значит выключено
+  options?: ChoiceOption[];   // для choice — варианты; не задано = первый
 }
+
+/* Цвета сургучной печати 3D-конверта (../assets/envelope3d.js). value совпадают
+   с WAXES движка (public/invite/assets/envelope3d/engine.js), color — образец
+   в редакторе, близкий к тону воска на рендере. */
+export const SEAL_COLORS: ChoiceOption[] = [
+  { value: 'beige',    label: 'Бежевый', color: '#dbc7a3' },
+  { value: 'ivory',    label: 'Айвори',  color: '#efe6d6' },
+  { value: 'gold',     label: 'Золото',  color: '#d9b77c' },
+  { value: 'burgundy', label: 'Бордо',   color: '#7a1f27' },
+  { value: 'sage',     label: 'Шалфей',  color: '#a4b095' },
+  { value: 'blue',     label: 'Голубой', color: '#9fb8d6' },
+];
 
 export interface TemplateSection {
   title: string;
@@ -738,6 +754,12 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   angels: [
+    {
+      title: 'Конверт', icon: '✉️',
+      fields: [
+        { id: 'sealColor', type: 'choice', label: 'Цвет печати', hint: 'Буквы на печати — первые буквы ваших имён', scope: 'custom', options: SEAL_COLORS },
+      ],
+    },
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1404,6 +1426,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { value: 'no_alcohol', label: 'Без алкоголя' },
     ],
     custom: {
+      sealColor:     'beige',
       greetingTitle: 'Дорогие Гости!',
       polaroidPhoto: '/invite/angels/assets/polaroid.jpg',
       dateIntro:     'Наша свадьба состоится',

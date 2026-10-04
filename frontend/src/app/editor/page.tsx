@@ -1020,6 +1020,35 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
         </label>
       );
     }
+    case 'choice': {
+      // Не задано — первый вариант: так поле работает и у сайтов, созданных до его появления.
+      const opts = field.options || [];
+      const cur = opts.some(o => o.value === value) ? value : opts[0]?.value;
+      return (
+        <Field label={field.label}>
+          <div role="radiogroup" aria-label={field.label} style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+            {opts.map(o => {
+              const on = o.value === cur;
+              return (
+                <button key={o.value} type="button" role="radio" aria-checked={on} title={o.label} onClick={() => onChange(o.value)}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: 0, border: 'none', background: 'none',
+                    cursor: 'pointer', fontFamily: 'var(--font-inter)', fontSize: 11, color: on ? '#4b463d' : '#8a8273', minWidth: 46,
+                  }}>
+                  <span style={{
+                    width: 34, height: 34, borderRadius: '50%', background: o.color || '#ccc',
+                    boxShadow: on ? '0 0 0 2px #fff, 0 0 0 4px #685d4a' : 'inset 0 0 0 1px rgba(0,0,0,0.14)',
+                    transition: 'box-shadow .15s ease',
+                  }} />
+                  {o.label}
+                </button>
+              );
+            })}
+          </div>
+          {field.hint ? <div style={{ fontSize: 11, color: '#a39b8e', marginTop: 8, fontFamily: 'var(--font-inter)' }}>{field.hint}</div> : null}
+        </Field>
+      );
+    }
     case 'rsvpQuestions':
       return (
         <Field label={field.label}>

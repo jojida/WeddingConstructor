@@ -424,7 +424,7 @@
   }
 
   /* ─── Появление при прокрутке ────────────────────── */
-  var io = null;
+  var io = null, ioClip = null;
   var REVEAL = '.rv:not(.in), .rv-soft:not(.in), .rv-write:not(.in), .rv-pop:not(.in), .scroll:not(.in), .polaroid:not(.in)';
 
   function revealNow(el) {
@@ -441,22 +441,28 @@
       document.querySelectorAll('.rv, .rv-soft, .rv-write, .rv-pop, .scroll, .polaroid').forEach(function (el) { el.classList.add('in', 'done'); });
       return;
     }
-    io = new IntersectionObserver(function (entries) {
-      // Что вошло в экран одновременно — проявляется лесенкой
+    // Что вошло в экран одновременно — проявляется лесенкой
+    var enter = function (entries, obs) {
       var i = 0;
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         e.target.style.setProperty('--d', Math.min(i++, 5) * 120 + 'ms');
         revealNow(e.target);
-        io.unobserve(e.target);
+        obs.unobserve(e.target);
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    };
+    io = new IntersectionObserver(enter, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    // Свиток до раскрытия обрезан clip-path до верхнего валика (~5% высоты),
+    // а Chrome считает видимость с учётом clip-path: порог 0.12 не набирался
+    // никогда, и свиток оставался свёрнутым. Ему — порог 0.
+    ioClip = new IntersectionObserver(enter, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
     observeReveal(document);
   }
 
   function observeReveal(scope) {
     (scope || document).querySelectorAll(REVEAL).forEach(function (el) {
-      if (io) io.observe(el);
+      var obs = el.classList.contains('scroll') ? ioClip : io;
+      if (obs) obs.observe(el);
       else el.classList.add('in', 'done');
     });
   }
@@ -477,6 +483,16 @@
       startHero();
       return;
     }
+    // Гость сначала открывает 3D-конверт (../assets/envelope3d.js):
+    // облака, Купидон и лента начинают, пока конверт растворяется
+    if (window.WCEnvelope && window.WCEnvelope.active) {
+      window.addEventListener('wc:envelope-open', waitAndStartHero, { once: true });
+      return;
+    }
+    waitAndStartHero();
+  }
+
+  function waitAndStartHero() {
     var waits = [];
     if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
     var photo = document.querySelector('.hero__photo');
