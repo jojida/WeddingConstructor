@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Конверт 3D — прототип</title>
+<style>
+  @font-face { font-family: 'Great Vibes'; src: url(/invite/assets/fonts/google/80b935e653c6426a8780.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: block; }
+  @font-face { font-family: 'Great Vibes'; src: url(/invite/assets/fonts/google/c59dc73d29daf142ef24.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F; font-display: block; }
+  @font-face { font-family: 'Cormorant Garamond'; font-weight: 300 600; src: url(/invite/assets/fonts/google/017fab69b4be8ffc08ca.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; font-display: block; }
+  @font-face { font-family: 'Cormorant Garamond'; font-weight: 300 600; src: url(/invite/assets/fonts/google/d80df8ff5aecd299a615.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F; font-display: block; }
+
+  html, body { margin: 0; height: 100%; background: #16140f; overflow: hidden; }
+  #stage {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    height: 100vh; height: 100dvh; width: min(100vw, calc(100dvh * 0.62));
+    overflow: hidden; cursor: pointer; outline: none;
+    -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none;
+  }
+  #gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #hint { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity .45s ease; }
+  #hint.off { opacity: 0; }
+  #hint text { font-family: 'Cormorant Garamond', serif; font-weight: 500; fill: #9a8462; letter-spacing: .03em; }
+  #hint .hand { animation: tap 1.9s ease-in-out infinite; }
+  @keyframes tap { 0%, 100% { transform: translateY(0); } 45% { transform: translateY(3px); } }
+  #final {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    background: #f7f2e8; opacity: 0; pointer-events: none; transition: opacity .7s ease;
+    font-family: 'Cormorant Garamond', serif; color: #7c6a4f; text-align: center; padding: 24px; box-sizing: border-box;
+  }
+  #final.on { opacity: 1; pointer-events: auto; }
+  #final h1 { font-family: 'Great Vibes', cursive; font-weight: 400; font-size: 46px; margin: 0; color: #9c8158; }
+  #final p { margin: 0; font-size: 18px; }
+  #final button, #panel button {
+    font: 500 15px 'Cormorant Garamond', serif; color: #6d5b40; background: #fffaf0;
+    border: 1px solid #d8c7a6; border-radius: 999px; padding: 8px 18px; cursor: pointer;
+  }
+  #panel {
+    position: fixed; right: 12px; bottom: 12px; z-index: 5; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    background: rgba(255, 250, 240, .92); border: 1px solid #e3d6bb; border-radius: 14px; padding: 8px 10px;
+    font: 500 14px 'Cormorant Garamond', serif; color: #6d5b40; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+  }
+  #panel input { width: 30px; text-align: center; font: 22px 'Great Vibes', cursive; border: 1px solid #d8c7a6; border-radius: 8px; background: #fff; color: #6d5b40; padding: 2px 0; }
+  #panel select { font: 500 14px 'Cormorant Garamond', serif; border: 1px solid #d8c7a6; border-radius: 8px; background: #fff; color: #6d5b40; padding: 4px; }
+  #err { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; color: #e9dfcc; font: 16px sans-serif; padding: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="stage" role="button" tabindex="0" aria-label="Открыть приглашение">
+  <canvas id="gl"></canvas>
+  <svg id="hint" aria-hidden="true"></svg>
+  <div id="final" aria-live="polite">
+    <h1 id="finalNames">Анна &amp; Дмитрий</h1>
+    <p>Здесь начинается сайт-приглашение</p>
+    <button id="again" type="button">Открыть ещё раз</button>
+  </div>
+</div>
+<div id="panel">
+  <span>Инициалы</span>
+  <input id="ia" maxlength="1" value="А" aria-label="Первая буква">
+  <input id="ib" maxlength="1" value="Д" aria-label="Вторая буква">
+  <select id="wax" aria-label="Цвет воска">
+    <option value="ivory">Айвори</option>
+    <option value="gold">Золото</option>
+    <option value="burgundy">Бордо</option>
+    <option value="sage">Шалфей</option>
+  </select>
+  <button id="replay" type="button">Сначала</button>
+</div>
+<div id="err"></div>
+
+<script type="module">
+  import { mountEnvelope } from './envelope3d.js';
+
+  const q = new URLSearchParams(location.search);
+  const stage = document.getElementById('stage');
+  const hint = document.getElementById('hint');
+  const final = document.getElementById('final');
+  const ia = document.getElementById('ia'), ib = document.getElementById('ib'), wax = document.getElementById('wax');
+  if (q.get('a')) ia.value = q.get('a').slice(0, 1);
+  if (q.get('b')) ib.value = q.get('b').slice(0, 1);
+  if (q.get('wax')) wax.value = q.get('wax');
+  const names = q.get('names') || 'Анна & Дмитрий';
+  document.getElementById('finalNames').textContent = names;
+  if (q.get('panel') === '0') document.getElementById('panel').remove();
+
+  // Надпись по дуге под кончиком клапана и рука — как на референсе, но в вёрстке.
+  function drawHint(L) {
+    const { W, H, tipR } = L;
+    const cx = W / 2, cy = 0.553 * H, r = tipR + 0.058 * W;
+    const a0 = (157 * Math.PI) / 180, a1 = (23 * Math.PI) / 180;
+    const p0 = [cx + r * Math.cos(a0), cy + r * Math.sin(a0)], p1 = [cx + r * Math.cos(a1), cy + r * Math.sin(a1)];
+    const fs = Math.max(13, 0.05 * W);
+    const hs = 0.075 * W, hy = cy + r + 0.1 * W;
+    hint.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    hint.innerHTML = `
+      <defs><path id="arc" d="M ${p0[0]} ${p0[1]} A ${r} ${r} 0 0 0 ${p1[0]} ${p1[1]}" /></defs>
+      <text font-size="${fs}"><textPath href="#arc" startOffset="50%" text-anchor="middle">Нажмите, чтобы открыть</textPath></text>
+      <g transform="translate(${cx - hs / 2} ${hy}) scale(${hs / 24})">
+        <g class="hand" fill="none" stroke="#9a8462" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11V5.6a1.5 1.5 0 0 1 3 0V11" />
+          <path d="M12 10.4V9.1a1.5 1.5 0 0 1 3 0v1.6" />
+          <path d="M15 10.6a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.1a5 5 0 0 1-3.9-1.9l-2.4-3.5a1.5 1.5 0 0 1 2.4-1.8L9 15.6" />
+          <path d="M10.5 1.4v1.5M6.9 2.9l1 1M14.1 2.9l-1 1" />
+        </g>
+      </g>`;
+  }
+
+  let env;
+  try {
+    env = await mountEnvelope(stage, {
+      base: './', letters: [ia.value, ib.value], wax: wax.value, names,
+      onLayout: drawHint,
+      onDone: () => final.classList.add('on'),
+    });
+  } catch (e) {
+    const err = document.getElementById('err');
+    err.style.display = 'flex'; err.textContent = 'Не удалось запустить 3D: ' + e.message;
+    console.error(e);
+  }
+  window.__env = env;
+
+  function open() {
+    if (!env || env.isOpen()) return;
+    hint.classList.add('off');
+    env.open();
+  }
+  function reset() {
+    if (!env) return;
+    final.classList.remove('on');
+    hint.classList.remove('off');
+    env.reset();
+  }
+  stage.addEventListener('click', (e) => { if (!final.classList.contains('on')) open(); });
+  stage.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+  document.getElementById('again').addEventListener('click', (e) => { e.stopPropagation(); reset(); });
+  document.getElementById('replay')?.addEventListener('click', reset);
+  const upd = () => env && env.setInitials(ia.value.trim(), ib.value.trim());
+  ia.addEventListener('input', upd); ib.addEventListener('input', upd);
+  wax.addEventListener('change', () => env && env.setWax(wax.value));
+</script>
+</body>
+</html>
