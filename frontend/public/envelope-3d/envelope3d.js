@@ -8,6 +8,7 @@
 // «отъехать» от печати: это один объект с общим светом.
 
 const SEAL_N = 512;
+const FACE_R = 0.665;   // радиус круглого «лица» печати в долях внешнего радиуса
 
 // ---------------------------------------------------------------- math
 function perspective(fovy, aspect, near, far) {
@@ -393,8 +394,8 @@ function renderMonogram(letters, N, font) {
   draw(1, 0, 0);
   let bb = inkBox(g, N);
   if (!bb) return new Float32Array(N * N);
-  const faceD = N * 0.69;                       // диаметр лица печати в пикселях текстуры
-  const s = clamp((faceD * 0.80) / Math.hypot(bb.w, bb.h), 0.4, 2.5);
+  const faceD = N * FACE_R;                     // диаметр лица печати в пикселях текстуры
+  const s = clamp((faceD * 0.86) / Math.hypot(bb.w, bb.h), 0.4, 2.5);
   draw(s, 0, 0);
   bb = inkBox(g, N);
   draw(s, N / 2 - (bb.x0 + bb.x1) / 2, N / 2 - (bb.y0 + bb.y1) / 2);
@@ -418,11 +419,12 @@ function buildSeal(gl, tex, letters, font) {
     const t = clamp((1 - rho) / 0.22, 0, 1);
     const wob = 1 + 0.06 * Math.sin(3 * th + 0.8) + 0.04 * Math.sin(7 * th + 2.6);
     let h = 0.92 * wob * Math.sqrt(1 - (1 - t) * (1 - t));
-    h += 0.05 * Math.exp(-Math.pow((rho - 0.80) / 0.06, 2));
-    const face = smooth(0.715, 0.685, rho);
+    // Волнистый только внешний край (rho), всё внутри — правильные окружности (r).
+    h += 0.05 * Math.exp(-Math.pow((r - (FACE_R + ro) / 2) / 0.06, 2));
+    const face = smooth(FACE_R + 0.016, FACE_R - 0.012, r);
     h = h * (1 - face) + 0.60 * face;
-    h += 0.04 * Math.exp(-Math.pow((rho - 0.648) / 0.0085, 2));
-    h -= 0.025 * face * (1 - rho / 0.7);
+    h += 0.04 * Math.exp(-Math.pow((r - (FACE_R - 0.034)) / 0.0085, 2));
+    h -= 0.025 * face * (1 - r / FACE_R);
     h += 0.075 * monoSoft[k] * face;
     h += 0.010 * noise2(x * 6 + 3.1, y * 6 - 1.7) + 0.005 * noise2(x * 17, y * 17) + 0.0025 * noise2(x * 70, y * 70);
     H[k] = Math.max(h, 0);
