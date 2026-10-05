@@ -126,9 +126,9 @@ export default function GardenArchTemplate({ data, apiBase, fullPage, slug, edit
       background: '#ffffff', containerType: 'inline-size',
       fontFamily: "'Cormorant Garamond', Georgia, serif",
     }}>
-      <div style={{ position: 'relative', width: '100%' }}>
+      <div style={{ position: 'relative', width: '100%', height: '100%' }}>
         <img src="/invite/garden-arch/assets/decor/arch.webp" alt=""
-          style={{ position: 'relative', zIndex: 1, width: '100%', display: 'block', aspectRatio: '1038 / 1351' }} />
+          style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%', display: 'block', objectFit: 'cover' }} />
 
         {/* Шатёр (беседка) и пара — слоями в проёме арки */}
         <img src="/invite/garden-arch/assets/decor/gazebo.webp" alt=""
