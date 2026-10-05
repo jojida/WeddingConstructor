@@ -15,8 +15,8 @@
     apiBase: '', slug: '', guestToken: '', guestName: '',
     date: '2027-07-12', time: '12:00',
     groom: 'Алексей', bride: 'Ангелина',
-    signUser: false,
-    looksSeen: false,       // данные с фото образов уже приходили        // подпись финала задала пара (иначе — имена)
+    signUser: false,        // подпись финала задала пара (иначе — имена)
+    looksSeen: false,       // данные с фото образов уже приходили
     scheduleSig: '',
     storySig: ''
   };
