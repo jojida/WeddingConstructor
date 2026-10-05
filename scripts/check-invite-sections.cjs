@@ -11,7 +11,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 const { TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, templateCustomDefaults } = require('../frontend/src/lib/constants.ts');
 const base = process.env.SECTIONS_BASE_URL || 'http://localhost:3210';
 const required = ['cover', 'date', 'venue', 'closing'];
-const optional = ['greeting', 'photos', 'schedule', 'dresscode', 'wishes', 'rsvp', 'organizer', 'countdown', 'music', 'map', 'envelope'];
+const optional = ['greeting', 'photos', 'schedule', 'dresscode', 'wishes', 'rsvp', 'organizer', 'countdown', 'music', 'map', 'envelope', 'forecast', 'menu'];
 const allOff = Object.fromEntries([...required, ...optional].map(id => [id, false]));
 const draft = id => ({
   templateId: id, groomName: 'Иван', brideName: 'Анна', weddingDate: '2027-07-17', weddingTime: '15:00', status: 'draft',
