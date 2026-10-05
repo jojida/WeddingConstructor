@@ -185,6 +185,11 @@ img, svg { display: block; max-width: 100%; }
 }
 .polaroids .pol-l { transform: rotate(-5deg); }
 .polaroids .pol-r { transform: rotate(4deg); margin-top: 18px; }
+.pol[data-cutout="1"] .frame { display: none; }
+.pol[data-cutout="1"] .photo {
+  inset: 0; width: 100%; height: 100%; object-fit: contain;
+  filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff);
+}
 
 /* Подпись под рамкой, вместе с ней наклонена (поворот у .pol). */
 .pol .pol-cap {

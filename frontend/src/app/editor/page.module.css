@@ -378,3 +378,30 @@
   .sidebarContent { flex: none; overflow: visible; padding-top: 0; }
   .sidebarFooter { padding-top: 20px; }
 }
+.cutoutActions { display: flex; margin-top: 8px; }
+.cutoutActions button, .cutoutFooter button {
+  padding: 10px 14px; border: 1px solid #cec5ba; border-radius: 8px;
+  background: #fff; color: #4b463d; cursor: pointer; font-size: 13px;
+}
+.cutoutActions button { width: 100%; }
+.cutoutActions button:disabled { opacity: .6; cursor: wait; }
+.cutoutBackdrop {
+  position: fixed; inset: 0; z-index: 10002; background: rgba(13,11,9,.65);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.cutoutDialog { width: 100%; max-width: 640px; max-height: 90dvh; overflow: auto; background: #fff; border-radius: 16px; padding: 20px; }
+.cutoutHeading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.cutoutHeading h2 { font-size: 20px; }
+.cutoutHeading button { border: none; background: transparent; font-size: 26px; cursor: pointer; padding: 4px 10px; }
+.cutoutComparison { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.cutoutComparison figure { min-width: 0; margin: 0; }
+.cutoutComparison img { width: 100%; height: clamp(170px, 35vh, 310px); object-fit: contain; display: block; }
+.cutoutComparison figcaption { text-align: center; color: #7d766c; font-size: 13px; margin-top: 8px; }
+.cutoutChecker {
+  background: repeating-conic-gradient(#eee 0% 25%, #fff 0% 50%) 0 0 / 16px 16px; border-radius: 8px;
+}
+.cutoutHint { color: #7d766c; font-size: 13px; line-height: 1.5; margin-top: 16px; }
+.cutoutPending { padding: 48px 12px; text-align: center; font-size: 16px; }
+.cutoutPending span { display: block; margin-top: 12px; color: #7d766c; font-size: 13px; }
+.cutoutFooter { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+.cutoutFooter button:last-child:not(:first-child) { background: #685d4a; color: #fff; border-color: #685d4a; }

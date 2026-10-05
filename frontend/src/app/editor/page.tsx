@@ -13,10 +13,12 @@ import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import dynamic from 'next/dynamic';
 import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
+import type { PhotoCutout } from './BackgroundRemovalEditor';
 import styles from './page.module.css';
 
 const AuthModal = dynamic(() => import('@/components/AuthModal'));
 const PhotoFrameEditor = dynamic(() => import('./PhotoFrameEditor'));
+const BackgroundRemovalEditor = dynamic(() => import('./BackgroundRemovalEditor'));
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 export interface InviteData {
@@ -534,6 +536,14 @@ function EditorContent() {
       return { ...prev, customData: { ...cd, photoFrames: frames } };
     });
 
+  const setPhotoCutout = (id: string, photo: PhotoCutout | null, value: string) =>
+    setData(prev => {
+      const cd = prev.customData || {};
+      const photos = { ...(cd.photoCutouts || {}) };
+      if (photo) photos[id] = photo; else delete photos[id];
+      return { ...prev, customData: { ...cd, photoCutouts: photos, [id]: value } };
+    });
+
   // Загрузка картинки, возвращает URL (для ImagePicker)
   const uploadImage = async (file: File): Promise<string | null> => {
     setUploading(true);
@@ -801,6 +811,8 @@ function EditorContent() {
                               frame={(data.customData?.photoFrames || {})[f.id] ?? null}
                               slot={photoSlots[f.id]}
                               onFrame={fr => setPhotoFrame(f.id, fr)}
+                              photoCutout={data.customData?.photoCutouts?.[f.id]}
+                              onPhotoCutout={(photo, value) => setPhotoCutout(f.id, photo, value)}
                             />
                           </div>
                         ))}
@@ -974,7 +986,7 @@ function CharCounter({ value, max }: { value: string; max: number }) {
   );
 }
 
-function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uploadImage, uploadAudio, frame, slot, onFrame }: {
+function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uploadImage, uploadAudio, frame, slot, onFrame, photoCutout, onPhotoCutout }: {
   field: TemplateField;
   templateId?: string;
   value: any;
@@ -985,6 +997,8 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
   frame: PhotoFrame | null;
   slot?: PhotoSlot;
   onFrame: (f: PhotoFrame | null) => void;
+  photoCutout?: PhotoCutout;
+  onPhotoCutout?: (photo: PhotoCutout | null, value: string) => void;
 }) {
   // Лимиты символов, чтобы длинный текст не ломал вёрстку шаблона.
   // Явный field.maxLength имеет приоритет; ссылки (URL) без лимита.
@@ -1014,9 +1028,18 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
           <ImagePicker
             value={value || ''}
             // Новое фото — старый кадр к нему не подходит, начинаем с положения по умолчанию
-            onChange={v => { if (v !== (value || '') && frame) onFrame(null); onChange(v); }}
+            onChange={v => {
+              if (v !== (value || '') && frame) onFrame(null);
+              if (field.removeBackground && onPhotoCutout) onPhotoCutout(null, v); else onChange(v);
+            }}
             apiBase={apiBase} uploadImage={uploadImage}
             frame={frame} slot={slot} onFrame={onFrame}
+            removeBackground={field.removeBackground}
+            photoCutout={photoCutout?.resultUrl === value ? photoCutout : undefined}
+            onPhotoCutout={photo => {
+              if (frame) onFrame(null);
+              onPhotoCutout?.(photo, photo?.resultUrl ?? photoCutout?.originalUrl ?? '');
+            }}
           />
         </Field>
       );
@@ -1274,10 +1297,12 @@ function AudioPicker({ value, onChange, apiBase, templateId, uploadAudio, hint }
   );
 }
 
-function ImagePicker({ value, onChange, apiBase, uploadImage, frame, slot, onFrame }: {
+function ImagePicker({ value, onChange, apiBase, uploadImage, frame, slot, onFrame, removeBackground, photoCutout, onPhotoCutout }: {
   value: string; onChange: (v: string) => void; apiBase: string;
   uploadImage: (f: File) => Promise<string | null>;
   frame?: PhotoFrame | null; slot?: PhotoSlot; onFrame?: (f: PhotoFrame | null) => void;
+  removeBackground?: boolean; photoCutout?: PhotoCutout;
+  onPhotoCutout?: (photo: PhotoCutout | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [showGallery, setShowGallery] = useState(false);
@@ -1329,6 +1354,9 @@ function ImagePicker({ value, onChange, apiBase, uploadImage, frame, slot, onFra
       {showFrame && canFrame && onFrame && (
         <PhotoFrameEditor src={frameSrc} frame={frame ?? null} slot={slot} onChange={onFrame} />
       )}
+      {removeBackground && onPhotoCutout && frameSrc && <BackgroundRemovalEditor key={frameSrc}
+        src={frameSrc} originalUrl={value || slot?.src || ''} saved={photoCutout} apiBase={apiBase}
+        onApply={onPhotoCutout} onRestore={() => onPhotoCutout(null)} />}
       {showGallery && <GalleryModal onPick={u => { onChange(u); setShowGallery(false); }} onClose={() => setShowGallery(false)} />}
     </div>
   );

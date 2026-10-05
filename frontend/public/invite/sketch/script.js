@@ -325,6 +325,11 @@
     setRichText('brideCaption', d.brideCaption);
     setImg('groomPhoto', d.groomPhoto);
     setImg('bridePhoto', d.bridePhoto);
+    ['groomPhoto', 'bridePhoto'].forEach(function (id) {
+      var photo = document.querySelector('[data-edit="' + id + '"]');
+      var cutout = d.photoCutouts && d.photoCutouts[id];
+      if (photo) photo.closest('.pol').setAttribute('data-cutout', cutout && cutout.resultUrl === d[id] ? '1' : '0');
+    });
     rebuildSwatches(d.dressCodeColors);
     setImg('dressCodePhoto', d.dressCodePhoto);
     setImg('dressPhoto2', d.dressPhoto2);

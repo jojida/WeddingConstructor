@@ -4,6 +4,8 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth';
+import { rateLimit } from '../middleware/rateLimit';
+import { BackgroundRemovalError, removeBackground } from '../lib/backgroundRemoval';
 
 const router = Router();
 const uploadsDir = path.join(__dirname, '../../uploads');
@@ -29,7 +31,7 @@ const storage = multer.diskStorage({
   filename: (_req, file, cb) => cb(null, crypto.randomUUID() + formats[file.mimetype].ext),
 });
 
-function receive(kind: 'image' | 'audio', field: string, count: number) {
+function receive(kind: 'image' | 'audio', field: string, count: number, cutout = false) {
   const parser = multer({ storage,
     limits: { fileSize: (kind === 'image' ? 10 : 15) * 1024 * 1024, files: count, fields: 0, parts: count },
     fileFilter: (_req, file, cb) => {
@@ -57,10 +59,20 @@ function receive(kind: 'image' | 'audio', field: string, count: number) {
             return res.status(400).json({ error: 'Содержимое файла не соответствует формату' });
           }
         }
+        if (cutout) {
+          const png = await removeBackground(files[0].path);
+          const filename = crypto.randomUUID() + '.png';
+          const outputPath = path.join(uploadsDir, filename);
+          await fs.promises.writeFile(outputPath, png);
+          await cleanup();
+          files[0].path = outputPath;
+          files[0].filename = filename;
+        }
         const urls = files.map(f => `/uploads/${f.filename}`);
         return res.json(count === 1 ? { url: urls[0] } : { urls });
-      } catch {
+      } catch (error) {
         await cleanup();
+        if (error instanceof BackgroundRemovalError) return res.status(error.status).json({ error: error.message });
         return res.status(500).json({ error: 'Ошибка загрузки файла' });
       }
     });
@@ -68,6 +80,7 @@ function receive(kind: 'image' | 'audio', field: string, count: number) {
 }
 // Anonymous uploads support the draft editor. The application applies a shared IP limit.
 router.post('/image', receive('image', 'image', 1));
+router.post('/remove-background', rateLimit(12, 10 * 60_000), receive('image', 'image', 1, true));
 router.post('/gallery', authMiddleware, receive('image', 'images', 10));
 router.post('/audio', receive('audio', 'audio', 1));
 export default router;

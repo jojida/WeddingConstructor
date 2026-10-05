@@ -503,6 +503,7 @@ export interface TemplateField {
   type: FieldType;
   label: string;
   hint?: string;
+  removeBackground?: boolean; // бесплатное удаление фона у фото людей
   scope: 'data' | 'custom';   // где лежит значение
   iconSet?: string;           // для schedule — набор иконок-картинок (иначе ввод эмодзи)
   withDesc?: boolean;         // для schedule — показывать поле описания пункта
@@ -1082,8 +1083,8 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Фото на обложке', icon: '📸',
       fields: [
-        { id: 'groomPhoto', type: 'image', label: 'Фото жениха',  scope: 'custom' },
-        { id: 'bridePhoto', type: 'image', label: 'Фото невесты', scope: 'custom' },
+        { id: 'groomPhoto', type: 'image', label: 'Фото жениха',  scope: 'custom', removeBackground: true },
+        { id: 'bridePhoto', type: 'image', label: 'Фото невесты', scope: 'custom', removeBackground: true },
         { id: 'groomCaption', type: 'text', label: 'Подпись под фото жениха',  scope: 'custom' },
         { id: 'brideCaption', type: 'text', label: 'Подпись под фото невесты', scope: 'custom' },
       ],
