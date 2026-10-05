@@ -116,9 +116,9 @@ function heroMediterraneanData() {
 
 /* Живой шаблон «Средиземноморье» в окошке hero. Сам шаблон — iframe с фото,
    видео и Яндекс.Картой (мегабайты), поэтому сначала показываем лёгкую
-   миниатюру того же дизайна, а iframe подключаем после window.load — чтобы он
-   не отнимал канал у JS и шрифтов первого экрана. На телефоне iframe не нужен
-   совсем: там он не прокручивается (тап открывает демо), хватает миниатюры. */
+   миниатюру того же дизайна, а iframe подключаем после window.load и появления
+   окошка в поле зрения. Так открывание дверей видно и на телефоне, где окошко
+   находится ниже текста, а тап по-прежнему открывает полное демо. */
 function HeroLivePreview() {
   const data = useMemo(() => heroMediterraneanData(), []);
   const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
@@ -126,7 +126,6 @@ function HeroLivePreview() {
   const [shown, setShown] = useState(false);
 
   useEffect(() => {
-    if (window.matchMedia('(max-width: 768px)').matches) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const mount = () => { timer = setTimeout(() => setLive(true), 200); };
     if (document.readyState === 'complete') mount();
@@ -147,8 +146,8 @@ function HeroLivePreview() {
       <MediterraneanTemplate data={data} apiBase={apiBase} />
       {live && (
         <div style={{ position: 'absolute', inset: 0, opacity: shown ? 1 : 0, transition: 'opacity .5s ease' }}>
-          {/* editing=1 отключает скролл-гейт и «слив воды» с даты внутри шаблона */}
-          <MediterraneanTemplate data={data} apiBase={apiBase} editing onFrameLoad={() => setShown(true)} />
+          {/* editing отключает скролл-гейт; showIntro сохраняет открывание дверей. */}
+          <MediterraneanTemplate data={data} apiBase={apiBase} editing showIntro onFrameLoad={() => setShown(true)} />
         </div>
       )}
     </>
@@ -191,7 +190,11 @@ function Hero() {
         <div className={styles.heroDevice}>
           <div className={styles.heroDeviceFrame}>
             <div className={styles.heroDeviceScreen}>
-              <HeroLivePreview />
+              <LazyMount rootMargin="0px" placeholder={
+                <MediterraneanTemplate data={heroMediterraneanData()} apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'} />
+              }>
+                <HeroLivePreview />
+              </LazyMount>
               {/* На мобильных прокрутка внутри окошка «съедает» свайпы —
                   поэтому там iframe не интерактивен, а тап открывает демо. */}
               <Link href="/demo/mediterranean" className={styles.heroDeviceTapLink} aria-label="Открыть демо шаблона «Средиземноморье»">

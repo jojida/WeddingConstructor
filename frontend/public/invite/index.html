@@ -515,9 +515,9 @@
         setTimeout(remove, 900);
       }
 
-      // The editor and landing-page preview need the invitation itself. Avoid
-      // downloading the guest intro behind their non-interactive preview.
-      if (new URLSearchParams(location.search).get('editing') === '1') { remove(); return; }
+      // Skip the intro in the editor; the landing preview explicitly opts in.
+      var introParams = new URLSearchParams(location.search);
+      if (introParams.get('editing') === '1' && introParams.get('intro') !== '1') { remove(); return; }
       vid.src = vid.getAttribute('data-src');
       var playback = vid.play();
       if (playback && playback.catch) playback.catch(remove);

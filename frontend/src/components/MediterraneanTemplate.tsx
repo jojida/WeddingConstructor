@@ -8,6 +8,8 @@ interface Props {
   fullPage?: boolean;
   slug?: string;
   editing?: boolean;
+  /** Главная показывает заставку даже в упрощённом режиме превью. */
+  showIntro?: boolean;
   /** load iframe живого превью — hero лендинга ждёт его, чтобы сменить миниатюру */
   onFrameLoad?: () => void;
 }
@@ -18,7 +20,7 @@ interface Props {
      В режиме editing передаём editing=1 — «слив воды» с даты/скролл-гейт отключаются.
    Preview/card → миниатюра с именами поверх фото.
 ───────────────────────────────────────────────────────── */
-export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, editing, onFrameLoad }: Props) {
+export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, editing, showIntro, onFrameLoad }: Props) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dataRef = useRef(data);
   useEffect(() => { dataRef.current = data; }, [data]);
@@ -30,6 +32,7 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
     p.set('apiBase', apiBase || '');
     if (slug) p.set('slug', slug);
     if (editing) p.set('editing', '1');
+    if (showIntro) p.set('intro', '1');
     if (data.groomName) p.set('groom', data.groomName);
     if (data.brideName) p.set('bride', data.brideName);
     if (data.weddingDate) p.set('date', data.weddingDate);
