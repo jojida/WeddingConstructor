@@ -7,6 +7,7 @@ import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximiz
 import api from '@/lib/api';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
 import { isSectionEnabled } from '@/lib/section-visibility';
+import { withSketchDemoPhotos } from '@/lib/sketch-demo-photos';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
@@ -437,13 +438,14 @@ function EditorContent() {
     const defs = TEMPLATE_DEFAULTS[data.templateId];
     if (!defs) return;
     setData(prev => {
-      const cd = (prev.customData || {}) as any;
+      const currentCd = (prev.customData || {}) as any;
       // Мелодия шаблона ставится один раз (__musicSeeded): удалённая парой не
       // возвращается. Опубликованным сайтам музыку сами не добавляем.
       const published = prev.status === 'paid' || prev.status === 'published';
+      const cd = prev.templateId === 'sketch' && !published ? withSketchDemoPhotos(currentCd) : currentCd;
       const seedMusic = () => prev.musicUrl || (published ? '' : templateMusic(prev.templateId));
       if (cd.__seededTemplate === prev.templateId) {
-        let next = prev;
+        let next = cd === currentCd ? prev : { ...prev, customData: cd };
         // Уже засеяно, но «Программа дня» не должна оставаться пустой
         // (битые/старые данные в БД) — добираем дефолты дизайна шаблона.
         if ((!Array.isArray(prev.schedule) || prev.schedule.length === 0) && defs.schedule?.length) {

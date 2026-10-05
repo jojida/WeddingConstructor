@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef } from 'react';
 import { InviteData } from './TemplatePreview';
+import { SKETCH_DEMO_PHOTOS } from '@/lib/sketch-demo-photos';
 
 interface Props {
   data: InviteData;
@@ -169,21 +170,18 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
         </div>
       </div>
 
-      {/* полароиды */}
+      {/* Вырезанные фото детей */}
       <div style={{
         display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
         gap: 6, margin: '26px auto 4px', maxWidth: 400,
       }}>
         {([
-          ['photo-groom.webp', 'frame-stamp-red.svg',    'rotate(-5deg)', 0],
-          ['photo-bride.webp', 'frame-stamp-yellow.svg', 'rotate(4deg)',  14],
-        ] as const).map(([photo, frame, transform, marginTop]) => (
-          // Фото в окне рамки-«марки»: окно x 6.6…141.2, y 6.9…194.8 из 148×201.5
-          <div key={frame} style={{ position: 'relative', width: '42%', aspectRatio: '148 / 201.5', transform, marginTop }}>
-            <img src={`${A}/${photo}`} alt=""
-              style={{ position: 'absolute', left: '4.05%', top: '3%', width: '91.8%', height: '93.8%', objectFit: 'cover' }} />
-            <img src={`${A}/${frame}`} alt=""
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
+          [SKETCH_DEMO_PHOTOS.groomPhoto.resultUrl, 'rotate(-5deg)', 0],
+          [SKETCH_DEMO_PHOTOS.bridePhoto.resultUrl, 'rotate(4deg)', 14],
+        ] as const).map(([photo, transform, marginTop]) => (
+          <div key={photo} style={{ position: 'relative', width: '42%', aspectRatio: '148 / 201.5', transform, marginTop }}>
+            <img src={photo} alt=""
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)' }} />
           </div>
         ))}
       </div>

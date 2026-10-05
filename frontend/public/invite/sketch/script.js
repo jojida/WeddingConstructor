@@ -328,7 +328,8 @@
     ['groomPhoto', 'bridePhoto'].forEach(function (id) {
       var photo = document.querySelector('[data-edit="' + id + '"]');
       var cutout = d.photoCutouts && d.photoCutouts[id];
-      if (photo) photo.closest('.pol').setAttribute('data-cutout', cutout && cutout.resultUrl === d[id] ? '1' : '0');
+      var demoCutout = photo && /\/photo-(groom|bride)-cutout\.png(?:[?#]|$)/.test(photo.src);
+      if (photo) photo.closest('.pol').setAttribute('data-cutout', demoCutout || cutout && cutout.resultUrl === d[id] ? '1' : '0');
     });
     rebuildSwatches(d.dressCodeColors);
     setImg('dressCodePhoto', d.dressCodePhoto);

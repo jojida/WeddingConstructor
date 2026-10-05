@@ -1,5 +1,6 @@
 /** Публичный адрес сайта (канонические URL, sitemap, OG). */
 import { STUDIO_TEMPLATES } from './studioTemplates';
+import { SKETCH_DEMO_DEFAULTS } from './sketch-demo-photos';
 
 export const SITE_URL = 'https://weddingcraft.ru';
 
@@ -1679,8 +1680,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       dressMan1:    '/invite/sketch/assets/man1.jpg',
       dressMan2:    '/invite/sketch/assets/man2.jpg',
       finalPhoto:   '/invite/sketch/assets/couple.lossless.webp',
-      groomPhoto:   '/invite/sketch/assets/photo-groom.webp',
-      bridePhoto:   '/invite/sketch/assets/photo-bride.webp',
+      ...SKETCH_DEMO_DEFAULTS,
       groomCaption: 'Жених',
       brideCaption: 'Невеста',
     },
