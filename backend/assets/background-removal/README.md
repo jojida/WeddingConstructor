@@ -12,8 +12,10 @@
 
 The application uses ONNX Runtime's CPU provider in a short-lived worker,
 one request at a time. No model download, API key, GPU or third-party image
-service is needed at runtime. Deployment sets `ONNXRUNTIME_NODE_INSTALL=skip`
-to use the CPU binaries bundled in the npm package without downloading CUDA.
+service is needed at runtime. The project's `.npmrc` sets
+`onnxruntime-node-install=skip`, and deployment also sets
+`ONNXRUNTIME_NODE_INSTALL=skip`, to use the CPU binaries bundled in the npm
+package without downloading CUDA, including the first deployment.
 
 Input is RGB, 512 by 512, normalized to [-1, 1]. The predicted alpha matte is
 resized to the oriented original (maximum 1800 pixels on its longest side),
