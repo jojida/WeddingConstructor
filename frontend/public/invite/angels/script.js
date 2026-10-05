@@ -15,7 +15,8 @@
     apiBase: '', slug: '', guestToken: '', guestName: '',
     date: '2027-07-12', time: '12:00',
     groom: 'Алексей', bride: 'Ангелина',
-    signUser: false,        // подпись финала задала пара (иначе — имена)
+    signUser: false,
+    looksSeen: false,       // данные с фото образов уже приходили        // подпись финала задала пара (иначе — имена)
     scheduleSig: '',
     storySig: ''
   };
@@ -95,12 +96,53 @@
   }
 
   // Пустая строка — пара удалила фото: возвращаем фото дизайна
+  // Возвращает true, если фото сменилось
   function setImg(key, url) {
-    if (url == null) return;
+    if (url == null) return false;
+    var changed = false;
     document.querySelectorAll('img[data-edit="' + key + '"]').forEach(function (el) {
       var next = url === '' ? el.getAttribute('data-def') : imageUrl(url);
-      if (next && el.getAttribute('src') !== next) el.src = next;
+      if (!next) return;
+      // «assets/x.jpg» и «/invite/angels/assets/x.jpg» — одно и то же фото
+      var abs = next;
+      try { abs = new URL(next, window.location.href).href; } catch (e) {}
+      if (el.src !== abs) { el.src = next; changed = true; }
     });
+    return changed;
+  }
+
+  /* ─── Дресс-код: вкладки «Для дам / Для джентльменов» ─── */
+  function showLooks(which) {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      var on = b.getAttribute('data-look') === which;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.looks__panel').forEach(function (p) {
+      var on = p.getAttribute('data-look') === which;
+      p.classList.toggle('is-active', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+  }
+
+  function initLooks() {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      b.addEventListener('click', function () { showLooks(b.getAttribute('data-look')); });
+    });
+    // В редакторе подсвеченное (правимое) фото образа — сразу на экране:
+    // скрытая вкладка (visibility) находится и подсвечивается редактором
+    if (EDITING && 'MutationObserver' in window) {
+      var mo = new MutationObserver(function (list) {
+        list.forEach(function (r) {
+          if (!r.target.classList || !r.target.classList.contains('wc-editor-flash')) return;
+          var panel = r.target.closest('.looks__panel');
+          if (panel) showLooks(panel.getAttribute('data-look'));
+        });
+      });
+      document.querySelectorAll('.looks__panel img').forEach(function (img) {
+        mo.observe(img, { attributes: true, attributeFilter: ['class'] });
+      });
+    }
   }
 
   /* ─── Имена: лента на обложке и подпись финала ───── */
@@ -550,6 +592,13 @@
 
     setImg('coverPhoto', d.coverPhoto);
     setImg('polaroidPhoto', d.polaroidPhoto);
+    // Образы гостей: в редакторе замену фото сразу видно — открываем его
+    // вкладку (первые данные после загрузки вкладку не переключают)
+    var looksReady = STATE.looksSeen;
+    [['dressCodePhoto', 'women'], ['dressPhoto2', 'women'], ['dressMan1', 'men'], ['dressMan2', 'men']].forEach(function (k) {
+      if (setImg(k[0], d[k[0]]) && EDITING && looksReady) showLooks(k[1]);
+      if (d[k[0]] != null) STATE.looksSeen = true;
+    });
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     rebuildPalette(d.dressCodeColors);
@@ -582,6 +631,7 @@
     initReveal();
     applySchedule(DEFAULT_SCHEDULE);   // базовое наполнение (сам по себе, без редактора)
     initTrack();
+    initLooks();
     bindFormOptions();
     initRsvp();
     applyDate();

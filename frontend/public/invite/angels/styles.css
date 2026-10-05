@@ -631,6 +631,67 @@ html.no-anim .hero__names { -webkit-mask-image: none; mask-image: none; }
 }
 .dress__text:empty { display: none; }
 
+/* Образы гостей: вкладки и фото в арках (как арки портика) */
+.looks { margin-top: calc(110 * var(--u)); }
+.looks__tabs {
+  display: inline-flex;
+  padding: calc(8 * var(--u));
+  border: calc(3 * var(--u)) solid rgba(82, 108, 159, .45);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, .45);
+}
+.looks__tab {
+  margin: 0;
+  padding: calc(16 * var(--u)) calc(46 * var(--u));
+  border: 0; border-radius: 9999px;
+  background: transparent;
+  font-family: var(--f-text);
+  font-size: max(13px, calc(48 * var(--u)));
+  line-height: 1.2;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color .3s ease, color .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.looks__tab.is-active { background: var(--ink); color: #fff; }
+.looks__tab:focus-visible { outline: calc(3 * var(--u)) solid rgba(82, 108, 159, .5); outline-offset: calc(4 * var(--u)); }
+/* Обе вкладки в одной ячейке сетки: высота блока не прыгает, смена — растворением */
+.looks__panels { display: grid; margin-top: calc(60 * var(--u)); }
+.looks__panel {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(2, calc(470 * var(--u)));
+  justify-content: center;
+  column-gap: calc(60 * var(--u));
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(calc(18 * var(--u)));
+  transition: opacity .5s ease, transform .5s ease, visibility 0s linear .5s;
+}
+.looks__panel.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease, transform .5s ease, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) { .looks__panel { transition: none; transform: none; } }
+.look {
+  margin: 0;
+  aspect-ratio: 470 / 700;
+  padding: calc(14 * var(--u));
+  background: #fbf8ef;
+  border: calc(3 * var(--u)) solid rgba(82, 108, 159, .4);
+  border-radius: 9999px 9999px calc(24 * var(--u)) calc(24 * var(--u));
+  box-shadow: 0 calc(14 * var(--u)) calc(36 * var(--u)) rgba(60, 90, 140, .18);
+}
+.look img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  border-radius: 9999px 9999px calc(14 * var(--u)) calc(14 * var(--u));
+}
+
 /* ============================================================
    11 — ДО НОВЫХ ВСТРЕЧ (макет: 19220–20544)
    ============================================================ */

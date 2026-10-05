@@ -811,6 +811,10 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры', scope: 'data' },
         { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Образ для дам 1',     scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Образ для дам 2',     scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Образ для джентльменов 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Образ для джентльменов 2', scope: 'custom' },
       ],
     },
     {
@@ -1418,6 +1422,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { time: '22:00', title: 'Фотосессия',                icon: '/invite/angels/assets/icon-camera.webp' },
     ],
     dressCodeColors: ['#f4dec2', '#c2a07d', '#867c5e', '#d69a67'],
+    dressCodePhoto: '/invite/angels/assets/dress-w1.jpg',
     drinks: [
       { value: 'sparkling',  label: 'Игристое' },
       { value: 'red',        label: 'Красное вино' },
@@ -1429,6 +1434,9 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       sealColor:     'beige',
       greetingTitle: 'Дорогие Гости!',
       polaroidPhoto: '/invite/angels/assets/polaroid.jpg',
+      dressPhoto2:   '/invite/angels/assets/dress-w2.jpg',
+      dressMan1:     '/invite/angels/assets/dress-m1.jpg',
+      dressMan2:     '/invite/angels/assets/dress-m2.jpg',
       dateIntro:     'Наша свадьба состоится',
       dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей палитры',
       surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',

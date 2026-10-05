@@ -61,6 +61,7 @@ export default function AngelsTemplate({ data, apiBase, fullPage, slug, editing 
           story: d.story,
           schedule: d.schedule,
           dressCodeColors: d.dressCodeColors,
+          dressCodePhoto: d.dressCodePhoto,
           musicUrl: d.musicUrl,
         },
       },
