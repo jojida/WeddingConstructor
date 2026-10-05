@@ -433,7 +433,17 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
   overflow-wrap: break-word;
 }
 .fc__title:empty, .fc__text:empty { display: none; }
-.forecast__necklace { display: block; width: calc(781.5 * var(--u)); height: auto; margin: calc(435 * var(--u)) auto 0; }
+/* Колье на гирлянде из бумажных роз (по макету пары): гирлянда 1351 во всю
+   ширину, её верх на 300,5 выше колье; концы цепочки спрятаны под розами */
+.hang { position: relative; }
+.hang > img { position: absolute; display: block; height: auto; margin: 0; pointer-events: none; }
+.hang__flowers { z-index: 1; }
+.hang--paper {
+  width: calc(1351 * var(--u)); height: calc(1097 * var(--u));
+  margin: calc(134.5 * var(--u)) 0 0 calc(-72.5 * var(--u));   /* от края страницы — 7,5 */
+}
+.hang--paper .hang__flowers { left: 0; top: 0; width: 100%; }
+.hang--paper .hang__necklace { left: calc(284 * var(--u)); top: calc(300.5 * var(--u)); width: calc(781.5 * var(--u)); }
 
 /* 6 — МЕНЮ */
 .menu { position: relative; padding: calc(504 * var(--u)) calc(160 * var(--u)) 0; text-align: center; }
@@ -501,9 +511,13 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
 .prog__heart { fill: var(--brown); }
 
 /* Между расписанием и дресс-кодом: пара и колье */
-.interlude { position: relative; padding-top: calc(26 * var(--u)); text-align: center; }
-.interlude__couple { display: block; width: calc(423 * var(--u)); height: auto; margin: 0 0 0 calc(432.5 * var(--u)); }
-.interlude__necklace { display: block; width: calc(640 * var(--u)); height: auto; margin: calc(220 * var(--u)) auto 0; }
+/* Пара в венке из акварельных роз, колье свисает с венка (по макету пары):
+   всё — от верха венка; пара поверх венка, колье под ним */
+.interlude { position: relative; padding-top: calc(80 * var(--u)); }
+.hang--wreath { height: calc(1526 * var(--u)); }
+.hang--wreath .hang__flowers { left: calc(-3.4 * var(--u)); top: 0; width: calc(1376 * var(--u)); }
+.hang--wreath .interlude__couple { z-index: 2; left: calc(454 * var(--u)); top: calc(57 * var(--u)); width: calc(370 * var(--u)); }
+.hang--wreath .hang__necklace { left: calc(370 * var(--u)); top: calc(804 * var(--u)); width: calc(640 * var(--u)); }
 
 /* ============================================================
    8 — ДРЕСС-КОД (макет: 14540–16640)

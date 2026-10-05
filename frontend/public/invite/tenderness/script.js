@@ -572,6 +572,15 @@
       startHero();
       return;
     }
+    // Сначала конверт (../assets/envelope-slide.js): обложка оживает, когда створки разъезжаются
+    if (window.WCEnvelope && window.WCEnvelope.active) {
+      window.addEventListener('wc:envelope-open', heroWhenReady, { once: true });
+      return;
+    }
+    heroWhenReady();
+  }
+
+  function heroWhenReady() {
     var waits = [];
     if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
     var bg = new Image();

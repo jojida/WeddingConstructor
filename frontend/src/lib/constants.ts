@@ -83,8 +83,8 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'tenderness',
     name: 'Нежность',
-    description: 'Бежевая акварель: на обложке под аркой с цветами пишутся имена пары, рядом дата с таймером. Фото в овальной рамке, шуточный прогноз на день, меню, программа с сердцем на треке, дресс-код с платьями и рубашками в цветах вашей палитры и анкета для гостей.',
-    tags: ['Акварель', 'Бежевый', 'Нежный', 'Арка', 'Анимация'],
+    description: 'Бежевая акварель: сначала конверт с золотой печатью-монограммой — створки разъезжаются, и под аркой с цветами пишутся имена пары. Фото в овальной рамке, шуточный прогноз на день, меню, программа с сердцем на треке, пара в венке из роз, дресс-код с платьями и рубашками в цветах вашей палитры и анкета для гостей.',
+    tags: ['Акварель', 'Бежевый', 'Нежный', 'Конверт', 'Анимация'],
     colors: ['#f4f0ed', '#6b4f2f', '#cfaa8e'],
     preview: '/invite/tenderness/assets/preview.jpg',
     defaultCover: '/invite/tenderness/assets/photo.jpg',
@@ -791,6 +791,12 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   tenderness: [
+    {
+      title: 'Конверт', icon: '✉️',
+      fields: [
+        { id: 'envelopeHint', type: 'text', label: 'Надпись над печатью', hint: 'Например: Нажмите, чтобы открыть', scope: 'custom', maxLength: 32 },
+      ],
+    },
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1589,6 +1595,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { value: 'no_alcohol', label: 'Не буду пить алкоголь' },
     ],
     custom: {
+      envelopeHint:   'Нажмите, чтобы открыть',
       heroTitle:      'Приглашение на свадьбу',
       greetingTitle:  'Дорогие гости',
       forecastQuote:  'Там, где посеяна любовь, растёт радость!',

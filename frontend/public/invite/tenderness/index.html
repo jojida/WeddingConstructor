@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Евгений и Надежда — приглашение на свадьбу</title>
   <link href="/invite/assets/fonts/google/3b6a9eb7ba365fdf6335.css" rel="stylesheet" />
+  <link rel="preload" as="image" href="../assets/envelope-slide/seal-gold.webp" />
   <link rel="preload" as="image" href="assets/cover-bg.jpg" />
   <link rel="stylesheet" href="styles.css" />
   <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
@@ -16,6 +17,12 @@
   </style></noscript>
 </head>
 <body>
+
+  <!-- 0 — КОНВЕРТ: две створки белой бумаги с золотой печатью-монограммой
+       (../assets/envelope-slide.js). Касание — левая створка с печатью уезжает
+       влево, правая — вправо; обложка ждёт события 'wc:envelope-open'.
+       В редакторе — первый экран превью. -->
+  <script src="../assets/envelope-slide.js" data-groom="Евгений" data-bride="Надежда" data-hint="Нажмите, чтобы открыть"></script>
 
   <main class="invite" id="invite">
 
@@ -101,7 +108,11 @@
             <p class="fc__text" data-edit="forecast4Text">Осадки — только из конфетти</p>
           </div>
         </div>
-        <img width="977" height="996" class="forecast__necklace swing rv-soft" src="assets/necklace1.webp" alt="" loading="lazy" decoding="async" />
+        <!-- колье свисает с гирлянды из бумажных роз -->
+        <div class="hang hang--paper" aria-hidden="true">
+          <img width="977" height="996" class="hang__necklace swing rv-soft" src="assets/necklace1.webp" alt="" loading="lazy" decoding="async" />
+          <img width="1359" height="601" class="hang__flowers rv-soft" src="assets/roses-paper.webp" alt="" loading="lazy" decoding="async" />
+        </div>
       </section>
 
       <!-- 6 — МЕНЮ -->
@@ -131,8 +142,12 @@
 
     <!-- пара и колье между расписанием и дресс-кодом — украшение без блока -->
     <div class="interlude" aria-hidden="true">
-      <img width="529" height="859" class="interlude__couple rv-soft" src="assets/couple-stand.webp" alt="" loading="lazy" decoding="async" />
-      <img width="800" height="902" class="interlude__necklace swing rv-soft" src="assets/necklace2.webp" alt="" loading="lazy" decoding="async" />
+      <!-- пара в венке из акварельных роз, колье свисает с венка -->
+      <div class="hang hang--wreath">
+        <img width="800" height="902" class="hang__necklace swing rv-soft" src="assets/necklace2.webp" alt="" loading="lazy" decoding="async" />
+        <img width="1378" height="1048" class="hang__flowers rv-soft" src="assets/roses-blue.webp" alt="" loading="lazy" decoding="async" />
+        <img width="529" height="859" class="interlude__couple rv-soft" src="assets/couple-stand.webp" alt="" loading="lazy" decoding="async" />
+      </div>
     </div>
 
     <!-- 8 — ДРЕСС-КОД: платья и рубашки красятся в цвета палитр пары -->
