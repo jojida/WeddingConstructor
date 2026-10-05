@@ -14,7 +14,7 @@
   <main id="invitation">
 
     <!-- HERO -->
-    <section class="hero" id="hero">
+    <section class="hero" id="hero" data-wc-section="cover">
       <div class="hero-overlay"></div>
       <div class="hero-photo-bg" id="hero-bg">
         <img decoding="async" src="images/couple.jpg" alt="Александр и Анна" class="hero-img" id="heroImg" data-edit="coverPhoto" />
@@ -42,16 +42,16 @@
     </section>
 
     <!-- DOVES DIVIDER -->
-    <div class="divider-section">
+    <div class="divider-section" data-wc-section="greeting">
       <img decoding="async" loading="lazy" src="images/doves_rings.png" alt="Голуби и кольца" class="doves-img" />
     </div>
 
     <!-- INVITATION TEXT -->
-    <section class="invite-text-section" id="invite-text">
+    <section class="invite-text-section" id="invite-text" data-wc-section="date">
       <div class="invite-card">
-        <p class="dear-guests" id="guestGreeting">Дорогие</p>
-        <h2 class="guest-name" id="guestName">Дорогие гости</h2>
-        <p class="invite-body" data-edit="inviteText">
+        <p class="dear-guests" id="guestGreeting" data-wc-section="greeting">Дорогие</p>
+        <h2 class="guest-name" id="guestName" data-wc-section="greeting">Дорогие гости</h2>
+        <p class="invite-body" data-edit="inviteText" data-wc-section="greeting">
           Мы безмерно рады пригласить вас разделить с нами одно из самых значимых и счастливых событий в нашей жизни —
           торжество нашей любви.
         </p>
@@ -71,7 +71,7 @@
           </div>
           <p class="calendar-year" data-edit="calYear">2026</p>
         </div>
-        <div class="venue-block">
+        <div class="venue-block" data-wc-section="venue">
           <p class="venue-label">Место проведения</p>
           <p class="venue-name" data-edit="venue">Усадьба «Белый сад»</p>
           <div class="venue-photo-frame">
@@ -87,7 +87,7 @@
     </section>
 
     <!-- PROGRAM -->
-    <section class="program-section" id="program">
+    <section class="program-section" id="program" data-wc-section="schedule">
       <h2 class="section-title">Программа дня</h2>
       <div class="timeline" id="timeline">
 
@@ -131,7 +131,7 @@
     </section>
 
     <!-- DRESS CODE -->
-    <section class="dresscode-section reveal" id="dresscode">
+    <section class="dresscode-section reveal" id="dresscode" data-wc-section="dresscode">
       <div class="dresscode-card">
         <h2 class="section-title">Дресс-код</h2>
         <p class="dresscode-subtitle" data-edit="dressCode">Пастельные тона</p>
@@ -194,7 +194,7 @@
     </section>
 
     <!-- COUNTDOWN -->
-    <section class="countdown-section reveal" id="countdown">
+    <section class="countdown-section reveal" id="countdown" data-wc-section="countdown">
       <div class="countdown-inner">
         <p class="countdown-label">До торжества осталось</p>
         <div class="countdown-grid">
@@ -222,7 +222,7 @@
     </section>
 
     <!-- WISHES & DETAILS -->
-    <section class="details-section reveal" id="details">
+    <section class="details-section reveal" id="details" data-wc-section="wishes">
       <div class="details-card">
         <h2 class="section-title">Пожелания &amp; Детали</h2>
         <div class="details-content" id="detailsContent">
@@ -246,7 +246,7 @@
     </section>
 
     <!-- RSVP -->
-    <section class="rsvp-section" id="rsvp">
+    <section class="rsvp-section" id="rsvp" data-wc-section="rsvp">
       <div class="rsvp-card">
         <img decoding="async" loading="lazy" src="images/doves_rings.png" alt="" class="rsvp-doves" />
         <h2 class="section-title">Анкета Гостя</h2>
@@ -309,7 +309,7 @@
     </section>
 
     <!-- CLOSING SECTION -->
-    <section class="closing-section reveal" id="closing">
+    <section class="closing-section reveal" id="closing" data-wc-section="closing">
       <div class="closing-card">
         <h2 class="section-title">Ждём вас!</h2>
         
@@ -347,6 +347,7 @@
 
   </main>
 
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>

@@ -28,7 +28,7 @@
          задний стоит за деревьями (его открывают расходящиеся кроны),
          передний проявляется поверх, когда деревья остановились, — чтобы
          имена читались целиком, как в макете -->
-    <section class="hero" id="hero">
+    <section class="hero" id="hero" data-wc-section="cover">
       <div class="hero__stage">
         <img decoding="async" class="hero__bg" src="assets/hero-bg.webp" alt="" />
         <div class="hero__mist" aria-hidden="true"></div>
@@ -52,7 +52,7 @@
     </section>
 
     <!-- 2 — ДОРОГИЕ ГОСТИ -->
-    <section class="greet" id="greeting">
+    <section class="greet" id="greeting" data-wc-section="greeting">
       <h2 class="title rv-write" data-edit="greetingTitle">Дорогие гости</h2>
       <div class="greet__text rv" data-edit="inviteText">
         <p>Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.</p>
@@ -62,7 +62,7 @@
 
     <!-- 3 — ФОТО ПАРЫ: овальная рамка макета, фото листаются стрелками
          (и свайпом). Рамка в макете повёрнута на −3° — фото вместе с ней -->
-    <section class="album" id="album" aria-label="Наши фото">
+    <section class="album" id="album" aria-label="Наши фото" data-wc-section="photos">
       <div class="album__frame rv-soft">
         <div class="album__photos" id="albumPhotos">
           <img decoding="async" loading="lazy" class="album__img is-active" src="assets/album-1.jpg" data-edit="coverPhoto" alt="Наше фото 1" />
@@ -80,7 +80,7 @@
     </section>
 
     <!-- 4 — ДАТА: пять дней, день свадьбы — в сердце (строит script.js) -->
-    <section class="dates" id="date">
+    <section class="dates" id="date" data-wc-section="date">
       <div class="dates__row" id="datesRow" aria-hidden="true">
         <span class="dates__day rv-soft">17</span>
         <span class="dates__day rv-soft">18</span>
@@ -95,7 +95,7 @@
     </section>
 
     <!-- 5 — МЕСТО ПРОВЕДЕНИЯ: серая рваная бумага, ветка со мхом над ней -->
-    <section class="venue" id="venue">
+    <section class="venue" id="venue" data-wc-section="venue">
       <img decoding="async" loading="lazy" class="venue__branch" src="assets/branch.webp" alt="" />
       <h2 class="title rv-write" data-edit="venueTitle">Место проведения</h2>
       <img decoding="async" loading="lazy" class="venue__gazebo rv-soft" src="assets/gazebo.webp" alt="" />
@@ -106,7 +106,7 @@
     </section>
 
     <!-- 6 — РАСПИСАНИЕ: жёлудь едет по треку за прокруткой -->
-    <section class="program" id="program">
+    <section class="program" id="program" data-wc-section="schedule">
       <h2 class="title rv-write" data-edit="programTitle">Расписание</h2>
       <img decoding="async" loading="lazy" class="program__pine rv-soft" src="assets/pine.webp" alt="" />
       <div class="sched" id="sched">
@@ -118,7 +118,7 @@
     </section>
 
     <!-- 7 — ОТСЧЁТ -->
-    <section class="cd" id="countdown">
+    <section class="cd" id="countdown" data-wc-section="countdown">
       <h2 class="title cd__title rv-write" data-edit="countdownTitle">До свадьбы осталось</h2>
       <div class="cd__row rv" aria-live="off">
         <div class="cd__cell"><span class="cd__num" id="cdD">122</span><span class="cd__lbl" id="cdDl">дня</span></div>
@@ -132,7 +132,7 @@
     </section>
 
     <!-- 8 — ДРЕСС-КОД: мазки кистью, цвета — из палитры пары -->
-    <section class="dress" id="dresscode">
+    <section class="dress" id="dresscode" data-wc-section="dresscode">
       <h2 class="title rv-write" data-edit="dressTitle">Дресс код</h2>
       <div class="brushes rv-brush" data-edit="palette">
         <span style="--c:#738445"></span><span style="--c:#4a552d"></span><span style="--c:#b39c7e"></span><span style="--c:#925c2d"></span><span style="--c:#44200d"></span>
@@ -155,7 +155,7 @@
     </section>
 
     <!-- 9 — ПОЖЕЛАНИЯ: текст слева, ель справа -->
-    <section class="wish" id="wishes">
+    <section class="wish" id="wishes" data-wc-section="wishes">
       <img decoding="async" loading="lazy" class="wish__spruce rv-soft" src="assets/spruce.webp" alt="" />
       <h2 class="title wish__title rv-write" data-edit="wishTitle">Пожелания</h2>
       <div class="wish__text rv" data-edit="story">
@@ -165,7 +165,7 @@
     </section>
 
     <!-- 10 — АНКЕТА: серая рваная бумага тянется под форму -->
-    <section class="rsvp" id="rsvp">
+    <section class="rsvp" id="rsvp" data-wc-section="rsvp">
       <h2 class="title rv-write" data-edit="surveyTitle">Анкета гостя</h2>
       <p class="rsvp__lead rv" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету заранее</p>
       <form class="rsvp__form rv" id="rsvpForm" novalidate>
@@ -198,7 +198,7 @@
     </section>
 
     <!-- 11 — ДО СКОРЫХ ВСТРЕЧ: горы в тумане -->
-    <section class="fin" id="final">
+    <section class="fin" id="final" data-wc-section="closing">
       <!-- три фото пары, как отпечатки, разложенные на бумаге -->
       <div class="fin__photos">
         <figure class="fin__print fin__print--l rv-soft"><img decoding="async" src="assets/final-1.jpg" data-edit="finalPhoto1" data-def="assets/final-1.jpg" alt="Наше фото" loading="lazy" /></figure>
@@ -212,6 +212,7 @@
 
   </main>
 
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>

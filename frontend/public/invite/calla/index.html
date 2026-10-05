@@ -12,7 +12,7 @@
   <main class="invite">
 
     <!-- 1 — ОБЛОЖКА -->
-    <section class="panel">
+    <section class="panel" data-wc-section="cover">
       <div class="canvas hero reveal">
         <img decoding="async" class="deco hero__pearls-tl fade-soft" src="assets/pearls-string.svg" alt="" />
         <img decoding="async" class="deco hero__callas fade-soft" src="assets/callas-pair.webp" alt="" />
@@ -27,15 +27,15 @@
     </section>
 
     <!-- 2 — ДОРОГИЕ ГОСТИ -->
-    <section class="panel">
+    <section class="panel" data-wc-section="date">
       <div class="canvas guests reveal">
         <img decoding="async" loading="lazy" class="deco guests__pearls-tl fade-soft" src="assets/pearls-string.svg" alt="" />
         <img decoding="async" loading="lazy" class="deco guests__callas-tr fade-soft" src="assets/callas-cluster.webp" alt="" />
         <img decoding="async" loading="lazy" class="deco guests__callas-bl fade-soft" src="assets/callas-corner.webp" alt="" />
         <img decoding="async" loading="lazy" class="deco guests__pearls-br fade-soft" src="assets/pearls-string.svg" alt="" />
 
-        <h2 class="title title--light guests__title fade-up" data-edit="greetingTitle">Дорогие гости</h2>
-        <p class="guests__lead fade-up" data-edit="inviteText">
+        <h2 class="title title--light guests__title fade-up" data-edit="greetingTitle" data-wc-section="greeting">Дорогие гости</h2>
+        <p class="guests__lead fade-up" data-edit="inviteText" data-wc-section="greeting">
           Мы безмерно рады пригласить вас разделить с нами одно из самых
           значимых и счастливых событий в нашей жизни — торжество нашей любви
         </p>
@@ -53,7 +53,7 @@
     </section>
 
     <!-- 3 — МЕСТО ПРОВЕДЕНИЯ -->
-    <section class="panel">
+    <section class="panel" data-wc-section="venue">
       <div class="canvas venue reveal">
         <h2 class="title title--light venue__title fade-up" data-edit="venueTitle">Место проведения</h2>
         <img loading="lazy" decoding="async" class="venue__img fade-soft" src="assets/mansion.webp" alt="Место проведения" />
@@ -65,7 +65,7 @@
     </section>
 
     <!-- 4 — ПРОГРАММА ДНЯ -->
-    <section class="panel">
+    <section class="panel" data-wc-section="schedule">
       <div class="canvas program reveal">
         <h2 class="title title--light program__title fade-up" data-edit="programTitle">Программа дня</h2>
         <div class="timeline-section">
@@ -81,7 +81,7 @@
     </section>
 
     <!-- 5 — ДРЕСС КОД -->
-    <section class="panel">
+    <section class="panel" data-wc-section="dresscode">
       <div class="canvas dresscode reveal">
         <h2 class="title title--light dresscode__title fade-up" data-edit="dressTitle">Дресс код</h2>
         <div class="palette fade-up" data-edit="palette">
@@ -111,7 +111,7 @@
     </section>
 
     <!-- 6 — СВАДЬБА ЧЕРЕЗ -->
-    <section class="panel">
+    <section class="panel" data-wc-section="countdown">
       <div class="canvas countdown reveal">
         <img decoding="async" loading="lazy" class="deco cd__pearls-tl fade-soft" src="assets/pearls-string.svg" alt="" />
         <img decoding="async" loading="lazy" class="deco cd__callas-tr fade-soft" src="assets/callas-cluster.webp" alt="" />
@@ -125,7 +125,7 @@
     </section>
 
     <!-- 7 — ПОЖЕЛАНИЯ И ДЕТАЛИ -->
-    <section class="panel">
+    <section class="panel" data-wc-section="wishes">
       <div class="canvas wishes reveal">
         <div class="plaque fade-up">
           <img decoding="async" loading="lazy" class="plaque__frame" src="assets/frame-plaque.webp" alt="" />
@@ -142,7 +142,7 @@
     </section>
 
     <!-- 8 — АНКЕТА ГОСТЯ -->
-    <section class="panel">
+    <section class="panel" data-wc-section="rsvp">
       <div class="canvas rsvp reveal">
         <h2 class="title title--light rsvp__title fade-up" data-edit="surveyTitle">Анкета гостя</h2>
         <p class="rsvp__lead fade-up" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету заранее</p>
@@ -175,7 +175,7 @@
     </section>
 
     <!-- 9 — ФИНАЛ -->
-    <section class="panel">
+    <section class="panel" data-wc-section="closing">
       <div class="canvas farewell reveal">
         <div class="polaroid fade-soft">
           <img loading="lazy" decoding="async" class="zoomable" src="assets/couple-photo.jpg" data-edit="finalPhoto" alt="Жених и невеста" />
@@ -191,6 +191,7 @@
 
   </main>
 
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>

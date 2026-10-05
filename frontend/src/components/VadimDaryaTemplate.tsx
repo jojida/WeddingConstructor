@@ -59,6 +59,7 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
       {
         type: 'wc:data',
         payload: {
+          enabledSections: dataRef.current.enabledSections || {},
           apiBase,
           // Адрес сайта — куда слать анкету; без него (превью, демо) она не уходит
           slug: slug || '',

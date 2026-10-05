@@ -45,6 +45,7 @@ export default function ForestTemplate({ data, apiBase, fullPage, slug, editing 
       {
         type: 'wc:data',
         payload: {
+          enabledSections: dataRef.current.enabledSections || {},
           ...(d.customData || {}),
           apiBase,
           slug: slug || '',

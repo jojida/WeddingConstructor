@@ -225,10 +225,11 @@
   }
 
   function applyData(d) {
+    if (window.WCSections) WCSections.apply(d);
     if (!d) return;
     applyMapLink(d.mapLink);
     // Карта места (Яндекс) по адресу — общий модуль ../assets/venue-map.js
-    if (window.WCMap) WCMap.set({ address: d.venueAddress, venue: d.venue, mapLink: d.mapLink, point: d.mapPoint, show: d.showMap });
+    if (window.WCMap) WCMap.set({ address: d.venueAddress, venue: d.venue, mapLink: d.mapLink, point: d.mapPoint, show: d.enabledSections && typeof d.enabledSections.map === 'boolean' ? d.enabledSections.map : d.showMap !== false });
     if (typeof d.apiBase === 'string') STATE.apiBase = d.apiBase;
     if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
     if (typeof d.slug === 'string' && d.slug) STATE.slug = d.slug;

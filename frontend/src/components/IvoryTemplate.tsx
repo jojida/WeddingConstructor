@@ -44,6 +44,7 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
       {
         type: 'wc:data',
         payload: {
+          enabledSections: dataRef.current.enabledSections || {},
           ...(d.customData || {}),
           apiBase,
           slug: slug || '',

@@ -46,6 +46,7 @@ export default function GardenEveningTemplate({ data, apiBase, fullPage, slug, e
         type: 'wc:data',
         payload: {
           ...(d.customData || {}),
+          enabledSections: d.enabledSections || {},
           apiBase,
           slug: slug || '',
           groomName: d.groomName,

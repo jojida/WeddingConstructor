@@ -55,6 +55,7 @@
 
   // ─── Применение данных к DOM ─────────────────────
   function applyData(d) {
+    if (window.WCSections) WCSections.apply(d);
     if (!d) return;
 
     if (typeof d.apiBase === 'string') STATE.apiBase = d.apiBase;
@@ -175,7 +176,7 @@
     if (window.WCPhotoFrame) WCPhotoFrame.apply(d.photoFrames);
 
     // Карта места (Яндекс) по адресу — общий модуль ../assets/venue-map.js
-    if (window.WCMap) WCMap.set({ address: d.venueAddress, venue: d.venue, mapLink: d.mapLink, point: d.mapPoint, show: d.showMap });
+    if (window.WCMap) WCMap.set({ address: d.venueAddress, venue: d.venue, mapLink: d.mapLink, point: d.mapPoint, show: d.enabledSections && typeof d.enabledSections.map === 'boolean' ? d.enabledSections.map : d.showMap !== false });
 
     // Перезапуск таймера под новую дату
     restartCountdown();

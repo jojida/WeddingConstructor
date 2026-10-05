@@ -9,6 +9,7 @@
   if (window.WCMusic) return;                 // защита от двойного подключения
 
   var audio = null, btn = null, src = '', playing = false, armed = false;
+  var enabled = true;
   // В редакторе музыка не должна включаться сама — пара правит текст в тишине.
   var EDITING = window.location.search.indexOf('editing=1') !== -1;
 
@@ -62,7 +63,7 @@
   }
 
   function play() {
-    if (!audio || !audio.src) return;
+    if (!enabled || !audio || !audio.src) return;
     var p = audio.play();
     if (p && p.catch) p.catch(function () { /* браузер запретил автозапуск — ждём тап */ });
   }
@@ -82,9 +83,9 @@
   }
 
   function teardown() {
-    if (audio) { audio.pause(); audio.removeAttribute('src'); }
+    if (audio) { audio.pause(); audio.removeAttribute('src'); audio.remove(); }
     if (btn && btn.parentNode) btn.parentNode.removeChild(btn);
-    btn = null; src = ''; playing = false;
+    audio = null; btn = null; src = ''; playing = false;
   }
 
   /** Задать мелодию. Пустое значение — убрать плеер. */
@@ -93,6 +94,7 @@
     if (!url) { if (src) teardown(); return; }
     if (url === src && audio) return;
     build();
+    btn.style.display = enabled ? 'flex' : 'none';
     src = url;
     audio.src = url;
     audio.load();
@@ -100,5 +102,10 @@
     if (!EDITING) armAutoplay();
   }
 
-  window.WCMusic = { set: set };
+  function setEnabled(value) {
+    enabled = value !== false;
+    if (!enabled && audio) audio.pause();
+    if (btn) btn.style.display = enabled ? 'flex' : 'none';
+  }
+  window.WCMusic = { set: set, setEnabled: setEnabled };
 })();

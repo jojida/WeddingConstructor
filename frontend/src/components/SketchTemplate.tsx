@@ -47,6 +47,7 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
         type: 'wc:data',
         payload: {
           ...(d.customData || {}),       // тексты/фото, специфичные для шаблона
+          enabledSections: d.enabledSections || {},
           apiBase,
           slug: slug || '',
           groomName: d.groomName,

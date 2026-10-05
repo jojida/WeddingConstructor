@@ -172,12 +172,13 @@
 
   function set(d) {
     if (!d) return;
+    var visibilityChanged = typeof d.show === 'boolean' && d.show !== state.show;
     ['address', 'venue', 'mapLink', 'point', 'show'].forEach(function (k) {
       if (d[k] !== undefined && d[k] !== null) state[k] = d[k];
     });
     // В редакторе адрес набирают по букве: карту перезагружаем, когда набор утих
     clearTimeout(timer);
-    if (EDITING) timer = setTimeout(render, 700); else render();
+    if (EDITING && !visibilityChanged && d.show !== false) timer = setTimeout(render, 700); else render();
   }
 
   window.WCMap = { set: set };

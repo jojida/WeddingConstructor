@@ -57,7 +57,7 @@
   <div class="invitation">
 
     <!-- ═══════════════════════════════════════ HERO ═══════════════════════════════════════ -->
-    <section class="hero">
+    <section class="hero" data-wc-section="cover">
       <div class="hero-image-wrap">
         <img decoding="async" src="assets/window.jpg" alt="Средиземноморское окно с видом на море" class="hero-img">
 
@@ -106,14 +106,14 @@
     </section>
 
     <!-- ═══════════════════════════════════════ GREETING ═══════════════════════════════════════ -->
-    <section class="greeting fade-up">
+    <section class="greeting fade-up" data-wc-section="greeting">
       <p class="greeting-label">Дорогие</p>
       <h2 class="greeting-title" data-edit="greetingTitle">Любимые друзья!</h2>
       <p class="greeting-sub" data-edit="greetingSub">приглашаем вас на нашу свадьбу</p>
     </section>
 
     <!-- ═══════════════════════════════════════ DATE CIRCLES ═══════════════════════════════════════ -->
-    <section class="date-section fade-up">
+    <section class="date-section fade-up" data-wc-section="date">
       <div class="date-circles">
         <div class="date-circle">
           <span class="date-num">30</span>
@@ -131,7 +131,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ VENUE ═══════════════════════════════════════ -->
-    <section class="venue-section fade-up">
+    <section class="venue-section fade-up" data-wc-section="venue">
       <div class="venue-stripes">
         <img decoding="async" loading="lazy" src="assets/branch.webp" class="venue-branch venue-branch-tl" alt="">
         <img decoding="async" loading="lazy" src="assets/branch.webp" class="venue-branch venue-branch-br" alt="">
@@ -159,7 +159,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ TIMELINE ═══════════════════════════════════════ -->
-    <section class="timeline-section">
+    <section class="timeline-section" data-wc-section="schedule">
       <div class="timeline-inner">
 
         <!-- Dashed S-path  +  heart follower (in SVG coordinate space) -->
@@ -226,7 +226,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ COUNTDOWN ═══════════════════════════════════════ -->
-    <section class="countdown-section fade-up">
+    <section class="countdown-section fade-up" data-wc-section="countdown">
       <div class="countdown">
         <div class="cd-unit">
           <span id="cd-days">00</span>
@@ -251,7 +251,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ DRESS CODE ═══════════════════════════════════════ -->
-    <section class="dresscode-section fade-up">
+    <section class="dresscode-section fade-up" data-wc-section="dresscode">
       <h2 class="dresscode-title">Дресс код</h2>
       <div class="dc-tabs" role="tablist">
         <button class="dc-tab is-active" type="button" data-group="women" role="tab" aria-selected="true">Женщины</button>
@@ -343,7 +343,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ WISHES ═══════════════════════════════════════ -->
-    <section class="wishes-section fade-up">
+    <section class="wishes-section fade-up" data-wc-section="wishes">
       <img decoding="async" loading="lazy" src="assets/icons/gift.svg" class="gift-icon" alt="">
 
       <h2 class="wishes-title">Пожелания и детали</h2>
@@ -356,7 +356,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ ORGANIZER ═══════════════════════════════════════ -->
-    <section class="organizer-section fade-up">
+    <section class="organizer-section fade-up" data-wc-section="organizer">
       <div class="wavy-box-wrap">
         <svg class="wavy-box-svg" viewBox="0 0 300 240" preserveAspectRatio="none">
           <path d="
@@ -382,7 +382,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ RSVP ═══════════════════════════════════════ -->
-    <section class="rsvp-section fade-up">
+    <section class="rsvp-section fade-up" data-wc-section="rsvp">
       <h2 class="rsvp-title">Анкета Гостя</h2>
       <p class="rsvp-sub" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить,<br>заполните анкету заранее</p>
 
@@ -450,7 +450,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════ CLOSING ═══════════════════════════════════════ -->
-    <section class="closing-section fade-up">
+    <section class="closing-section fade-up" data-wc-section="closing">
       <h2 class="closing-title" data-edit="closingTitle">Ждем вас на нашей<br>свадьбе!</h2>
 
       <div class="photo-collage">
@@ -785,6 +785,7 @@
       requestAnimationFrame(enforce);
     })();
   </script>
+  <script src="/invite/assets/sections.js"></script>
   <script src="assets/music.js"></script>
   <script src="assets/photo-frame.js"></script>
   <script src="assets/venue-map.js"></script>

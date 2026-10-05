@@ -46,6 +46,7 @@ export default function GardenArchTemplate({ data, apiBase, fullPage, slug, edit
         type: 'wc:data',
         payload: {
           ...(d.customData || {}),
+          enabledSections: d.enabledSections || {},
           apiBase,
           slug: slug || '',
           groomName: d.groomName,

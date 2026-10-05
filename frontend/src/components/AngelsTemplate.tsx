@@ -46,6 +46,7 @@ export default function AngelsTemplate({ data, apiBase, fullPage, slug, editing 
       {
         type: 'wc:data',
         payload: {
+          enabledSections: dataRef.current.enabledSections || {},
           ...(d.customData || {}),
           apiBase,
           slug: slug || '',

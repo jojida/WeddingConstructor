@@ -113,11 +113,15 @@
   el.innerHTML = '<div class="wc-env3d__stage"><canvas></canvas><svg class="wc-env3d__hint" aria-hidden="true"></svg></div>' +
     (EDITING ? '<button type="button" class="wc-env3d__replay">▶ Посмотреть, как откроется</button>' : '');
   document.body.insertBefore(el, document.body.firstChild);
+  el.setAttribute('data-wc-section', 'envelope');
   var stage = el.querySelector('.wc-env3d__stage');
   var hint = el.querySelector('.wc-env3d__hint');
   var replay = el.querySelector('.wc-env3d__replay');
 
-  window.WCEnvelope = { active: !EDITING };
+  window.WCEnvelope = {
+    active: !EDITING,
+    setEnabled: function (enabled) { if (!enabled && !EDITING) reveal(); }
+  };
   if (!EDITING) root.classList.add('env-lock');
 
   /* ─── Открытие ─── */

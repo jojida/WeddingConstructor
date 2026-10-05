@@ -47,6 +47,7 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
         type: 'wc:data',
         payload: {
           ...(d.customData || {}),
+          enabledSections: d.enabledSections || {},
           apiBase,
           slug: slug || '',
           groomName: d.groomName,

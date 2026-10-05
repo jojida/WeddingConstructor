@@ -14,7 +14,7 @@
     <!-- ══════════════════════════════════════
          СТРАНИЦА 1 — ОБЛОЖКА
     ══════════════════════════════════════ -->
-    <section class="cover">
+    <section class="cover" data-wc-section="cover">
 
       <!-- Угловые ветки: оба смотрят ВЛЕВО (flip TL), TR — нормальный -->
       <img decoding="async" class="corner corner-tl" src="assets/decor/branch_corner.png" alt="">
@@ -70,16 +70,16 @@
     ══════════════════════════════════════ -->
     <section class="invite-section">
 
-      <h2 class="dear-guests" data-edit="dearGuests">Дорогие гости</h2>
+      <h2 class="dear-guests" data-edit="dearGuests" data-wc-section="greeting">Дорогие гости</h2>
 
-      <p class="invite-body" data-edit="inviteText">
+      <p class="invite-body" data-edit="inviteText" data-wc-section="greeting">
         СПЕШИМ СООБЩИТЬ РАДОСТНУЮ НОВОСТЬ —
         МЫ ЖЕНИМСЯ! В ЭТОТ ДЕНЬ МЫ ХОТИМ,
         ЧТОБЫ ВЫ ПРИСУТСТВОВАЛИ НА НАШЕМ ПРАЗДНИКЕ
       </p>
 
       <!-- Карточка "Мы ждём вас": peony позади даты -->
-      <div class="invite-card-wrap">
+      <div class="invite-card-wrap" data-wc-section="date">
         <p class="we-await" data-edit="weAwait">Мы ждём вас</p>
         <div class="date-wrap">
           <img decoding="async" loading="lazy" class="invite-peony" src="assets/decor/peony.png" alt="">
@@ -87,20 +87,20 @@
         </div>
       </div>
 
-      <img decoding="async" loading="lazy" class="table-icon" src="assets/decor/decor(16).webp" alt="">
+      <img decoding="async" loading="lazy" class="table-icon" src="assets/decor/decor(16).webp" alt="" data-wc-section="countdown">
 
       <!-- Таймер -->
-      <div class="countdown" id="countdown">
+      <div class="countdown" id="countdown" data-wc-section="countdown">
         <span id="cd-days">00</span><span class="cd-sep">:</span><span id="cd-hours">00</span><span class="cd-sep">:</span><span id="cd-mins">00</span><span class="cd-sep">:</span><span id="cd-secs">00</span>
       </div>
-      <p class="countdown-label">ДНИ : ЧАСЫ : МИНУТЫ : СЕКУНДЫ</p>
+      <p class="countdown-label" data-wc-section="countdown">ДНИ : ЧАСЫ : МИНУТЫ : СЕКУНДЫ</p>
 
     </section>
 
     <!-- ══════════════════════════════════════
          ТЕМНЫЙ ФОН ДЛЯ ЛОКАЦИИ (РАЗДЕЛ 1)
     ══════════════════════════════════════ -->
-    <div class="dark-section-wrapper dark-loc">
+    <div class="dark-section-wrapper dark-loc" data-wc-section="venue">
       <img decoding="async" loading="lazy" class="dark-peony-tl" src="assets/decor/peony.png" alt="">
 
       <!-- ЛОКАЦИЯ -->
@@ -125,7 +125,7 @@
     <!-- ══════════════════════════════════════
          СТРАНИЦА 2 — РАСПИСАНИЕ
     ══════════════════════════════════════ -->
-    <section class="program-section">
+    <section class="program-section" data-wc-section="schedule">
 
       <!-- Ветки ТОЛЬКО снизу -->
       <img decoding="async" loading="lazy" class="corner corner-bl" src="assets/decor/branch_corner.png" alt="">
@@ -192,7 +192,7 @@
     <!-- ══════════════════════════════════════
          СТРАНИЦА 3 — ДРЕСС-КОД
     ══════════════════════════════════════ -->
-    <section class="dresscode-section">
+    <section class="dresscode-section" data-wc-section="dresscode">
 
       <h2 class="section-script">Дресс код</h2>
 
@@ -223,14 +223,14 @@
     <!-- ══════════════════════════════════════
          ПИРАМИДА ШАМПАНСКОГО
     ══════════════════════════════════════ -->
-    <div class="champagne-wrap">
+    <div class="champagne-wrap" data-wc-section="wishes">
       <img decoding="async" loading="lazy" class="champagne-tower" src="assets/decor/decor(11).webp" alt="">
     </div>
 
     <!-- ══════════════════════════════════════
          ТЕМНЫЙ ФОН ДЛЯ ПОЖЕЛАНИЙ (РАЗДЕЛ 2)
     ══════════════════════════════════════ -->
-    <div class="dark-section-wrapper dark-wish">
+    <div class="dark-section-wrapper dark-wish" data-wc-section="wishes">
       <img decoding="async" loading="lazy" class="dark-peony-br" src="assets/decor/peony.png" alt="">
 
       <!-- ══════════════════════════════════════
@@ -261,18 +261,18 @@
     <!-- ══════════════════════════════════════
          АНКЕТА ГОСТЯ (RSVP)
     ══════════════════════════════════════ -->
-    <section class="rsvp-section">
+    <section class="rsvp-section" data-wc-section="closing">
 
-      <img decoding="async" loading="lazy" class="rsvp-bird-icon" src="assets/icons/icon(2).svg" alt="">
-      <h2 class="rsvp-title">АНКЕТА ГОСТЯ</h2>
-      <p class="rsvp-subtitle" data-edit="surveyText">
+      <img decoding="async" loading="lazy" class="rsvp-bird-icon" src="assets/icons/icon(2).svg" alt="" data-wc-section="rsvp">
+      <h2 class="rsvp-title" data-wc-section="rsvp">АНКЕТА ГОСТЯ</h2>
+      <p class="rsvp-subtitle" data-edit="surveyText" data-wc-section="rsvp">
         Чтобы мы знали, сколько стульев и бокалов готовить,<br>
         заполните анкету заранее
       </p>
 
-      <img decoding="async" loading="lazy" class="rsvp-bouquet" src="assets/decor/bouquet_color.png" alt="">
+      <img decoding="async" loading="lazy" class="rsvp-bouquet" src="assets/decor/bouquet_color.png" alt="" data-wc-section="rsvp">
 
-      <form class="rsvp-form" id="rsvpForm">
+      <form class="rsvp-form" id="rsvpForm" data-wc-section="rsvp">
         <fieldset class="rsvp-fieldset">
           <legend class="rsvp-legend">Как вас зовут?</legend>
           <input type="text" name="guestName" class="rsvp-name" placeholder="Ваше имя"
@@ -327,7 +327,7 @@
         <button type="submit" class="rsvp-submit">Отправить</button>
       </form>
 
-      <div class="rsvp-thanks" id="rsvpThanks" hidden>
+      <div class="rsvp-thanks" id="rsvpThanks" hidden data-wc-section="rsvp">
         <p class="closing-script">Будем рады видеть вас</p>
       </div>
 
@@ -410,6 +410,7 @@
       document.querySelectorAll('.fu').forEach(function (el) { io.observe(el); });
     })();
   </script>
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>

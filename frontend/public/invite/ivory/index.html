@@ -21,7 +21,7 @@
   <main class="invite" id="invite">
 
     <!-- 1 — ОБЛОЖКА -->
-    <section class="hero" id="hero">
+    <section class="hero" id="hero" data-wc-section="cover">
       <img decoding="async" class="hero__photo" src="assets/couple.jpg" data-edit="coverPhoto" alt="Жених и невеста" />
       <span class="hero__amp hero-in" aria-hidden="true">&amp;</span>
       <div class="hero__shade" aria-hidden="true"></div>
@@ -37,11 +37,11 @@
     </section>
 
     <!-- 2 — ДОРОГИЕ ГОСТИ: приглашение, календарь, место -->
-    <section class="guests paper" id="guests">
+    <section class="guests paper" id="guests" data-wc-section="date">
       <div class="card rv-soft">
         <div class="card__inner">
-          <h2 class="guests__title rv-write" data-edit="greetingTitle">Дорогие гости!</h2>
-          <p class="guests__text rv" data-edit="inviteText">Приглашаем вас разделить радость того особенного для нас события и стать частью начала семейной истории</p>
+          <h2 class="guests__title rv-write" data-edit="greetingTitle" data-wc-section="greeting">Дорогие гости!</h2>
+          <p class="guests__text rv" data-edit="inviteText" data-wc-section="greeting">Приглашаем вас разделить радость того особенного для нас события и стать частью начала семейной истории</p>
 
           <div class="cal rv" data-edit="calendar">
             <p class="cal__month" data-cal="month">Июнь</p>
@@ -55,7 +55,7 @@
           </div>
 
           <p class="venue__label rv" data-edit="venueLabel">Ждем вас в</p>
-          <p class="venue__name rv" data-edit="venue">“Белая роща”</p>
+          <p class="venue__name rv" data-edit="venue" data-wc-section="venue">“Белая роща”</p>
           <p class="venue__addr rv" data-edit="venueAddress"></p>
           <div class="venue__frame rv-soft">
             <img decoding="async" loading="lazy" class="venue__photo" src="assets/venue.jpg" data-edit="venuePhoto" alt="Место проведения" />
@@ -67,7 +67,7 @@
     </section>
 
     <!-- 3 — ПРОГРАММА ДНЯ: трек с сердцем -->
-    <section class="program" id="program">
+    <section class="program" id="program" data-wc-section="schedule">
       <img decoding="async" loading="lazy" class="program__doves rv-soft" src="assets/doves.webp" alt="" />
       <h2 class="title rv-write" data-edit="programTitle">Программа дня</h2>
       <div class="prog" id="prog">
@@ -83,7 +83,7 @@
     </section>
 
     <!-- 4 — ДРЕСС-КОД -->
-    <section class="dress paper" id="dresscode">
+    <section class="dress paper" id="dresscode" data-wc-section="dresscode">
       <h2 class="title rv-write" data-edit="dressTitle">Дресс-код</h2>
       <p class="dress__text rv" data-edit="dressText">Будем рады, если вы поддержите сдержанную палитру нашего праздника</p>
       <div class="palette rv" data-edit="palette">
@@ -101,7 +101,7 @@
     </section>
 
     <!-- 5 — СВАДЬБА ЧЕРЕЗ -->
-    <section class="cd" id="countdown">
+    <section class="cd" id="countdown" data-wc-section="countdown">
       <span class="cd__amp" aria-hidden="true">&amp;</span>
       <h2 class="title title--light rv-write" data-edit="countdownTitle">Свадьба через</h2>
       <div class="cd__grid rv">
@@ -114,7 +114,7 @@
     </section>
 
     <!-- 6 — ПОЖЕЛАНИЯ И ДЕТАЛИ -->
-    <section class="wish" id="wishes">
+    <section class="wish" id="wishes" data-wc-section="wishes">
       <img decoding="async" loading="lazy" class="wish__heart rv-soft" src="assets/heart.webp" alt="" />
       <h2 class="title rv-write" data-edit="wishesTitle">Пожелания</h2>
       <div class="wish__box rv">
@@ -126,7 +126,7 @@
     </section>
 
     <!-- 7 — АНКЕТА ГОСТЯ -->
-    <section class="rsvp paper" id="rsvp">
+    <section class="rsvp paper" id="rsvp" data-wc-section="rsvp">
       <div class="rsvp__card rv-soft">
         <h2 class="title rv-write" data-edit="surveyTitle">Анкета гостя</h2>
         <p class="rsvp__lead rv" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету заранее</p>
@@ -161,7 +161,7 @@
     </section>
 
     <!-- 8 — ФИНАЛ -->
-    <section class="fin" id="final">
+    <section class="fin" id="final" data-wc-section="closing">
       <div class="fin__frame rv-soft">
         <img decoding="async" loading="lazy" class="fin__photo" src="assets/final.jpg" data-edit="finalPhoto" alt="Жених и невеста" />
       </div>
@@ -174,6 +174,7 @@
 
   </main>
 
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>

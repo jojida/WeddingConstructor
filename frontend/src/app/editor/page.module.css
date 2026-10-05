@@ -128,22 +128,34 @@
 .panelTitle:first-child { margin-top: 0; }
 
 /* Разделы движка полей сворачиваются: шапка — кнопка, тело — только у открытых */
-.section { border-bottom: 1px solid #ecebe8; }
-.section:last-child { border-bottom: none; }
+.sectionsHint { margin: 0 0 14px; font-size: 12px; line-height: 1.5; color: #8a8378; }
+.section { border: 1px solid #dce3ed; border-radius: 12px; margin-bottom: 9px; }
+.sectionRow { display: flex; align-items: center; gap: 8px; padding: 0 10px; }
 .sectionHead {
-  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 14px 2px; background: none; border: none; cursor: pointer; text-align: left;
-  font-size: 11px; font-weight: 700; color: #6f685e; text-transform: uppercase; letter-spacing: 0.1em;
+  flex: 1; min-width: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 12px 0; background: none; border: none; cursor: pointer; text-align: left;
+  font-size: 14px; font-weight: 500; color: #354366;
   font-family: var(--font-inter);
   scroll-margin-top: 4px;
 }
 .sectionHead:hover { color: #2f2a24; }
+.sectionHead:disabled { color: #99a4b7; cursor: default; }
+.sectionLabel { display: flex; flex-direction: column; gap: 3px; }
+.sectionLabel small { font-size: 10px; font-weight: 400; color: #99a4b7; }
+.sectionSwitch { flex: none; position: relative; width: 42px; height: 24px; border: 0; border-radius: 999px; padding: 3px; background: #bec9d9; cursor: pointer; transition: background .18s; }
+.sectionSwitch span { display: block; width: 18px; height: 18px; border-radius: 50%; background: white; box-shadow: 0 1px 3px #0002; transition: transform .18s; }
+.sectionSwitch[aria-checked="true"] { background: #3084d5; }
+.sectionSwitch[aria-checked="true"] span { transform: translateX(18px); }
+.sectionSwitch:disabled { background: #9abbdc; cursor: default; }
+.sectionSwitch:focus-visible, .sectionHead:focus-visible { outline: 2px solid #3084d5; outline-offset: 3px; }
+.sectionOff { background: #fafbfd; }
 .sectionChevron {
   font-size: 18px; line-height: 1; color: #a39b8e;
   transform: rotate(90deg); transition: transform 0.2s;
 }
 .sectionHead[aria-expanded="true"] .sectionChevron { transform: rotate(-90deg); }
-.sectionBody { padding: 2px 0 14px; }
+.sectionBody { padding: 2px 12px 14px; }
+.sectionSetup { border: 1px solid #dce3ed; border-radius: 8px; padding: 9px 12px; background: #fff; color: #354366; cursor: pointer; font: inherit; font-size: 12px; }
 
 .sidebarFooter { margin-top: auto; padding-top: 24px; }
 .finishBtn {

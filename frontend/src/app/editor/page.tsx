@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
 import api from '@/lib/api';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
+import { isSectionEnabled } from '@/lib/section-visibility';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
@@ -293,9 +294,15 @@ function EditorContent() {
     const open = openNow !== s.title;
     setOpenTitle(open ? s.title : null);
     if (!open) return;
-    revealInPreview(s.fields.map(f => f.id));
+    revealInPreview([`section:${s.id}`, ...(s.previewFields || []), ...s.fields.map(f => f.id)]);
     // Раздел выше свернулся — шапка открытого уехала бы вверх; возвращаем её к началу панели
     setTimeout(() => head.scrollIntoView({ block: 'start', behavior: 'smooth' }), 30);
+  };
+
+  const setSectionEnabled = (section: TemplateSection, enabled: boolean) => {
+    if (!section.id || section.required) return;
+    setData(prev => ({ ...prev, enabledSections: { ...prev.enabledSections, [section.id!]: enabled } }));
+    if (!enabled && openNow === section.title) setOpenTitle(null);
   };
 
   // Вход в редактор — вторая ступень воронки после галереи шаблонов.
@@ -743,23 +750,44 @@ function EditorContent() {
 
             <div className={styles.sidebarContent}>
 
+              {sections?.some(s => s.id) && <p className={styles.sectionsHint}>
+                Уберите ненужные блоки переключателем. Их можно вернуть в любой момент.
+              </p>}
+
               {sections ? sections.map(section => {
-                const open = openNow === section.title;
+                const enabled = isSectionEnabled(section, data.enabledSections, data.customData?.showMap);
+                const open = enabled && openNow === section.title;
                 const ids = section.fields.map(f => f.id);
                 return (
-                  <div className={`${styles.fields} ${styles.section}`} key={section.title}
+                  <div className={`${styles.fields} ${styles.section} ${!enabled ? styles.sectionOff : ''}`} key={section.title}
                     // Перешли в поле — превью к его блоку (а если у поля блока нет — к разделу)
                     onFocusCapture={e => {
                       const id = (e.target as HTMLElement).closest('[data-field]')?.getAttribute('data-field');
                       if (id) revealInPreview([id, ...ids.filter(x => x !== id)]);
                     }}>
-                    <button type="button" className={styles.sectionHead} aria-expanded={open}
-                      onClick={e => toggleSection(section, e.currentTarget)}>
-                      <span>{section.icon ? section.icon + ' ' : ''}{section.title}</span>
-                      <span className={styles.sectionChevron} aria-hidden="true">›</span>
-                    </button>
+                    <div className={styles.sectionRow}>
+                      <button type="button" className={styles.sectionHead} aria-expanded={open}
+                        aria-controls={`section-body-${section.title}`} disabled={!enabled}
+                        onClick={e => toggleSection(section, e.currentTarget)}>
+                        <span className={styles.sectionLabel}>
+                          <span>{section.icon ? section.icon + ' ' : ''}{section.title}</span>
+                          {section.required && <small>Обязательный блок</small>}
+                          {!enabled && <small>Убран с сайта</small>}
+                        </span>
+                        <span className={styles.sectionChevron} aria-hidden="true">›</span>
+                      </button>
+                      {section.id && <button type="button" role="switch" aria-checked={enabled}
+                        aria-label={`${section.title}: показывать на сайте`} disabled={section.required}
+                        title={section.required ? 'Этот блок всегда остаётся на сайте' : enabled ? 'Убрать блок с сайта' : 'Вернуть блок на сайт'}
+                        className={styles.sectionSwitch} onClick={() => setSectionEnabled(section, !enabled)}>
+                        <span aria-hidden="true" />
+                      </button>}
+                    </div>
                     {open && (
-                      <div className={styles.sectionBody}>
+                      <div className={styles.sectionBody} id={`section-body-${section.title}`}>
+                        {section.fields.length === 0 && (section.required
+                          ? <button type="button" className={styles.sectionSetup} onClick={() => setStep('setup')}>Изменить имена и дату</button>
+                          : <p className={styles.sectionsHint}>Этот блок можно убрать и вернуть переключателем.</p>)}
                         {section.fields.map(f => (
                           <div key={f.id} data-field={f.id}>
                             <SchemaFieldRenderer
@@ -1107,7 +1135,9 @@ const PREVIEW_TARGETS: Record<string, string[]> = {
 };
 
 function findPreviewTarget(doc: Document, id: string): HTMLElement | null {
-  const selectors = [`[data-edit="${CSS.escape(id)}"]`, ...(PREVIEW_TARGETS[id] || [])];
+  const selectors = id.startsWith('section:')
+    ? [`[data-wc-section="${CSS.escape(id.slice(8))}"]`]
+    : [`[data-edit="${CSS.escape(id)}"]`, ...(PREVIEW_TARGETS[id] || [])];
   for (const sel of selectors) {
     // Спрятанное (display:none, неактивная вкладка дресс-кода) не годится
     const hit = Array.from(doc.querySelectorAll<HTMLElement>(sel)).find(el => el.getClientRects().length > 0);

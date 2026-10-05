@@ -525,6 +525,9 @@ export const SEAL_COLORS: ChoiceOption[] = [
 ];
 
 export interface TemplateSection {
+  id?: string;               // стабильный ключ в enabledSections / data-wc-section
+  required?: boolean;        // обложка, дата, место и завершение остаются всегда
+  previewFields?: string[];  // точки прокрутки у разделов без редактируемых полей
   title: string;
   icon?: string;              // эмодзи в шапке панели
   fields: TemplateField[];
@@ -712,7 +715,6 @@ const MAP_ADDRESS: TemplateField = {
 const MAP_LINK: TemplateField = {
   id: 'mapLink', type: 'text', label: 'Ссылка на место в Яндекс Картах (необязательно)', hint: 'Метка на карте встанет точно на место', scope: 'data',
 };
-const MAP_TOGGLE: TemplateField = { id: 'showMap', type: 'toggle', label: 'Показывать карту', scope: 'custom' };
 
 /** Готовые вопросы анкеты. Сами вопросы и варианты ответа гость видит такими,
     как их задаёт общий модуль public/invite/assets/rsvp-count.js (QUESTIONS) —
@@ -783,7 +785,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Усадьба «Архангельское»', scope: 'data', maxLength: 50 },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
         { id: 'dateIntro', type: 'text', label: 'Надпись над датой', hint: 'Например: Наша свадьба состоится', scope: 'custom', maxLength: 40 },
       ],
     },
@@ -847,7 +849,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Усадьба Кусково', scope: 'data', maxLength: 50 },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
       ],
     },
     {
@@ -911,7 +913,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Дворцовая усадьба', scope: 'data', maxLength: 50 },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
       ],
     },
     {
@@ -975,7 +977,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'venueLabel', type: 'text', label: 'Надпись над местом', hint: 'Например: Ждем вас в', scope: 'custom', maxLength: 30 },
         { id: 'venue',      type: 'text', label: 'Место проведения', hint: 'Например: Белая роща — кавычки добавятся сами', scope: 'data', maxLength: 50 },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
         { id: 'venuePhoto', type: 'image', label: 'Фото места', scope: 'custom' },
       ],
     },
@@ -1031,7 +1033,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Дворцовая усадьба 12', scope: 'data' },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
       ],
     },
     {
@@ -1096,7 +1098,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Локация', icon: '📍',
       fields: [
         { id: 'locationText', type: 'textarea', label: 'Текст локации', hint: 'Например: Праздник пройдёт на базе отдыха «Барвиха»', scope: 'custom' },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
       ],
     },
     {
@@ -1156,7 +1158,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Локация', icon: '📍',
       fields: [
         { id: 'venue',        type: 'text',  label: 'Место проведения', hint: 'Например: Дворец бракосочетания 12/8', scope: 'data' },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
         { id: 'locationPhoto', type: 'image', label: 'Фото в рамке локации', scope: 'custom' },
       ],
     },
@@ -1223,7 +1225,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Место проведения', icon: '📍',
       fields: [
         { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Хвойный 17', scope: 'data' },
-        MAP_ADDRESS, MAP_LINK, MAP_TOGGLE,
+        MAP_ADDRESS, MAP_LINK,
       ],
     },
     {
@@ -1276,7 +1278,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'venue',        type: 'text', label: 'Название места', hint: 'Например: СПА Отель',            scope: 'data' },
         { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'Появится меткой на карте. Например: г. Сочи, ул. Приморская, 15', scope: 'data', maxLength: 90 },
-        MAP_LINK, MAP_TOGGLE,
+        MAP_LINK,
       ],
     },
     {
@@ -1350,7 +1352,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'venue',        type: 'text', label: 'Название места', hint: '«Артурс Спа Отель»', scope: 'data', maxLength: 50 },
         { id: 'venueAddress', type: 'text', label: 'Адрес',          hint: 'Появится меткой на карте', scope: 'data', maxLength: 90 },
-        MAP_LINK, MAP_TOGGLE,
+        MAP_LINK,
       ],
     },
     {
@@ -1400,8 +1402,47 @@ export const TEMPLATE_FIELDS: Record<string, TemplateSection[]> = Object.fromEnt
     ...Object.fromEntries(
       STUDIO_TEMPLATES.map((t) => [t.id, [...(t.fields ?? []), MUSIC_SECTION]]),
     ),
-  }).map(([id, sections]) => [id, withRsvpFields(sections)]),
+  }).map(([id, sections]) => [id, withSectionControls(id, withRsvpFields(sections))]),
 );
+
+/** Границы проверены в HTML каждого активного дизайна. Фото coverPhoto у
+    «Леса» — отдельный альбом, а полароиды «Флорального» — часть финала. */
+function withSectionControls(templateId: string, sections: TemplateSection[]): TemplateSection[] {
+  if (!(templateId in HANDMADE_TEMPLATE_FIELDS)) return sections;
+  const required = new Set(['cover', 'date', 'venue', 'closing']);
+  const ids: Record<string, string> = {
+    'Конверт': 'envelope', 'Обложка': 'cover', 'Фото на обложке': 'cover',
+    'Приветствие': 'greeting', 'Фото в полароиде': 'photos',
+    'Фото в рамке': templateId === 'floral' ? 'closing' : 'photos',
+    'Фото в рамке (приветствие)': 'photos', 'Место проведения': 'venue', 'Локация': 'venue',
+    'Программа дня': 'schedule', 'Расписание': 'schedule', 'Дресс-код': 'dresscode',
+    'Пожелания': 'wishes', 'Пожелания и детали': 'wishes', 'Анкета гостя': 'rsvp',
+    'Организатор': 'organizer', 'Завершение': 'closing', 'Финальное фото': 'closing',
+    'Фотоколлаж': 'closing', 'Музыка': 'music',
+  };
+  const result: TemplateSection[] = [];
+  if (!sections.some(s => ids[s.title] === 'cover')) {
+    result.push({ id: 'cover', required: true, title: 'Обложка', icon: '🖼', fields: [], previewFields: ['names', 'heroDate', 'groomName'] });
+  }
+  for (const section of sections) {
+    const id = ids[section.title];
+    result.push({ ...section, id, required: required.has(id), fields: section.fields.filter(f => f.id !== 'showMap' && f.id !== 'mapLink') });
+    if (id === 'greeting') {
+      result.push({ id: 'date', required: true, title: 'Дата', icon: '📅', fields: [], previewFields: ['calendar', 'heroDate', 'letterDate', 'dateLine', 'calMonth'] });
+    }
+    if (id === 'venue') {
+      result.push({ id: 'map', title: 'Карта', icon: '🗺', fields: [MAP_LINK], previewFields: ['venueAddress'] });
+    }
+    if (id === 'schedule' && templateId !== 'sketch') {
+      result.push({ id: 'countdown', title: 'Таймер', icon: '⏳', fields: [], previewFields: ['countdownTitle'] });
+    }
+  }
+  if (!result.some(s => s.id === 'closing')) {
+    const at = result.findIndex(s => s.id === 'music');
+    result.splice(at < 0 ? result.length : at, 0, { id: 'closing', required: true, title: 'Завершение', icon: '💍', fields: [], previewFields: ['closingTitle', 'footerNames'] });
+  }
+  return result;
+}
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
   angels: {

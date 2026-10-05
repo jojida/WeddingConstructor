@@ -12,7 +12,7 @@
   <main class="card">
 
     <!-- ══════════════ ОБЛОЖКА ══════════════ -->
-    <section class="section cover">
+    <section class="section cover" data-wc-section="cover">
       <div class="cover-head">
         <img decoding="async" class="cf cf-yellow1" src="assets/confetti-yellow.svg" alt="">
         <img decoding="async" class="cf cf-blue1"   src="assets/confetti-blue.svg" alt="">
@@ -50,7 +50,7 @@
     </section>
 
     <!-- ══════════════ ДОРОГИЕ ГОСТИ ══════════════ -->
-    <section class="section guests">
+    <section class="section guests" data-wc-section="greeting">
       <div class="guests-head fu">
         <img decoding="async" loading="lazy" src="assets/cake-tiered.svg" alt="">
         <h2 class="h-script" data-edit="guestsTitle">Дорогие гости</h2>
@@ -66,7 +66,7 @@
     </section>
 
     <!-- ══════════════ НАШ ДЕНЬ ══════════════ -->
-    <section class="section ourday">
+    <section class="section ourday" data-wc-section="date">
       <img decoding="async" loading="lazy" class="confetti" style="top:-10px;left:-8px;width:90px" src="assets/confetti-blue.svg" alt="">
       <h2 class="h-script fu">Наш день</h2>
       <div class="dates fu fu-d1" id="dateRow">
@@ -83,7 +83,7 @@
     </section>
 
     <!-- ══════════════ ЛОКАЦИЯ ══════════════ -->
-    <section class="section location">
+    <section class="section location" data-wc-section="venue">
       <img decoding="async" loading="lazy" class="confetti" style="top:8px; right:-10px; width:110px" src="assets/confetti-yellow.svg" alt="">
       <img decoding="async" loading="lazy" class="loc-icon fu" src="assets/gazebo.lossless.webp" alt="">
       <h2 class="h-marker fu">Локация</h2>
@@ -94,7 +94,7 @@
     </section>
 
     <!-- ══════════════ ПРОГРАММА ДНЯ ══════════════ -->
-    <section class="section program">
+    <section class="section program" data-wc-section="schedule">
       <h2 class="h-marker fu">Программа дня</h2>
 
       <div class="timeline">
@@ -149,7 +149,7 @@
     </section>
 
     <!-- ══════════════ DRESS CODE ══════════════ -->
-    <section class="section dress">
+    <section class="section dress" data-wc-section="dresscode">
       <h2 class="h-script fu">Дресс код</h2>
       <p class="lead fu fu-d1" data-edit="dressText">
         Одевайтесь в пастельных тонах, пожалуйста,
@@ -188,7 +188,7 @@
     </section>
 
     <!-- ══════════════ АНКЕТА ══════════════ -->
-    <section class="section survey">
+    <section class="section survey" data-wc-section="rsvp">
       <img decoding="async" loading="lazy" class="confetti" style="top:-30px; right:-8px; width:130px" src="assets/confetti-yellow.svg" alt="">
       <h2 class="h-marker fu">Анкета</h2>
       <p class="lead fu fu-d1" data-edit="surveyText">
@@ -232,7 +232,7 @@
     </section>
 
     <!-- ══════════════ ПОЖЕЛАНИЯ ══════════════ -->
-    <section class="section wishes">
+    <section class="section wishes" data-wc-section="wishes">
       <img decoding="async" loading="lazy" class="confetti confetti-bl" src="assets/confetti-blue.svg" alt="">
       <h2 class="h-marker fu">Пожелания</h2>
       <p class="lead fu fu-d1" data-edit="wishesText">
@@ -246,7 +246,7 @@
     </section>
 
     <!-- ══════════════ ДО НОВЫХ ВСТРЕЧ ══════════════ -->
-    <section class="section outro">
+    <section class="section outro" data-wc-section="closing">
       <h2 class="h-script fu">До новых встреч!</h2>
 
       <div class="framed fu fu-d1">
@@ -271,6 +271,7 @@
     }, { threshold: 0.1, rootMargin: '0px 0px 0px 0px' });
     document.querySelectorAll('.fu').forEach(el => io.observe(el));
   </script>
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>

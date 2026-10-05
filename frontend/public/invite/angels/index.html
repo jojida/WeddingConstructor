@@ -28,7 +28,7 @@
     <!-- 1 — ОБЛОЖКА: фото пары, под ним облака; Купидон, лента с именами,
          ангел с арфой и голубь в лучах. При открытии облака поднимаются,
          Купидон прилетает, лента разворачивается и пишутся имена -->
-    <section class="hero" id="hero">
+    <section class="hero" id="hero" data-wc-section="cover">
       <div class="hero__photo-wrap hero-in">
         <img class="hero__photo" src="assets/hero.jpg" data-edit="coverPhoto" alt="Фото пары" />
       </div>
@@ -43,7 +43,7 @@
     </section>
 
     <!-- 2 — ДОРОГИЕ ГОСТИ: свиток разворачивается сверху вниз -->
-    <section class="greet" id="greeting">
+    <section class="greet" id="greeting" data-wc-section="greeting">
       <div class="scroll" id="scroll">
         <h2 class="title rv-write" data-edit="greetingTitle">Дорогие Гости!</h2>
         <div class="greet__text rv" data-edit="inviteText">
@@ -54,7 +54,7 @@
     </section>
 
     <!-- 3 — ПОРТИК: колонны, полароид с фото пары, цветочная дорожка -->
-    <section class="portico" id="photo">
+    <section class="portico" id="photo" data-wc-section="photos">
       <img class="portico__aisle rv-soft" src="assets/aisle.webp" alt="" loading="lazy" decoding="async" />
       <img class="portico__arch rv-soft" src="assets/portico.webp" alt="" loading="lazy" decoding="async" />
       <figure class="polaroid" id="polaroid">
@@ -66,7 +66,7 @@
     </section>
 
     <!-- 4 — ЛОКАЦИЯ -->
-    <section class="loc" id="venue">
+    <section class="loc" id="venue" data-wc-section="venue">
       <h2 class="title rv-write" data-edit="venueTitle">Локация</h2>
       <p class="loc__name rv" data-edit="venue">Усадьба «Архангельское»</p>
       <p class="loc__addr rv" data-edit="venueAddress">Московская обл., Красногорск, пос. Архангельское</p>
@@ -75,7 +75,7 @@
     </section>
 
     <!-- 5 — ДАТА: ангел с мандолиной -->
-    <section class="date" id="date">
+    <section class="date" id="date" data-wc-section="date">
       <img class="cloud cloud--a" src="assets/cloud-a.webp" alt="" loading="lazy" decoding="async" />
       <p class="date__intro rv" data-edit="dateIntro">Наша свадьба состоится</p>
       <p class="date__day rv-write" id="dateLine">12 июля 2027</p>
@@ -84,7 +84,7 @@
     </section>
 
     <!-- 6 — ПРОГРАММА ДНЯ: Купидон летит по пунктиру за прокруткой -->
-    <section class="program" id="program">
+    <section class="program" id="program" data-wc-section="schedule">
       <h2 class="title program__title rv-write" data-edit="programTitle">Программа дня</h2>
       <div class="prog" id="prog">
         <!-- Трек и Купидон — в одном SVG: Купидон едет по пути атрибутом
@@ -99,7 +99,7 @@
     </section>
 
     <!-- 7 — ОТСЧЁТ: золотой картуш -->
-    <section class="cd" id="countdown">
+    <section class="cd" id="countdown" data-wc-section="countdown">
       <div class="cd__box rv-soft">
         <img class="cd__img" src="assets/cartouche.webp" alt="" loading="lazy" decoding="async" />
         <p class="cd__title" data-edit="countdownTitle">Осталось до свадьбы</p>
@@ -113,7 +113,7 @@
     </section>
 
     <!-- 8 — ПОЖЕЛАНИЯ: бант, ангел с лентой -->
-    <section class="wish" id="wishes">
+    <section class="wish" id="wishes" data-wc-section="wishes">
       <img class="wish__bow rv-soft" src="assets/bow.webp" alt="" loading="lazy" decoding="async" />
       <img class="cloud cloud--d" src="assets/cloud-d.webp" alt="" loading="lazy" decoding="async" />
       <div class="wish__cherub rv-soft"><img class="float float--slow" src="assets/cherub-ribbon.webp" alt="" loading="lazy" decoding="async" /></div>
@@ -125,7 +125,7 @@
     </section>
 
     <!-- 9 — АНКЕТА ГОСТЕЙ -->
-    <section class="rsvp" id="rsvp">
+    <section class="rsvp" id="rsvp" data-wc-section="rsvp">
       <h2 class="title rv-write" data-edit="surveyTitle">Анкета Гостей</h2>
       <p class="rsvp__lead rv" data-edit="surveyText">Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету заранее</p>
       <form class="rsvp__form rv" id="rsvpForm" novalidate>
@@ -161,7 +161,7 @@
          «Для дам / Для джентльменов». Неактивная вкладка скрыта visibility,
          а не display: так редактор находит и подсвечивает её фото, а
          кадрирование (photo-frame.js) знает размеры всех рамок -->
-    <section class="dress" id="dresscode">
+    <section class="dress" id="dresscode" data-wc-section="dresscode">
       <div class="dress__cherub rv-soft"><img class="float" src="assets/cherub-bell.webp" alt="" loading="lazy" decoding="async" /></div>
       <h2 class="title dress__title rv-write" data-edit="dressTitle">Дресс код</h2>
       <div class="palette rv-pop" data-edit="palette">
@@ -187,7 +187,7 @@
     </section>
 
     <!-- 11 — ДО НОВЫХ ВСТРЕЧ -->
-    <section class="fin" id="final">
+    <section class="fin" id="final" data-wc-section="closing">
       <img class="cloud cloud--e" src="assets/cloud-e.webp" alt="" loading="lazy" decoding="async" />
       <img class="cloud cloud--f" src="assets/cloud-f.webp" alt="" loading="lazy" decoding="async" />
       <h2 class="title fin__title rv-write" data-edit="closingTitle">До новых встреч!</h2>
@@ -197,6 +197,7 @@
 
   </main>
 
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>

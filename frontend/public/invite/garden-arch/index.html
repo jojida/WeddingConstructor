@@ -16,7 +16,7 @@
   <div class="card">
 
     <!-- ═══════════════ ОБЛОЖКА — ЦВЕТУЩАЯ АРКА (целый PNG) ═══════════════ -->
-    <section class="cover reveal">
+    <section class="cover reveal" data-wc-section="cover">
       <div class="cover-art">
         <img decoding="async" class="cover-img" src="assets/decor/arch.webp" alt="">
         <img decoding="async" class="cover-venue" src="assets/decor/gazebo.webp" alt="">
@@ -33,7 +33,7 @@
     </section>
 
     <!-- ═══════════════ ДОРОГИЕ ДРУЗЬЯ ═══════════════ -->
-    <section class="friends reveal">
+    <section class="friends reveal" data-wc-section-group="greeting photos">
       <div class="friends-frame">
         <img decoding="async" loading="lazy" class="friends-goldframe" src="assets/icons/frame_gold.svg" alt="">
         <img decoding="async" loading="lazy" class="friends-bouquet" src="assets/decor/bouquet2.png" alt="">
@@ -41,11 +41,11 @@
         <img decoding="async" loading="lazy" class="friends-olive friends-olive-bl" src="assets/decor/olive.lossless.webp" alt="">
 
         <div class="friends-inner">
-          <h2 class="script-h" data-edit="dearGuests">Дорогие друзья</h2>
-          <p class="friends-text" data-edit="inviteText">
+          <h2 class="script-h" data-edit="dearGuests" data-wc-section="greeting">Дорогие друзья</h2>
+          <p class="friends-text" data-edit="inviteText" data-wc-section="greeting">
             Приглашаем вас разделить с нами это чудесное событие. Очень ждём вас на нашей свадьбе!
           </p>
-          <div class="friends-photos">
+          <div class="friends-photos" data-wc-section="photos">
             <div class="polaroid polaroid-l"><img loading="lazy" decoding="async" src="assets/photos/couple1.jpg" alt="" data-edit="polaroid1"></div>
             <div class="polaroid polaroid-r"><img loading="lazy" decoding="async" src="assets/photos/couple2.jpg" alt="" data-edit="polaroid2"></div>
           </div>
@@ -54,7 +54,7 @@
     </section>
 
     <!-- ═══════════════ WEDDING DAY — ИНТЕРАКТИВНОЕ СЕРДЦЕ С ДАТОЙ ═══════════════ -->
-    <section class="wedday reveal">
+    <section class="wedday reveal" data-wc-section="date">
       <img decoding="async" loading="lazy" class="wedday-script" src="assets/icons/wedding_day.svg" alt="Wedding day">
       <img decoding="async" loading="lazy" class="wedday-divider" src="assets/icons/divider_gold.svg" alt="">
       <p class="wedday-hint" id="weddayHint">проведите по цветам — и они разлетятся</p>
@@ -66,7 +66,7 @@
     </section>
 
     <!-- ═══════════════ МЕСТО ПРОВЕДЕНИЯ ═══════════════ -->
-    <section class="venue reveal">
+    <section class="venue reveal" data-wc-section="venue">
       <img decoding="async" loading="lazy" class="venue-sprig" src="assets/decor/sprig.png" alt="">
       <h2 class="script-h">Место проведения</h2>
       <p class="venue-name" data-edit="venue">Хвойный 17</p>
@@ -77,7 +77,7 @@
     </section>
 
     <!-- ═══════════════ ПРОГРАММА ДНЯ ═══════════════ -->
-    <section class="program reveal">
+    <section class="program reveal" data-wc-section="schedule">
       <h2 class="script-h">Программа дня</h2>
 
       <div class="timeline-inner">
@@ -115,7 +115,7 @@
     </section>
 
     <!-- ═══════════════ ДО СВАДЬБЫ ОСТАЛОСЬ ═══════════════ -->
-    <section class="countdown-sec reveal">
+    <section class="countdown-sec reveal" data-wc-section="countdown">
       <div class="cd-scene">
         <img decoding="async" loading="lazy" class="cd-scene-img" src="assets/decor/cd_scene.svg" alt="">
         <div class="cd-plashka">
@@ -135,7 +135,7 @@
     </section>
 
     <!-- ═══════════════ АНКЕТА ГОСТЯ (RSVP) ═══════════════ -->
-    <section class="rsvp reveal">
+    <section class="rsvp reveal" data-wc-section="rsvp">
       <img decoding="async" loading="lazy" class="rsvp-heart" src="assets/icons/divider_heart.svg" alt="">
       <h2 class="rsvp-title">Анкета гостя</h2>
       <p class="rsvp-sub" data-edit="surveyText">
@@ -180,7 +180,7 @@
     </section>
 
     <!-- ═══════════════ ДРЕСС-КОД ═══════════════ -->
-    <section class="dresscode reveal">
+    <section class="dresscode reveal" data-wc-section="dresscode">
       <h2 class="script-h">Дресс&nbsp;код</h2>
       <p class="dc-sub">поддержите палитру нашего торжества</p>
 
@@ -224,7 +224,7 @@
     </section>
 
     <!-- ═══════════════ ПОЖЕЛАНИЯ И ДЕТАЛИ ═══════════════ -->
-    <section class="wishes reveal">
+    <section class="wishes reveal" data-wc-section="wishes">
       <div class="wishes-arch-wrap">
         <img decoding="async" loading="lazy" class="wishes-arch" src="assets/decor/wildflower_arch.png" alt="">
         <div class="wishes-inner">
@@ -238,7 +238,7 @@
     </section>
 
     <!-- ═══════════════ ФИНАЛ ═══════════════ -->
-    <section class="closing reveal">
+    <section class="closing reveal" data-wc-section="closing">
       <h2 class="script-h closing-h" data-edit="closing">Ждём вас на нашей свадьбе!</h2>
       <div class="closing-wreath-wrap">
         <img decoding="async" loading="lazy" class="closing-wreath" src="assets/decor/lily_laurel.png" alt="">
@@ -248,6 +248,7 @@
 
   </div>
 
+  <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>
   <script src="../assets/venue-map.js"></script>
