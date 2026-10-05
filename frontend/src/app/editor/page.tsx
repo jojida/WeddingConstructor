@@ -1285,7 +1285,7 @@ function ImagePicker({ value, onChange, apiBase, uploadImage, frame, slot, onFra
   const resolve = (url: string) => !url ? ''
     : (/^https?:\/\//.test(url) || url.startsWith('data:') || url.startsWith('/invite/')) ? url
       : url.startsWith('/') ? apiBase + url : url;
-  // Кадрировать можно и фото из дизайна шаблона, пока пара не загрузила своё
+  // Показываем и кадрируем текущее фото: своё либо демо-фото из шаблона.
   const frameSrc = value ? resolve(value) : (slot?.src || '');
   const canFrame = !!onFrame && !!frameSrc;
   return (
@@ -1298,15 +1298,15 @@ function ImagePicker({ value, onChange, apiBase, uploadImage, frame, slot, onFra
         }} />
       <div className={styles.dropzone}
         onClick={() => inputRef.current?.click()}
-        style={value ? { backgroundImage: `url(${resolve(value)})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
-        {!value && (
+        style={frameSrc ? { backgroundImage: `url(${frameSrc})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}>
+        {!frameSrc && (
           <div className={styles.dropzoneInner}>
             <span className={styles.dropzoneIcon}>📷</span>
             <span>Загрузить фото</span>
             <span className={styles.dropzoneHint}>JPG, PNG до 10 MB</span>
           </div>
         )}
-        {value && <div className={styles.dropzoneOverlay}>Изменить</div>}
+        {frameSrc && <div className={styles.dropzoneOverlay}>Изменить</div>}
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
         <button type="button" onClick={() => setShowGallery(true)}
