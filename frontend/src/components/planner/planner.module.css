@@ -64,6 +64,8 @@
 }
 .stat:hover { border-color: #cfc4b3; background: var(--soft); }
 .statActive { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.stat:disabled { cursor: default; }
+.stat:disabled:hover { border-color: var(--line); background: var(--card); }
 .statNum { font-family: var(--font-playfair, Georgia), serif; font-size: 26px; font-weight: 700; line-height: 1.1; }
 .statLabel { font-size: 12px; color: var(--muted); margin-top: 2px; }
 .statNote { font-size: 11px; color: var(--muted); }
@@ -162,6 +164,30 @@
 .seatedSub { display: block; font-size: 11px; color: var(--muted); }
 .emptyTable { font-size: 12px; color: var(--muted); padding: 6px 0; }
 .tableFoot { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ── Меню ────────────────────────────────────────────────────────────────── */
+.panel { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 14px 16px; margin-bottom: 14px; }
+.panelTitle { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 0 10px; font-family: var(--font-playfair, Georgia), serif; font-size: 18px; }
+.switchRow { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; cursor: pointer; }
+.switchRow input { margin-top: 3px; flex: 0 0 auto; width: 18px; height: 18px; accent-color: #36454f; }
+.optionList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.optionRow { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid rgba(206, 197, 186, 0.45); border-radius: 10px; flex-wrap: wrap; }
+.optionRow .iconBtn:disabled { opacity: 0.3; cursor: default; }
+/* Название и описание варианта: рядом на широком экране, друг под другом на узком */
+.addForm { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; flex: 1; }
+.addForm > input { flex: 1 1 200px; min-width: 0; }
+.barRow { display: flex; width: 100%; align-items: center; gap: 10px; padding: 6px 4px; border: none; background: none; font: inherit; color: inherit; cursor: pointer; border-radius: 8px; text-align: left; }
+.barRow:hover { background: var(--soft); }
+.barLabel { flex: 0 0 34%; min-width: 0; overflow-wrap: anywhere; }
+.barNum { flex: 0 0 auto; min-width: 28px; text-align: right; }
+.matrixWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.matrix { border-collapse: collapse; width: 100%; font-size: 13px; }
+.matrix th, .matrix td { padding: 7px 10px; border-bottom: 1px solid rgba(206, 197, 186, 0.45); text-align: center; white-space: nowrap; }
+.matrix th:first-child { text-align: left; white-space: normal; min-width: 90px; }
+.matrix thead th { font-weight: 700; color: var(--muted); font-size: 12px; }
+.menuPerson { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 4px; border-top: 1px solid rgba(206, 197, 186, 0.35); }
+.menuPerson:first-child { border-top: none; }
+.menuWho { flex: 1 1 180px; min-width: 0; overflow-wrap: anywhere; }
 
 /* ── Окна ────────────────────────────────────────────────────────────────── */
 .overlay {

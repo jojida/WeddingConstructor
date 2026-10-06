@@ -23,7 +23,8 @@ for (const dir of fs.readdirSync(path.join(root, 'prisma/migrations')).sort()) {
 db.close();
 
 const prisma = require('../dist/lib/prisma').default;
-const { planParty, buildParties } = require('../dist/lib/planner/roster');
+const { planParty, buildParties, planDetails } = require('../dist/lib/planner/roster');
+const { cleanPeople, peopleAnswer } = require('../dist/lib/planner/public');
 const { csvCell, toCsv } = require('../dist/lib/planner/csv');
 const { planAutoseat } = require('../dist/lib/planner/autoseat');
 const { ensureSchema } = require('../dist/lib/ensureSchema');
@@ -93,6 +94,68 @@ test('buildParties: последний ответ гостя, ответы бе�
   assert.deepEqual(parties.map((p) => [p.key, p.status, p.want]), [['g:g1', 'yes', 2], ['r:r3', 'yes', 1], ['r:r4', 'yes', 1]]);
 });
 
+test('planDetails: повторная анкета находит своих по имени и заготовкам, не плодит дублей', () => {
+  const rows = [
+    row(0, { name: 'Пётр Корелов', tableId: 't1', menuOptionId: 'meat' }),
+    row(1),
+    row(2, { name: 'Анна', excluded: true }),
+  ];
+  const plan = planDetails(rows, [
+    { name: 'Анна', menuOptionId: 'fish', diet: 'Без орехов', isChild: false },
+    { name: 'петр корелов', menuOptionId: null, diet: null, isChild: false },
+    { name: '', menuOptionId: 'kids', diet: '', isChild: true },
+  ]);
+  assert.deepEqual(plan.create, []);
+  const byId = Object.fromEntries(plan.update.map((u) => [u.id, u.data]));
+  assert.deepEqual(byId.p2, { isChild: false, excluded: false, menuOptionId: 'fish', menuReview: false, diet: 'Без орехов' });
+  // нашли по имени без учёта регистра и «ё» — написание владельца и прежнее блюдо остаются
+  assert.deepEqual(byId.p0, { isChild: false, excluded: false });
+  assert.deepEqual(byId.p1, { isChild: true, excluded: false, menuOptionId: 'kids', menuReview: false, diet: '' });
+  assert.equal(plan.rows.find((r) => r.id === 'p0').tableId, 't1', 'место за столом сохраняется');
+  assert.deepEqual([...plan.keep].sort(), ['p0', 'p1', 'p2']);
+
+  const fresh = planDetails([], [{ name: 'Иван', menuOptionId: null, diet: null, isChild: false }, { name: '', menuOptionId: null, diet: null, isChild: true }]);
+  assert.deepEqual(fresh.create.map((c) => [c.slot, c.name, c.isChild]), [[0, 'Иван', false], [1, '', true]]);
+  assert.deepEqual([...fresh.keep], ['new:0', 'new:1']);
+});
+
+test('planParty: строки, которые гость только что назвал, лишними не считаются', () => {
+  const rows = [row(0), row(1), row(2)];
+  assert.deepEqual(planParty(party({ want: 1 }), rows).remove.sort(), ['p1', 'p2']);
+  // p2 гость только что назвал: лишними становятся остальные две
+  assert.deepEqual(planParty(party({ want: 1 }), rows, new Set(['p2'])).remove.sort(), ['p0', 'p1']);
+  // обе строки названы в анкете — не трогаем, даже если их больше, чем людей в ответе
+  assert.deepEqual(planParty(party({ want: 1 }), rows.slice(0, 2), new Set(['p0', 'p1'])).remove, []);
+});
+
+test('анкета: поле people проверяется мягко, питание — только если спрашивали', () => {
+  const menu = { askMenu: true, askDiet: true, options: [{ id: 'm1', label: 'Мясное', note: '' }, { id: 'f1', label: 'Рыбное', note: '' }] };
+  const list = cleanPeople([
+    { name: '  Иван  ', menu: 'm1', diet: 'Без глютена', child: true },
+    { name: 'x'.repeat(150), menu: 'удалённый', diet: 'y'.repeat(300), child: true },
+  ], menu);
+  assert.equal(list[0].name, 'Иван');
+  assert.equal(list[0].isChild, false, 'первый — сам гость, взрослый');
+  assert.equal(list[1].name.length, 120);
+  assert.equal(list[1].menuOptionId, null, 'удалённый вариант — как «не выбрано»');
+  assert.equal(list[1].diet.length, 200);
+  assert.equal(list[1].isChild, true);
+  for (const bad of [null, 'строка', [], [1], [{ name: 5 }], Array.from({ length: 21 }, () => ({ name: 'a' }))]) {
+    assert.equal(cleanPeople(bad, menu), null, JSON.stringify(bad).slice(0, 40));
+  }
+  const noDiet = cleanPeople([{ name: 'Иван', menu: 'm1', diet: 'секрет' }], { ...menu, askDiet: false });
+  assert.equal(noDiet[0].diet, null);
+  const noMenu = cleanPeople([{ name: 'Иван', menu: 'm1' }], { ...menu, askMenu: false });
+  assert.equal(noMenu[0].menuOptionId, null);
+
+  const answer = peopleAnswer([
+    { name: 'Иван', menuOptionId: 'm1', diet: 'Без глютена', isChild: false },
+    { name: '', menuOptionId: null, diet: 'аллергия', isChild: true },
+  ], menu);
+  assert.equal(answer.a, 'Иван: Мясное; Гость 2 (ребёнок): блюдо не выбрано');
+  assert.ok(!answer.a.includes('глютен') && !answer.a.includes('аллерг'), 'пищевые ограничения в строку ответа не попадают');
+});
+
 test('авторассадка: группа целиком, метки рядом, большая группа делится, нехватка мест', () => {
   const tables = [{ id: 't1', free: 4, tags: [], order: 0 }, { id: 't2', free: 4, tags: [], order: 1 }];
   const plan = planAutoseat(tables, [
@@ -140,9 +203,9 @@ test('меню и рассадка на изолированной базе', as
   server = app.listen(0, '127.0.0.1');
   await new Promise((r) => server.once('listening', r));
   const base = `http://127.0.0.1:${server.address().port}`;
-  const call = async (url, method = 'GET', body, token) => {
+  const call = async (url, method = 'GET', body, token, extra = {}) => {
     const res = await fetch(base + url, {
-      method, headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      method, headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...extra },
       body: body ? JSON.stringify(body) : undefined,
     });
     const type = res.headers.get('content-type') || '';
@@ -169,7 +232,10 @@ test('меню и рассадка на изолированной базе', as
   };
   const seat = (ids, tableId, token = tok, id = inv.id) => call(`/api/planner/${id}/seat`, 'POST', { personIds: ids, tableId }, token);
   const makeTable = async (name, capacity) => (await call(P('/tables'), 'POST', { name, capacity }, tok)).json.result;
-  const rsvp = (slug, body) => call(`/api/rsvp/${slug}`, 'POST', body);
+  // У анкеты ограничение 30 ответов за 10 минут с одного адреса: каждому ответу — свой адрес
+  // (сервер доверяет X-Forwarded-For только от loopback, как за nginx на проде)
+  let rsvpIp = 0;
+  const rsvp = (slug, body) => call(`/api/rsvp/${slug}`, 'POST', body, undefined, { 'X-Forwarded-For': `10.9.0.${++rsvpIp}` });
 
   await t.test('доступ: вход, чужое приглашение, тариф и флаг раскрытия', async () => {
     assert.equal((await call(P())).status, 401);
@@ -477,6 +543,152 @@ test('меню и рассадка на изолированной базе', as
     const placedIds = [...run.json.result.placements, ...more.json.result.placements].map((p) => p.personId);
     assert.equal((await call(A('/seat'), 'POST', { personIds: placedIds, tableId: null }, tok)).json.snapshot.persons.filter((p) => p.tableId).length, 0);
     void t1; void t2;
+  });
+
+  const bySlot = (a, b) => a.slot - b.slot;
+
+  await t.test('сайт получает только настройки анкеты: варианты блюд, без ответов и ограничений', async () => {
+    const site = await mk(owner.id, 'planner-site');
+    const S = (route = '') => `/api/planner/${site.id}${route}`;
+    const pub = async () => (await call(`/api/invites/by-slug/${site.slug}`)).json;
+    assert.equal((await pub()).customData.wcMenu, undefined, 'по умолчанию ничего не спрашиваем');
+    await call(S('/settings'), 'PUT', { askMenu: true }, tok);
+    assert.equal((await pub()).customData.wcMenu, undefined, 'вариантов ещё нет — спрашивать нечего');
+    const meat = (await call(S('/menu'), 'POST', { label: 'Мясное', note: 'Говядина с овощами' }, tok)).json.result;
+    await call(S('/menu'), 'POST', { label: 'Рыбное' }, tok);
+    const menu = (await pub()).customData.wcMenu;
+    assert.deepEqual(Object.keys(menu).sort(), ['askDiet', 'askMenu', 'options']);
+    assert.deepEqual(menu.options.map((o) => [o.label, o.note]), [['Мясное', 'Говядина с овощами'], ['Рыбное', '']]);
+    assert.equal(menu.options[0].id, meat.id);
+    assert.equal(menu.askDiet, false);
+
+    // гость с ограничениями и местом за столом — на сайт ничего из этого не попадает
+    const g = (await call(S('/parties'), 'POST', { names: 'Секретов', people: [{ name: 'Секрет Секретович' }] }, tok)).json;
+    const person = g.snapshot.persons.find((p) => p.partyKey === `g:${g.result.id}`);
+    await call(S(`/persons/${person.id}`), 'PUT', { diet: 'Аллергия на орехи', menuOptionId: meat.id }, tok);
+    const body = JSON.stringify(await pub());
+    assert.ok(!body.includes('орех') && !body.includes('Секрет'), 'ни ограничений, ни гостей');
+
+    // то же по своему домену
+    await prisma.invitation.update({ where: { id: site.id }, data: { customDomain: 'planner-site.example' } });
+    assert.equal((await call('/api/invites/by-domain/planner-site.example')).json.customData.wcMenu.options.length, 2);
+    // владельцу планировщик ещё не открыт — сайт не узнаёт ничего
+    process.env.FREE_ACCOUNTS = 'planner-stranger@example.test';
+    try { assert.equal((await pub()).customData.wcMenu, undefined); }
+    finally { process.env.FREE_ACCOUNTS = 'planner-owner@example.test, planner-stranger@example.test'; }
+    // в данных редактора wcMenu не сохраняется
+    assert.equal(JSON.parse((await prisma.invitation.findUnique({ where: { id: site.id } })).customData).wcMenu, undefined);
+  });
+
+  await t.test('анкета: люди поимённо и блюдо у каждого; питание видит только владелец', async () => {
+    const site = await prisma.invitation.findUnique({ where: { slug: 'planner-site' } });
+    const S = (route = '') => `/api/planner/${site.id}${route}`;
+    await call(S('/settings'), 'PUT', { askMenu: true, askDiet: true }, tok);
+    const [meat, fish] = (await call(S(), 'GET', undefined, tok)).json.options;
+    const kids = (await call(S('/menu'), 'POST', { label: 'Детское' }, tok)).json.result;
+    const res = await rsvp(site.slug, {
+      guestName: 'Иван Петров', attendance: 'yes', guestsCount: 1,      // старое поле расходится с людьми — верим людям
+      people: [
+        { name: 'Иван Петров', menu: meat.id, diet: 'Без орехов' },
+        { name: 'Мария Петрова', menu: fish.id, diet: '' },
+        { name: '', menu: kids.id, child: true },
+      ],
+    });
+    assert.equal(res.status, 200);
+    const saved = await prisma.guestResponse.findUnique({ where: { id: res.json.id } });
+    assert.deepEqual([saved.guestsCount, saved.childrenCount], [3, 1]);
+    assert.equal(JSON.parse(saved.answers).find((a) => a.id === 'people').a,
+      'Иван Петров: Мясное; Мария Петрова: Рыбное; Гость 3 (ребёнок): Детское');
+    assert.ok(!saved.answers.includes('орех'), 'ограничения не в строке ответа');
+    const s = (await call(S(), 'GET', undefined, tok)).json;
+    const mine = s.persons.filter((p) => p.partyKey === `r:${res.json.id}`).sort(bySlot);
+    assert.deepEqual(mine.map((p) => [p.name, p.menuOptionId, p.diet, p.isChild]), [
+      ['Иван Петров', meat.id, 'Без орехов', false], ['Мария Петрова', fish.id, '', false], ['', kids.id, '', true],
+    ]);
+    assert.ok(s.summary.diet.ids.includes(mine[0].id));
+    const pubBody = JSON.stringify((await call(`/api/invites/by-slug/${site.slug}`)).json);
+    assert.ok(!pubBody.includes('орех') && !pubBody.includes('Мария'));
+
+    // мусор в people — ответ принят как раньше, по старым полям
+    const junk = await rsvp(site.slug, { guestName: 'Старый шаблон', attendance: 'yes', guestsCount: 2, people: 'нет' });
+    assert.equal(junk.status, 200);
+    assert.equal((await prisma.guestResponse.findUnique({ where: { id: junk.json.id } })).guestsCount, 2);
+    // отказ — люди из анкеты не учитываются
+    const no = await rsvp(site.slug, { guestName: 'Отказ', attendance: 'no', people: [{ name: 'Кто-то', menu: meat.id }] });
+    assert.equal(no.status, 200);
+    assert.equal((await prisma.guestResponse.findUnique({ where: { id: no.json.id } })).guestsCount, 1);
+    // планировщик владельцу не открыт — поле не учитывается, ответ сохраняется
+    process.env.FREE_ACCOUNTS = 'planner-stranger@example.test';
+    try {
+      const closed = await rsvp(site.slug, { guestName: 'Закрыто', attendance: 'yes', guestsCount: 2, people: [{ name: 'Закрыто' }] });
+      const row = await prisma.guestResponse.findUnique({ where: { id: closed.json.id } });
+      assert.equal(row.guestsCount, 2);
+      assert.ok(!row.answers.includes('people'));
+    } finally { process.env.FREE_ACCOUNTS = 'planner-owner@example.test, planner-stranger@example.test'; }
+    // ограничения не спрашивали — не сохраняем, даже если прислали
+    await call(S('/settings'), 'PUT', { askDiet: false }, tok);
+    const nd = await rsvp(site.slug, { guestName: 'Без вопроса', attendance: 'yes', people: [{ name: 'Без вопроса', menu: meat.id, diet: 'Тайна' }] });
+    const ndPerson = (await call(S(), 'GET', undefined, tok)).json.persons.find((p) => p.partyKey === `r:${nd.json.id}`);
+    assert.deepEqual([ndPerson.diet, ndPerson.menuOptionId], ['', meat.id]);
+  });
+
+  await t.test('персональная ссылка: повторная анкета обновляет своих, места за столом сохраняются', async () => {
+    const site = await prisma.invitation.findUnique({ where: { slug: 'planner-site' } });
+    const S = (route = '') => `/api/planner/${site.id}${route}`;
+    await call(S('/settings'), 'PUT', { askMenu: true, askDiet: true }, tok);
+    const [meat, fish] = (await call(S(), 'GET', undefined, tok)).json.options;
+    const veg = (await call(S('/menu'), 'POST', { label: 'Вегетарианское' }, tok)).json.result;
+    const fam = (await call(S('/parties'), 'POST', { names: 'Смирновых', salutation: 'семья' }, tok)).json.result;
+    const key = `g:${fam.id}`;
+    const list = async () => (await call(S(), 'GET', undefined, tok)).json.persons.filter((p) => p.partyKey === key).sort(bySlot);
+    assert.deepEqual((await list()).map((p) => p.name), [''], 'до ответа — одна заготовка без имени');
+
+    await rsvp(site.slug, { guestToken: fam.token, attendance: 'yes', people: [{ name: 'Олег', menu: meat.id }, { name: 'Ольга', menu: fish.id }] });
+    const first = await list();
+    assert.deepEqual(first.map((p) => p.name), ['Олег', 'Ольга'], 'заготовка получила имя, дублей нет');
+    const table = (await call(S('/tables'), 'POST', { name: '7', capacity: 6 }, tok)).json.result;
+    await call(S('/seat'), 'POST', { personIds: first.map((p) => p.id), tableId: table.id }, tok);
+
+    // Ольга сменила блюдо, Олег блюдо заново не выбрал, добавился ребёнок; порядок другой
+    await rsvp(site.slug, { guestToken: fam.token, attendance: 'yes', people: [{ name: 'ольга', menu: veg.id }, { name: 'Олег' }, { name: 'Ваня', child: true }] });
+    const after = await list();
+    assert.equal(after.length, 3);
+    const by = (n) => after.find((p) => p.name === n);
+    assert.deepEqual([by('Ольга').menuOptionId, by('Ольга').tableId], [veg.id, table.id]);
+    assert.deepEqual([by('Олег').menuOptionId, by('Олег').tableId], [meat.id, table.id], 'прежнее блюдо и место остаются');
+    assert.deepEqual([by('Ваня').isChild, by('Ваня').tableId], [true, null]);
+    assert.equal(by('Ольга').id, first[1].id, 'это тот же человек, а не новая строка');
+    const responses = await prisma.guestResponse.findMany({ where: { guestId: fam.id } });
+    assert.deepEqual(responses.map((r) => [r.guestsCount, r.childrenCount]), [[3, 1]]);
+  });
+
+  await t.test('уведомление владельцу: имена и блюда есть, пищевых ограничений нет', async () => {
+    const site = await prisma.invitation.findUnique({ where: { slug: 'planner-site' } });
+    const S = (route = '') => `/api/planner/${site.id}${route}`;
+    await call(S('/settings'), 'PUT', { askMenu: true, askDiet: true }, tok);
+    const [meat] = (await call(S(), 'GET', undefined, tok)).json.options;
+    await prisma.invitation.update({ where: { id: site.id }, data: { notifyChannel: 'telegram', notifyTelegramChatId: '42' } });
+    const sent = [];
+    const realFetch = global.fetch;
+    process.env.TELEGRAM_BOT_TOKEN = 'test-token';
+    global.fetch = async (url, init) => {
+      if (String(url).startsWith('https://api.telegram.org/')) {
+        sent.push(JSON.parse(init.body));
+        return new Response('{"ok":true}', { headers: { 'Content-Type': 'application/json' } });
+      }
+      return realFetch(url, init);
+    };
+    try {
+      await rsvp(site.slug, { guestName: 'Анна Уведомлённая', attendance: 'yes', people: [{ name: 'Анна Уведомлённая', menu: meat.id, diet: 'Целиакия' }] });
+      for (let i = 0; i < 100 && !sent.length; i++) await new Promise((r) => setTimeout(r, 20));
+      assert.equal(sent.length, 1);
+      assert.match(sent[0].text, /Анна Уведомлённая: Мясное/);
+      assert.ok(!sent[0].text.includes('Целиакия'), 'ограничения не уходят в Telegram');
+    } finally {
+      global.fetch = realFetch;
+      process.env.TELEGRAM_BOT_TOKEN = '';
+      await prisma.invitation.update({ where: { id: site.id }, data: { notifyChannel: 'none' } });
+    }
   });
 
   await t.test('CSV: кириллица, длинные имена, формулы; питание только по запросу', async () => {

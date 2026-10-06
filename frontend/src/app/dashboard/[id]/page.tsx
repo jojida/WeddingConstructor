@@ -44,7 +44,7 @@ interface RsvpData {
   drinkLabels: Record<string, string>;
 }
 
-type Tab = 'responses' | 'guests' | 'seating' | 'notify' | 'domain';
+type Tab = 'responses' | 'guests' | 'seating' | 'menu' | 'notify' | 'domain';
 
 const PRIMARY = '#685d4a';
 const BORDER = '1px solid rgba(206,197,186,0.5)';
@@ -88,6 +88,7 @@ export default function ManageInvitePage() {
     { key: 'guests',    label: '👥 Гости', show: true },
     // «Меню и рассадка»: пока открыта только тестовым аккаунтам (флаг приходит с сервера)
     { key: 'seating',   label: '🪑 Рассадка', show: !!user?.planner },
+    { key: 'menu',      label: '🍽 Меню', show: !!user?.planner },
     { key: 'notify',    label: '🔔 Уведомления', show: true },
     { key: 'domain',    label: '🌐 Домен', show: true },
   ];
@@ -95,7 +96,7 @@ export default function ManageInvitePage() {
   return (
     <div style={{ minHeight: '100vh', background: '#faf8f5' }}>
       <Navbar />
-      <div style={{ maxWidth: tab === 'seating' ? 1180 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
+      <div style={{ maxWidth: tab === 'seating' ? 1180 : tab === 'menu' ? 980 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
@@ -134,8 +135,9 @@ export default function ManageInvitePage() {
 
         {tab === 'responses' && <ResponsesTab inviteId={invite.id} />}
         {tab === 'guests'    && <GuestsTab invite={invite} advanced={advanced} origin={origin} />}
-        {tab === 'seating'   && (hasPlanner(invite.plan)
-          ? <PlannerSection inviteId={invite.id} view="seating" />
+        {/* Рассадка и меню — один экземпляр раздела: при переключении гости не перезагружаются */}
+        {(tab === 'seating' || tab === 'menu') && (hasPlanner(invite.plan)
+          ? <PlannerSection inviteId={invite.id} slug={invite.slug} view={tab} />
           : <PlannerUpsell invite={invite} />)}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
         {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}

@@ -4,6 +4,7 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { notifyOwner, notifyOwnerText } from '../lib/notify';
 import { plannerDenial } from '../lib/planner/access';
 import { reconcile } from '../lib/planner/roster';
+import { cleanPeople, loadPublicMenu, peopleAnswer } from '../lib/planner/public';
 import { errName } from '../lib/planner/util';
 import { isPaid } from '../lib/plans';
 import { inviteDrinkLabels } from '../lib/drinks';
@@ -38,11 +39,25 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
         (childrenCount != null && !(Number.isInteger(childrenCount) && childrenCount >= 0 && childrenCount <= 20))) {
       return res.status(400).json({ error: 'Проверьте поля анкеты' });
     }
+    // Меню и рассадка: если пара включила выбор блюд, анкета присылает людей поимённо (people).
+    // Ошибка в этом поле ответ не отклоняет — его просто не учитываем (см. cleanPeople).
+    let plannerOpen = false;
+    try { plannerOpen = !(await plannerDenial(invite)); } catch { plannerOpen = false; }
+    const menu = plannerOpen && status !== 'no' && req.body.people != null ? await loadPublicMenu(invite.id).catch(() => null) : null;
+    const listed = menu ? cleanPeople(req.body.people, menu) : null;
+
     // Сколько человек придёт по ответу (у «пока не знаю» — сколько может прийти).
     // Старые страницы шаблонов поля не шлют — тогда один; у отказа не спрашивается.
-    const people = status !== 'no' && Number.isInteger(guestsCount) ? guestsCount as number : 1;
+    // Перечислил гость людей поимённо — их и считаем.
+    const people = listed ? listed.length : status !== 'no' && Number.isInteger(guestsCount) ? guestsCount as number : 1;
     // Дети — часть people; хотя бы один взрослый остаётся всегда
-    const children = status !== 'no' && Number.isInteger(childrenCount) ? Math.min(childrenCount as number, people - 1) : 0;
+    const children = listed ? Math.min(listed.filter((p) => p.isChild).length, people - 1)
+      : status !== 'no' && Number.isInteger(childrenCount) ? Math.min(childrenCount as number, people - 1) : 0;
+    // Кто и что выбрал — ещё и строкой ответа: видно во вкладке «Ответы» и в уведомлении
+    // (без пищевых ограничений), и сохранится, даже если список людей обновить не выйдет.
+    const finalAnswers = listed && menu && cleanedAnswers.length < 12
+      ? [...cleanedAnswers.filter((a) => a.id !== 'people'), peopleAnswer(listed, menu)]
+      : cleanedAnswers;
 
     // Персональная ссылка (продвинутый тариф): связываем ответ с гостем.
     let guest = null as Awaited<ReturnType<typeof prisma.guest.findUnique>> | null;
@@ -69,7 +84,7 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
         wishes: wishes || '',
         guestsCount: people,
         childrenCount: children,
-        answers: JSON.stringify(cleanedAnswers),
+        answers: JSON.stringify(finalAnswers),
       },
       });
       if (guest) await tx.guest.update({ where: { id: guest.id }, data: { responseId: saved.id } });
@@ -79,8 +94,9 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
     // Меню и рассадка: люди группы подтягиваются из ответа, а отказ снимает со стола.
     // Сбой здесь не должен стоить гостю его ответа — он уже сохранён.
     try {
-      if (!(await plannerDenial(invite))) {
-        const { unseated } = await reconcile(invite.id, guest ? `g:${guest.id}` : `r:${response.id}`);
+      if (plannerOpen) {
+        const key = guest ? `g:${guest.id}` : `r:${response.id}`;
+        const { unseated } = await reconcile(invite.id, key, listed ? { key, people: listed } : undefined);
         for (const u of unseated) void notifyOwnerText(invite as any, 'Рассадка: освободилось место', [u.text]);
       }
     } catch (e) {
@@ -96,7 +112,7 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
       wishes: wishes || '',
       guestsCount: people,
       childrenCount: children,
-      answers: cleanedAnswers,
+      answers: finalAnswers,
     });
 
     return res.json({ success: true, id: response.id });

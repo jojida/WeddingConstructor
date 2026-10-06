@@ -91,6 +91,8 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
           rsvpChildren: dataRef.current.customData?.rsvpChildren,
           rsvpQuestions: dataRef.current.customData?.rsvpQuestions,
           rsvpCustomQ: dataRef.current.customData?.rsvpCustomQ,
+          // Выбор блюд и пищевые ограничения у каждого гостя (кладёт сервер, если пара включила)
+          wcMenu: dataRef.current.customData?.wcMenu,
         },
       },
       window.location.origin

@@ -8,6 +8,7 @@ import { botUsername } from '../lib/telegram';
 import { validInviteInput } from '../lib/inviteValidation';
 import { normalizeEmail } from '../lib/security';
 import { rateLimit } from '../middleware/rateLimit';
+import { publicMenu } from '../lib/planner/public';
 
 const router = Router();
 
@@ -47,6 +48,14 @@ function publicInvite(invite: any) {
     enabledSections: parseObj(invite.enabledSections),
     customData: parseObj(invite.customData),
   };
+}
+
+/* Анкета гостя узнаёт, спрашивать ли блюдо и пищевые ограничения (wcMenu), из customData —
+   как и остальные настройки шаблона. Хранится это не в customData (её целиком перезаписывает
+   редактор), а в таблицах планировщика; сюда кладётся только для гостевой страницы. */
+async function withPlannerMenu(invite: { id: string; plan: string; userId: string }, pub: ReturnType<typeof publicInvite>) {
+  const menu = await publicMenu(invite);
+  return menu ? { ...pub, customData: { ...pub.customData, wcMenu: menu } } : pub;
 }
 
 function generateSlug(groomName: string, brideName: string): string {
@@ -149,7 +158,7 @@ router.get('/by-slug/:slug', async (req, res: Response) => {
   if (!isPaid(invite.status)) {
     return res.status(402).json({ error: 'Сайт ещё не опубликован', reason: 'unpaid' });
   }
-  return res.json(publicInvite(invite));
+  return res.json(await withPlannerMenu(invite, publicInvite(invite)));
 });
 
 // GET /api/invites/by-domain/:host — резолв привязанного домена клиента (MVP)
@@ -162,7 +171,7 @@ router.get('/by-domain/:host', async (req, res: Response) => {
   if (!isPaid(invite.status)) {
     return res.status(402).json({ error: 'Сайт ещё не опубликован', reason: 'unpaid' });
   }
-  return res.json(publicInvite(invite));
+  return res.json(await withPlannerMenu(invite, publicInvite(invite)));
 });
 
 // PATCH /api/invites/:id/settings — уведомления и свой домен (владелец)

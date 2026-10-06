@@ -52,8 +52,10 @@
   };
   var ORDER = ['ceremony', 'menu', 'allergy', 'transfer', 'stay', 'parking', 'song', 'seat', 'toast', 'wishes'];
 
-  // По умолчанию анкета как раньше: пара включает новое в редакторе
-  var CFG = { maybe: false, children: false, questions: [], customQ: '' };
+  // По умолчанию анкета как раньше: пара включает новое в редакторе.
+  // menu — выбор блюда и пищевые ограничения у каждого гостя (кабинет «Меню»): сервер кладёт
+  // в данные страницы wcMenu = { askMenu, askDiet, options: [{ id, label, note }] }
+  var CFG = { maybe: false, children: false, questions: [], customQ: '', menu: null };
 
   // Обычные классы в начале <head>: сильнее сброса шаблона, слабее его правил
   var CSS =
@@ -74,6 +76,8 @@
     '.wc-count-row__label{font:inherit;color:inherit}' +
     // :where — нулевая специфичность: класс поля имени шаблона (он у клона) главнее
     ':where([data-wc-q] textarea){font:inherit;color:inherit;box-sizing:border-box;width:100%;resize:vertical}' +
+    '.wc-people-note{font-size:.85em;opacity:.8;line-height:1.4;margin:.2em 0 .6em}' +
+    '.wc-people-note a{color:inherit;text-decoration:underline}' +
     '[data-rsvp-count][hidden],.wc-off{display:none!important}';
 
   function injectCss() {
@@ -296,14 +300,18 @@
   function questionList() {
     var list = [];
     ORDER.forEach(function (id) {
-      if (CFG.questions.indexOf(id) >= 0) list.push({ id: id, meta: QUESTIONS[id] });
+      if (CFG.questions.indexOf(id) < 0) return;
+      // Блюдо и ограничения спрашиваем у каждого гостя отдельно — общий вопрос не дублируем
+      if (id === 'menu' && CFG.menu && CFG.menu.askMenu) return;
+      if (id === 'allergy' && CFG.menu && CFG.menu.askDiet) return;
+      list.push({ id: id, meta: QUESTIONS[id] });
     });
     if (CFG.customQ) list.push({ id: 'custom', meta: { q: CFG.customQ, t: 'text', placeholder: 'Ваш ответ' } });
     return list;
   }
 
   function buildQuestions(form) {
-    var sig = JSON.stringify([CFG.questions, CFG.customQ]);
+    var sig = JSON.stringify([CFG.questions, CFG.customQ, !!(CFG.menu && CFG.menu.askMenu), !!(CFG.menu && CFG.menu.askDiet)]);
     if (form.__wcqSig === sig) return;
     form.__wcqSig = sig;
     var old = form.querySelector('[data-wc-questions]');
@@ -357,6 +365,158 @@
     return field ? field.value.trim() : '';
   }
 
+  /* ─── Кто придёт: имя, блюдо и ограничения у каждого ──────────────────── */
+  // Строк столько, сколько гостей в степперах; первая — сам гость. Строки — клоны элементов
+  // формы шаблона, как и доп. вопросы. Ответ уходит полем people (см. payload).
+
+  function normalizeMenu(m) {
+    if (!m || typeof m !== 'object') return null;
+    var options = (Array.isArray(m.options) ? m.options : []).filter(function (o) {
+      return o && typeof o.id === 'string' && typeof o.label === 'string';
+    }).slice(0, 12);
+    var askMenu = m.askMenu === true && options.length > 0;
+    var askDiet = m.askDiet === true;
+    return askMenu || askDiet ? { askMenu: askMenu, askDiet: askDiet, options: options } : null;
+  }
+
+  // «Денис и Мария», «Анна, Пётр» — это не одно имя: такое в строку гостя не переносим
+  function looksSingle(s) { return !/[,&+]|(^|\s)(и|с)(\s|$)/i.test(s); }
+
+  function personTitle(i, child) {
+    return i === 0 ? 'Вы' : 'Гость ' + (i + 1) + (child ? ' · ребёнок' : '');
+  }
+
+  function personGroup(form, i) {
+    var m = CFG.menu;
+    var g = groupShell(form, personTitle(i, false));
+    g.__wcTitle = g.firstChild;
+    g.setAttribute('data-wc-person', String(i));
+    g.setAttribute('data-wc-coming', '');
+    var name = fieldClone(form, 'wcp_name', i === 0 ? 'Ваше имя' : 'Имя (можно не знать)');
+    name.maxLength = 120;
+    name.setAttribute('data-wc-pname', '');
+    name.setAttribute('aria-label', i === 0 ? 'Ваше имя' : 'Имя гостя ' + (i + 1));
+    if (i === 0) {
+      // Первая строка повторяет имя из анкеты, пока гость не поправит её сам
+      name.__wcAuto = true;
+      name.addEventListener('input', function () { name.__wcAuto = false; });
+    }
+    g.appendChild(name);
+    if (m.askMenu) {
+      var proto = form.querySelector(attendSelector('yes'));
+      proto = proto && proto.closest('label');
+      if (proto) {
+        m.options.forEach(function (o) {
+          var text = o.note ? o.label + ' — ' + o.note : o.label;
+          g.appendChild(optionClone(proto, 'radio', 'wcp_menu_' + i, o.id, text));
+        });
+      }
+    }
+    if (m.askDiet) {
+      var diet = fieldClone(form, 'wcp_diet', 'Аллергия или ограничения');
+      diet.maxLength = 200;
+      diet.setAttribute('data-wc-pdiet', '');
+      diet.setAttribute('aria-label', 'Ограничения в еде');
+      g.appendChild(diet);
+    }
+    return g;
+  }
+
+  function dietNote() {
+    var p = document.createElement('p');
+    p.className = 'wc-people-note';
+    p.setAttribute('data-wc-people-note', '');
+    p.setAttribute('data-wc-coming', '');
+    p.appendChild(document.createTextNode('Ограничения в еде указывать не обязательно. Их увидят только молодожёны, на сайте они не публикуются. '));
+    var a = document.createElement('a');
+    a.href = '/privacy';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = 'Подробнее';
+    p.appendChild(a);
+    return p;
+  }
+
+  function syncFirstName(form) {
+    var first = form.querySelector('[data-wc-person="0"] [data-wc-pname]');
+    var src = form.querySelector('input[name="guestName"]');
+    if (!first || !src || !first.__wcAuto) return;
+    var v = (src.value || '').trim();
+    first.value = looksSingle(v) ? v : '';
+  }
+
+  function syncPeople(form) {
+    var box = form.querySelector('[data-wc-people]');
+    if (!CFG.menu || !box) return;
+    // По степперам, а не по ответу: «не смогу» строки только прячет (refresh) — передумает
+    // гость, и введённые имена и блюда на месте
+    var g = counts(form);
+    var groups = box.querySelectorAll('[data-wc-person]');
+    // Меньше гостей — лишние строки уходят; больше — добавляются, введённое в прежних остаётся
+    for (var i = groups.length - 1; i >= g.total; i--) groups[i].remove();
+    var note = box.querySelector('[data-wc-people-note]');
+    for (var j = groups.length; j < g.total; j++) box.insertBefore(personGroup(form, j), note);
+    groups = box.querySelectorAll('[data-wc-person]');
+    for (var k = 0; k < groups.length; k++) {
+      // Дети — последние строки, как в степперах «Взрослые / Дети»
+      var child = k > 0 && k >= g.total - g.kids;
+      groups[k].setAttribute('data-wc-child', child ? '1' : '0');
+      if (groups[k].__wcTitle) groups[k].__wcTitle.textContent = personTitle(k, child);
+    }
+    if (CFG.menu.askDiet && !note) box.appendChild(dietNote());
+    else if (!CFG.menu.askDiet && note) note.remove();
+    syncFirstName(form);
+  }
+
+  function buildPeople(form) {
+    var box = form.querySelector('[data-wc-people]');
+    var sig = CFG.menu ? JSON.stringify(CFG.menu) : '';
+    if (!CFG.menu) {
+      if (box) box.remove();
+      form.__wcpSig = '';
+      return;
+    }
+    if (box && form.__wcpSig === sig) { syncPeople(form); return; }
+    if (box) box.remove();
+    form.__wcpSig = sig;
+    box = document.createElement('div');
+    box.setAttribute('data-wc-people', '');
+    box.style.display = 'contents';
+    // Значки выбора у клонов шаблон не оживлял — ведём их сами
+    box.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t && t.name) box.querySelectorAll('input[name="' + t.name + '"]').forEach(syncIndicator);
+    });
+    // Сразу после «Сколько вас будет?», а если такого блока нет — перед кнопкой отправки
+    var anchor = form.querySelector('[data-rsvp-count]');
+    while (anchor && anchor.parentNode !== form) anchor = anchor.parentNode;
+    if (!anchor) {
+      var submit = form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
+      while (submit && submit.parentNode !== form) submit = submit.parentNode;
+      form.insertBefore(box, submit || null);
+    } else {
+      form.insertBefore(box, anchor.nextSibling);
+    }
+    syncPeople(form);
+  }
+
+  function readPeople(form) {
+    var list = [];
+    syncFirstName(form);
+    form.querySelectorAll('[data-wc-person]').forEach(function (g) {
+      var name = g.querySelector('[data-wc-pname]');
+      var choice = g.querySelector('input[type="radio"]:checked');
+      var diet = g.querySelector('[data-wc-pdiet]');
+      list.push({
+        name: name ? name.value.trim().slice(0, 120) : '',
+        menu: choice ? choice.value : '',
+        diet: diet ? diet.value.trim().slice(0, 200) : '',
+        child: g.getAttribute('data-wc-child') === '1'
+      });
+    });
+    return list;
+  }
+
   /* ─── Состояние формы ─────────────────────────────────────────────────── */
   // Отказ — ни количества, ни вопросов для тех, кто придёт
   function refresh(form) {
@@ -370,6 +530,7 @@
     applyMaybe(form);
     applyChildren(form);
     buildQuestions(form);
+    buildPeople(form);
     refresh(form);
   }
 
@@ -380,7 +541,15 @@
     if (!box && !form.querySelector(attendSelector())) return;
     form.__wcCount = true;
     if (box) bindBox(box, MIN, MAX);
-    form.addEventListener('change', function () { refresh(form); });
+    form.addEventListener('change', function () { syncPeople(form); refresh(form); });
+    // Степперы меняют число без события change — после щелчка пересчитываем строки гостей
+    form.addEventListener('click', function (e) {
+      var t = e.target;
+      if (t && t.closest && t.closest('[data-step]')) { syncPeople(form); refresh(form); }
+    });
+    form.addEventListener('input', function (e) {
+      if (e.target && e.target.name === 'guestName') syncFirstName(form);
+    });
     apply(form);
   }
 
@@ -402,16 +571,24 @@
         : [];
     }
     if ('rsvpCustomQ' in d) CFG.customQ = typeof d.rsvpCustomQ === 'string' ? d.rsvpCustomQ.trim().slice(0, 200) : '';
+    if ('wcMenu' in d) CFG.menu = normalizeMenu(d.wcMenu);
     forms().forEach(function (f) { if (f.__wcCount) apply(f); });
+    // Имя гостя шаблон подставляет в этом же сообщении, но позже нас — подхватываем после
+    setTimeout(function () { forms().forEach(function (f) { if (f.__wcCount) syncFirstName(f); }); }, 0);
   }
 
-  function guests(form) {
-    if (declined(form)) return { total: 1, kids: 0 };
+  // Сколько выставлено в степперах — независимо от ответа
+  function counts(form) {
     var adults = form.querySelector('[name="guestsCount"]');
     var kids = CFG.children ? form.querySelector('[name="childrenCount"]') : null;
     var a = adults ? clamp(adults.value, MIN, MAX) : 1;
     var k = kids ? clamp(kids.value, 0, KIDS_MAX) : 0;
     return { total: a + k, kids: k };
+  }
+
+  function guests(form) {
+    if (declined(form)) return { total: 1, kids: 0 };
+    return counts(form);
   }
 
   function payload(form) {
@@ -431,6 +608,11 @@
       else answers.push({ id: item.id, q: item.meta.q, a: text, t: item.meta.t === 'long' ? 'text' : item.meta.t });
     });
     out.answers = answers;
+    // Кто придёт поимённо, с блюдом и ограничениями — если пара включила это в кабинете
+    if (CFG.menu && !declined(form)) {
+      syncPeople(form);
+      if (form.querySelector('[data-wc-person]')) out.people = readPeople(form);
+    }
     return out;
   }
 
