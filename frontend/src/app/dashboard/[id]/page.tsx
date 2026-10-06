@@ -44,7 +44,7 @@ interface RsvpData {
   drinkLabels: Record<string, string>;
 }
 
-type Tab = 'responses' | 'guests' | 'seating' | 'menu' | 'notify' | 'domain';
+type Tab = 'responses' | 'guests' | 'seating' | 'menu' | 'print' | 'notify' | 'domain';
 
 const PRIMARY = '#685d4a';
 const BORDER = '1px solid rgba(206,197,186,0.5)';
@@ -89,6 +89,7 @@ export default function ManageInvitePage() {
     // «Меню и рассадка»: пока открыта только тестовым аккаунтам (флаг приходит с сервера)
     { key: 'seating',   label: '🪑 Рассадка', show: !!user?.planner },
     { key: 'menu',      label: '🍽 Меню', show: !!user?.planner },
+    { key: 'print',     label: '🖨 Печать', show: !!user?.planner },
     { key: 'notify',    label: '🔔 Уведомления', show: true },
     { key: 'domain',    label: '🌐 Домен', show: true },
   ];
@@ -96,7 +97,7 @@ export default function ManageInvitePage() {
   return (
     <div style={{ minHeight: '100vh', background: '#faf8f5' }}>
       <Navbar />
-      <div style={{ maxWidth: tab === 'seating' ? 1180 : tab === 'menu' ? 980 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
+      <div style={{ maxWidth: tab === 'seating' ? 1180 : tab === 'menu' || tab === 'print' ? 980 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
@@ -135,8 +136,8 @@ export default function ManageInvitePage() {
 
         {tab === 'responses' && <ResponsesTab inviteId={invite.id} />}
         {tab === 'guests'    && <GuestsTab invite={invite} advanced={advanced} origin={origin} />}
-        {/* Рассадка и меню — один экземпляр раздела: при переключении гости не перезагружаются */}
-        {(tab === 'seating' || tab === 'menu') && (hasPlanner(invite.plan)
+        {/* Рассадка, меню и печать — один экземпляр раздела: при переключении гости не перезагружаются */}
+        {(tab === 'seating' || tab === 'menu' || tab === 'print') && (hasPlanner(invite.plan)
           ? <PlannerSection inviteId={invite.id} slug={invite.slug} view={tab} />
           : <PlannerUpsell invite={invite} />)}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
@@ -328,9 +329,9 @@ function PlannerUpsell({ invite }: { invite: Invite }) {
   return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>🪑</div>
-      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Рассадка гостей — на тарифе Премиум</h3>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Меню и рассадка — на тарифе Премиум</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
-        Столы и места, рассадка семьёй целиком, подсказки «кто остался без стола» — гости сами подтягиваются из ответов на анкету.
+        Столы и места, выбор блюда у каждого гостя, карточки и план рассадки для печати — гости сами подтягиваются из ответов на анкету.
       </p>
       <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
         Улучшить тариф →

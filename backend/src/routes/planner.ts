@@ -4,7 +4,14 @@ import { Router, Response } from 'express';
 import type { Invitation } from '@prisma/client';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { DENIAL_TEXT, plannerDenial } from '../lib/planner/access';
+import { DENIAL_TEXT, plannerDenial, plannerPrintDenial } from '../lib/planner/access';
+import { rateLimit } from '../middleware/rateLimit';
+import { loadPrintData } from '../lib/planner/print/data';
+import { THEMES } from '../lib/planner/print/themes';
+import { renderPdf } from '../lib/planner/print/render';
+import {
+  MENU_TEXT_LIMIT, alphaDoc, cardsDoc, defaultMenuText, listDoc, menuDoc, posterDoc, summaryDoc, tentsDoc, wishesDoc,
+} from '../lib/planner/print/docs';
 import { PlannerError, errName } from '../lib/planner/util';
 import { reconcile } from '../lib/planner/roster';
 import { buildSnapshot } from '../lib/planner/snapshot';
@@ -89,6 +96,53 @@ router.post('/:inviteId/import', route(async (c) => { await reply(c, await impor
 router.post('/:inviteId/notices/seen', route(async (c) => {
   await prisma.plannerNotice.updateMany({ where: { invitationId: c.id, seenAt: null }, data: { seenAt: new Date() } });
   await reply(c);
+}));
+
+/* ── Печать: PDF из рассадки и меню ─────────────────────────────────────────── */
+const POSTER_SIZES = ['a3', 'a2', 'a1'] as const;
+const MENU_SIZES = ['a5', 'dl'] as const;
+const pick = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T =>
+  (typeof value === 'string' && (allowed as readonly string[]).includes(value) ? value as T : fallback);
+
+async function requirePrint(invite: Invitation): Promise<void> {
+  const denied = await plannerPrintDenial(invite);
+  if (denied) throw new PlannerError(403, denied === 'plan' ? 'Печатные материалы недоступны на вашем тарифе' : DENIAL_TEXT.beta, { code: denied });
+}
+
+// Что нужно вкладке «Печать»: темы, тема по шаблону, черновик текста меню из вариантов
+router.get('/:inviteId/print', route(async (c) => {
+  await requirePrint(c.invite);
+  const data = await loadPrintData(c.invite);
+  c.res.json({ themes: THEMES.map((t) => ({ id: t.id, title: t.title, accent: t.accent })), theme: data.theme.id, menuText: defaultMenuText(data) });
+}));
+
+// PDF собирается заново при каждом запросе — пересадили гостя, и карточки уже новые
+router.post('/:inviteId/print/:kind', rateLimit(30, 60_000), route(async (c) => {
+  await requirePrint(c.invite);
+  const kind = param(c.req, 'kind');
+  const data = await loadPrintData(c.invite, c.body.theme);
+  const b = c.body;
+  let doc;
+  switch (kind) {
+    case 'cards': doc = cardsDoc(data, { menu: b.menu === true }); break;
+    case 'tents': doc = tentsDoc(data); break;
+    case 'poster': doc = posterDoc(data, pick(b.size, POSTER_SIZES, 'a3')); break;
+    case 'alpha': doc = alphaDoc(data, pick(b.size, POSTER_SIZES, 'a3')); break;
+    case 'list': doc = listDoc(data, { diet: b.diet === true }); break;
+    case 'summary': doc = summaryDoc(data, { diet: b.diet === true }); break;
+    case 'wishes': doc = wishesDoc(data); break;
+    case 'menu': {
+      const raw = typeof b.text === 'string' ? b.text : '';
+      if (raw.length > MENU_TEXT_LIMIT) throw new PlannerError(400, `Текст меню: не больше ${MENU_TEXT_LIMIT} символов`);
+      doc = menuDoc(data, raw, pick(b.size, MENU_SIZES, 'a5'));
+      break;
+    }
+    default: throw new PlannerError(404, 'Такого документа нет');
+  }
+  const pdf = await renderPdf(doc);
+  c.res.setHeader('Content-Type', 'application/pdf');
+  c.res.setHeader('Content-Disposition', `attachment; filename="weddingcraft-${kind}.pdf"`);
+  c.res.send(pdf);
 }));
 
 // CSV для Excel. Пищевые ограничения — только если попросили явно (diet=1)

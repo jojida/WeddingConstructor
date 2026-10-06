@@ -189,6 +189,20 @@
 .menuPerson:first-child { border-top: none; }
 .menuWho { flex: 1 1 180px; min-width: 0; overflow-wrap: anywhere; }
 
+/* ── Печать ──────────────────────────────────────────────────────────────── */
+.printGroup { margin: 20px 0 10px; font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.printGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(290px, 100%), 1fr)); gap: 12px; }
+.printCard { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.printHead { display: flex; gap: 12px; align-items: flex-start; }
+.thumb { flex: 0 0 auto; display: block; }
+.printTitle { margin: 0; font-family: var(--font-playfair, Georgia), serif; font-size: 17px; }
+.printMeta { margin: 4px 0 0; font-size: 12px; font-weight: 600; color: var(--accent); }
+.printOption { display: flex; flex-direction: column; gap: 4px; }
+.printFoot { margin-top: auto; padding-top: 2px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.7); }
+.textarea { min-height: 150px; resize: vertical; line-height: 1.45; }
+.printTips { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+
 /* ── Окна ────────────────────────────────────────────────────────────────── */
 .overlay {
   position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center;

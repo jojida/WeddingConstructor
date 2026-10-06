@@ -2,12 +2,13 @@
 import { usePlanner } from './usePlanner';
 import SeatingBoard from './SeatingBoard';
 import MenuBoard from './MenuBoard';
+import PrintBoard from './PrintBoard';
 import styles from './planner.module.css';
 
-export type PlannerView = 'seating' | 'menu';
+export type PlannerView = 'seating' | 'menu' | 'print';
 
 /** Раздел кабинета «Меню и рассадка». Состояние живёт здесь один раз: переключение между
-    вкладками «Рассадка» и «Меню» не перезагружает гостей. */
+    вкладками «Рассадка», «Меню» и «Печать» не перезагружает гостей. */
 export default function PlannerSection({ inviteId, slug, view }: { inviteId: string; slug: string; view: PlannerView }) {
   const planner = usePlanner(inviteId);
   const { snap, load } = planner;
@@ -20,7 +21,9 @@ export default function PlannerSection({ inviteId, slug, view }: { inviteId: str
   }
   return (
     <div className={styles.root}>
-      {view === 'seating' ? <SeatingBoard planner={planner} snap={snap} /> : <MenuBoard planner={planner} snap={snap} slug={slug} />}
+      {view === 'seating' && <SeatingBoard planner={planner} snap={snap} />}
+      {view === 'menu' && <MenuBoard planner={planner} snap={snap} slug={slug} />}
+      {view === 'print' && <PrintBoard planner={planner} snap={snap} />}
     </div>
   );
 }
