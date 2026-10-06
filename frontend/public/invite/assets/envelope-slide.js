@@ -68,22 +68,22 @@
       'touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}' +
     '.wc-slide--inline{position:relative;inset:auto;z-index:auto;height:100vh;cursor:default;touch-action:auto;' +
       'background:#f4f0ed}' +
-    // створки: левая чуть светлее и лежит поверх правой, у шва — складка и тень
-    '.wc-slide__half{position:absolute;top:0;bottom:0;width:50%;will-change:transform;' +
+    // Створки — бумага с фактурой (envelope-slide/paper.jpg, 626×626, бесшовная):
+    // плиткой в натуральную величину, без растяжения — на телефоне по высоте встают
+    // две картинки одна над другой. Поверх лёгкая светотень: левая створка чуть
+    // светлее и лежит на правой, у шва — складка и тень.
+    '.wc-slide__half{position:absolute;top:0;bottom:0;width:50%;will-change:transform;background-color:#fafafa;' +
+      'background-size:auto,auto,626px 626px;background-repeat:no-repeat,no-repeat,repeat;' +
       'transition:transform 1.5s cubic-bezier(.58,.02,.22,1)}' +
     '.wc-slide__half--r{right:0;z-index:1;' +
-      'background:linear-gradient(90deg,rgba(60,50,45,.22) 0,rgba(60,50,45,.08) 5px,rgba(60,50,45,0) 22px),' +
-      'radial-gradient(130% 75% at 85% 15%,#fbfbfb 0%,#f3f3f4 55%,#e9e8ea 100%)}' +
+      'background-image:linear-gradient(90deg,rgba(60,50,45,.22) 0,rgba(60,50,45,.08) 5px,rgba(60,50,45,0) 22px),' +
+      'radial-gradient(130% 75% at 85% 15%,rgba(255,255,255,.2) 0%,rgba(110,108,116,.04) 55%,rgba(100,98,108,.1) 100%),' +
+      'url("' + BASE + 'paper.jpg")}' +
     '.wc-slide__half--l{left:0;z-index:2;' +
-      'background:linear-gradient(270deg,rgba(80,72,70,.55) 0,rgba(140,132,130,.22) 1.5px,rgba(255,255,255,0) 3px),' +
-      'radial-gradient(140% 80% at 70% 18%,#ffffff 0%,#fcfcfc 50%,#efeeee 100%);' +
+      'background-image:linear-gradient(270deg,rgba(80,72,70,.55) 0,rgba(140,132,130,.22) 1.5px,rgba(255,255,255,0) 3px),' +
+      'radial-gradient(140% 80% at 70% 18%,rgba(255,255,255,.35) 0%,rgba(255,255,255,0) 50%,rgba(110,100,95,.06) 100%),' +
+      'url("' + BASE + 'paper.jpg");' +
       'box-shadow:3px 0 9px rgba(60,48,40,.10)}' +
-    // бумажное зерно поверх обеих створок
-    '.wc-slide__half::after{content:"";position:absolute;inset:0;opacity:.05;mix-blend-mode:multiply;pointer-events:none;' +
-      'background-image:url("data:image/svg+xml,' + encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="n"><feTurbulence type="fractalNoise" ' +
-        'baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 1 0"/>' +
-        '</filter><rect width="220" height="220" filter="url(#n)"/></svg>') + '")}' +
     '.wc-slide.is-open .wc-slide__half--l{transform:translateX(-101%)}' +
     '.wc-slide.is-open .wc-slide__half--r{transform:translateX(101%)}' +
     // тёплый свет из щели: тонкая линия по шву + ореол у печати
