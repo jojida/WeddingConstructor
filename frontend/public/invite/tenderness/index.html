@@ -151,17 +151,36 @@
       </div>
     </div>
 
-    <!-- 8 — ДРЕСС-КОД: платья и рубашки красятся в цвета палитр пары -->
+    <!-- 8 — ДРЕСС-КОД: вкладки «Женщины / Мужчины». В каждой — силуэты в цветах
+         палитры пары (платья / рубашки) и два фото-примера образов.
+         Неактивная вкладка скрыта visibility, а не display: так редактор находит
+         и подсвечивает её фото, а кадрирование (photo-frame.js) знает размеры рамок -->
     <section class="dress" id="dresscode" data-wc-section="dresscode">
       <h2 class="heading rv" data-edit="dressTitle">Дресс код</h2>
-      <p class="dress__label rv">Для дам</p>
-      <div class="dress__grid dress__grid--w rv-pop" data-edit="palette">
-        <span class="dress__item" style="--c:#fcfcf8"></span><span class="dress__item" style="--c:#fff8f3"></span><span class="dress__item" style="--c:#e4c49c"></span>
-        <span class="dress__item" style="--c:#ffe9e9"></span><span class="dress__item" style="--c:#ffe4c7"></span><span class="dress__item" style="--c:#b0887c"></span>
+      <div class="looks__tabs rv" role="tablist" aria-label="Дресс-код гостей">
+        <button class="looks__tab is-active" type="button" role="tab" aria-selected="true" data-look="women">Женщины</button>
+        <button class="looks__tab" type="button" role="tab" aria-selected="false" data-look="men">Мужчины</button>
       </div>
-      <p class="dress__label rv">Для джентльменов</p>
-      <div class="dress__grid dress__grid--m rv-pop" data-edit="menColors">
-        <!-- рубашки строит script.js из палитры; символ — ниже -->
+      <div class="looks__panels">
+        <div class="looks__panel is-active" role="tabpanel" data-look="women">
+          <div class="dress__grid dress__grid--w rv-pop" data-edit="palette">
+            <span class="dress__item" style="--c:#fcfcf8"></span><span class="dress__item" style="--c:#fff8f3"></span><span class="dress__item" style="--c:#e4c49c"></span>
+            <span class="dress__item" style="--c:#ffe9e9"></span><span class="dress__item" style="--c:#ffe4c7"></span><span class="dress__item" style="--c:#b0887c"></span>
+          </div>
+          <div class="looks__photos rv">
+            <figure class="look"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для женщин 1" loading="lazy" decoding="async" /></figure>
+            <figure class="look"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для женщин 2" loading="lazy" decoding="async" /></figure>
+          </div>
+        </div>
+        <div class="looks__panel" role="tabpanel" data-look="men" aria-hidden="true">
+          <div class="dress__grid dress__grid--m rv-pop" data-edit="menColors">
+            <!-- рубашки строит script.js из палитры; символ — ниже -->
+          </div>
+          <div class="looks__photos rv">
+            <figure class="look"><img src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для мужчин 1" loading="lazy" decoding="async" /></figure>
+            <figure class="look"><img src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для мужчин 2" loading="lazy" decoding="async" /></figure>
+          </div>
+        </div>
       </div>
       <p class="dress__text rv" data-edit="dressText">Пожалуйста, избегайте чисто белого и чёрного цветов</p>
       <svg class="sprite" aria-hidden="true" width="0" height="0">

@@ -83,7 +83,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'tenderness',
     name: 'Нежность',
-    description: 'Бежевая акварель: сначала конверт с золотой печатью-монограммой — створки разъезжаются, и под аркой с цветами пишутся имена пары. Фото в овальной рамке, шуточный прогноз на день, меню, программа с сердцем на треке, пара в венке из роз, дресс-код с платьями и рубашками в цветах вашей палитры и анкета для гостей.',
+    description: 'Бежевая акварель: сначала конверт с золотой печатью-монограммой — створки разъезжаются, и под аркой с цветами пишутся имена пары. Фото в овальной рамке, шуточный прогноз на день, меню, программа с сердцем на треке, пара в венке из роз, дресс-код во вкладках «Женщины / Мужчины» — платья и рубашки в цветах вашей палитры и фото-примеры образов, анкета для гостей.',
     tags: ['Акварель', 'Бежевый', 'Нежный', 'Конверт', 'Анимация'],
     colors: ['#f4f0ed', '#6b4f2f', '#cfaa8e'],
     preview: '/invite/tenderness/assets/preview.jpg',
@@ -852,8 +852,12 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Дресс-код', icon: '👗',
       fields: [
-        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета платьев (для дам)', scope: 'data' },
-        { id: 'menColors',       type: 'colorList', label: 'Цвета рубашек (для джентльменов)', scope: 'custom' },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Женщины: цвета платьев', scope: 'data' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Женщины: фото-пример 1', scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Женщины: фото-пример 2', scope: 'custom' },
+        { id: 'menColors',       type: 'colorList', label: 'Мужчины: цвета рубашек', scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Мужчины: фото-пример 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Мужчины: фото-пример 2', scope: 'custom' },
         { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
       ],
     },
@@ -1586,6 +1590,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { time: '23:00', title: 'Окончание праздничного дня', icon: '/invite/tenderness/assets/ic-ringbox.webp' },
     ],
     dressCodeColors: ['#fcfcf8', '#fff8f3', '#e4c49c', '#ffe9e9', '#ffe4c7', '#b0887c'],
+    dressCodePhoto: '/invite/tenderness/assets/dress-w1.jpg',
     drinks: [
       { value: 'red',        label: 'Красное вино' },
       { value: 'white',      label: 'Белое вино' },
@@ -1607,6 +1612,9 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
         'Меню разнообразно, поэтому сообщите нам заранее, если у вас есть какие-либо предпочтения или диетические ограничения. ' +
         'После подтверждения вы сможете пройти опрос о своих вкусовых предпочтениях и напитках.',
       menColors:      ['#957a5d', '#d2aa97', '#dbd3cc', '#f2e8d9', '#e3ccba', '#daaa7b'],
+      dressMan1:      '/invite/tenderness/assets/dress-m1.jpg',
+      dressMan2:      '/invite/tenderness/assets/dress-m2.jpg',
+      dressPhoto2:    '/invite/tenderness/assets/dress-w2.jpg',
       dressText:      'Пожалуйста, избегайте чисто белого и чёрного цветов',
       surveyText:     'Пожалуйста, ответьте на несколько вопросов до {{rsvpDate}}',
       rsvpChildren:   true,

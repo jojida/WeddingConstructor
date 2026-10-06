@@ -524,22 +524,81 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
    ============================================================ */
 .dress { position: relative; padding: calc(124 * var(--u)) calc(80 * var(--u)) calc(300 * var(--u)); text-align: center; }
 .dress .heading { font-size: calc(47.6 * var(--u)); }
-.dress__label {
-  margin: calc(50 * var(--u)) 0 0;
-  font-size: max(11px, calc(36 * var(--u)));
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: #8d7558;
+/* Вкладки «Женщины / Мужчины» — линия как у арок, активная — шоколадная */
+.looks__tabs {
+  display: inline-flex;
+  margin-top: calc(70 * var(--u));
+  padding: calc(8 * var(--u));
+  border: calc(3 * var(--u)) solid var(--arch-line);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, .55);
 }
+.looks__tab {
+  margin: 0;
+  padding: calc(18 * var(--u)) calc(44 * var(--u));
+  border: 0; border-radius: 9999px;
+  background: transparent;
+  font-family: var(--f-text);
+  font-size: max(12px, calc(36 * var(--u)));
+  line-height: 1.2;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background-color .3s ease, color .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.looks__tab.is-active { background: var(--ink); color: #fff; }
+.looks__tab:focus-visible { outline: calc(3 * var(--u)) solid rgba(107, 79, 47, .45); outline-offset: calc(4 * var(--u)); }
+/* Обе вкладки в одной ячейке сетки: высота блока не прыгает, смена — растворением */
+.looks__panels { display: grid; margin-top: calc(80 * var(--u)); }
+.looks__panel {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(calc(18 * var(--u)));
+  transition: opacity .5s ease, transform .5s ease, visibility 0s linear .5s;
+}
+.looks__panel.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease, transform .5s ease, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) { .looks__panel { transition: none; transform: none; } }
 .dress__grid {
   display: grid;
   grid-template-columns: repeat(3, calc(var(--cell, 313) * var(--u)));
   justify-content: center;
+  align-content: center;
   row-gap: calc(70 * var(--u));
-  margin-top: calc(36 * var(--u));
+  min-height: calc(760 * var(--u));     /* платья ниже рубашек: фото во вкладках на одной высоте */
 }
-.dress__grid--w + .dress__label { margin-top: calc(157 * var(--u)); }
 .dress__grid--m { --cell: 392; row-gap: calc(72 * var(--u)); }
+/* Фото-примеры образов — в арках, как арка обложки */
+.looks__photos {
+  display: grid;
+  grid-template-columns: repeat(2, calc(545 * var(--u)));
+  justify-content: center;
+  column-gap: calc(50 * var(--u));
+  margin-top: calc(110 * var(--u));
+}
+.look {
+  margin: 0;
+  aspect-ratio: 470 / 700;
+  padding: calc(14 * var(--u));
+  background: var(--card);
+  border: calc(3 * var(--u)) solid var(--arch-line);
+  border-radius: 9999px 9999px calc(18 * var(--u)) calc(18 * var(--u));
+  box-shadow: 0 calc(14 * var(--u)) calc(36 * var(--u)) rgba(107, 79, 47, .14);
+}
+.look img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  border-radius: 9999px 9999px calc(10 * var(--u)) calc(10 * var(--u));
+}
 /* Платье: силуэт закрашен цветом палитры, линии — поверх (multiply) */
 .dress__item {
   position: relative;
@@ -557,7 +616,7 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
 .shirt { justify-self: center; display: block; width: calc(363 * var(--u)); height: calc(344 * var(--u)); fill: var(--c); }
 .dress__text {
   max-width: calc(820 * var(--u));
-  margin: calc(176.7 * var(--u)) auto 0;
+  margin: calc(130 * var(--u)) auto 0;
   font-size: calc(43.6 * var(--u));
   line-height: calc(47.1 * var(--u));
   text-transform: uppercase;

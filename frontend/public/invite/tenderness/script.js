@@ -16,6 +16,7 @@
     date: '2027-08-14', time: '15:00',
     groom: 'Евгений', bride: 'Надежда',
     signUser: false,        // подпись финала задала пара (иначе — имена)
+    looksSeen: false,       // данные дресс-кода уже приходили (дальше правки переключают вкладку)
     scheduleSig: '',
     storySig: '', inviteSig: '', menuSig: ''
   };
@@ -105,16 +106,59 @@
     return true;
   }
 
-  // Пустая строка — пара удалила фото: возвращаем фото дизайна
+  // Пустая строка — пара удалила фото: возвращаем фото дизайна.
+  // true — фото действительно сменилось
   function setImg(key, url) {
-    if (url == null) return;
+    if (url == null) return false;
+    var changed = false;
     document.querySelectorAll('img[data-edit="' + key + '"]').forEach(function (el) {
       var next = url === '' ? el.getAttribute('data-def') : imageUrl(url);
       if (!next) return;
       var abs = next;
       try { abs = new URL(next, window.location.href).href; } catch (e) {}
-      if (el.src !== abs) el.src = next;
+      if (el.src !== abs) { el.src = next; changed = true; }
     });
+    return changed;
+  }
+
+  /* ─── Дресс-код: вкладки «Женщины / Мужчины» ─── */
+  function showLooks(which, replay) {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      var on = b.getAttribute('data-look') === which;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.looks__panel').forEach(function (p) {
+      var on = p.getAttribute('data-look') === which;
+      var was = p.classList.contains('is-active');
+      p.classList.toggle('is-active', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+      // открытая вкладка: силуэты появляются по очереди заново
+      if (on && !was && replay && !REDUCED) {
+        var grid = p.querySelector('.rv-pop.in');
+        if (grid) { grid.classList.remove('in'); void grid.offsetWidth; grid.classList.add('in'); }
+      }
+    });
+  }
+
+  function initLooks() {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      b.addEventListener('click', function () { showLooks(b.getAttribute('data-look'), true); });
+    });
+    // В редакторе подсвеченное (правимое) поле дресс-кода — сразу на экране:
+    // скрытая вкладка (visibility) находится и подсвечивается редактором
+    if (EDITING && 'MutationObserver' in window) {
+      var mo = new MutationObserver(function (list) {
+        list.forEach(function (r) {
+          if (!r.target.classList || !r.target.classList.contains('wc-editor-flash')) return;
+          var panel = r.target.closest('.looks__panel');
+          if (panel) showLooks(panel.getAttribute('data-look'));
+        });
+      });
+      document.querySelectorAll('.looks__panel [data-edit]').forEach(function (el) {
+        mo.observe(el, { attributes: true, attributeFilter: ['class'] });
+      });
+    }
   }
 
   /* ─── Имена: обложка и подпись финала ─────────────── */
@@ -349,9 +393,9 @@
   function rebuildDresses(colors) {
     var list = cleanColors(colors);
     var box = document.querySelector('[data-edit="palette"]');
-    if (!box || !list.length) return;
+    if (!box || !list.length) return false;
     var sig = list.join(',');
-    if (box.dataset.sig === sig) return;
+    if (box.dataset.sig === sig) return false;
     box.dataset.sig = sig;
     var shown = box.classList.contains('in');
     box.innerHTML = '';
@@ -362,14 +406,15 @@
       box.appendChild(sp);
     });
     if (shown) box.classList.add('in');
+    return true;
   }
 
   function rebuildShirts(colors) {
     var list = cleanColors(colors);
     var box = document.querySelector('[data-edit="menColors"]');
-    if (!box || !list.length) return;
+    if (!box || !list.length) return false;
     var sig = list.join(',');
-    if (box.dataset.sig === sig) return;
+    if (box.dataset.sig === sig) return false;
     box.dataset.sig = sig;
     var shown = box.classList.contains('in');
     box.innerHTML = '';
@@ -386,6 +431,7 @@
       box.appendChild(svg);
     });
     if (shown) box.classList.add('in');
+    return true;
   }
 
   /* ─── Анкета: переключатели и напитки ─────────────── */
@@ -637,10 +683,19 @@
     if (typeof d.story === 'string' && d.story !== STATE.storySig && setParagraphs('story', d.story)) STATE.storySig = d.story;
 
     setImg('coverPhoto', d.coverPhoto);
+    // Дресс-код: в редакторе правку сразу видно — открываем её вкладку
+    // (первые данные после загрузки вкладку не переключают)
+    var looksReady = STATE.looksSeen, showTab = '';
+    [['dressCodePhoto', 'women'], ['dressPhoto2', 'women'], ['dressMan1', 'men'], ['dressMan2', 'men']].forEach(function (k) {
+      if (setImg(k[0], d[k[0]])) showTab = k[1];
+      if (d[k[0]] != null) STATE.looksSeen = true;
+    });
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
-    rebuildDresses(d.dressCodeColors);
-    rebuildShirts(d.menColors);
+    if (rebuildDresses(d.dressCodeColors)) showTab = 'women';
+    if (rebuildShirts(d.menColors)) showTab = 'men';
+    if (d.dressCodeColors != null || d.menColors != null) STATE.looksSeen = true;
+    if (EDITING && looksReady && showTab) showLooks(showTab);
     applySchedule(d.schedule);
     rebuildDrinks(d.drinks);
   }
@@ -668,6 +723,7 @@
       img.setAttribute('data-def', img.getAttribute('src') || '');
     });
     rebuildShirts(DEFAULT_MEN);
+    initLooks();
     initReveal();
     applySchedule(DEFAULT_SCHEDULE);   // базовое наполнение (сам по себе, без редактора)
     initTrack();
