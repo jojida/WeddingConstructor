@@ -27,3 +27,17 @@ test('uploads, deleted photos and custom crops stay unchanged', () => {
   const cropped = { groomPhoto: demo.groomPhoto.originalUrl, photoFrames: { groomPhoto: { z: 2 } } };
   assert.equal(withSketchDemoPhotos(cropped).groomPhoto, cropped.groomPhoto);
 });
+
+test('hair cleanup refreshes an old cutout without undoing a restored original', () => {
+  const previousUrl = '/invite/sketch/assets/photo-bride-cutout.png';
+  const old = { __sketchDemoPhotos: 1, bridePhoto: previousUrl, groomPhoto: demo.groomPhoto.originalUrl,
+    photoCutouts: { bridePhoto: { originalUrl: demo.bridePhoto.originalUrl, resultUrl: previousUrl } },
+    photoFrames: { bridePhoto: { z: 1.2 } } };
+  const updated = withSketchDemoPhotos(old);
+  assert.equal(updated.bridePhoto, demo.bridePhoto.resultUrl);
+  assert.equal(updated.photoCutouts.bridePhoto.resultUrl, demo.bridePhoto.resultUrl);
+  assert.equal(updated.photoCutouts.bridePhoto.originalUrl, demo.bridePhoto.originalUrl);
+  assert.equal(updated.photoFrames, old.photoFrames);
+  assert.equal(updated.groomPhoto, old.groomPhoto);
+  assert.equal(withSketchDemoPhotos({ __sketchDemoPhotos: 1, bridePhoto: demo.bridePhoto.originalUrl }).bridePhoto, demo.bridePhoto.originalUrl);
+});
