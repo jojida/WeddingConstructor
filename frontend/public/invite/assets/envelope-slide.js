@@ -68,12 +68,11 @@
       'touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}' +
     '.wc-slide--inline{position:relative;inset:auto;z-index:auto;height:100vh;cursor:default;touch-action:auto;' +
       'background:#f4f0ed}' +
-    // Створки — бумага с фактурой (envelope-slide/paper.jpg, 626×626, бесшовная):
-    // плиткой в натуральную величину, без растяжения — на телефоне по высоте встают
-    // две картинки одна над другой. Поверх лёгкая светотень: левая створка чуть
-    // светлее и лежит на правой, у шва — складка и тень.
+    // Створки — бумага с фактурой (envelope-slide/paper.jpg, бесшовная): квадратами,
+    // по высоте створки ровно три штуки (мелкое зерно на любом экране). Поверх
+    // лёгкая светотень: левая створка чуть светлее и лежит на правой, у шва — складка и тень.
     '.wc-slide__half{position:absolute;top:0;bottom:0;width:50%;will-change:transform;background-color:#fafafa;' +
-      'background-size:auto,auto,626px 626px;background-repeat:no-repeat,no-repeat,repeat;' +
+      'background-size:auto,auto,auto 33.3334%;background-repeat:no-repeat,no-repeat,repeat;' +
       'transition:transform 1.5s cubic-bezier(.58,.02,.22,1)}' +
     '.wc-slide__half--r{right:0;z-index:1;' +
       'background-image:linear-gradient(90deg,rgba(60,50,45,.22) 0,rgba(60,50,45,.08) 5px,rgba(60,50,45,0) 22px),' +
