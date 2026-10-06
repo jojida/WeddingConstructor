@@ -1,0 +1,847 @@
+/* ============================================================
+   «Витраж» — свадебное приглашение по Canva-макету «Фиолетовое и
+   Розовое Цветок Геометрический Цветочное Свадебное Приглашение»
+   (перекрашен в голубой; сайт шириной 1366px).
+   Размеры — в пикселях макета: calc(N * var(--u)).
+   Шрифты: Lora (весь текст, ближе всего к шрифту макета) и HamiltoneSHA
+   (рукописные заголовки и имена — по просьбе пары вместо шрифта макета).
+   ============================================================ */
+
+@font-face {
+  font-family: "HamiltoneSHA";
+  src: url("/invite/assets/fonts/HamiltoneSHA.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --col: 500px;
+  /* Единица макета. Колонка = min(ширина окна, --col), полоса прокрутки скрыта */
+  --u: calc(min(100vw, var(--col)) / 1366);
+
+  --page: #f0f7ff;
+  --blue: #556f95;
+  --ink: #343434;
+  --green: #45513c;
+  --btn: #5b6f8b;
+
+  --f-text: "Lora", Georgia, "Times New Roman", serif;
+  --f-script: "HamiltoneSHA", "Great Vibes", cursive;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #dfe9f5;
+  color: var(--ink);
+  font-family: var(--f-text);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+}
+html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+.invite {
+  position: relative;
+  width: 100%;
+  max-width: var(--col);
+  margin: 0 auto;
+  background: var(--page);
+  overflow: hidden;
+}
+@media (min-width: 520px) {
+  .invite { box-shadow: 0 0 60px rgba(60, 90, 140, .22); }
+}
+
+img { max-width: none; }
+p, h1, h2 { margin: 0; font-weight: 500; }
+
+/* Рукописные строки — HamiltoneSHA: у неё большие заглавные с росчерками
+   и маленькие строчные; кегли подобраны по ширине строк макета */
+.script {
+  font-family: var(--f-script);
+  font-weight: 400;
+  font-size: calc(125 * var(--u));
+  line-height: 1;
+  color: var(--ink);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Четырёхлучевые звёздочки макета — мерцают */
+.spark {
+  position: absolute; z-index: 1;
+  width: calc(145 * var(--u)); height: calc(141 * var(--u));
+  fill: var(--blue);
+  pointer-events: none;
+  animation: twinkle 3.4s ease-in-out infinite alternate;
+}
+.spark--sm { width: calc(63 * var(--u)); height: calc(61 * var(--u)); }
+@keyframes twinkle {
+  from { transform: scale(.8) rotate(-8deg); opacity: .65; }
+  to   { transform: scale(1.06) rotate(6deg); opacity: 1; }
+}
+
+/* ============================================================
+   АНИМАЦИЯ ПОЯВЛЕНИЯ ПРИ ПРОКРУТКЕ (как в других шаблонах)
+   .rv       — текст: всплывает и проявляется из лёгкой дымки;
+   .rv-write — рукописные строки «пишутся» слева направо;
+   .rv-soft  — картинки: проявляются;
+   .rv-line  — жемчужная гирлянда «раскрывается» из середины;
+   .rv-pop   — банты и кружки палитры появляются по очереди.
+   Класс .in ставит script.js, когда блок доходит до экрана.
+   ============================================================ */
+.rv {
+  opacity: 0;
+  transform: translateY(calc(40 * var(--u)));
+  filter: blur(5px);
+  transition: opacity .9s ease, transform 1s cubic-bezier(.2, .7, .2, 1), filter .9s ease;
+  transition-delay: var(--d, 0ms);
+}
+.rv.in { opacity: 1; transform: none; filter: none; }
+
+.rv-soft {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  transition-delay: var(--d, 0ms);
+}
+.rv-soft.in { opacity: var(--o, 1); }
+
+/* поля — запас под росчерки HamiltoneSHA: маска «письма» режет всё за краями блока */
+.rv-write {
+  opacity: 0;
+  padding: .45em .3em;
+  margin-top: -.45em;
+  margin-bottom: -.45em;
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+          mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+.rv-write.in { animation: write 1.8s cubic-bezier(.35, .45, .25, 1) var(--d, 0ms) both; }
+.rv-write.done { opacity: 1; -webkit-mask-image: none; mask-image: none; animation: none; }
+@keyframes write {
+  from { opacity: 0; -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  12%  { opacity: 1; }
+  to   { opacity: 1; -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
+
+.rv-line {
+  clip-path: inset(0 50% 0 50%);
+  transition: clip-path 1.8s cubic-bezier(.45, .05, .25, 1) var(--d, 0ms);
+}
+.rv-line.in { clip-path: inset(-10% -1% -10% -1%); }
+
+.rv-pop > * {
+  opacity: 0;
+  transform: translateY(calc(30 * var(--u))) scale(.82);
+  transition: opacity .6s ease, transform .8s cubic-bezier(.3, 1.45, .5, 1);
+}
+.rv-pop > *:nth-child(2) { transition-delay: .12s; }
+.rv-pop > *:nth-child(3) { transition-delay: .24s; }
+.rv-pop > *:nth-child(4) { transition-delay: .36s; }
+.rv-pop > *:nth-child(5) { transition-delay: .48s; }
+.rv-pop > *:nth-child(6) { transition-delay: .6s; }
+.rv-pop > *:nth-child(7) { transition-delay: .72s; }
+.rv-pop > *:nth-child(8) { transition-delay: .84s; }
+.rv-pop > *:nth-child(9) { transition-delay: .96s; }
+.rv-pop.in > * { opacity: 1; transform: none; }
+
+/* Вещицы «дышат», люстра покачивается, ветки колышутся */
+.float { display: block; animation: float 6s ease-in-out infinite alternate; }
+.float--slow { animation-duration: 7.5s; animation-delay: -2.5s; }
+@keyframes float {
+  from { transform: translateY(calc(-10 * var(--u))) rotate(-1.2deg); }
+  to   { transform: translateY(calc(10 * var(--u))) rotate(1.2deg); }
+}
+.swing { transform-origin: 50% 0; animation: swing 6s ease-in-out infinite alternate; }
+@keyframes swing {
+  from { transform: rotate(-1.6deg); }
+  to   { transform: rotate(1.6deg); }
+}
+.branch { animation: sway 7s ease-in-out infinite alternate; }
+.branch--r { transform-origin: 100% 40%; }
+.branch--l { transform-origin: 0 40%; animation-delay: -3s; }
+@keyframes sway {
+  from { transform: rotate(-1.4deg); }
+  to   { transform: rotate(1.8deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv, .rv-soft, .rv-write, .rv-line, .rv-pop > * {
+    opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important;
+    -webkit-mask-image: none !important; mask-image: none !important;
+    transition: none !important; animation: none !important;
+  }
+  .rv-soft { opacity: var(--o, 1) !important; }
+  .float, .swing, .branch, .spark { animation: none !important; }
+}
+
+/* ============================================================
+   1 — ОБЛОЖКА (макет: 0–2601): витражная арка
+   ============================================================ */
+.cover {
+  position: relative; z-index: 2;
+  height: calc(2601 * var(--u));
+  overflow: hidden;
+  background: var(--page);
+}
+.cover > * { position: absolute; display: block; margin: 0; }
+.cover__bg { left: 0; top: 0; width: 100%; height: auto; }
+.cover__label {
+  left: 0; top: calc(748.5 * var(--u)); width: 100%;
+  text-align: center;
+  font-size: calc(47.4 * var(--u));
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+/* Имена: строки стоят по базовым линиям макета (1080 / 1262 / 1445).
+   У HamiltoneSHA при line-height:1 базовая линия на 0,612 кегля ниже верха */
+.cover__names {
+  left: 0; top: 0; width: 100%; height: 100%;
+  margin: 0;
+  font-weight: 400;
+  pointer-events: none;
+}
+.cover__name, .cover__amp {
+  position: absolute; left: 50%;
+  width: max-content;
+  white-space: nowrap;
+  line-height: 1;
+  color: var(--blue);
+  transform: translateX(calc(-50% + var(--x, 0) * var(--u)));
+}
+.cover__name {
+  font-family: var(--f-script);
+  font-size: calc(var(--nfs, 155) * var(--u));
+  /* запас под заглавные и хвосты букв: маска «письма» режет всё за краями блока */
+  padding: .45em .3em;
+  margin-top: -.45em;
+}
+.cover__name--g { --x: -30; top: calc((1080 - .612 * var(--nfs, 155)) * var(--u)); }
+.cover__name--b { --x: 18; top: calc((1445.3 - .612 * var(--nfs, 155)) * var(--u)); }
+/* у HamiltoneSHA нет «&» — амперсанд курсивом Lora */
+.cover__amp {
+  --x: -6;
+  top: calc((1262.4 - .866 * 124) * var(--u));
+  font-family: var(--f-text);
+  font-style: italic;
+  font-weight: 400;
+  font-size: calc(124 * var(--u));
+}
+.cover__text {
+  left: 50%; top: calc(1690.8 * var(--u));
+  width: calc(560 * var(--u));
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: calc(46.5 * var(--u));
+  line-height: calc(63.8 * var(--u));
+  text-transform: uppercase;
+  color: var(--blue);
+  overflow-wrap: anywhere;
+}
+/* Дата — добавлена под приглашением (в макете её нет): число и месяц
+   капителью с тонкими линиями, время — строкой ниже */
+.cover__date {
+  left: 0; top: calc(1985 * var(--u)); width: 100%;
+  text-align: center;
+  color: var(--blue);
+}
+.cover__day {
+  display: flex; align-items: center; justify-content: center;
+  font-size: calc(54 * var(--u));
+  line-height: 1.2;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.cover__day::before, .cover__day::after {
+  content: ""; flex: none;
+  width: calc(70 * var(--u)); height: calc(2.5 * var(--u));
+  margin: 0 calc(28 * var(--u));
+  background: currentColor;
+  opacity: .55;
+}
+.cover__time {
+  margin-top: calc(8 * var(--u));
+  font-size: calc(42 * var(--u));
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* Снег над витражом (строит script.js); вне экрана — на паузе */
+.cover__snow { inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.cover__snow i {
+  position: absolute; top: calc(-40 * var(--u)); left: var(--x);
+  width: calc(var(--s) * var(--u)); height: calc(var(--s) * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 42%, rgba(255, 255, 255, .55) 62%, rgba(255, 255, 255, 0) 72%);
+  box-shadow: 0 0 calc(3 * var(--u)) rgba(85, 111, 149, .28);
+  opacity: var(--o, .9);
+  animation: snowfall var(--t) linear var(--d) infinite;
+}
+.cover__snow.is-off i { animation-play-state: paused; }
+@keyframes snowfall {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(calc(var(--dx) * var(--u)), calc(2700 * var(--u)), 0); }
+}
+
+/* ── Открытие обложки (класс hero-go на <html>) ──
+   Витраж сразу на экране, но в дымке — фокусируется; «Свадьба»
+   поднимается, имена пишутся, амперсанд и приглашение проявляются, затем дата */
+.hero-in { opacity: 0; }
+.cover__bg { transform: scale(1.06); filter: blur(6px); transform-origin: 50% 30%; }
+.cover__label { transform: translateY(calc(24 * var(--u))); }
+.cover__text { transform: translate(-50%, calc(24 * var(--u))); }
+.cover__date { transform: translateY(calc(24 * var(--u))); }
+.cover__amp { opacity: 0; }
+.cover__name {
+  opacity: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+          mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+html.hero-go .hero-in { opacity: 1; }
+html.hero-go .cover__bg    { transform: none; filter: none; transition: transform 2.6s cubic-bezier(.2, .7, .2, 1), filter 1.6s ease; }
+html.hero-go .cover__label { transform: none; transition: opacity 1.2s ease .7s, transform 1.4s cubic-bezier(.2, .7, .2, 1) .7s; }
+html.hero-go .cover__name--g { animation: write 1.9s cubic-bezier(.35, .45, .25, 1) 1.2s both; }
+html.hero-go .cover__amp   { opacity: 1; transition: opacity 1s ease 2.4s; }
+html.hero-go .cover__name--b { animation: write 1.9s cubic-bezier(.35, .45, .25, 1) 2.7s both; }
+html.hero-go .cover__text  { transform: translateX(-50%); transition: opacity 1.2s ease 3.8s, transform 1.4s cubic-bezier(.2, .7, .2, 1) 3.8s; }
+html.hero-go .cover__date  { transform: none; transition: opacity 1.2s ease 4.3s, transform 1.4s cubic-bezier(.2, .7, .2, 1) 4.3s; }
+/* Редактор и «меньше движения»: сразу финал, без переходов */
+html.no-anim .hero-in, html.no-anim .cover__bg, html.no-anim .cover__name, html.no-anim .cover__amp { transition: none !important; animation: none !important; }
+html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-image: none; mask-image: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-in, .cover__amp { opacity: 1 !important; transition: none !important; }
+  .cover__bg, .cover__label, .cover__date { transform: none !important; filter: none !important; }
+  .cover__text { transform: translateX(-50%) !important; }
+  .cover__name { opacity: 1 !important; -webkit-mask-image: none !important; mask-image: none !important; animation: none !important; }
+  .cover__snow { display: none; }
+}
+
+/* ============================================================
+   2 — ДОРОГИЕ ГОСТИ (макет: 2601–3871)
+   ============================================================ */
+.greet { position: relative; padding: calc(707.5 * var(--u)) calc(110 * var(--u)) 0; text-align: center; }
+.greet__key { position: absolute; left: calc(596 * var(--u)); top: calc(175 * var(--u)); width: calc(193 * var(--u)); height: auto; }
+.greet .spark--a { left: calc(979 * var(--u)); top: calc(200 * var(--u)); }
+.greet .spark--b { left: calc(1072 * var(--u)); top: calc(181 * var(--u)); width: calc(63 * var(--u)); height: calc(61 * var(--u)); animation-delay: -1.7s; }
+.greet__branch { position: absolute; right: 0; top: calc(571 * var(--u)); width: calc(413 * var(--u)); height: auto; pointer-events: none; }
+.greet__head { position: relative; z-index: 2; }
+.greet__word { display: block; width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; }
+.greet__word:empty { display: none; }
+.greet__name {
+  margin-top: calc(71.3 * var(--u));
+  font-size: calc(81 * var(--u));
+  line-height: 1.15;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.greet__name:empty { display: none; }
+.greet__text {
+  position: relative; z-index: 2;
+  max-width: calc(1000 * var(--u));
+  margin: calc(151 * var(--u)) auto 0;
+  font-size: calc(41 * var(--u));
+  line-height: calc(61 * var(--u));
+  color: var(--ink);
+}
+.greet__text p + p { margin-top: calc(20 * var(--u)); }
+
+/* ============================================================
+   3 — ДО СВАДЬБЫ: дни | часы | минуты рукописными цифрами
+   ============================================================ */
+.cd {
+  display: grid;
+  grid-template-columns: repeat(3, calc(390 * var(--u)));
+  justify-content: center;
+  padding-top: calc(249.6 * var(--u));
+  text-align: center;
+}
+.cd__cell { position: relative; display: flex; flex-direction: column; align-items: center; }
+.cd__cell + .cd__cell::before {
+  content: ""; position: absolute; left: 0; top: calc(-3 * var(--u));
+  width: calc(3 * var(--u)); height: calc(135 * var(--u));
+  background: var(--ink);
+}
+.cd__num {
+  display: block;
+  height: calc(120 * var(--u));
+  font-size: calc(310 * var(--u));
+  line-height: calc(120 * var(--u));
+  font-variant-numeric: tabular-nums;
+}
+.cd__lbl {
+  margin-top: calc(26 * var(--u));
+  font-size: max(10px, calc(30 * var(--u)));
+  line-height: 1.2;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+/* ============================================================
+   4 — ГДЕ ПРОЙДЁТ (макет: 4358–4572)
+   ============================================================ */
+.venue { position: relative; padding: calc(110 * var(--u)) calc(110 * var(--u)) 0; text-align: center; }
+.venue .spark--c { left: calc(64 * var(--u)); top: calc(39.6 * var(--u)); animation-delay: -.8s; }
+.venue .spark--d { left: calc(157 * var(--u)); top: calc(20.6 * var(--u)); width: calc(64 * var(--u)); height: calc(61 * var(--u)); animation-delay: -2.4s; }
+.venue__title { position: relative; z-index: 2; font-size: calc(57 * var(--u)); line-height: 1.2; color: var(--ink); }
+.venue__name, .venue__addr {
+  position: relative; z-index: 2;
+  font-size: calc(50 * var(--u));
+  line-height: calc(74 * var(--u));
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+.venue__name { margin-top: calc(13.6 * var(--u)); }
+.venue__name:empty, .venue__addr:empty { display: none; }
+
+/* Люстра в голубом сиянии (макет: 4473–6209) */
+.lux { position: relative; height: calc(1588 * var(--u)); }
+.lux::before {
+  content: ""; position: absolute; left: 0; right: 0;
+  top: calc(-104 * var(--u)); height: calc(1736 * var(--u));
+  background: linear-gradient(180deg, rgba(123, 161, 208, 0) 0%, rgba(123, 161, 208, .19) 50%, rgba(123, 161, 208, 0) 100%);
+  pointer-events: none;
+}
+.lux > img { position: absolute; display: block; height: auto; }
+.lux__branch { left: 0; top: calc(45.6 * var(--u)); width: calc(484 * var(--u)); }
+.lux__chandelier { left: calc(302.5 * var(--u)); top: calc(184.6 * var(--u)); width: calc(761 * var(--u)); }
+.lux .spark--e { left: calc(1123 * var(--u)); top: calc(60.6 * var(--u)); animation-delay: -1.2s; }
+.lux .spark--f { left: calc(1215 * var(--u)); top: calc(41.6 * var(--u)); width: calc(64 * var(--u)); height: calc(61 * var(--u)); animation-delay: -2.9s; }
+.lux .spark--g { left: calc(1103 * var(--u)); top: calc(1394.6 * var(--u)); animation-delay: -.4s; }
+.lux .spark--h { left: calc(1196 * var(--u)); top: calc(1375.6 * var(--u)); width: calc(64 * var(--u)); height: calc(61 * var(--u)); animation-delay: -2.1s; }
+
+/* ============================================================
+   5 — МЕСТО ПРОВЕДЕНИЯ: фото зала в рамке из рваной бумаги
+   ============================================================ */
+.hall { position: relative; text-align: center; }
+.hall__title { font-size: calc(58.6 * var(--u)); line-height: 1.2; color: var(--ink); padding: 0 calc(110 * var(--u)); }
+.hall__frame { position: relative; margin-top: calc(35 * var(--u)); height: calc(1252 * var(--u)); }
+.hall__photo {
+  position: absolute; left: 0; top: calc(93 * var(--u));
+  width: 100%; height: calc(1066 * var(--u));
+  overflow: hidden;
+  background: #d9e2ee;
+}
+.hall__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.hall__torn { position: absolute; left: 0; top: 0; width: 100%; height: auto; display: block; pointer-events: none; }
+
+/* Кнопка карты (макет: 7551–7708) и карта */
+.venue--cta { padding-top: calc(28 * var(--u)); }
+.venue--cta .spark--i { left: calc(64 * var(--u)); top: calc(102 * var(--u)); animation-delay: -1.5s; }
+.venue--cta .spark--j { left: calc(157 * var(--u)); top: calc(83 * var(--u)); width: calc(64 * var(--u)); height: calc(61 * var(--u)); animation-delay: -.3s; }
+.venue__btn {
+  position: relative; z-index: 2;
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: calc(475 * var(--u)); height: calc(157 * var(--u));
+  padding: 0 calc(60 * var(--u));
+  border-radius: 999px;
+  background: var(--btn);
+  color: #fff;
+  font-family: var(--f-text);
+  font-weight: 700;
+  font-size: max(14px, calc(51 * var(--u)));
+  text-decoration: none;
+  box-shadow: 0 calc(12 * var(--u)) calc(30 * var(--u)) rgba(85, 111, 149, .3);
+  transition: transform .25s ease, background-color .25s ease;
+}
+.venue__btn:hover { background: #4d5f78; transform: translateY(-2px); }
+.venue__btn[hidden] { display: none; }
+.vit-map {
+  --wc-map-width: calc(1100 * var(--u));
+  --wc-map-h: calc(720 * var(--u));
+  --wc-map-radius: calc(40 * var(--u));
+  --wc-map-border: calc(8 * var(--u)) solid #fff;
+  --wc-map-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(60, 90, 140, .2);
+  --wc-map-accent: var(--btn);
+  --wc-map-accent-ink: #fff;
+  --wc-map-font: var(--f-text);
+  margin: calc(80 * var(--u)) auto 0;
+}
+.vit-map .wc-map__route {
+  margin-top: calc(34 * var(--u));
+  font-size: max(13px, calc(44 * var(--u)));
+  background: rgba(255, 255, 255, .7);
+}
+
+/* ============================================================
+   6 — МЕНЮ (макет: 7758–9640)
+   ============================================================ */
+.menu { position: relative; padding: calc(50 * var(--u)) calc(110 * var(--u)) 0; text-align: center; color: var(--blue); }
+.menu__title { font-size: calc(61.6 * var(--u)); line-height: 1.2; }
+.menu__text {
+  max-width: calc(820 * var(--u));
+  margin: calc(34 * var(--u)) auto 0;
+  font-size: calc(43 * var(--u));
+  line-height: calc(64 * var(--u));
+}
+.menu__text p + p { margin-top: calc(20 * var(--u)); }
+.menu__grid {
+  display: grid;
+  grid-template-columns: calc(470 * var(--u)) calc(470 * var(--u));
+  justify-content: center;
+  column-gap: calc(20 * var(--u));
+  row-gap: calc(153 * var(--u));
+  margin: calc(185 * var(--u)) calc(-110 * var(--u)) 0;
+}
+.mi { display: flex; flex-direction: column; align-items: center; }
+.mi__pic { height: calc(440 * var(--u)); display: flex; align-items: flex-end; justify-content: center; }
+.mi__pic img { height: auto; }
+.mi--1 .mi__pic img { width: calc(481 * var(--u)); }
+.mi--2 .mi__pic img { width: calc(349 * var(--u)); }
+.mi--3 .mi__pic img { width: calc(313 * var(--u)); }
+.mi--4 .mi__pic img { width: calc(432 * var(--u)); }
+.mi__cap {
+  margin-top: calc(40 * var(--u));
+  max-width: calc(440 * var(--u));
+  font-size: calc(45 * var(--u));
+  line-height: 1.2;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.mi__cap:empty { display: none; }
+
+/* Жемчужная гирлянда с бантами (макет: 9930–10664) */
+.garland { position: relative; height: calc(734 * var(--u)); margin-top: calc(300 * var(--u)); }
+.garland__pearls { position: absolute; left: 0; top: calc(138 * var(--u)); width: 100%; height: auto; display: block; }
+.garland__bows { position: absolute; inset: 0; }
+.garland__bow { position: absolute; display: block; height: auto; }
+.garland__bow--l { left: calc(76 * var(--u)); top: calc(18 * var(--u)); width: calc(282 * var(--u)); }
+.garland__bow--c { left: calc(473 * var(--u)); top: 0; width: calc(405 * var(--u)); }
+.garland__bow--r { left: calc(1015 * var(--u)); top: calc(61 * var(--u)); width: calc(282 * var(--u)); }
+
+/* ============================================================
+   7 — РАСПИСАНИЕ: карусель (макет: 10778–11800)
+   ============================================================ */
+.program { position: relative; padding-top: calc(139 * var(--u)); text-align: center; }
+.program__title { display: block; width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; }
+.sched {
+  position: relative;
+  height: calc(830 * var(--u));
+  margin-top: calc(60 * var(--u));
+  outline: none;
+  touch-action: pan-y;
+  -webkit-user-select: none; user-select: none;
+}
+.sched:focus-visible { outline: 2px solid rgba(69, 81, 60, .35); outline-offset: 4px; }
+.sched__track { position: absolute; inset: 0; }
+.sched__item {
+  position: absolute; left: 50%; top: 0;
+  width: calc(560 * var(--u));
+  margin-left: calc(-280 * var(--u));
+  display: flex; flex-direction: column; align-items: center;
+  color: var(--green);
+  transform-origin: 50% 50%;
+  transform: translateX(calc(var(--off, 0) * 450 * var(--u))) scale(.575);
+  opacity: 0;
+  transition: transform .75s cubic-bezier(.3, .7, .2, 1), opacity .6s ease;
+  cursor: pointer;
+  pointer-events: none;
+}
+.sched__item.is-active { transform: none; opacity: 1; cursor: default; pointer-events: auto; }
+.sched__item.is-side { opacity: .48; pointer-events: auto; }
+.sched__icon-box { height: calc(512 * var(--u)); width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+.sched__icon { display: block; max-width: calc(520 * var(--u)); max-height: calc(512 * var(--u)); width: auto; height: auto; object-fit: contain; -webkit-user-drag: none; }
+.sched__icon--emoji { font-size: calc(300 * var(--u)); line-height: 1; }
+.sched__time {
+  margin-top: calc(33 * var(--u));
+  font-size: calc(149 * var(--u));
+  line-height: 1;
+  font-variant-numeric: lining-nums;
+}
+.sched__title {
+  margin-top: calc(31 * var(--u));
+  max-width: 100%;
+  font-size: calc(75 * var(--u));
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.sched__dots { display: flex; justify-content: center; gap: calc(26 * var(--u)); margin-top: calc(40 * var(--u)); min-height: calc(22 * var(--u)); }
+.sched__dot {
+  width: calc(22 * var(--u)); height: calc(22 * var(--u));
+  min-width: 7px; min-height: 7px;
+  padding: 0; border: 0; border-radius: 50%;
+  background: rgba(69, 81, 60, .25);
+  cursor: pointer;
+  transition: background-color .3s ease, transform .3s ease;
+}
+.sched__dot.is-active { background: var(--green); transform: scale(1.25); }
+@media (prefers-reduced-motion: reduce) { .sched__item { transition: none; } }
+
+/* ============================================================
+   8 — ЖЕНИХ И НЕВЕСТА: синяя «капсула» (макет: 11904–15351)
+   ============================================================ */
+.couple { position: relative; padding-top: calc(62 * var(--u)); }
+.couple__panel {
+  position: relative;
+  padding: calc(446 * var(--u)) calc(150 * var(--u)) calc(530 * var(--u));
+  background: var(--blue);
+  border-radius: calc(683 * var(--u)) / calc(680 * var(--u));
+  color: #fff;
+  text-align: center;
+}
+.couple__roses { position: absolute; z-index: 2; display: block; height: auto; pointer-events: none; }
+.couple__roses--tr { left: calc(650 * var(--u)); top: calc(44 * var(--u)); width: calc(700 * var(--u)); }
+.couple__roses--bl { left: calc(142 * var(--u)); bottom: calc(-77 * var(--u)); width: calc(536 * var(--u)); }
+.couple__half + .couple__half {
+  margin: calc(166 * var(--u)) calc(-150 * var(--u)) 0;
+  padding: calc(41 * var(--u)) calc(150 * var(--u)) 0;
+  border-top: calc(2 * var(--u)) solid rgba(255, 255, 255, .45);
+}
+.couple__photo {
+  width: calc(712 * var(--u)); height: calc(560 * var(--u));
+  margin: 0 auto;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .15);
+}
+.couple__photo img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.1); transition: transform 2.4s cubic-bezier(.2, .7, .2, 1) .2s; }
+.couple__photo.in img { transform: none; }
+.couple__title { margin-top: calc(102 * var(--u)); font-size: calc(59.5 * var(--u)); line-height: 1.18; overflow-wrap: anywhere; }
+.couple__title:empty { display: none; }
+.couple__text {
+  max-width: calc(1020 * var(--u));
+  margin: calc(26 * var(--u)) auto 0;
+  font-size: calc(42.7 * var(--u));
+  line-height: calc(62.8 * var(--u));
+}
+.couple__text p + p { margin-top: calc(18 * var(--u)); }
+@media (prefers-reduced-motion: reduce) { .couple__photo img { transform: none; transition: none; } }
+
+/* ============================================================
+   9 — ДРЕСС-КОД (макет: 15849–16372) + палитра и образы гостей
+   ============================================================ */
+.dress { position: relative; padding: calc(480 * var(--u)) calc(110 * var(--u)) calc(110 * var(--u)); text-align: center; }
+.dress__title { display: block; width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; }
+.dress__style { margin-top: calc(78.8 * var(--u)); font-size: calc(48 * var(--u)); line-height: calc(69 * var(--u)); color: var(--ink); }
+.dress__style:empty { display: none; }
+.dress__text {
+  max-width: calc(980 * var(--u));
+  margin: 0 auto;
+  font-size: calc(46.5 * var(--u));
+  line-height: calc(69 * var(--u));
+  color: var(--ink);
+}
+.dress__text:empty { display: none; }
+.palette { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(36 * var(--u)); margin-top: calc(90 * var(--u)); }
+.palette span {
+  width: calc(110 * var(--u)); height: calc(110 * var(--u));
+  border-radius: 50%;
+  background: var(--c);
+  border: calc(3 * var(--u)) solid rgba(85, 111, 149, .35);
+  box-shadow: 0 calc(8 * var(--u)) calc(18 * var(--u)) rgba(60, 90, 140, .16);
+}
+/* Вкладки «Женщины / Мужчины» — капсула в цвет витража */
+.looks__tabs {
+  display: inline-flex;
+  margin-top: calc(90 * var(--u));
+  padding: calc(8 * var(--u));
+  border: calc(3 * var(--u)) solid rgba(85, 111, 149, .45);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, .6);
+}
+.looks__tab {
+  margin: 0;
+  padding: calc(18 * var(--u)) calc(46 * var(--u));
+  border: 0; border-radius: 9999px;
+  background: transparent;
+  font-family: var(--f-text);
+  font-weight: 500;
+  font-size: max(12px, calc(38 * var(--u)));
+  line-height: 1.2;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--blue);
+  cursor: pointer;
+  transition: background-color .3s ease, color .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.looks__tab.is-active { background: var(--blue); color: #fff; }
+.looks__tab:focus-visible { outline: calc(3 * var(--u)) solid rgba(85, 111, 149, .5); outline-offset: calc(4 * var(--u)); }
+/* Обе вкладки в одной ячейке сетки: высота блока не прыгает, смена — растворением */
+.looks__panels { display: grid; margin-top: calc(70 * var(--u)); }
+.looks__panel {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(2, calc(470 * var(--u)));
+  justify-content: center;
+  column-gap: calc(50 * var(--u));
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(calc(18 * var(--u)));
+  transition: opacity .5s ease, transform .5s ease, visibility 0s linear .5s;
+}
+.looks__panel.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease, transform .5s ease, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) { .looks__panel { transition: none; transform: none; } }
+/* Фото-примеры — в арках, как окна витража */
+.look {
+  margin: 0;
+  aspect-ratio: 470 / 700;
+  padding: calc(14 * var(--u));
+  background: #fff;
+  border: calc(3 * var(--u)) solid rgba(85, 111, 149, .45);
+  border-radius: 9999px 9999px calc(18 * var(--u)) calc(18 * var(--u));
+  box-shadow: 0 calc(14 * var(--u)) calc(36 * var(--u)) rgba(60, 90, 140, .16);
+}
+.look img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 50% 20%;
+  border-radius: 9999px 9999px calc(10 * var(--u)) calc(10 * var(--u));
+}
+
+/* ============================================================
+   10 — ФОТО ПАРЫ: края «рваной бумаги» — маской (макет: 16476–17591)
+   ============================================================ */
+.photo__torn {
+  position: relative;
+  height: calc(1115 * var(--u));
+  overflow: hidden;
+  background: #cfd9e6;
+  -webkit-mask: url("assets/torn-mask.png") center / 100% 100% no-repeat;
+          mask: url("assets/torn-mask.png") center / 100% 100% no-repeat;
+}
+.photo__torn img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); transition: transform 2.6s cubic-bezier(.2, .7, .2, 1) .2s; }
+.photo__torn.in img { transform: none; }
+@media (prefers-reduced-motion: reduce) { .photo__torn img { transform: none; transition: none; } }
+
+/* ============================================================
+   11 — ПОЖЕЛАНИЯ И ДЕТАЛИ (макет: 17665–18064)
+   ============================================================ */
+.wish { padding: calc(74 * var(--u)) calc(130 * var(--u)) 0; text-align: center; color: var(--ink); }
+.wish__title, .wish__text { font-size: calc(43.8 * var(--u)); line-height: calc(64 * var(--u)); }
+.wish__text { max-width: calc(1060 * var(--u)); margin: 0 auto; }
+.wish__text p { margin: 0; }
+
+/* ============================================================
+   12 — АНКЕТА
+   ============================================================ */
+.rsvp { position: relative; padding: calc(145 * var(--u)) calc(60 * var(--u)) 0; text-align: center; }
+.rsvp__title { display: block; width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; }
+.rsvp__lead {
+  max-width: calc(1000 * var(--u));
+  margin: calc(70 * var(--u)) auto 0;
+  font-size: calc(43 * var(--u));
+  line-height: calc(64 * var(--u));
+  color: var(--ink);
+}
+.rsvp__form {
+  margin: calc(80 * var(--u)) auto 0;
+  padding: calc(100 * var(--u)) calc(100 * var(--u)) calc(110 * var(--u));
+  max-width: calc(1246 * var(--u));
+  display: flex; flex-direction: column;
+  gap: calc(70 * var(--u));
+  text-align: left;
+  background: rgba(255, 255, 255, .75);
+  border: calc(3 * var(--u)) solid rgba(85, 111, 149, .25);
+  border-radius: calc(48 * var(--u));
+  box-shadow: 0 calc(20 * var(--u)) calc(60 * var(--u)) rgba(60, 90, 140, .12);
+}
+/* Поле имени — образец и для полей ответов, которые добавляет rsvp-count.js.
+   Не меньше 16px: иначе iPhone приближает страницу при вводе. */
+.rsvp__name {
+  width: 100%;
+  padding: calc(18 * var(--u)) calc(4 * var(--u));
+  border: 0;
+  border-bottom: calc(3 * var(--u)) solid rgba(85, 111, 149, .45);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--f-text);
+  font-size: max(16px, calc(54 * var(--u)));
+  line-height: 1.3;
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+.rsvp__name::placeholder { color: rgba(85, 111, 149, .55); }
+.rsvp__name:focus { border-bottom-color: var(--blue); }
+.rsvp__group { margin: 0; padding: 0; border: 0; min-width: 0; }
+.rsvp__group legend {
+  padding: 0;
+  margin: 0 0 calc(30 * var(--u));
+  font-family: var(--f-text);
+  font-size: calc(56 * var(--u));
+  line-height: 1.2;
+  color: var(--blue);
+}
+.form-option {
+  position: relative;
+  display: flex; align-items: center; gap: calc(30 * var(--u));
+  margin: 0 0 calc(24 * var(--u)) calc(36 * var(--u));
+  font-family: var(--f-text);
+  font-size: calc(50 * var(--u));
+  line-height: 1.25;
+  color: var(--ink);
+  cursor: pointer;
+}
+.form-option:last-child { margin-bottom: 0; }
+.form-option input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.custom-radio, .custom-check {
+  flex: none;
+  width: calc(48 * var(--u)); height: calc(48 * var(--u));
+  min-width: 14px; min-height: 14px;
+  border: calc(5 * var(--u)) solid var(--blue);
+  background: #fff;
+  transition: background .25s ease, box-shadow .25s ease;
+}
+.custom-radio { border-radius: 50%; }
+.custom-check { border-radius: calc(10 * var(--u)); }
+.custom-radio.checked { background: var(--blue); box-shadow: inset 0 0 0 calc(9 * var(--u)) #fff; }
+.custom-check.checked { background: var(--blue); box-shadow: inset 0 0 0 calc(8 * var(--u)) #fff; }
+.form-option:focus-within .custom-radio,
+.form-option:focus-within .custom-check { outline: 2px solid rgba(85, 111, 149, .4); outline-offset: 2px; }
+.rsvp__group .wc-count { font-family: var(--f-text); font-size: max(16px, calc(54 * var(--u))); color: var(--blue); margin-left: calc(36 * var(--u)); }
+.rsvp__submit {
+  align-self: center;
+  margin-top: calc(10 * var(--u));
+  min-width: calc(475 * var(--u));
+  padding: calc(34 * var(--u)) calc(110 * var(--u));
+  border: 0;
+  border-radius: 999px;
+  background: var(--btn);
+  color: #fff;
+  font-family: var(--f-text);
+  font-weight: 700;
+  font-size: max(14px, calc(48 * var(--u)));
+  cursor: pointer;
+  box-shadow: 0 calc(14 * var(--u)) calc(34 * var(--u)) rgba(85, 111, 149, .3);
+  transition: transform .25s ease, background .25s ease, opacity .25s ease;
+}
+.rsvp__submit:hover { background: #4d5f78; transform: translateY(-2px); }
+.rsvp__submit:disabled { opacity: .55; cursor: default; transform: none; }
+.rsvp__error {
+  margin: calc(-30 * var(--u)) 0 0;
+  text-align: center;
+  font-size: max(14px, calc(44 * var(--u)));
+  color: #9c2f2f;
+}
+.rsvp__error:empty { display: none; }
+.rsvp__thanks { margin-top: calc(90 * var(--u)); font-size: calc(110 * var(--u)); line-height: 1.4; color: var(--blue); }
+
+/* ============================================================
+   13 — ЖДЁМ ВСТРЕЧИ (макет: 18887–19906)
+   ============================================================ */
+.fin { position: relative; padding: calc(300 * var(--u)) 0 calc(248 * var(--u)); text-align: center; }
+.fin__title { display: block; width: max-content; max-width: 100%; margin-left: auto; margin-right: auto; font-size: calc(130 * var(--u)); }
+.fin__locks { position: relative; z-index: 1; width: calc(578 * var(--u)); height: auto; margin: calc(161 * var(--u)) auto 0; }
+.fin__flowers { position: absolute; bottom: 0; z-index: 2; display: block; height: auto; pointer-events: none; }
+.fin__flowers--l { left: 0; width: calc(604 * var(--u)); }
+.fin__flowers--r { right: 0; width: calc(615 * var(--u)); }
+
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Григорий и Александра — приглашение на свадьбу</title>
+  <link href="/invite/assets/fonts/google/423708c44a2a7900fd37.css" rel="stylesheet" />
+  <link rel="preload" as="image" href="assets/cover.jpg" />
+  <link rel="preload" as="font" type="font/woff2" href="/invite/assets/fonts/HamiltoneSHA.woff2" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
+  <noscript><style>
+    .hero-in, .rv, .rv-soft, .rv-write, .rv-pop > *, .rv-line, .cover__bg, .cover__name, .cover__amp {
+      opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important;
+      -webkit-mask-image: none !important; mask-image: none !important;
+    }
+  </style></noscript>
+</head>
+<body>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА: витражная арка, «Свадьба», имена, приглашение и дата.
+         При открытии витраж проступает, имена пишутся, идёт снег -->
+    <section class="cover" id="hero" data-wc-section="cover">
+      <img class="cover__bg" src="assets/cover.jpg" width="1366" height="2601" alt="" />
+      <div class="cover__snow" aria-hidden="true"></div>
+      <p class="cover__label hero-in" data-edit="heroTitle">Свадьба</p>
+      <h1 class="cover__names" id="heroNames">
+        <span class="cover__name cover__name--g" data-name="groom">Григорий</span>
+        <span class="cover__amp">&amp;</span>
+        <span class="cover__name cover__name--b" data-name="bride">Александра</span>
+      </h1>
+      <p class="cover__text hero-in" data-edit="heroText">Приглашаем вас присоединиться к нашему празднику</p>
+      <!-- дата — обязательный блок -->
+      <div class="cover__date hero-in" data-wc-section="date" data-edit="heroDate">
+        <p class="cover__day" id="dateText">14 августа 2027</p>
+        <p class="cover__time">в <span id="dateTime">15:00</span></p>
+      </div>
+    </section>
+
+    <!-- 2 — ДОРОГИЕ ГОСТИ: ключ с бантом, звёздочки, заснеженная ветка.
+         Первое слово обращения — рукописным, остальное — строкой ниже -->
+    <section class="greet" id="greeting" data-wc-section="greeting">
+      <img class="greet__key float rv-soft" src="assets/key.webp" width="193" height="461" alt="" loading="lazy" decoding="async" />
+      <svg class="spark spark--a" aria-hidden="true"><use href="#spark" /></svg>
+      <svg class="spark spark--b" aria-hidden="true"><use href="#spark" /></svg>
+      <img class="greet__branch branch branch--r rv-soft" src="assets/branch-r.webp" width="413" height="351" alt="" loading="lazy" decoding="async" />
+      <div class="greet__head" data-edit="greetingTitle">
+        <p class="script greet__word rv-write" id="greetWord">Дорогие</p>
+        <p class="greet__name rv" id="greetName">Гости</p>
+      </div>
+      <div class="greet__text rv" data-edit="inviteText">
+        <p>Приглашаем вас разделить с нами радость этого незабываемого дня.</p>
+      </div>
+    </section>
+
+    <!-- 3 — ДО СВАДЬБЫ: дни | часы | минуты -->
+    <section class="cd" id="countdown" data-wc-section="countdown" aria-live="off">
+      <div class="cd__cell rv"><span class="cd__num script" id="cdD">212</span><span class="cd__lbl" id="cdDl">дней</span></div>
+      <div class="cd__cell rv"><span class="cd__num script" id="cdH">12</span><span class="cd__lbl" id="cdHl">часов</span></div>
+      <div class="cd__cell rv"><span class="cd__num script" id="cdM">32</span><span class="cd__lbl" id="cdMl">минуты</span></div>
+    </section>
+
+    <!-- 4 — ГДЕ ПРОЙДЁТ -->
+    <section class="venue" id="venue" data-wc-section="venue">
+      <svg class="spark spark--c" aria-hidden="true"><use href="#spark" /></svg>
+      <svg class="spark spark--d" aria-hidden="true"><use href="#spark" /></svg>
+      <h2 class="venue__title rv" data-edit="venueTitle">Где пройдёт?</h2>
+      <p class="venue__name rv" data-edit="venue">Юсуповский дворец</p>
+      <p class="venue__addr rv" data-edit="venueAddress">Санкт-Петербург, наб. реки Мойки, 94</p>
+    </section>
+
+    <!-- Хрустальная люстра в голубом сиянии, ветка и звёздочки — украшение без блока -->
+    <div class="lux" aria-hidden="true">
+      <img class="lux__branch branch branch--l rv-soft" src="assets/branch-l.webp" width="484" height="425" alt="" loading="lazy" decoding="async" />
+      <svg class="spark spark--e" aria-hidden="true"><use href="#spark" /></svg>
+      <svg class="spark spark--f" aria-hidden="true"><use href="#spark" /></svg>
+      <svg class="spark spark--g" aria-hidden="true"><use href="#spark" /></svg>
+      <svg class="spark spark--h" aria-hidden="true"><use href="#spark" /></svg>
+      <img class="lux__chandelier swing rv-soft" src="assets/chandelier.webp" width="761" height="1261" alt="" loading="lazy" decoding="async" />
+    </div>
+
+    <!-- 5 — ФОТО МЕСТА в рамке из рваной бумаги -->
+    <section class="hall" id="hall" data-wc-section="hall">
+      <h2 class="hall__title rv" data-edit="hallTitle">Место проведения</h2>
+      <div class="hall__frame rv-soft">
+        <div class="hall__photo"><img src="assets/hall.jpg" data-edit="hallPhoto" alt="Место проведения" loading="lazy" decoding="async" /></div>
+        <img class="hall__torn" src="assets/frame-torn.webp" width="1366" height="1252" alt="" loading="lazy" decoding="async" />
+      </div>
+    </section>
+
+    <!-- Кнопка карты и сама карта — часть блока места -->
+    <section class="venue venue--cta" data-wc-section="venue">
+      <svg class="spark spark--i" aria-hidden="true"><use href="#spark" /></svg>
+      <svg class="spark spark--j" aria-hidden="true"><use href="#spark" /></svg>
+      <a class="venue__btn rv" id="mapBtn" href="#" target="_blank" rel="noopener" data-edit="mapButton">Открыть карту</a>
+      <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
+      <div class="wc-map vit-map" data-wc-map hidden></div>
+    </section>
+
+    <!-- 6 — МЕНЮ: текст и четыре акварельные картинки с подписями -->
+    <section class="menu" id="menu" data-wc-section="menu">
+      <h2 class="menu__title rv" data-edit="menuTitle">Меню</h2>
+      <div class="menu__text rv" data-edit="menuText">
+        <p>Меню разнообразно, поэтому сообщите нам заранее, если у вас есть предпочтения или ограничения в еде.</p>
+      </div>
+      <div class="menu__grid">
+        <div class="mi mi--1 rv">
+          <div class="mi__pic"><img class="float" src="assets/lantern.webp" width="481" height="439" alt="" loading="lazy" decoding="async" /></div>
+          <p class="mi__cap" data-edit="menu1Title">Уютный вечер</p>
+        </div>
+        <div class="mi mi--2 rv">
+          <div class="mi__pic"><img class="float float--slow" src="assets/snowflake.webp" width="349" height="402" alt="" loading="lazy" decoding="async" /></div>
+          <p class="mi__cap" data-edit="menu2Title">Снежинка</p>
+        </div>
+        <div class="mi mi--3 rv">
+          <div class="mi__pic"><img class="float float--slow" src="assets/cake.webp" width="313" height="418" alt="" loading="lazy" decoding="async" /></div>
+          <p class="mi__cap" data-edit="menu3Title">Торт</p>
+        </div>
+        <div class="mi mi--4 rv">
+          <div class="mi__pic"><img class="float" src="assets/glasses.webp" width="432" height="405" alt="" loading="lazy" decoding="async" /></div>
+          <p class="mi__cap" data-edit="menu4Title">Бокалы</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Жемчужная гирлянда с бантами — украшение без блока -->
+    <div class="garland" aria-hidden="true">
+      <img class="garland__pearls rv-line" src="assets/pearls.webp" width="1366" height="596" alt="" loading="lazy" decoding="async" />
+      <div class="garland__bows rv-pop">
+        <img class="garland__bow garland__bow--l" src="assets/bow.webp" width="282" height="269" alt="" loading="lazy" decoding="async" />
+        <img class="garland__bow garland__bow--c" src="assets/bow.webp" width="282" height="269" alt="" loading="lazy" decoding="async" />
+        <img class="garland__bow garland__bow--r" src="assets/bow.webp" width="282" height="269" alt="" loading="lazy" decoding="async" />
+      </div>
+    </div>
+
+    <!-- 7 — РАСПИСАНИЕ: карусель — текущий пункт крупно по центру,
+         соседние — мельче и бледнее; листается касанием, свайпом и стрелками -->
+    <section class="program" id="program" data-wc-section="schedule">
+      <h2 class="script program__title rv-write" data-edit="programTitle">Расписание</h2>
+      <div class="sched rv" id="sched" role="region" aria-roledescription="карусель" aria-label="Программа дня" tabindex="0">
+        <div class="sched__track" id="schedTrack"><!-- пункты строит script.js --></div>
+      </div>
+      <div class="sched__dots" id="schedDots" role="tablist" aria-label="Пункты программы"></div>
+    </section>
+
+    <!-- 8 — ЖЕНИХ И НЕВЕСТА: синяя «капсула» с фото, розы по углам -->
+    <section class="couple" id="couple" data-wc-section="couple">
+      <img class="couple__roses couple__roses--tr rv-soft" src="assets/roses-tr.webp" width="700" height="670" alt="" loading="lazy" decoding="async" />
+      <div class="couple__panel">
+        <div class="couple__half">
+          <div class="couple__photo rv-soft"><img src="assets/groom.jpg" data-edit="groomPhoto" alt="Жених" loading="lazy" decoding="async" /></div>
+          <h2 class="couple__title rv" data-edit="groomTitle">Жених</h2>
+          <div class="couple__text rv" data-edit="groomText">
+            <p>Григорий — инженер, любитель гор и хорошего кофе. Самый надёжный и заботливый человек, которого я знаю.</p>
+          </div>
+        </div>
+        <div class="couple__half">
+          <div class="couple__photo rv-soft"><img src="assets/bride.jpg" data-edit="bridePhoto" alt="Невеста" loading="lazy" decoding="async" /></div>
+          <h2 class="couple__title rv" data-edit="brideTitle">Невеста</h2>
+          <div class="couple__text rv" data-edit="brideText">
+            <p>Александра — художник по образованию и оптимист по жизни. Обожает зиму, книги и собирать друзей за большим столом.</p>
+          </div>
+        </div>
+      </div>
+      <img class="couple__roses couple__roses--bl rv-soft" src="assets/roses-bl.webp" width="536" height="561" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 9 — ДРЕСС-КОД: стиль, палитра и вкладки «Женщины / Мужчины» с фото-примерами.
+         Неактивная вкладка скрыта visibility, а не display: так редактор находит
+         и подсвечивает её фото, а кадрирование (photo-frame.js) знает размеры рамок -->
+    <section class="dress" id="dresscode" data-wc-section="dresscode">
+      <h2 class="script dress__title rv-write" data-edit="dressTitle">Дресс код</h2>
+      <p class="dress__style rv" data-edit="dressStyle">White Tie</p>
+      <p class="dress__text rv" data-edit="dressText">Мы будем рады, если вы поддержите стиль нашего торжества и выберете наряд в нежных оттенках</p>
+      <div class="palette rv-pop" data-edit="palette">
+        <span style="--c:#ffffff"></span><span style="--c:#dbe8f6"></span><span style="--c:#b7cde6"></span><span style="--c:#8eaad0"></span><span style="--c:#556f95"></span>
+      </div>
+      <div class="looks__tabs rv" role="tablist" aria-label="Дресс-код гостей">
+        <button class="looks__tab is-active" type="button" role="tab" aria-selected="true" data-look="women">Женщины</button>
+        <button class="looks__tab" type="button" role="tab" aria-selected="false" data-look="men">Мужчины</button>
+      </div>
+      <div class="looks__panels rv">
+        <div class="looks__panel is-active" role="tabpanel" data-look="women">
+          <figure class="look"><img src="assets/dress-w1.jpg" data-edit="dressCodePhoto" alt="Образ для женщин 1" loading="lazy" decoding="async" /></figure>
+          <figure class="look"><img src="assets/dress-w2.jpg" data-edit="dressPhoto2" alt="Образ для женщин 2" loading="lazy" decoding="async" /></figure>
+        </div>
+        <div class="looks__panel" role="tabpanel" data-look="men" aria-hidden="true">
+          <figure class="look"><img src="assets/dress-m1.jpg" data-edit="dressMan1" alt="Образ для мужчин 1" loading="lazy" decoding="async" /></figure>
+          <figure class="look"><img src="assets/dress-m2.jpg" data-edit="dressMan2" alt="Образ для мужчин 2" loading="lazy" decoding="async" /></figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 — ФОТО ПАРЫ: края «рваной бумаги» — маской, фото меняется -->
+    <section class="photo" id="photo" data-wc-section="photos">
+      <div class="photo__torn rv-soft"><img src="assets/couple.jpg" data-edit="coverPhoto" alt="Наше фото" loading="lazy" decoding="async" /></div>
+    </section>
+
+    <!-- 11 — ПОЖЕЛАНИЯ И ДЕТАЛИ -->
+    <section class="wish" id="wishes" data-wc-section="wishes">
+      <h2 class="wish__title rv" data-edit="wishTitle">Пожелания &amp; Детали</h2>
+      <div class="wish__text rv" data-edit="story">
+        <p>Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.</p>
+        <p>Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.</p>
+      </div>
+    </section>
+
+    <!-- 12 — АНКЕТА -->
+    <section class="rsvp" id="rsvp" data-wc-section="rsvp">
+      <h2 class="script rsvp__title rv-write" data-edit="surveyTitle">Анкета</h2>
+      <p class="rsvp__lead rv" data-edit="surveyText">Пожалуйста, ответьте на несколько вопросов заранее</p>
+      <form class="rsvp__form rv" id="rsvpForm" novalidate>
+        <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+        <fieldset class="rsvp__group">
+          <legend>Будете ли вы на празднике?</legend>
+          <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, с радостью приду</label>
+          <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+        </fieldset>
+        <fieldset class="rsvp__group" data-rsvp-count>
+          <legend>Сколько вас будет?</legend>
+          <div class="wc-count" data-wc-count>
+            <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+            <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+            <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+          </div>
+        </fieldset>
+        <fieldset class="rsvp__group" data-edit="drinks">
+          <legend>Какие напитки вы предпочитаете?</legend>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Шампанское</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк или виски</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+        </fieldset>
+        <button class="rsvp__submit" type="submit">Отправить</button>
+        <p class="rsvp__error" id="rsvpError" role="alert"></p>
+      </form>
+      <p class="script rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен</p>
+    </section>
+
+    <!-- 13 — ЖДЁМ ВСТРЕЧИ: замочки-сердца и белые цветы по углам -->
+    <section class="fin" id="final" data-wc-section="closing">
+      <p class="script fin__title rv-write" data-edit="closingTitle">Ждём встречи!</p>
+      <img class="fin__locks float rv-soft" src="assets/locks.webp" width="578" height="480" alt="" loading="lazy" decoding="async" />
+      <img class="fin__flowers fin__flowers--l rv-soft" src="assets/flowers-l.webp" width="604" height="636" alt="" loading="lazy" decoding="async" />
+      <img class="fin__flowers fin__flowers--r rv-soft" src="assets/flowers-r.webp" width="615" height="636" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- четырёхлучевая звёздочка макета -->
+    <svg class="sprite" aria-hidden="true" width="0" height="0">
+      <symbol id="spark" viewBox="0 0 100 100">
+        <path d="M 100 50 C 59.52 55.26 55.26 59.52 50 100 C 44.74 59.52 40.48 55.26 0 50 C 40.48 44.74 44.74 40.48 50 0 C 55.26 40.48 59.52 44.74 100 50 Z" />
+      </symbol>
+    </svg>
+
+  </main>
+
+  <script src="/invite/assets/sections.js"></script>
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

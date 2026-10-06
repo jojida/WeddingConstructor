@@ -73,6 +73,7 @@ const DEMO_MAP_POINTS: Record<string, { lat: number; lon: number }> = {
   'Москва, ул. Юности, 2': { lat: 55.73494, lon: 37.80898 },         // усадьба Кусково («Туманный лес»)
   'Московская обл., Красногорск, пос. Архангельское': { lat: 55.78858, lon: 37.28593 }, // усадьба Архангельское («Ангелы»)
   'Санкт-Петербург, Английская наб., 28': { lat: 59.93379, lon: 30.29436 },             // Дворец бракосочетания №1 («Нежность»)
+  'Санкт-Петербург, наб. реки Мойки, 94': { lat: 59.92926, lon: 30.29848 },             // Юсуповский дворец («Витраж»)
 };
 export function demoMapPoint(address?: string): { q: string; lat: number; lon: number } | undefined {
   const p = address ? DEMO_MAP_POINTS[address] : undefined;
@@ -80,6 +81,19 @@ export function demoMapPoint(address?: string): { q: string; lat: number; lon: n
 }
 
 const HANDMADE_TEMPLATES = [
+  {
+    id: 'vitrage',
+    name: 'Витраж',
+    description: 'Голубой витраж-арка на обложке: под падающим снегом пишутся имена пары. Хрустальная люстра, фото места в рамке из рваной бумаги, меню, жемчужная гирлянда, расписание-карусель, рассказ о женихе и невесте, дресс-код с палитрой и образами, анкета для гостей.',
+    tags: ['Витраж', 'Зима', 'Голубой', 'Хрусталь', 'Анимация'],
+    colors: ['#f0f7ff', '#556f95', '#45513c'],
+    preview: '/invite/vitrage/assets/preview.jpg',
+    defaultCover: '/invite/vitrage/assets/couple.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Александра',
+    sampleGroom: 'Григорий',
+    sampleDaysAhead: 212,
+  },
   {
     id: 'tenderness',
     name: 'Нежность',
@@ -486,6 +500,7 @@ export const formatDrinkChoice = (choice: string, labels: Record<string, string>
 
 /** Ключ data-edit строки-приветствия в каждом шаблоне (для персонализации гостя). */
 export const TEMPLATE_GREETING_KEY: Record<string, string> = {
+  vitrage: 'greetingTitle',
   tenderness: 'greetingTitle',
   angels: 'greetingTitle',
   forest: 'greetingTitle',
@@ -557,6 +572,18 @@ export interface TemplateSection {
 
 /* Наборы иконок для пикера в «Программе дня» */
 export const ICON_SETS: Record<string, string[]> = {
+  vitrage: [
+    '/invite/vitrage/assets/ic-plate.webp',
+    '/invite/vitrage/assets/ic-bottle.webp',
+    '/invite/vitrage/assets/ic-cake.webp',
+    '/invite/vitrage/assets/lantern.webp',
+    '/invite/vitrage/assets/snowflake.webp',
+    '/invite/vitrage/assets/cake.webp',
+    '/invite/vitrage/assets/glasses.webp',
+    '/invite/vitrage/assets/key.webp',
+    '/invite/vitrage/assets/locks.webp',
+    '/invite/vitrage/assets/bow.webp',
+  ],
   tenderness: [
     '/invite/tenderness/assets/ic-cake.webp',
     '/invite/tenderness/assets/ic-champagne.webp',
@@ -715,6 +742,7 @@ export function musicLibraryFor(templateId?: string): MusicTrack[] {
 
 /** Мелодия, с которой шаблон открывается у новой пары (остальные — «Канон») */
 const TEMPLATE_MUSIC: Record<string, string> = {
+  vitrage: 'clair',
   tenderness: 'nocturne',
   angels: 'air',
   forest: 'thousand',
@@ -795,6 +823,103 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 }
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
+  vitrage: [
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'heroTitle', type: 'text',     label: 'Надпись над именами', hint: 'Например: Свадьба', scope: 'custom', maxLength: 30 },
+        { id: 'heroText',  type: 'textarea', label: 'Текст под именами', scope: 'custom', maxLength: 90 },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'Первое слово — рукописным шрифтом, остальное — строкой ниже. По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения (абзацы с новой строки)', scope: 'data', maxLength: 300 },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Юсуповский дворец', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK,
+      ],
+    },
+    {
+      title: 'Фото места', icon: '🏛',
+      fields: [
+        { id: 'hallTitle', type: 'text',  label: 'Заголовок', hint: 'Например: Место проведения', scope: 'custom', maxLength: 30 },
+        { id: 'hallPhoto', type: 'image', label: 'Фото зала', hint: 'Лучше горизонтальное: края рвутся, как бумага', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Меню', icon: '🍽',
+      fields: [
+        { id: 'menuText',   type: 'textarea', label: 'Текст о меню (абзацы с новой строки)', scope: 'custom', maxLength: 400 },
+        { id: 'menu1Title', type: 'text', label: 'Подпись 1 (фонари)',  hint: 'Пусто — без подписи', scope: 'custom', maxLength: 24 },
+        { id: 'menu2Title', type: 'text', label: 'Подпись 2 (снежинка)', scope: 'custom', maxLength: 24 },
+        { id: 'menu3Title', type: 'text', label: 'Подпись 3 (торт)',    scope: 'custom', maxLength: 24 },
+        { id: 'menu4Title', type: 'text', label: 'Подпись 4 (бокалы)',  scope: 'custom', maxLength: 24 },
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', hint: 'Гости листают пункты, как карусель', scope: 'data', iconSet: 'vitrage' },
+      ],
+    },
+    {
+      title: 'Жених и невеста', icon: '💑',
+      fields: [
+        { id: 'groomPhoto', type: 'image',    label: 'Фото жениха', hint: 'Лучше горизонтальное', scope: 'custom' },
+        { id: 'groomTitle', type: 'text',     label: 'Подпись под фото жениха', scope: 'custom', maxLength: 30 },
+        { id: 'groomText',  type: 'textarea', label: 'О женихе', scope: 'custom', maxLength: 300 },
+        { id: 'bridePhoto', type: 'image',    label: 'Фото невесты', hint: 'Лучше горизонтальное', scope: 'custom' },
+        { id: 'brideTitle', type: 'text',     label: 'Подпись под фото невесты', scope: 'custom', maxLength: 30 },
+        { id: 'brideText',  type: 'textarea', label: 'О невесте', scope: 'custom', maxLength: 300 },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressStyle',      type: 'text',      label: 'Стиль', hint: 'Например: White Tie, Black Tie, Коктейль', scope: 'custom', maxLength: 30 },
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры', scope: 'data' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Женщины: фото-пример 1', scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Женщины: фото-пример 2', scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Мужчины: фото-пример 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Мужчины: фото-пример 2', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Фото пары', icon: '📸',
+      fields: [
+        { id: 'coverPhoto', type: 'image', label: 'Фото пары', hint: 'Лучше горизонтальное: края рвутся, как бумага', scope: 'data' },
+      ],
+    },
+    {
+      title: 'Пожелания', icon: '💌',
+      fields: [
+        { id: 'wishTitle', type: 'text',     label: 'Заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'story',     type: 'textarea', label: 'Текст пожеланий (абзацы с новой строки)', scope: 'data', maxLength: 400 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingTitle', type: 'text', label: 'Финальная надпись', hint: 'Рукописным шрифтом', scope: 'custom', maxLength: 30 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
   tenderness: [
     {
       title: 'Конверт', icon: '✉️',
@@ -1554,6 +1679,7 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
     'Организатор': 'organizer', 'Завершение': 'closing', 'Финальное фото': 'closing',
     'Фотоколлаж': 'closing', 'Музыка': 'music',
     'Прогноз на день': 'forecast', 'Меню': 'menu',
+    'Фото места': 'hall', 'Жених и невеста': 'couple', 'Фото пары': 'photos',
   };
   const result: TemplateSection[] = [];
   if (!sections.some(s => ids[s.title] === 'cover')) {
@@ -1580,6 +1706,53 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
 }
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
+  vitrage: {
+    inviteText: 'Приглашаем вас разделить с нами радость этого незабываемого дня.',
+    venue: 'Юсуповский дворец',
+    venueAddress: 'Санкт-Петербург, наб. реки Мойки, 94',
+    story:
+      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
+      'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
+    schedule: [
+      { time: '12:00', title: 'Церемония', icon: '/invite/vitrage/assets/ic-plate.webp' },
+      { time: '15:00', title: 'Банкет',    icon: '/invite/vitrage/assets/ic-bottle.webp' },
+      { time: '18:00', title: 'Торт',      icon: '/invite/vitrage/assets/ic-cake.webp' },
+    ],
+    dressCodeColors: ['#ffffff', '#dbe8f6', '#b7cde6', '#8eaad0', '#556f95'],
+    dressCodePhoto: '/invite/vitrage/assets/dress-w1.jpg',
+    drinks: [
+      { value: 'sparkling',  label: 'Шампанское' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'cognac',     label: 'Коньяк или виски' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      heroTitle:     'Свадьба',
+      heroText:      'Приглашаем вас присоединиться к нашему празднику',
+      greetingTitle: 'Дорогие гости',
+      venueTitle:    'Где пройдёт?',
+      hallTitle:     'Место проведения',
+      hallPhoto:     '/invite/vitrage/assets/hall.jpg',
+      menuText:      'Меню разнообразно, поэтому сообщите нам заранее, если у вас есть предпочтения или ограничения в еде.',
+      menu1Title: 'Уютный вечер', menu2Title: 'Снежинка', menu3Title: 'Торт', menu4Title: 'Бокалы',
+      groomPhoto:    '/invite/vitrage/assets/groom.jpg',
+      groomTitle:    'Жених',
+      groomText:     'Григорий — инженер, любитель гор и хорошего кофе. Самый надёжный и заботливый человек, которого я знаю.',
+      bridePhoto:    '/invite/vitrage/assets/bride.jpg',
+      brideTitle:    'Невеста',
+      brideText:     'Александра — художник по образованию и оптимист по жизни. Обожает зиму, книги и собирать друзей за большим столом.',
+      dressStyle:    'White Tie',
+      dressText:     'Мы будем рады, если вы поддержите стиль нашего торжества и выберете наряд в нежных оттенках',
+      dressPhoto2:   '/invite/vitrage/assets/dress-w2.jpg',
+      dressMan1:     '/invite/vitrage/assets/dress-m1.jpg',
+      dressMan2:     '/invite/vitrage/assets/dress-m2.jpg',
+      wishTitle:     'Пожелания & Детали',
+      surveyText:    'Пожалуйста, ответьте на несколько вопросов до {{rsvpDate}}',
+      closingTitle:  'Ждём встречи!',
+    },
+  },
+
   tenderness: {
     inviteText: 'Мы рады сообщить вам, что состоится самое главное торжество в нашей жизни — день нашей свадьбы!',
     venue: 'Дворец бракосочетания №1',

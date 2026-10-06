@@ -16,6 +16,7 @@ const GardenEveningTemplate = dynamic(() => import('./GardenEveningTemplate'));
 const ForestTemplate = dynamic(() => import('./ForestTemplate'));
 const AngelsTemplate = dynamic(() => import('./AngelsTemplate'));
 const TendernessTemplate = dynamic(() => import('./TendernessTemplate'));
+const VitrageTemplate = dynamic(() => import('./VitrageTemplate'));
 const StudioTemplate = dynamic(() => import('./StudioTemplate'));
 
 export interface ScheduleItem { time: string; title: string; icon: string; }
@@ -72,6 +73,9 @@ export default function TemplatePreview({ data, apiBase, fullPage, slug, editing
   }
   if (data.templateId === 'calla') {
     return <CallaTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
+  }
+  if (data.templateId === 'vitrage') {
+    return <VitrageTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
   }
   if (data.templateId === 'tenderness') {
     return <TendernessTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
