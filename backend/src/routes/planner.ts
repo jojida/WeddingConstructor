@@ -12,6 +12,7 @@ import { assignPersons, createTable, createTables, deleteTable, updateTable } fr
 import { createOption, deleteOption, reorderOptions, saveSettings, updateOption } from '../lib/planner/menu';
 import { createParty, createPerson, importGuests, setPartyTag, updatePerson } from '../lib/planner/people';
 import { buildGuestsCsv } from '../lib/planner/csv';
+import { autoseat } from '../lib/planner/autoseat';
 
 const router = Router();
 router.use(authMiddleware);
@@ -68,6 +69,13 @@ router.post('/:inviteId/tables/bulk', route(async (c) => { await reply(c, await 
 router.put('/:inviteId/tables/:tableId', route(async (c) => { await reply(c, await updateTable(c.id, param(c.req, 'tableId'), c.body)); }));
 router.delete('/:inviteId/tables/:tableId', route(async (c) => {
   await reply(c, await deleteTable(c.id, param(c.req, 'tableId'), c.req.query.confirm === '1'));
+}));
+
+// Авторассадка: dryRun=true — только предпросмотр, ничего не записывается
+router.post('/:inviteId/autoseat', route(async (c) => {
+  const result = await autoseat(c.id, { dryRun: c.body.dryRun !== false, includeMaybe: c.body.includeMaybe === true, includeNone: c.body.includeNone === true,
+    tableIds: Array.isArray(c.body.tableIds) ? c.body.tableIds.filter((x): x is string => typeof x === 'string') : undefined });
+  await reply(c, result);
 }));
 
 router.post('/:inviteId/seat', route(async (c) => { await reply(c, await assignPersons(c.id, c.body.personIds, c.body.tableId ?? null)); }));

@@ -176,6 +176,10 @@ export interface ReconcileResult {
 
 const personTitle = (p: Person): string => p.name || `гость ${p.slot + 1}`;
 
+/** «стол 5» для номеров и коротких названий, «стол «Молодожёны»» для слов. */
+const tableLabel = (name: string): string =>
+  /^\p{L}?\d{1,3}\p{L}?$/u.test(name) || name.length <= 2 ? `стол ${name}` : `стол «${name}»`;
+
 async function reconcileOnce(inviteId: string, onlyKey?: string): Promise<ReconcileResult> {
   const { parties, persons, tables } = await loadRoster(inviteId);
   const byParty = groupByParty(persons);
@@ -213,7 +217,7 @@ async function reconcileOnce(inviteId: string, onlyKey?: string): Promise<Reconc
       unseatIds.push(...plan.unseat);
       const items = rows
         .filter((r) => plan.unseat.includes(r.id))
-        .map((r) => `${personTitle(r)} (стол ${tableName.get(r.tableId as string) ?? '—'})`);
+        .map((r) => `${personTitle(r)} (${tableLabel(tableName.get(r.tableId as string) ?? '—')})`);
       const text = `Ответ «не придёт» от «${party.label}». Освобождено ${items.length} ${plural(items.length, 'место', 'места', 'мест')}: ${items.join(', ')}.`;
       notices.push({ kind: 'declined', text });
       result.unseated.push({ partyLabel: party.label, text });

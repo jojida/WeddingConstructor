@@ -424,6 +424,11 @@ export const isAdvancedPlan = (plan?: string | null): boolean =>
 export const hasCustomDomain = (plan?: string | null): boolean =>
   plan === 'premium';
 
+/** Меню и рассадка гостей (кабинет «Планировщик»). Одна функция на все проверки — как hasPlanner
+    на бэкенде (backend/src/lib/plans.ts): когда тарифы получат новый состав, правим только их. */
+export const hasPlanner = (plan?: string | null): boolean =>
+  plan === 'premium' || plan === 'pro';
+
 /** «гость» в нужной форме: 1 гость, 2 гостя, 5 гостей, 21 гость. */
 export function guestsWord(n: number): string {
   const m10 = n % 10, m100 = n % 100;

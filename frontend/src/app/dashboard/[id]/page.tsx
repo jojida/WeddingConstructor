@@ -6,7 +6,8 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { isAdvancedPlan, hasCustomDomain, hasNotifications, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
+import { isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
+import PlannerSection from '@/components/planner/PlannerSection';
 
 interface Invite {
   id: string; slug: string; status: string; plan: string;
@@ -38,7 +39,7 @@ interface RsvpData {
   drinkLabels: Record<string, string>;
 }
 
-type Tab = 'responses' | 'guests' | 'notify' | 'domain';
+type Tab = 'responses' | 'guests' | 'seating' | 'notify' | 'domain';
 
 const PRIMARY = '#685d4a';
 const BORDER = '1px solid rgba(206,197,186,0.5)';
@@ -80,6 +81,8 @@ export default function ManageInvitePage() {
   const TABS: { key: Tab; label: string; show: boolean }[] = [
     { key: 'responses', label: '📋 Ответы', show: true },
     { key: 'guests',    label: '👥 Гости', show: true },
+    // «Меню и рассадка»: пока открыта только тестовым аккаунтам (флаг приходит с сервера)
+    { key: 'seating',   label: '🪑 Рассадка', show: !!user?.planner },
     { key: 'notify',    label: '🔔 Уведомления', show: true },
     { key: 'domain',    label: '🌐 Домен', show: true },
   ];
@@ -87,7 +90,7 @@ export default function ManageInvitePage() {
   return (
     <div style={{ minHeight: '100vh', background: '#faf8f5' }}>
       <Navbar />
-      <div style={{ maxWidth: 880, margin: '0 auto', padding: '32px 20px 80px' }}>
+      <div style={{ maxWidth: tab === 'seating' ? 1180 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
@@ -126,6 +129,9 @@ export default function ManageInvitePage() {
 
         {tab === 'responses' && <ResponsesTab inviteId={invite.id} />}
         {tab === 'guests'    && <GuestsTab invite={invite} advanced={advanced} origin={origin} />}
+        {tab === 'seating'   && (hasPlanner(invite.plan)
+          ? <PlannerSection inviteId={invite.id} view="seating" />
+          : <PlannerUpsell invite={invite} />)}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
         {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}
       </div>
@@ -306,6 +312,22 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── «Меню и рассадка» на тарифе без этой функции ────────────────────────────
+function PlannerUpsell({ invite }: { invite: Invite }) {
+  return (
+    <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
+      <div style={{ fontSize: 36, marginBottom: 8 }}>🪑</div>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Рассадка гостей — на тарифе Премиум</h3>
+      <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
+        Столы и места, рассадка семьёй целиком, подсказки «кто остался без стола» — гости сами подтягиваются из ответов на анкету.
+      </p>
+      <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
+        Улучшить тариф →
+      </Link>
     </div>
   );
 }

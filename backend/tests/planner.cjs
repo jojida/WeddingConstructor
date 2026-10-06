@@ -25,6 +25,7 @@ db.close();
 const prisma = require('../dist/lib/prisma').default;
 const { planParty, buildParties } = require('../dist/lib/planner/roster');
 const { csvCell, toCsv } = require('../dist/lib/planner/csv');
+const { planAutoseat } = require('../dist/lib/planner/autoseat');
 const { ensureSchema } = require('../dist/lib/ensureSchema');
 const app = require('../dist/index').default;
 let server;
@@ -90,6 +91,38 @@ test('buildParties: последний ответ гостя, ответы бе�
   ];
   const parties = buildParties(guests, responses);
   assert.deepEqual(parties.map((p) => [p.key, p.status, p.want]), [['g:g1', 'yes', 2], ['r:r3', 'yes', 1], ['r:r4', 'yes', 1]]);
+});
+
+test('авторассадка: группа целиком, метки рядом, большая группа делится, нехватка мест', () => {
+  const tables = [{ id: 't1', free: 4, tags: [], order: 0 }, { id: 't2', free: 4, tags: [], order: 1 }];
+  const plan = planAutoseat(tables, [
+    { key: 'a', tag: 'жених', ids: ['a1', 'a2', 'a3'], order: 0 },
+    { key: 'b', tag: 'невеста', ids: ['b1', 'b2', 'b3'], order: 1 },
+    { key: 'c', tag: 'жених', ids: ['c1'], order: 2 },
+  ]);
+  const at = (id) => plan.placements.find((p) => p.personId === id).tableId;
+  assert.deepEqual(['a1', 'a2', 'a3', 'c1'].map(at), ['t1', 't1', 't1', 't1']);   // «жених» сидят вместе
+  assert.deepEqual(['b1', 'b2', 'b3'].map(at), ['t2', 't2', 't2']);
+  assert.deepEqual(plan.unplaced, []);
+  // кто-то из группы уже сидит — остальных ищем за тем же столом, даже если другой «плотнее»
+  const withAnchor = planAutoseat([{ id: 'p', free: 2, tags: [], order: 0 }, { id: 'q', free: 5, tags: [], order: 1 }],
+    [{ key: 'f', tag: '', ids: ['f2', 'f3'], order: 0, anchor: 'q' }]);
+  assert.deepEqual(withAnchor.placements.map((x) => x.tableId), ['q', 'q']);
+  // не помещаются все за свой стол — добиваем его, остаток уходит дальше
+  const overflow = planAutoseat([{ id: 'p', free: 5, tags: [], order: 0 }, { id: 'q', free: 1, tags: [], order: 1 }],
+    [{ key: 'f', tag: '', ids: ['f2', 'f3', 'f4', 'f5', 'f6', 'f7'], order: 0, anchor: 'q' }]);
+  assert.equal(overflow.placements.filter((x) => x.tableId === 'q').length, 1);
+  assert.equal(overflow.placements.filter((x) => x.tableId === 'p').length, 5);
+  // группа больше любого стола делится по самым свободным; нехватка мест — в «не рассажены»
+  const split = planAutoseat([{ id: 'x', free: 2, tags: [], order: 0 }, { id: 'y', free: 2, tags: [], order: 1 }],
+    [{ key: 'g', tag: '', ids: ['1', '2', '3'], order: 0 }]);
+  assert.deepEqual(split.placements.map((p) => p.tableId), ['x', 'x', 'y']);
+  const short = planAutoseat([{ id: 'x', free: 2, tags: [], order: 0 }], [{ key: 'g', tag: '', ids: ['1', '2', '3'], order: 0 }]);
+  assert.equal(short.placements.length, 2);
+  assert.deepEqual(short.unplaced, ['3']);
+  // никогда не больше свободных мест
+  const none = planAutoseat([{ id: 'x', free: 0, tags: [], order: 0 }], [{ key: 'g', tag: '', ids: ['1'], order: 0 }]);
+  assert.deepEqual([none.placements.length, none.unplaced.length], [0, 1]);
 });
 
 test('CSV: кириллица, кавычки, формулы', () => {
@@ -388,6 +421,62 @@ test('меню и рассадка на изолированной базе', as
     assert.equal((await call(P('/import'), 'POST', { text: 'x\n'.repeat(301) }, tok)).status, 413);
     assert.equal((await call(P('/import'), 'POST', { text: 'a'.repeat(20_001) }, tok)).status, 413);
     assert.equal((await call(P('/import'), 'POST', { text: '   ' }, tok)).status, 400);
+  });
+
+  await t.test('авторассадка: предпросмотр ничего не пишет, применение не превышает места и не трогает отказавшихся', async () => {
+    const auto = await mk(owner.id, 'planner-auto');
+    const A = (route = '') => `/api/planner/${auto.id}${route}`;
+    const party = async (names, count, answer) => {
+      const r = await call(A('/parties'), 'POST', { names, people: Array.from({ length: count }, (_, i) => ({ name: `${names} ${i + 1}` })) }, tok);
+      const guest = r.json.result;
+      if (answer) assert.equal((await rsvp(auto.slug, { guestToken: guest.token, attendance: answer, guestsCount: count })).status, 200);
+      return `g:${guest.id}`;
+    };
+    const t1 = (await call(A('/tables'), 'POST', { name: '1', capacity: 4 }, tok)).json.result;
+    const t2 = (await call(A('/tables'), 'POST', { name: '2', capacity: 3 }, tok)).json.result;
+    const famA = await party('Семья А', 3, 'yes');
+    const famB = await party('Семья Б', 2, 'yes');
+    const solo = await party('Одиночка', 1, 'yes');
+    const declined = await party('Отказ', 1, 'no');
+    const maybe = await party('Сомневается', 1, 'maybe');
+    const silent = await party('Молчит', 1);
+    const state = async () => (await call(A(), 'GET', undefined, tok)).json;
+    const seatedOf = (s, key) => s.persons.filter((p) => p.partyKey === key && p.tableId).length;
+
+    const preview = await call(A('/autoseat'), 'POST', { dryRun: true }, tok);
+    assert.equal(preview.status, 200);
+    assert.equal(preview.json.result.applied, false);
+    assert.equal(preview.json.result.placements.length, 6);
+    assert.equal(preview.json.result.unplaced.length, 0);
+    assert.equal((await state()).persons.filter((p) => p.tableId).length, 0, 'предпросмотр ничего не записал');
+
+    const run = await call(A('/autoseat'), 'POST', { dryRun: false }, tok);
+    assert.equal(run.json.result.applied, true);
+    const s = run.json.snapshot;
+    assert.equal(seatedOf(s, famA), 3);
+    assert.equal(new Set(s.persons.filter((p) => p.partyKey === famA).map((p) => p.tableId)).size, 1, 'семья за одним столом');
+    assert.equal(seatedOf(s, famB) + seatedOf(s, solo), 3);
+    assert.equal(seatedOf(s, declined) + seatedOf(s, maybe) + seatedOf(s, silent), 0, 'отказавшиеся, сомневающиеся и молчащие — не по умолчанию');
+    for (const table of s.tables) assert.ok(table.occupied <= table.capacity, `стол ${table.name}`);
+    assert.equal((await call(A('/autoseat'), 'POST', { dryRun: false }, tok)).json.result.placements.length, 0, 'повтор никого не пересаживает');
+
+    // только на выбранных столах: особые столы можно не трогать
+    await call(A('/seat'), 'POST', { personIds: s.persons.filter((p) => p.tableId).map((p) => p.id), tableId: null }, tok);
+    const onlyT2 = await call(A('/autoseat'), 'POST', { dryRun: true, tableIds: [t2.id] }, tok);
+    assert.ok(onlyT2.json.result.placements.every((p) => p.tableId === t2.id));
+    assert.equal(onlyT2.json.result.placements.length, 3);
+    assert.equal(onlyT2.json.result.unplaced.length, 3);
+    await call(A('/autoseat'), 'POST', { dryRun: false }, tok);
+    // «Пока не знают» и «без ответа» — только по просьбе; мест хватит не всем
+    const more = await call(A('/autoseat'), 'POST', { dryRun: false, includeMaybe: true, includeNone: true }, tok);
+    assert.equal(more.json.result.placements.length, 1);
+    assert.equal(more.json.result.unplaced.length, 1);
+    assert.equal(more.json.snapshot.tables.reduce((n, x) => n + x.occupied, 0), 7);
+    assert.equal(seatedOf(more.json.snapshot, declined), 0);
+    // отмена: сняли всех, кого посадила авторассадка
+    const placedIds = [...run.json.result.placements, ...more.json.result.placements].map((p) => p.personId);
+    assert.equal((await call(A('/seat'), 'POST', { personIds: placedIds, tableId: null }, tok)).json.snapshot.persons.filter((p) => p.tableId).length, 0);
+    void t1; void t2;
   });
 
   await t.test('CSV: кириллица, длинные имена, формулы; питание только по запросу', async () => {
