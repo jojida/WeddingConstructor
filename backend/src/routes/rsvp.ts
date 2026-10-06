@@ -1,7 +1,10 @@
 import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { notifyOwner } from '../lib/notify';
+import { notifyOwner, notifyOwnerText } from '../lib/notify';
+import { plannerDenial } from '../lib/planner/access';
+import { reconcile } from '../lib/planner/roster';
+import { errName } from '../lib/planner/util';
 import { isPaid } from '../lib/plans';
 import { inviteDrinkLabels } from '../lib/drinks';
 import { rateLimit } from '../middleware/rateLimit';
@@ -73,6 +76,17 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
       return saved;
     });
 
+    // Меню и рассадка: люди группы подтягиваются из ответа, а отказ снимает со стола.
+    // Сбой здесь не должен стоить гостю его ответа — он уже сохранён.
+    try {
+      if (!(await plannerDenial(invite))) {
+        const { unseated } = await reconcile(invite.id, guest ? `g:${guest.id}` : `r:${response.id}`);
+        for (const u of unseated) void notifyOwnerText(invite as any, 'Рассадка: освободилось место', [u.text]);
+      }
+    } catch (e) {
+      console.error('Не удалось обновить состав гостей:', errName(e));
+    }
+
     // Уведомление владельцу по выбранному каналу (best-effort, не блокирует ответ)
     notifyOwner(invite as any, {
       guestName: finalName,
@@ -87,7 +101,8 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
 
     return res.json({ success: true, id: response.id });
   } catch (e) {
-    console.error(e);
+    // Только код ошибки: в сообщениях Prisma бывают значения из анкеты (имя, пожелания)
+    console.error('Не удалось сохранить ответ:', errName(e));
     return res.status(500).json({ error: 'Ошибка сохранения ответа' });
   }
 });

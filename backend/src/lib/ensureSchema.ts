@@ -17,9 +17,22 @@ const COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: 'GuestResponse', column: 'answers', ddl: `"answers" TEXT NOT NULL DEFAULT '[]'` },
 ];
 
+/* Миграции, написанные идемпотентно (CREATE … IF NOT EXISTS): новые таблицы бэкенд
+   создаёт сам при запуске. Комментарии вычищаем — операторы режутся по «;». */
+const IDEMPOTENT_MIGRATIONS = ['20260928160000_print_orders', '20261006120000_planner'];
+
+async function runMigration(dir: string): Promise<void> {
+  const file = path.join(__dirname, '../../prisma/migrations', dir, 'migration.sql');
+  const sql = fs.readFileSync(file, 'utf8').split('\n').filter((line) => !line.trim().startsWith('--')).join('\n');
+  for (const statement of sql.split(';').filter((s) => s.trim())) await prisma.$executeRawUnsafe(statement);
+}
+
 export async function ensureSchema(): Promise<void> {
-  const printSchema = fs.readFileSync(path.join(__dirname, '../../prisma/migrations/20260928160000_print_orders/migration.sql'), 'utf8');
-  for (const statement of printSchema.split(';').filter(s => s.trim())) await prisma.$executeRawUnsafe(statement);
+  // Сбой одной таблицы не должен лишать базу остальных: каждый шаг сам по себе.
+  for (const dir of IDEMPOTENT_MIGRATIONS) {
+    try { await runMigration(dir); }
+    catch (e) { console.error(`Проверка схемы БД: миграция ${dir} не выполнена:`, e instanceof Error ? e.name : 'Error'); }
+  }
   for (const c of COLUMNS) {
     const cols = await prisma.$queryRawUnsafe<{ name: string }[]>(`PRAGMA table_info("${c.table}")`);
     if (cols.some((x) => x.name === c.column)) continue;

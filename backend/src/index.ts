@@ -13,6 +13,7 @@ import paymentRouter from './routes/payment';
 import printRouter from './routes/print';
 import rsvpRouter from './routes/rsvp';
 import guestsRouter from './routes/guests';
+import plannerRouter from './routes/planner';
 import telegramRouter from './routes/telegram';
 import domainsRouter from './routes/domains';
 import { initTelegram } from './lib/telegram';
@@ -81,6 +82,7 @@ app.use('/api/payment', rateLimit(120, 60_000), paymentRouter);
 app.use('/api/print', rateLimit(120, 60_000), printRouter);
 app.use('/api/rsvp', rsvpRouter);
 app.use('/api/guests', guestsRouter);
+app.use('/api/planner', rateLimit(900, 60_000), plannerRouter);
 app.use('/api/telegram', telegramRouter);
 app.use('/api/domains', domainsRouter);
 

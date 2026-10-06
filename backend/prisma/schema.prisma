@@ -96,6 +96,13 @@ model Invitation {
   updatedAt     DateTime @updatedAt
   guestResponses GuestResponse[]
   guests        Guest[]
+
+  // Планировщик (рассадка и меню) — см. модели ниже; колонок в Invitation они не добавляют
+  plannerSettings PlannerSettings?
+  menuOptions   MenuOption[]
+  seatTables    SeatTable[]
+  persons       Person[]
+  plannerNotices PlannerNotice[]
 }
 
 // Гости продвинутого тарифа (ручной список с персональными ссылками)
@@ -108,6 +115,7 @@ model Guest {
   names         String                          // «Денис и Мария» / «Кореловых»
   responseId    String?                         // связь с ответом (GuestResponse)
   createdAt     DateTime @default(now())
+  persons       Person[]
 
   @@index([invitationId])
 }
@@ -132,6 +140,97 @@ model GuestResponse {
   // Ответы на дополнительные вопросы анкеты, JSON: [{ id, q, a, t }]
   answers       String   @default("[]")
   createdAt     DateTime @default(now())
+  persons       Person[]
 
   @@index([guestId])
+}
+
+// ── Планировщик: меню и рассадка ─────────────────────────────────────────────
+// Только новые таблицы: существующие не меняются. В рабочую базу их создаёт сам
+// бэкенд при запуске (src/lib/ensureSchema.ts) — деплой миграции не запускает.
+
+// Настройки приглашения: что спрашивать у гостей в анкете и что показывать на сайте.
+// Всё выключено, пока пара не включит сама.
+model PlannerSettings {
+  invitationId String     @id
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  askMenu      Boolean    @default(false) // спрашивать выбор блюда у каждого гостя
+  askDiet      Boolean    @default(false) // спрашивать пищевые ограничения (необязательно)
+  showMenu     Boolean    @default(false) // показывать меню на сайте (этап 5)
+  showTable    Boolean    @default(false) // показывать гостю его стол (этап 5)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+// Вариант выбора блюда в анкете: «Мясное», «Рыбное», «Детское»…
+model MenuOption {
+  id           String     @id @default(uuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  label        String
+  note         String     @default("")
+  sort         Int        @default(0)
+  createdAt    DateTime   @default(now())
+  persons      Person[]
+
+  @@index([invitationId])
+}
+
+model SeatTable {
+  id           String     @id @default(uuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  name         String
+  capacity     Int
+  shape        String     @default("round") // round | long — только вид схемы и печати
+  sort         Int        @default(0)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  persons      Person[]
+
+  @@unique([invitationId, name])
+}
+
+// Один человек = одна строка со своим идентификатором. Принадлежит ровно одной группе:
+// Guest (персональная ссылка) или GuestResponse (ответ по общей ссылке сайта).
+model Person {
+  id           String         @id @default(uuid())
+  invitationId String
+  invitation   Invitation     @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  guestId      String?
+  guest        Guest?         @relation(fields: [guestId], references: [id], onDelete: Cascade)
+  responseId   String?
+  response     GuestResponse? @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  slot         Int            @default(0)     // порядковый номер внутри группы
+  name         String         @default("")    // пусто = состав группы нужно уточнить
+  isChild      Boolean        @default(false)
+  excluded     Boolean        @default(false) // «убран из списка»: строка остаётся учтённой
+  menuOptionId String?
+  menuOption   MenuOption?    @relation(fields: [menuOptionId], references: [id], onDelete: SetNull)
+  menuReview   Boolean        @default(false) // вариант меню удалён — выбор нужно уточнить
+  diet         String         @default("")    // пищевые ограничения, необязательно
+  tag          String         @default("")    // метка группы: «Семья жениха», «Друзья»
+  tableId      String?
+  table        SeatTable?     @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([guestId, slot])
+  @@unique([responseId, slot])
+  @@index([invitationId])
+  @@index([tableId])
+  @@index([menuOptionId])
+}
+
+// Сообщения владельцу в кабинете: «Анна отказалась — снята со стола 5».
+model PlannerNotice {
+  id           String     @id @default(uuid())
+  invitationId String
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  kind         String
+  text         String
+  seenAt       DateTime?
+  createdAt    DateTime   @default(now())
+
+  @@index([invitationId, seenAt])
 }

@@ -83,6 +83,27 @@ function formatMessage(invite: InviteLike, r: ResponseLike): { subject: string; 
   return { subject: `RSVP: ${r.guestName} — ${invite.groomName || ''} & ${invite.brideName || ''}`, text, html };
 }
 
+/** Доставка готового сообщения по каналу, который выбрал владелец. */
+async function deliver(invite: InviteLike, msg: { subject: string; text: string; html: string }): Promise<void> {
+  const channel = invite.notifyChannel || 'none';
+  if (channel === 'telegram') {
+    if (invite.notifyTelegramChatId) await tgSend(invite.notifyTelegramChatId, msg.text);
+    return;
+  }
+
+  if (channel === 'email') {
+    let to = invite.notifyEmail;
+    if (!to) {
+      const user = await prisma.user.findUnique({ where: { id: invite.userId } });
+      to = user?.email || '';
+    }
+    if (!to) return;
+    if (isEmailConfigured()) {
+      await sendEmail({ to, subject: msg.subject, text: msg.text, html: msg.html });
+    }
+  }
+}
+
 /** Отправляет уведомление владельцу по выбранному им каналу (best-effort, не бросает). */
 export async function notifyOwner(invite: InviteLike, r: ResponseLike): Promise<void> {
   try {
@@ -90,25 +111,21 @@ export async function notifyOwner(invite: InviteLike, r: ResponseLike): Promise<
     if (!hasNotifications((invite as { plan?: string }).plan)) return;
     const channel = invite.notifyChannel || 'none';
     if (channel === 'none') return;
-    const msg = formatMessage(invite, r);
-
-    if (channel === 'telegram') {
-      if (invite.notifyTelegramChatId) await tgSend(invite.notifyTelegramChatId, msg.text);
-      return;
-    }
-
-    if (channel === 'email') {
-      let to = invite.notifyEmail;
-      if (!to) {
-        const user = await prisma.user.findUnique({ where: { id: invite.userId } });
-        to = user?.email || '';
-      }
-      if (!to) return;
-      if (isEmailConfigured()) {
-        await sendEmail({ to, subject: msg.subject, text: msg.text, html: msg.html });
-      }
-    }
+    await deliver(invite, formatMessage(invite, r));
   } catch (e) {
     console.error('notifyOwner error:', e);
+  }
+}
+
+/** Служебное сообщение владельцу — например, «гость отказался, место за столом освобождено».
+    Те же каналы и условия, что у уведомления об ответе; не бросает. */
+export async function notifyOwnerText(invite: InviteLike, subject: string, lines: string[]): Promise<void> {
+  try {
+    if (!hasNotifications((invite as { plan?: string }).plan)) return;
+    if ((invite.notifyChannel || 'none') === 'none') return;
+    const html = lines.map((l) => (l ? `<div>${escapeHtml(l)}</div>` : '<br>')).join('');
+    await deliver(invite, { subject, text: lines.join('\n'), html });
+  } catch (e) {
+    console.error('notifyOwnerText error:', e instanceof Error ? e.name : 'Error');
   }
 }

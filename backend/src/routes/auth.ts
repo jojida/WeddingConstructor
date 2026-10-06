@@ -7,6 +7,7 @@ import { hashCode, jwtSecret, normalizeEmail } from '../lib/security';
 import { rateLimit } from '../middleware/rateLimit';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isFreeAccount } from '../lib/freeAccounts';
+import { plannerOpenForEmail } from '../lib/planner/access';
 
 const router = Router();
 const emailKey = (req: AuthRequest) => normalizeEmail(req.body?.email) || 'invalid';
@@ -50,7 +51,7 @@ router.post('/verify-code', rateLimit(30, 10 * 60_000), rateLimit(5, 10 * 60_000
     if (!consumed.count) return res.status(401).json({ error: 'Неверный код или срок его действия истёк' });
     const user = await prisma.user.upsert({ where: { email }, update: {}, create: { email, name: email.split('@')[0] } });
     const token = jwt.sign({ userId: user.id }, jwtSecret(), { algorithm: 'HS256', expiresIn: '30d' });
-    return res.json({ token, user: { id: user.id, email: user.email, name: user.name, free: isFreeAccount(user.email) } });
+    return res.json({ token, user: { id: user.id, email: user.email, name: user.name, free: isFreeAccount(user.email), planner: plannerOpenForEmail(user.email) } });
   } catch {
     return res.status(500).json({ error: 'Ошибка сервера' });
   }
@@ -59,6 +60,7 @@ router.post('/verify-code', rateLimit(30, 10 * 60_000), rateLimit(5, 10 * 60_000
 router.get('/me', authMiddleware, async (req: AuthRequest, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.userId! } });
   if (!user) return res.status(401).json({ error: 'Пользователь не найден' });
-  return res.json({ id: user.id, email: user.email, name: user.name, free: isFreeAccount(user.email) });
+  // planner — открыт ли аккаунту раздел «Меню и рассадка» (подсказка интерфейсу; сервер проверяет сам)
+  return res.json({ id: user.id, email: user.email, name: user.name, free: isFreeAccount(user.email), planner: plannerOpenForEmail(user.email) });
 });
 export default router;

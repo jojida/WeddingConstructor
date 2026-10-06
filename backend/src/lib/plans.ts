@@ -29,6 +29,19 @@ export function hasCustomDomain(plan: string | null | undefined): boolean {
   return plan === 'premium';
 }
 
+/** Меню и рассадка гостей (кабинет «Планировщик»). Один выключатель на все её роуты:
+    когда тарифы Бесплатный / Премиум / Про получат состав, правится только эта функция,
+    а не проверки по роутам. */
+export function hasPlanner(plan: string | null | undefined): boolean {
+  return plan === 'premium' || plan === 'pro';
+}
+
+/** Печатные PDF по рассадке и меню. Пока входят туда же, где сама рассадка,
+    но отдельной функцией — на случай, если печать уйдёт в старший тариф. */
+export function hasPlannerPrint(plan: string | null | undefined): boolean {
+  return hasPlanner(plan);
+}
+
 /** Оплачен ли тариф (доступны уведомления, свой домен и т.п.). */
 export function isPaid(status: string | null | undefined): boolean {
   return status === 'paid' || status === 'published';
