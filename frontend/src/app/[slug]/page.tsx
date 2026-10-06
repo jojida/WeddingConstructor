@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import TemplatePreview from '@/components/TemplatePreview';
 import UnpublishedNotice from '@/components/UnpublishedNotice';
-import { TEMPLATE_GREETING_KEY } from '@/lib/constants';
+import GuestSeat, { type GuestSeatView } from '@/components/GuestSeat';
+import { applyGuest, resolveGuest } from '@/lib/guestLink';
 
 /* Корневой адрес сайта-приглашения: weddingcraft.ru/<slug>.
    Зеркалит /invite/[slug] — статические маршруты (editor, demo, templates,
@@ -24,14 +25,6 @@ async function getInvite(slug: string) {
   } catch { return null; }
 }
 
-async function getGuest(token: string) {
-  try {
-    const res = await fetch(`${API}/api/guests/resolve/${token}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return res.json() as Promise<{ greeting: string; names: string; attending: boolean | null }>;
-  } catch { return null; }
-}
-
 export default async function SiteBySlugPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { g } = await searchParams;
@@ -42,20 +35,20 @@ export default async function SiteBySlugPage({ params, searchParams }: Props) {
   }
   if (invite.unpaid) return <UnpublishedNotice />;
 
+  // Персональная ссылка: обращение и имя гостя, а если пара включила — «Ваш стол»
+  let seat: GuestSeatView | null = null;
   if (g) {
-    const guest = await getGuest(g);
+    const guest = await resolveGuest(API, g, invite.id);
     if (guest) {
-      const greetingKey = TEMPLATE_GREETING_KEY[invite.templateId];
-      invite.customData = { ...(invite.customData || {}) };
-      if (greetingKey) invite.customData[greetingKey] = guest.greeting;
-      invite.customData.guestName = guest.names;
-      invite.customData.guestToken = g;
+      applyGuest(invite, guest, g);
+      seat = guest.planner ?? null;
     }
   }
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <TemplatePreview data={invite} apiBase={API} fullPage slug={slug} />
+      {seat && <GuestSeat view={seat} />}
     </div>
   );
 }

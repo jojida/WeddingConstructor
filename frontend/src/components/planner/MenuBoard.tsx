@@ -99,7 +99,7 @@ export default function MenuBoard({ planner, snap, slug }: { planner: PlannerCtl
   const options = [...snap.options].sort((a, b) => a.sort - b.sort);
   const holdersOf = (id: string) => snap.persons.filter((p) => p.menuOptionId === id).length;
 
-  const toggle = (key: 'askMenu' | 'askDiet', value: boolean) => act('put', '/settings', { [key]: value });
+  const toggle = (key: 'askMenu' | 'askDiet' | 'showMenu', value: boolean) => act('put', '/settings', { [key]: value });
 
   const addOption = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -186,7 +186,7 @@ export default function MenuBoard({ planner, snap, slug }: { planner: PlannerCtl
     <div>
       {/* Настройки анкеты */}
       <section className={styles.panel}>
-        <h3 className={styles.panelTitle}>Анкета гостя</h3>
+        <h3 className={styles.panelTitle}>Анкета и сайт</h3>
         <label className={styles.switchRow}>
           <input type="checkbox" checked={snap.settings.askMenu} disabled={planner.pending > 0}
             onChange={(e) => toggle('askMenu', e.target.checked)} />
@@ -205,6 +205,17 @@ export default function MenuBoard({ planner, snap, slug }: { planner: PlannerCtl
             <b>Спрашивать про аллергию и ограничения в еде</b>
             <span className={styles.hint} style={{ display: 'block' }}>
               Гостю не обязательно отвечать. Ответы видите только вы: на сайте, в уведомлениях и в обычной выгрузке их нет.
+            </span>
+          </span>
+        </label>
+        <label className={styles.switchRow}>
+          <input type="checkbox" checked={snap.settings.showMenu} disabled={planner.pending > 0}
+            onChange={(e) => toggle('showMenu', e.target.checked)} />
+          <span>
+            <b>Показывать гостю меню и его выбор на сайте</b>
+            <span className={styles.hint} style={{ display: 'block' }}>
+              Гость, открывший свою персональную ссылку, увидит ваши варианты блюд и что выбрала его компания.
+              Пищевых ограничений там нет.
             </span>
           </span>
         </label>

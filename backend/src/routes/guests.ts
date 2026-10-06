@@ -4,6 +4,8 @@ import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isAdvanced, isSalutation, computeGreeting, isPaid } from '../lib/plans';
 import { attendanceOf, parseAnswers } from '../lib/rsvpDetails';
+import { guestView, type GuestView } from '../lib/planner/guestView';
+import { errName } from '../lib/planner/util';
 
 const router = Router();
 
@@ -20,22 +22,32 @@ async function loadOwnedInvite(inviteId: string, userId?: string) {
 
 // ── Публичный резолв персональной ссылки (для страницы приглашения) ──────────
 // ВАЖНО: объявлен до /:inviteId, отдаёт только обращение/имя/статус — без утечки.
+// ?invite=<id> — страница называет свой сайт: чужая ссылка на нём не сработает, и только тогда
+// добавляется «Ваш стол» (стол и блюда своей группы, если пара включила их показ).
 router.get('/resolve/:token', async (req: Request, res: Response) => {
   const guest = await prisma.guest.findUnique({ where: { token: req.params.token as string } });
   if (!guest) return res.status(404).json({ error: 'Гость не найден' });
   const invitation = await prisma.invitation.findUnique({ where: { id: guest.invitationId } });
   if (!invitation || !isPaid(invitation.status)) return res.status(404).json({ error: 'Гость не найден' });
+  const site = typeof req.query.invite === 'string' ? req.query.invite : '';
+  if (site && site !== invitation.id) return res.status(404).json({ error: 'Гость не найден' });
   let attending: boolean | null = null;
   let attendance: string | null = null;
   if (guest.responseId) {
     const r = await prisma.guestResponse.findUnique({ where: { id: guest.responseId } });
     if (r) { attending = r.attending; attendance = attendanceOf(r); }
   }
+  // Сбой планировщика не мешает открыть сайт: гость просто не увидит плашку со столом
+  let planner: GuestView | null = null;
+  if (site) {
+    try { planner = await guestView(invitation, guest); } catch (e) { console.error('guest view failed:', errName(e)); }
+  }
   return res.json({
     greeting: computeGreeting(guest.salutation, guest.names),
     names: guest.names,
     attending,
     attendance,
+    planner,
   });
 });
 

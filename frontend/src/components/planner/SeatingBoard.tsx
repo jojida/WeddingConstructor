@@ -112,6 +112,10 @@ export default function SeatingBoard({ planner, snap }: { planner: PlannerCtl; s
   const dlg = dialog;
   const fillTable = dlg?.kind === 'fill' ? index.tableById.get(dlg.tableId) : undefined;
 
+  // «Ваш стол» на сайте увидят только группы с персональной ссылкой (kind 'guest')
+  const seatedParties = new Set(snap.persons.filter((p) => !p.excluded && p.tableId).map((p) => p.partyKey));
+  const linked = snap.parties.filter((p) => seatedParties.has(p.key) && p.kind === 'guest').length;
+
   return (
     <div>
       <div className={styles.stats}>
@@ -176,6 +180,22 @@ export default function SeatingBoard({ planner, snap }: { planner: PlannerCtl; s
           </ul>
         </div>
       )}
+
+      <section className={styles.panel} style={{ padding: '6px 14px' }}>
+        <label className={styles.switchRow}>
+          <input type="checkbox" checked={snap.settings.showTable} disabled={planner.pending > 0}
+            onChange={(e) => act('put', '/settings', { showTable: e.target.checked })} />
+          <span>
+            <b>Показывать гостям их стол на сайте</b>
+            <span className={styles.hint} style={{ display: 'block' }}>
+              Гость, открывший свою персональную ссылку, увидит плашку «Ваш стол». Включите, когда рассадка готова.
+              {seatedParties.size > 0 && (linked < seatedParties.size
+                ? ` Сейчас увидят ${linked} из ${seatedParties.size} ${plural(seatedParties.size, 'группы', 'групп', 'групп')} за столами: остальные отвечали по общей ссылке, своей у них нет.`
+                : ' Своя ссылка есть у всех, кто сидит за столами.')}
+            </span>
+          </span>
+        </label>
+      </section>
 
       <div className={styles.toolbar}>
         <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setDialog({ kind: 'table' })}>+ Стол</button>

@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import TemplatePreview from '@/components/TemplatePreview';
 import UnpublishedNotice from '@/components/UnpublishedNotice';
-import { TEMPLATE_GREETING_KEY } from '@/lib/constants';
+import GuestSeat, { type GuestSeatView } from '@/components/GuestSeat';
+import { applyGuest, resolveGuest } from '@/lib/guestLink';
 
 interface Props {
   params: Promise<{ host: string }>;
@@ -19,14 +20,6 @@ async function getByDomain(host: string) {
   } catch { return null; }
 }
 
-async function getGuest(token: string) {
-  try {
-    const res = await fetch(`${API}/api/guests/resolve/${token}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return res.json() as Promise<{ greeting: string; names: string; attending: boolean | null }>;
-  } catch { return null; }
-}
-
 export default async function DomainInvitePage({ params, searchParams }: Props) {
   const { host } = await params;
   const { g } = await searchParams;
@@ -34,20 +27,19 @@ export default async function DomainInvitePage({ params, searchParams }: Props) 
   if (!invite) notFound();
   if (invite.unpaid) return <UnpublishedNotice />;
 
+  let seat: GuestSeatView | null = null;
   if (g) {
-    const guest = await getGuest(g);
+    const guest = await resolveGuest(API, g, invite.id);
     if (guest) {
-      const greetingKey = TEMPLATE_GREETING_KEY[invite.templateId];
-      invite.customData = { ...(invite.customData || {}) };
-      if (greetingKey) invite.customData[greetingKey] = guest.greeting;
-      invite.customData.guestName = guest.names;
-      invite.customData.guestToken = g;
+      applyGuest(invite, guest, g);
+      seat = guest.planner ?? null;
     }
   }
 
   return (
     <div style={{ minHeight: '100vh' }}>
       <TemplatePreview data={invite} apiBase={API} fullPage slug={invite.slug} />
+      {seat && <GuestSeat view={seat} />}
     </div>
   );
 }
