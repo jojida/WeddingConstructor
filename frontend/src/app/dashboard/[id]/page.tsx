@@ -2,12 +2,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
 import { isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
-import PlannerSection from '@/components/planner/PlannerSection';
+
+// Рассадка грузится, только когда открыта её вкладка: остальным владельцам этот код ни к чему
+const PlannerSection = dynamic(() => import('@/components/planner/PlannerSection'), {
+  loading: () => <div style={{ padding: 40, textAlign: 'center', color: '#9a948a', fontSize: 14 }}>Загрузка…</div>,
+});
 
 interface Invite {
   id: string; slug: string; status: string; plan: string;
