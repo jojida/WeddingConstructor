@@ -40,7 +40,6 @@
   var first = function (s) { return (s || '').trim().charAt(0).toUpperCase(); };
 
   /* ─── Вид ─── */
-  // Лепесток: белый с тёплой тенью у основания (две формы — «сердечко» и вытянутый)
   // Лепесток белой розы: три вида (чашечкой, сбоку «лодочкой», вытянутый),
   // у каждого — тень завитка по краю, тёплое основание и блик
   var PETALS = [
@@ -101,13 +100,13 @@
       'transform:translate(50%,-50%);transition:transform .32s cubic-bezier(.3,.7,.3,1)}' +
     '.wc-slide__seal img{position:absolute;inset:0;width:100%;height:100%;display:block;' +
       'filter:drop-shadow(0 calc(var(--seal)*.035) calc(var(--seal)*.05) rgba(70,45,15,.35))}' +
-    '.wc-slide__mono{position:absolute;inset:0;pointer-events:none;font-family:"Great Vibes",cursive;line-height:1}' +
-    '.wc-slide__mono b{position:absolute;left:50%;top:50%;font-weight:400;white-space:nowrap;color:transparent;' +
-      'background:linear-gradient(140deg,#fbe9bf 0%,#e6c27d 30%,#c08a43 58%,#e9cc8f 80%,#b07a36 100%);' +
-      '-webkit-background-clip:text;background-clip:text;' +
-      'filter:drop-shadow(-.6px -.6px 0 rgba(255,244,214,.85)) drop-shadow(.8px 1.1px .5px rgba(84,52,14,.75))}' +
-    '.wc-slide__mono b:first-child{font-size:calc(var(--seal)*.56);transform:translate(-70%,-63%)}' +
-    '.wc-slide__mono b:last-child{font-size:calc(var(--seal)*.45);transform:translate(-27%,-38%)}' +
+    // монограмма — SVG поверх картинки печати (viewBox = её пиксели), место букв считает layoutMono()
+    // тиснение — CSS-фильтром всего слоя (SVG-фильтр в Chrome оставлял полоску по краю своей области)
+    '.wc-slide__mono{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;' +
+      'filter:drop-shadow(-.6px -.6px 0 rgba(255,244,214,.85)) drop-shadow(.8px 1.1px .5px rgba(84,52,14,.75));' +
+      'opacity:0;transition:opacity .3s ease}' +
+    '.wc-slide__mono.is-set{opacity:1}' +
+    '.wc-slide__mono text{font-family:"Great Vibes",cursive;font-weight:400}' +
     // надпись дугой над печатью
     '.wc-slide__hint{position:absolute;left:50%;bottom:100%;width:calc(var(--seal)*1.3);height:auto;overflow:visible;' +
       'transform:translate(-50%,24%);pointer-events:none;transition:opacity .3s ease;' +
@@ -157,21 +156,99 @@
           (EDITING ? ' data-edit="envelopeHint"' : '') + '></textPath></text>' +
         '</svg>' +
         '<img src="' + BASE + 'seal-gold.webp" alt="" draggable="false" />' +
-        '<span class="wc-slide__mono" aria-hidden="true"><b></b><b></b></span>' +
+        '<svg class="wc-slide__mono" viewBox="0 0 336 339" aria-hidden="true">' +
+          '<defs><linearGradient id="' + uid + 'g" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="266" y2="280">' +
+            '<stop offset="0" stop-color="#fbe9bf"/><stop offset=".3" stop-color="#e6c27d"/><stop offset=".58" stop-color="#c08a43"/>' +
+            '<stop offset=".8" stop-color="#e9cc8f"/><stop offset="1" stop-color="#b07a36"/></linearGradient></defs>' +
+          '<g fill="url(#' + uid + 'g)"><text></text><text></text></g>' +
+        '</svg>' +
       '</div>' +
     '</div>' +
     '<div class="wc-slide__petals" aria-hidden="true"></div>' +
     (EDITING ? '<button type="button" class="wc-slide__replay">▶ Посмотреть, как откроется</button>' : '');
   document.body.insertBefore(el, document.body.firstChild);
-  var mono = el.querySelectorAll('.wc-slide__mono b');
+  var monoSvg = el.querySelector('.wc-slide__mono');
+  var mono = monoSvg.querySelectorAll('text');
   var hintPath = el.querySelector('.wc-slide__hint textPath');
   var replay = el.querySelector('.wc-slide__replay');
+
+  /* ─── Монограмма: две буквы внутри лица печати ───
+     Размер и место — по реальным контурам букв (canvas): вторая буква правее
+     и ниже первой и заходит на неё, пара вместе стоит по центру лица печати
+     и целиком помещается в круг R_INK — у любых имён, и с длинными росчерками. */
+  var FACE_X = 166.5, FACE_Y = 167.5;   // центр лица печати в seal-gold.webp (336×339)
+  var R_INK = 96;                       // круг для букв (лицо печати — до 120, дальше кольцо)
+  var F_MAX = 150;                      // кегль не больше: короткие буквы не раздуваются
+  var K2 = 0.92;                        // вторая буква чуть меньше первой
+  var FAM = '"Great Vibes", cursive';
+
+  function inkBox(ctx, ch, k) {
+    var m = ctx.measureText(ch);
+    if (m.actualBoundingBoxRight == null) return { l: 0, r: m.width / 100 * k, t: -.75 * k, b: .25 * k };
+    return { l: -m.actualBoundingBoxLeft / 100 * k, r: m.actualBoundingBoxRight / 100 * k,
+             t: -m.actualBoundingBoxAscent / 100 * k, b: m.actualBoundingBoxDescent / 100 * k };
+  }
+
+  function layoutMono() {
+    var a = mono[0].textContent, b = mono[1].textContent;
+    var c = layoutMono.c || (layoutMono.c = document.createElement('canvas'));
+    c.width = 336; c.height = 339;
+    var ctx = c.getContext('2d');
+    if (!ctx) { monoSvg.classList.add('is-set'); return; }
+    // контуры в долях кегля первой буквы (начало буквы — точка базовой линии)
+    ctx.font = '100px ' + FAM;
+    var A = inkBox(ctx, a, 1), B = inkBox(ctx, b, K2);
+    var ox = .38 * ((A.r - A.l) + (B.r - B.l)) / 2;     // центр второй — правее…
+    var oy = .30 * ((A.b - A.t) + (B.b - B.t)) / 2;     // …и ниже центра первой
+    var bx = (A.l + A.r) / 2 + ox - (B.l + B.r) / 2;
+    var by = (A.t + A.b) / 2 + oy - (B.t + B.b) / 2;
+    var x0 = Math.min(A.l, bx + B.l), x1 = Math.max(A.r, bx + B.r);
+    var y0 = Math.min(A.t, by + B.t), y1 = Math.max(A.b, by + B.b);
+    var f = Math.min(F_MAX, 2 * R_INK / Math.max(x1 - x0, .01), 2 * R_INK / Math.max(y1 - y0, .01));
+    var ax = FACE_X - f * (x0 + x1) / 2, ay = FACE_Y - f * (y0 + y1) / 2;
+    // По пикселям: самая дальняя точка букв от центра — не дальше R_INK
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.font = f + 'px ' + FAM; ctx.fillText(a, ax, ay);
+    ctx.font = f * K2 + 'px ' + FAM; ctx.fillText(b, ax + f * bx, ay + f * by);
+    var px = ctx.getImageData(0, 0, c.width, c.height).data, far = 0;
+    for (var i = 3, n = 0; i < px.length; i += 4, n++) {
+      if (px[i] < 96) continue;
+      var dx = n % c.width - FACE_X, dy = (n / c.width | 0) - FACE_Y;
+      if (dx * dx + dy * dy > far) far = dx * dx + dy * dy;
+    }
+    far = Math.sqrt(far);
+    if (far > R_INK) {                    // уменьшаем вокруг центра лица
+      var s = R_INK / far;
+      f *= s; ax = FACE_X + (ax - FACE_X) * s; ay = FACE_Y + (ay - FACE_Y) * s;
+    }
+    var set = function (t, x, y, size) {
+      t.setAttribute('x', x.toFixed(2)); t.setAttribute('y', y.toFixed(2)); t.setAttribute('font-size', size.toFixed(2));
+    };
+    set(mono[0], ax, ay, f);
+    set(mono[1], ax + f * bx, ay + f * by, f * K2);
+    monoSvg.classList.add('is-set');
+  }
+
+  // Буквы считаем по загруженному шрифту; не дождались — считаем по тому, что есть
+  function placeMono() {
+    var text = mono[0].textContent + mono[1].textContent;
+    var done = false;
+    var go = function () { if (!done) { done = true; layoutMono(); } };
+    if (document.fonts && document.fonts.load) {
+      document.fonts.load('100px ' + FAM, text).then(go, go);
+      setTimeout(go, 3000);
+    } else go();
+  }
+  if (document.fonts && document.fonts.addEventListener) {
+    document.fonts.addEventListener('loadingdone', function () { layoutMono(); });
+  }
 
   function render() {
     mono[0].textContent = first(D.groom) || 'Е';
     mono[1].textContent = first(D.bride) || 'Н';
     hintPath.textContent = D.hint;
     el.setAttribute('aria-label', (D.hint || 'Открыть приглашение'));
+    placeMono();
   }
   render();
 
