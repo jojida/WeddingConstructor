@@ -584,8 +584,10 @@
      можно сразу. Касание створки — открыть не дожидаясь. Договор с обложкой
      как у конвертов: WCEnvelope.active, событие 'wc:envelope-open' (имена
      начинают писаться, когда створки разошлись). Раздел «Витражные двери»
-     в редакторе выключает их: sections.js → WCEnvelope.setEnabled(false). */
-  var DOORS = { el: null, phase: 'closed', timers: [] };   // closed → opening → open
+     в редакторе выключает их: sections.js → WCEnvelope.setEnabled(false).
+     Рисует их WebGL (doors3d.js → DOORS.gl, класс is-3d, когда готов первый
+     кадр); CSS-створки — первый кадр и запасной вариант без WebGL2. */
+  var DOORS = { el: null, phase: 'closed', timers: [], gl: null };   // closed → opening → open
 
   function doorsLater(fn, ms) { DOORS.timers.push(setTimeout(fn, ms)); }
 
@@ -601,9 +603,18 @@
     }
   }
 
+  // WebGL-двери больше не нужны (или не смогли) — остаются CSS-створки
+  function dropGl() {
+    if (!DOORS.gl) return;
+    try { DOORS.gl.destroy(); } catch (e) {}
+    DOORS.gl = null;
+    if (DOORS.el) DOORS.el.classList.remove('is-3d');
+  }
+
   function dropDoors() {
     DOORS.timers.forEach(clearTimeout);
     DOORS.phase = 'open';
+    dropGl();
     if (DOORS.el && DOORS.el.parentNode) DOORS.el.parentNode.removeChild(DOORS.el);
     DOORS.el = null;
     fireOpen();
@@ -613,7 +624,9 @@
     var el = DOORS.el;
     if (!el || DOORS.phase !== 'closed') return;
     DOORS.phase = 'opening';
+    if (DOORS.gl && !el.classList.contains('is-3d')) dropGl();   // WebGL не успел — открываем CSS-створки
     el.classList.add('is-open');
+    if (DOORS.gl) DOORS.gl.open();
     doorsLater(fireOpen, 1500);                     // створки распахнулись примерно на треть
     doorsLater(function () {
       DOORS.phase = 'open';
@@ -632,6 +645,7 @@
     var btn = el.querySelector('.doors__replay');
     if (btn) btn.disabled = true;
     el.classList.remove('is-gone', 'is-open');      // створки сразу закрыты
+    if (DOORS.gl) DOORS.gl.reset();
     DOORS.phase = 'closed';
     doorsLater(openDoors, 900);
   }
@@ -643,6 +657,21 @@
       setEnabled: function (on) { if (!on && !EDITING && DOORS.el) dropDoors(); }
     };
     if (!el) return;
+    if (!REDUCED && window.WCDoors3D) {
+      try {
+        DOORS.gl = window.WCDoors3D.mount(el, {
+          frost: 'assets/frost.jpg',
+          // видеопамять отобрали: закрытые — остаются CSS-створки, открываются — дверей больше нет
+          onLost: function () { if (DOORS.phase === 'opening' && !EDITING) dropDoors(); else dropGl(); }
+        });
+      } catch (e) { DOORS.gl = null; }
+    }
+    var gl = DOORS.gl;
+    if (gl) {
+      gl.canvas.addEventListener('click', openDoors);
+      gl.ready.then(function () { if (DOORS.gl === gl && DOORS.el) DOORS.el.classList.add('is-3d'); },
+        function () { if (DOORS.gl === gl) dropGl(); });
+    }
     layoutMono();
     if (EDITING) {
       // двери открыты: паре нужна обложка; «Посмотреть, как откроются» — по кнопке
@@ -666,8 +695,9 @@
     // закрытые двери — и они раздвигаются. Вкладка в фоне — ждём, пока её откроют;
     // обложка уже ушла с экрана (страницу вернули ниже) — двери не нужны
     var load = function (src) { return new Promise(function (res) { var i = new Image(); i.onload = i.onerror = res; i.src = src; }); };
-    var waits = ['door-l.webp', 'door-r.webp', 'medallion.webp'].map(function (f) { return load('assets/' + f); });
+    var waits = ['frost.jpg', 'medallion.webp'].map(function (f) { return load('assets/' + f); });
     if (document.fonts && document.fonts.load) waits.push(document.fonts.load('100px "HamiltoneSHA"', monoLetters().join('')));
+    if (gl) waits.push(gl.ready.catch(function () {}));
     var started = false;
     var go = function () {
       if (started || DOORS.phase !== 'closed' || !DOORS.el) return;
@@ -746,6 +776,8 @@
     set(t[1], ox + f * mx, oy + f * my, f * MONO.amp);
     set(t[2], ox + f * bx, oy, f);
     svg.classList.add('is-set');
+    // та же раскладка — рельефом на WebGL-медальоне
+    if (DOORS.gl) DOORS.gl.setMono({ letters: L, f: f, ox: ox, oy: oy, mx: mx, my: my, bx: bx, amp: MONO.amp, script: SCRIPT_FONT, ampFont: AMP_FONT });
   }
 
   /* ─── Обложка ─────────────────────────────────────────

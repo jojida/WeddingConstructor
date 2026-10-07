@@ -292,12 +292,14 @@ p, h1, h2 { margin: 0; font-weight: 500; }
   to   { transform: translate3d(calc(var(--dx) * var(--u)), calc(2700 * var(--u)), 0); }
 }
 
-/* ── Витражные двери (по видео-референсу пары) — на всю обложку, с толщиной.
-   Каждая створка — объёмный короб (transform-style: preserve-3d): лицо из
-   полупрозрачного матового стекла (door-*.webp с альфой ~0,8 — сквозь него
-   проступает витраж обложки), торцы толщиной 46 ед.: внутренний — серебряная
-   планка, верх/низ — край стекла. Открытие — поворот на петлях у краёв
-   обложки к гостю (rotateY), по стеклу пробегает блик, створка темнеет. */
+/* ── Витражные двери (по видео-референсу пары) — на весь первый экран, с толщиной.
+   Основная версия — WebGL (doors3d.js, холст .doors__gl): объёмные створки
+   «молоткового» стекла в серебряной раме и медальон с настоящей толщиной.
+   Пока она готовится и там, где WebGL2 нет, — эта CSS-версия: каждая
+   створка — короб (transform-style: preserve-3d): лицо — матовое стекло
+   (размытая обложка frost.jpg под светлой дымкой), торцы толщиной 46 ед.:
+   внутренний — серебряная планка, верх/низ — край стекла. Открытие —
+   поворот на петлях у краёв к гостю (rotateY), блик бежит, створка темнеет. */
 /* на весь первый экран: не ниже обложки и не ниже экрана телефона */
 .doors {
   position: absolute; left: 0; top: 0; z-index: 6;
@@ -329,9 +331,20 @@ p, h1, h2 { margin: 0; font-weight: 500; }
 }
 .doors__leaf--l { left: 0; transform-origin: 0 50%; }
 .doors__leaf--r { left: calc(683 * var(--u)); transform-origin: 100% 50%; }
-.doors__face { position: absolute; inset: 0; background: center / 100% 100% no-repeat; }
-.doors__leaf--l .doors__face { background-image: url("assets/door-l.webp"); }
-.doors__leaf--r .doors__face { background-image: url("assets/door-r.webp"); }
+/* стекло: что за ним (размытая обложка) + светлая дымка + серебряная планка у шва */
+.doors__face { position: absolute; inset: 0; }
+.doors__leaf--l .doors__face {
+  background:
+    linear-gradient(90deg, rgba(92, 108, 134, 0) calc(100% - 16 * var(--u)), #66778f calc(100% - 16 * var(--u)), #b9c6d7 calc(100% - 11 * var(--u)), #eef3f9 calc(100% - 7 * var(--u)), #9eadc4 calc(100% - 3 * var(--u)), #5c6c86 100%),
+    linear-gradient(rgba(237, 244, 252, .36), rgba(237, 244, 252, .36)),
+    url("assets/frost.jpg") 0 0 / 200% auto no-repeat #edf3fb;
+}
+.doors__leaf--r .doors__face {
+  background:
+    linear-gradient(270deg, rgba(92, 108, 134, 0) calc(100% - 16 * var(--u)), #66778f calc(100% - 16 * var(--u)), #b9c6d7 calc(100% - 11 * var(--u)), #eef3f9 calc(100% - 7 * var(--u)), #9eadc4 calc(100% - 3 * var(--u)), #5c6c86 100%),
+    linear-gradient(rgba(237, 244, 252, .36), rgba(237, 244, 252, .36)),
+    url("assets/frost.jpg") 100% 0 / 200% auto no-repeat #edf3fb;
+}
 /* блик, пробегающий по стеклу при повороте, и тень — створка отворачивается от света */
 .doors__face::before, .doors__face::after { content: ""; position: absolute; inset: 0; opacity: 0; pointer-events: none; }
 .doors__face::before {
@@ -356,10 +369,10 @@ p, h1, h2 { margin: 0; font-weight: 500; }
 .doors__edge--bot { top: 100%; }
 /* открытие: тяжёлые створки трогаются медленно, распахиваются и уходят за края */
 .doors.is-open .doors__leaf { pointer-events: none; }
-.doors.is-open .doors__leaf--l { animation: doorL 3.4s linear forwards; }
-.doors.is-open .doors__leaf--r { animation: doorR 3.4s linear forwards; }
-.doors.is-open .doors__face::before { animation: doorGlint 3.4s ease-in-out forwards; }
-.doors.is-open .doors__face::after { animation: doorShade 2.8s ease-in forwards; }
+.doors.is-open:not(.is-3d) .doors__leaf--l { animation: doorL 3.4s linear forwards; }
+.doors.is-open:not(.is-3d) .doors__leaf--r { animation: doorR 3.4s linear forwards; }
+.doors.is-open:not(.is-3d) .doors__face::before { animation: doorGlint 3.4s ease-in-out forwards; }
+.doors.is-open:not(.is-3d) .doors__face::after { animation: doorShade 2.8s ease-in forwards; }
 .doors.is-open .doors__glow { animation: doorGlow 3.4s ease forwards; }
 /* до 76° (створка уходит за край экрана) — плавное «тяжёлое» движение,
    дальше за кадром — быстро */
@@ -386,7 +399,22 @@ p, h1, h2 { margin: 0; font-weight: 500; }
   100% { opacity: 0; }
 }
 /* открыты (редактор) — створок и света не видно */
-.doors.is-gone .doors__stage, .doors.is-gone .doors__glow { visibility: hidden; }
+.doors.is-gone .doors__stage, .doors.is-gone .doors__glow, .doors.is-gone .doors__gl { visibility: hidden; }
+/* WebGL-двери: холст поверх CSS-створок, проявляется, когда готов первый кадр;
+   CSS-створки под ним после этого не рисуются */
+.doors__gl {
+  position: absolute; left: 0; top: 0; z-index: 1;
+  width: 100%; height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity .45s ease;
+  pointer-events: none;
+}
+.doors.is-3d .doors__gl { opacity: 1; pointer-events: auto; cursor: pointer; }
+.doors.is-3d.is-open .doors__gl { pointer-events: none; }
+.doors.is-3d .doors__stage { visibility: hidden; transition: visibility 0s linear .45s; }
+.doors.is-3d .doors__stage .doors__leaf { pointer-events: none; }
+.doors.is-3d .doors__medal-in { animation: none; }
 /* Медальон — на шве, посередине экрана; принадлежит правой створке
    и стоит чуть перед стеклом */
 .doors__medal {

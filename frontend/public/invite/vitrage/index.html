@@ -6,8 +6,7 @@
   <title>Григорий и Александра — приглашение на свадьбу</title>
   <link href="/invite/assets/fonts/google/423708c44a2a7900fd37.css" rel="stylesheet" />
   <link rel="preload" as="image" href="assets/cover.jpg" />
-  <link rel="preload" as="image" href="assets/door-l.webp" />
-  <link rel="preload" as="image" href="assets/door-r.webp" />
+  <link rel="preload" as="image" href="assets/frost.jpg" />
   <link rel="preload" as="image" href="assets/medallion.webp" />
   <link rel="preload" as="font" type="font/woff2" href="/invite/assets/fonts/HamiltoneSHA.woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
@@ -24,11 +23,13 @@
 
   <main class="invite" id="invite">
 
-    <!-- 0 — ВИТРАЖНЫЕ ДВЕРИ на весь первый экран: две створки полупрозрачного матового
-         стекла с толщиной (объёмные короба: лицо, торцы). Открываются сами
-         НАСТЕЖЬ — поворачиваются на петлях у краёв к гостю и уходят за края;
-         сквозь стекло проступает витраж обложки. Листать страницу можно сразу.
-         Медальон с инициалами — на правой створке. Касание — открыть сейчас.
+    <!-- 0 — ВИТРАЖНЫЕ ДВЕРИ на весь первый экран: две створки матового «молоткового»
+         стекла в серебряной раме, с толщиной. Открываются сами НАСТЕЖЬ —
+         поворачиваются на петлях у краёв к гостю и уходят за края; сквозь стекло
+         проступает витраж обложки. Листать страницу можно сразу. Медальон с
+         инициалами — на правой створке. Касание — открыть сейчас.
+         Основная версия — WebGL (doors3d.js рисует холст .doors__gl поверх);
+         разметка ниже — первый кадр и запасной вариант без WebGL2.
          В редакторе двери открыты, есть кнопка повтора -->
     <div class="doors" id="doors" data-wc-section="envelope">
       <div class="doors__glow" aria-hidden="true"></div>
@@ -303,6 +304,7 @@
   <script src="../assets/venue-map.js"></script>
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
+  <script src="doors3d.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
