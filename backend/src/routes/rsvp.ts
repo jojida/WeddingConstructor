@@ -10,12 +10,14 @@ import { isPaid, hasRsvp, hasResponseStats } from '../lib/plans';
 import { inviteDrinkLabels } from '../lib/drinks';
 import { rateLimit } from '../middleware/rateLimit';
 import { Attendance, attendanceOf, cleanAnswers, isAttendance, parseAnswers, summarizeAnswers } from '../lib/rsvpDetails';
+import { record } from '../lib/inviteValidation';
 
 const router = Router();
 
 // POST /api/rsvp/:slug — публичная отправка анкеты гостем
 router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Response) => {
   const slug = req.params.slug as string;
+  if (!record(req.body)) return res.status(400).json({ error: 'Проверьте поля анкеты' });
   try {
     const invite = await prisma.invitation.findUnique({ where: { slug } });
     if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
@@ -26,7 +28,7 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
 
     if (!hasRsvp(invite.plan)) return res.status(403).json({ error: 'Анкета доступна в «Премиум» и «Максимум»' });
 
-    const { guestName, attending, attendance, drinkChoice, wishes, guestToken, guestsCount, childrenCount, answers } = req.body;
+    const { guestName, attending, attendance, drinkChoice, wishes, guestToken, guestsCount, childrenCount, answers } = req.body as Record<string, any>;
     // Новые анкеты шлют attendance (yes | no | maybe), старые страницы — только attending
     const status: Attendance | null = attendance != null
       ? (isAttendance(attendance) ? attendance : null)

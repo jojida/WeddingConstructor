@@ -13,7 +13,7 @@ import styles from './page.module.css';
 function PaymentContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuthStore();
   const inviteId = searchParams.get('id') || '';
   /* Тестовый аккаунт владельца: касса не вызывается, тариф переключается
      сколько угодно раз — в том числе у уже опубликованного сайта. */
@@ -27,16 +27,19 @@ function PaymentContent() {
   const [promoChecking, setPromoChecking] = useState(false);
 
   useEffect(() => {
-    if (!inviteId) return;
+    if (!inviteId || !user) return;
+    let cancelled = false;
     api.get(`/api/invites/${inviteId}`)
       .then(res => {
+        if (cancelled) return;
         setInvite(res.data);
         if (!searchParams.get('plan') && (res.data.status === 'paid' || res.data.status === 'published')) {
           setSelectedPlan(res.data.plan === 'premium' || res.data.plan === 'maximum' ? 'maximum' : 'premium');
         }
       })
-      .catch(() => toast.error('Приглашение не найдено'));
-  }, [inviteId, searchParams]);
+      .catch(() => { if (!cancelled) toast.error('Приглашение не найдено'); });
+    return () => { cancelled = true; };
+  }, [inviteId, searchParams, user]);
 
   const applyPromo = async () => {
     const code = promoInput.trim();
@@ -92,6 +95,8 @@ function PaymentContent() {
         router.push(res.data.redirectUrl || `/payment/success?id=${inviteId}&plan=${selectedPlan}`);
       } else if (res.data.paymentUrl) {
         window.location.href = res.data.paymentUrl;
+      } else {
+        toast.error('Платёж не создан. Попробуйте ещё раз или обратитесь в поддержку.');
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Ошибка оплаты');
@@ -99,6 +104,8 @@ function PaymentContent() {
       setLoading(false);
     }
   };
+
+  if (authLoading) return <div className={styles.center}>Загрузка…</div>;
 
   if (!user) return (
     <div className={styles.center}>

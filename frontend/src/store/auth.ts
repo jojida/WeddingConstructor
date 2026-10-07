@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import api from '@/lib/api';
 import { reachGoal, GOAL, muteGoals } from '@/lib/metrika';
+import { readAuthToken, writeAuthToken, writeStorage } from '@/lib/browser-storage';
 
 interface User {
   id: string;
@@ -27,32 +28,36 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: true,
 
   setAuth: (user, token) => {
-    localStorage.setItem('wc_token', token);
+    writeAuthToken(token);
     muteGoals(!!user.free);
     reachGoal(GOAL.signup);
     set({ user, token, loading: false });
   },
 
   logout: () => {
-    localStorage.removeItem('wc_token');
+    writeAuthToken(null);
+    writeStorage('sessionStorage', 'wc_draft_id', null);
     muteGoals(false);
     set({ user: null, token: null, loading: false });
   },
 
   fetchMe: async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('wc_token') : null;
+    const token = typeof window !== 'undefined' ? readAuthToken() : null;
     if (!token) {
-      set({ loading: false });
+      muteGoals(false);
+      set({ user: null, token: null, loading: false });
       return;
     }
     try {
       const res = await api.get('/api/auth/me');
+      if (readAuthToken() !== token) return;
       muteGoals(!!res.data?.free);
       set({ user: res.data, token, loading: false });
     } catch (error) {
+      if (readAuthToken() !== token) return;
       const status = (error as { response?: { status?: number } }).response?.status;
       if (status === 401 || status === 403) {
-        localStorage.removeItem('wc_token');
+        writeAuthToken(null);
         set({ user: null, token: null, loading: false });
       } else {
         set({ token, loading: false });

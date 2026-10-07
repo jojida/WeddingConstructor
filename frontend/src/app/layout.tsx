@@ -21,7 +21,6 @@ import { Toaster } from "react-hot-toast";
 import AuthProvider from "@/components/AuthProvider";
 import AnimationObserver from "@/components/AnimationObserver";
 import { SITE_URL } from "@/lib/constants";
-import { METRIKA_ID } from "@/lib/metrika";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -81,13 +80,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href="/invite/assets/fonts/google/c125798b2a99adcb4bf4.css" />
       </head>
       <body suppressHydrationWarning>
-        {/* Метрика без JS: сам счётчик инициализируется в instrumentation-client.ts,
-            здесь только пиксель для браузеров с отключёнными скриптами. */}
-        <noscript>
-          <div>
-            <img src={`https://mc.yandex.ru/watch/${METRIKA_ID}`} style={{ position: 'absolute', left: '-9999px' }} alt="" />
-          </div>
-        </noscript>
         <AuthProvider>
           {children}
         </AuthProvider>

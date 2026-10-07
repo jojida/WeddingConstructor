@@ -11,6 +11,9 @@ import path from 'path';
    Идемпотентно: колонка уже есть — ничего не делаем; `db push` потом тоже
    ничего не станет менять, определения совпадают со schema.prisma. */
 const COLUMNS: { table: string; column: string; ddl: string }[] = [
+  { table: 'Invitation', column: 'customDomainVerifiedAt', ddl: '"customDomainVerifiedAt" DATETIME' },
+  { table: 'Invitation', column: 'telegramConnectExpiresAt', ddl: '"telegramConnectExpiresAt" DATETIME' },
+  { table: 'VerificationCode', column: 'attempts', ddl: '"attempts" INTEGER NOT NULL DEFAULT 0' },
   { table: 'GuestResponse', column: 'guestsCount', ddl: '"guestsCount" INTEGER NOT NULL DEFAULT 1' },
   { table: 'GuestResponse', column: 'attendance', ddl: `"attendance" TEXT NOT NULL DEFAULT ''` },
   { table: 'GuestResponse', column: 'childrenCount', ddl: '"childrenCount" INTEGER NOT NULL DEFAULT 0' },
@@ -19,7 +22,7 @@ const COLUMNS: { table: string; column: string; ddl: string }[] = [
 
 /* Миграции, написанные идемпотентно (CREATE … IF NOT EXISTS): новые таблицы бэкенд
    создаёт сам при запуске. Комментарии вычищаем — операторы режутся по «;». */
-const IDEMPOTENT_MIGRATIONS = ['20260928160000_print_orders', '20261006120000_planner'];
+const IDEMPOTENT_MIGRATIONS = ['20260928160000_print_orders', '20261006120000_planner', '20261007150000_payment_attempts'];
 
 async function runMigration(dir: string): Promise<void> {
   const file = path.join(__dirname, '../../prisma/migrations', dir, 'migration.sql');
@@ -28,10 +31,10 @@ async function runMigration(dir: string): Promise<void> {
 }
 
 export async function ensureSchema(): Promise<void> {
-  // Сбой одной таблицы не должен лишать базу остальных: каждый шаг сам по себе.
+  // A missing security/payment table must stop startup instead of serving
+  // requests with a partially upgraded schema.
   for (const dir of IDEMPOTENT_MIGRATIONS) {
-    try { await runMigration(dir); }
-    catch (e) { console.error(`Проверка схемы БД: миграция ${dir} не выполнена:`, e instanceof Error ? e.name : 'Error'); }
+    await runMigration(dir);
   }
   for (const c of COLUMNS) {
     const cols = await prisma.$queryRawUnsafe<{ name: string }[]>(`PRAGMA table_info("${c.table}")`);
@@ -39,4 +42,5 @@ export async function ensureSchema(): Promise<void> {
     await prisma.$executeRawUnsafe(`ALTER TABLE "${c.table}" ADD COLUMN ${c.ddl}`);
     console.log(`🛠 База: добавлена колонка ${c.table}.${c.column}`);
   }
+  await runMigration('20261007150200_unique_custom_domains');
 }

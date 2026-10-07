@@ -5,6 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
 import api from '@/lib/api';
+import { readStorage, writeStorage } from '@/lib/browser-storage';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
 import { isPlanSectionLocked } from '@/lib/plans';
 import { isSectionEnabled } from '@/lib/section-visibility';
@@ -324,7 +325,7 @@ function EditorContent() {
   const [photoSlots, setPhotoSlots] = useState<Record<string, PhotoSlot>>({});
   useEffect(() => {
     const onMsg = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin) return;
+      if (e.origin !== window.location.origin || e.source !== previewRef.current?.querySelector('iframe')?.contentWindow) return;
       const m = e.data;
       if (m && m.type === 'wc:photo-slots' && m.slots && typeof m.slots === 'object') setPhotoSlots(m.slots);
     };
@@ -373,7 +374,7 @@ function EditorContent() {
   useEffect(() => {
     if (draftChecked) return;
     try {
-      const saved = JSON.parse(localStorage.getItem(GUEST_DRAFT_KEY) || 'null');
+      const saved = JSON.parse(readStorage('localStorage', GUEST_DRAFT_KEY) || 'null');
       if (canResumeDraft(saved, templateIdFromUrl) && saved.groomName && saved.brideName && saved.weddingDate) {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- разовое решение после монтирования, см. выше
         setStep('editor');
@@ -394,14 +395,14 @@ function EditorContent() {
       api.get(`/api/invites/${idFromUrl}`)
         .then(res => {
           setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: Array.isArray(res.data.dressCodeColors) ? res.data.dressCodeColors : [], schedule: Array.isArray(res.data.schedule) ? res.data.schedule : [], galleryPhotos: Array.isArray(res.data.galleryPhotos) ? res.data.galleryPhotos : [], customData: res.data.customData || {} }));
-          sessionStorage.setItem('wc_draft_id', idFromUrl);
+          writeStorage('sessionStorage', 'wc_draft_id', idFromUrl);
         })
         .catch(() => toast.error('Не удалось загрузить приглашение'));
       return;
     }
     if (user) {
-      const savedId  = sessionStorage.getItem('wc_draft_id');
-      const guestRaw = localStorage.getItem(GUEST_DRAFT_KEY);
+      const savedId  = readStorage('sessionStorage', 'wc_draft_id');
+      const guestRaw = readStorage('localStorage', GUEST_DRAFT_KEY);
       const guestData = readGuestDraft<InviteData>(guestRaw, templateIdFromUrl);
       const mergedGuest = { ...guestData, ...(setup || {}) };
       if (savedId) {
@@ -412,12 +413,12 @@ function EditorContent() {
             }
             setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: Array.isArray(res.data.dressCodeColors) ? res.data.dressCodeColors : [], schedule: Array.isArray(res.data.schedule) ? res.data.schedule : [], galleryPhotos: Array.isArray(res.data.galleryPhotos) ? res.data.galleryPhotos : [], customData: res.data.customData || {} }));
           })
-          .catch(() => { sessionStorage.removeItem('wc_draft_id'); createDraft(templateIdFromUrl, mergedGuest); });
+          .catch(() => { writeStorage('sessionStorage', 'wc_draft_id', null); createDraft(templateIdFromUrl, mergedGuest); });
       } else {
         createDraft(templateIdFromUrl, mergedGuest);
       }
     } else {
-      const raw = localStorage.getItem(GUEST_DRAFT_KEY);
+      const raw = readStorage('localStorage', GUEST_DRAFT_KEY);
       const saved = readGuestDraft<InviteData>(raw, templateIdFromUrl);
       setGuestDraftReady(true);
       setData(prev => ({ ...prev, ...saved, ...(setup || {}), templateId: templateIdFromUrl, dressCodeColors: (setup?.dressCodeColors || saved.dressCodeColors || []) }));
@@ -426,7 +427,7 @@ function EditorContent() {
   }, [step, user, authLoading]);
 
   useEffect(() => {
-    if (!authLoading && !user && !idFromUrl && guestDraftReady && step === 'editor') localStorage.setItem(GUEST_DRAFT_KEY, JSON.stringify(data));
+    if (!authLoading && !user && !idFromUrl && guestDraftReady && step === 'editor') writeStorage('localStorage', GUEST_DRAFT_KEY, JSON.stringify(data));
   }, [data, user, step, authLoading, idFromUrl, guestDraftReady]);
 
   // ── Заполнение полей значениями по умолчанию (= содержимое дизайна) ──────────
@@ -507,15 +508,16 @@ function EditorContent() {
     try {
       const res    = await api.post('/api/invites', { templateId });
       const newId  = res.data.id;
-      sessionStorage.setItem('wc_draft_id', newId);
+      writeStorage('sessionStorage', 'wc_draft_id', newId);
       const merged = { ...EMPTY, ...res.data, ...guestData, id: newId, templateId, status: res.data.status, slug: res.data.slug, dressCodeColors: guestData.dressCodeColors || [] };
       if (Object.keys(guestData).length > 0) {
         await api.put(`/api/invites/${newId}`, merged);
-        localStorage.removeItem(GUEST_DRAFT_KEY);
+        writeStorage('localStorage', GUEST_DRAFT_KEY, null);
       }
       setData(merged);
     } catch {
       setData(prev => ({ ...prev, ...guestData, templateId, dressCodeColors: guestData.dressCodeColors || [] }));
+      toast.error('Не удалось создать черновик. Проверьте соединение и повторите сохранение.');
     }
   }, []);
 
@@ -572,7 +574,7 @@ function EditorContent() {
   };
 
   const saveToServer = async (): Promise<boolean> => {
-    if (!data.id) return false;
+    if (!data.id) { toast.error('Черновик ещё не создан. Обновите страницу и проверьте соединение.'); return false; }
     setSaving(true);
     try {
       const res = await api.put(`/api/invites/${data.id}`, data);

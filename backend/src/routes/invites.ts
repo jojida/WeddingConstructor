@@ -5,10 +5,12 @@ import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isPaid, hasCustomDomain, hasMusic, hasNotifications, planSections } from '../lib/plans';
 import { botUsername } from '../lib/telegram';
-import { validInviteInput } from '../lib/inviteValidation';
+import { validInviteInput, cleanCustomData, safeAssetUrl, record } from '../lib/inviteValidation';
 import { normalizeEmail } from '../lib/security';
+import { normalizeDomain, findPublicDomain } from '../lib/domains';
 import { rateLimit } from '../middleware/rateLimit';
 import { publicMenu } from '../lib/planner/public';
+import { errName } from '../lib/planner/util';
 
 const router = Router();
 
@@ -37,14 +39,23 @@ function stripPrivate(invite: any) {
 }
 
 function publicInvite(invite: any) {
+  // Explicit allowlist: new payment, ownership and integration fields stay private.
+  const fields = ['id', 'slug', 'templateId', 'status', 'plan', 'groomName', 'brideName',
+    'weddingDate', 'weddingTime', 'venue', 'venueAddress', 'story', 'inviteText',
+    'dressCode', 'colorScheme'] as const;
+  const visible = Object.fromEntries(fields.map(key => [key, invite[key]]));
   return {
-    ...stripPrivate(invite),
-    musicUrl: hasMusic(invite.plan) ? invite.musicUrl : '',
-    galleryPhotos: parseArr(invite.galleryPhotos),
+    ...visible,
+    mapLink: safeAssetUrl(invite.mapLink) ? invite.mapLink : '',
+    coverPhoto: safeAssetUrl(invite.coverPhoto) ? invite.coverPhoto : '',
+    coverVideo: safeAssetUrl(invite.coverVideo) ? invite.coverVideo : '',
+    dressCodePhoto: safeAssetUrl(invite.dressCodePhoto) ? invite.dressCodePhoto : '',
+    musicUrl: hasMusic(invite.plan) && safeAssetUrl(invite.musicUrl) ? invite.musicUrl : '',
+    galleryPhotos: parseArr(invite.galleryPhotos).filter(safeAssetUrl),
     schedule: parseArr(invite.schedule),
     dressCodeColors: parseArr(invite.dressCodeColors),
     enabledSections: planSections(invite.plan, parseObj(invite.enabledSections)),
-    customData: { ...parseObj(invite.customData), plan: invite.plan },
+    customData: { ...cleanCustomData(parseObj(invite.customData)), plan: invite.plan },
   };
 }
 
@@ -96,7 +107,7 @@ router.post('/', authMiddleware, rateLimit(20, 60 * 60_000, req => (req as AuthR
     res.json({ ...invite, galleryPhotos: parseArr(invite.galleryPhotos), schedule: parseArr(invite.schedule),
       dressCodeColors: parseArr(invite.dressCodeColors), enabledSections: parseObj(invite.enabledSections), customData: parseObj(invite.customData) });
   } catch (e) {
-    console.error(e);
+    console.error('Invitation creation failed:', errName(e));
     res.status(500).json({ error: 'Ошибка создания приглашения' });
   }
 });
@@ -135,13 +146,13 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
         schedule: schedule ? JSON.stringify(schedule) : undefined,
         galleryPhotos: galleryPhotos ? JSON.stringify(galleryPhotos) : undefined,
         enabledSections: enabledSections ? JSON.stringify(enabledSections) : undefined,
-        customData: customData !== undefined ? JSON.stringify(customData) : undefined,
+        customData: customData !== undefined ? JSON.stringify(cleanCustomData(customData)) : undefined,
         colorScheme, musicUrl, templateId, title, slug,
       },
     });
     return res.json(updated);
   } catch (e) {
-    console.error(e);
+    console.error('Invitation update failed:', errName(e));
     return res.status(500).json({ error: 'Ошибка обновления' });
   }
 });
@@ -161,9 +172,9 @@ router.get('/by-slug/:slug', async (req, res: Response) => {
 
 // GET /api/invites/by-domain/:host — резолв привязанного домена клиента (MVP)
 router.get('/by-domain/:host', async (req, res: Response) => {
-  const host = String(req.params.host || '').toLowerCase().replace(/^www\./, '');
+  const host = normalizeDomain(req.params.host);
   if (!host) return res.status(404).json({ error: 'Не найдено' });
-  const invite = await prisma.invitation.findFirst({ where: { customDomain: host } });
+  const invite = await findPublicDomain(host);
   if (!invite) return res.status(404).json({ error: 'Домен не привязан' });
   // Черновики гостям не видны: сайт открывается после оплаты тарифа.
   if (!isPaid(invite.status)) {
@@ -174,6 +185,7 @@ router.get('/by-domain/:host', async (req, res: Response) => {
 
 // PATCH /api/invites/:id/settings — уведомления и свой домен (владелец)
 router.patch('/:id/settings', authMiddleware, async (req: AuthRequest, res: Response) => {
+  if (!record(req.body)) return res.status(400).json({ error: 'Некорректные настройки' });
   const invite = await prisma.invitation.findUnique({ where: { id: req.params.id as string } });
   if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
 
@@ -189,8 +201,8 @@ router.patch('/:id/settings', authMiddleware, async (req: AuthRequest, res: Resp
     data.notifyEmail = normalizeEmail(req.body.notifyEmail) || '';
   }
   if (req.body.customDomain != null) {
-    const domain = String(req.body.customDomain).trim().toLowerCase()
-      .replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/:\d+$/, '').replace(/^www\./, '');
+    const domain = normalizeDomain(req.body.customDomain);
+    if (domain === null) return res.status(400).json({ error: 'Неверный формат домена (пример: denis-i-maria.ru)' });
     if (domain) {
       // Свой домен — фича тарифа «Премиум»; гейтим и на бэке, а не только в UI.
       if (!hasCustomDomain(invite.plan)) {
@@ -202,19 +214,26 @@ router.patch('/:id/settings', authMiddleware, async (req: AuthRequest, res: Resp
       if (domain === 'weddingcraft.ru' || domain.endsWith('.weddingcraft.ru')) {
         return res.status(400).json({ error: 'Этот домен нельзя привязать' });
       }
-      const taken = await prisma.invitation.findFirst({ where: { customDomain: domain } });
+      const taken = await prisma.invitation.findFirst({ where: { customDomain: domain, customDomainVerifiedAt: { not: null } } });
       if (taken && taken.id !== invite.id) {
         return res.status(409).json({ error: 'Этот домен уже привязан к другому сайту' });
       }
     }
     data.customDomain = domain; // пустая строка = отвязать
+    if (domain !== invite.customDomain) data.customDomainVerifiedAt = null;
   }
-  const updated = await prisma.invitation.update({ where: { id: invite.id }, data });
-  return res.json(stripPrivate(updated));
+  try {
+    const updated = await prisma.invitation.update({ where: { id: invite.id }, data });
+    return res.json(stripPrivate(updated));
+  } catch (error) {
+    if ((error as { code?: string }).code === 'P2002') return res.status(409).json({ error: 'Этот домен уже привязан к другому сайту' });
+    throw error;
+  }
 });
 
 // PATCH /api/invites/:id/slug — задать «красивый» адрес сайта (weddingcraft.ru/<slug>)
 router.patch('/:id/slug', authMiddleware, async (req: AuthRequest, res: Response) => {
+  if (!record(req.body) || typeof req.body.slug !== 'string') return res.status(400).json({ error: 'Укажите адрес сайта' });
   const invite = await prisma.invitation.findUnique({ where: { id: req.params.id as string } });
   if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
 
@@ -227,21 +246,26 @@ router.patch('/:id/slug', authMiddleware, async (req: AuthRequest, res: Response
   const taken = await prisma.invitation.findUnique({ where: { slug: raw } });
   if (taken && taken.id !== invite.id) return res.status(409).json({ error: 'Этот адрес уже занят' });
 
-  const updated = await prisma.invitation.update({ where: { id: invite.id }, data: { slug: raw } });
-  return res.json({ slug: updated.slug });
+  try {
+    const updated = await prisma.invitation.update({ where: { id: invite.id }, data: { slug: raw } });
+    return res.json({ slug: updated.slug });
+  } catch (error) {
+    if ((error as { code?: string }).code === 'P2002') return res.status(409).json({ error: 'Этот адрес уже занят' });
+    throw error;
+  }
 });
 
 // POST /api/invites/:id/telegram-connect — выдать deep-link для подключения Telegram
-router.post('/:id/telegram-connect', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/:id/telegram-connect', authMiddleware, rateLimit(20, 10 * 60_000, req => (req as AuthRequest).userId!), async (req: AuthRequest, res: Response) => {
   const invite = await prisma.invitation.findUnique({ where: { id: req.params.id as string } });
   if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
 
   if (!hasNotifications(invite.plan)) return res.status(403).json({ error: 'Telegram доступен в «Премиум» и «Максимум»' });
 
   let token = invite.telegramConnectToken;
-  if (!token) {
-    token = crypto.randomBytes(8).toString('base64url');
-    await prisma.invitation.update({ where: { id: invite.id }, data: { telegramConnectToken: token } });
+  if (!token || !invite.telegramConnectExpiresAt || invite.telegramConnectExpiresAt.getTime() <= Date.now()) {
+    token = crypto.randomBytes(24).toString('base64url');
+    await prisma.invitation.update({ where: { id: invite.id }, data: { telegramConnectToken: token, telegramConnectExpiresAt: new Date(Date.now() + 15 * 60_000) } });
   }
   const username = botUsername();
   return res.json({

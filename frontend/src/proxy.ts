@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { isPrivateTemplateFile } from './lib/private-template-files';
 
 // Привязка собственного домена клиента (MVP): если сайт открыт на чужом домене
 // (DNS указывает на наш сервер, SSL настроен вручную) — корень `/` рендерит
@@ -7,6 +8,12 @@ import type { NextRequest } from 'next/server';
 const PRIMARY_HOSTS = new Set(['weddingcraft.ru', 'www.weddingcraft.ru']);
 
 export function proxy(request: NextRequest) {
+  // Authoring projects and backup copies are not invitation assets. The studio
+  // reads these on the server through its authenticated API.
+  if (isPrivateTemplateFile(request.nextUrl.pathname)) {
+    return new NextResponse(null, { status: 404, headers: { 'Cache-Control': 'no-store' } });
+  }
+  if (request.nextUrl.pathname !== '/') return NextResponse.next();
   const host = (request.headers.get('host') || '').split(':')[0].toLowerCase();
   if (!host) return NextResponse.next();
   if (host === 'localhost' || host === '127.0.0.1' || host.endsWith('.localhost')) return NextResponse.next();
@@ -21,5 +28,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: '/',
+  matcher: ['/', '/invite/:path*'],
 };

@@ -484,6 +484,8 @@ const SERVER_IP = process.env.NEXT_PUBLIC_SERVER_IP || '89.191.226.237';
 interface DomainStatus {
   domain: string; expectedIp: string; ips: string[]; wwwIps: string[];
   dnsOk: boolean; wwwOk: boolean; paid: boolean;
+  verified: boolean;
+  verification: { name: string; type: 'TXT'; value: string };
 }
 
 function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: boolean; onSaved: () => void }) {
@@ -510,6 +512,10 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
       await api.patch(`/api/invites/${invite.id}/settings`, { customDomain: domain });
       toast.success(domain.trim() ? 'Домен сохранён' : 'Домен отвязан');
       setStatus(null);
+      if (domain.trim()) {
+        const result = await api.get(`/api/domains/status/${invite.id}`);
+        setStatus(result.data);
+      }
       onSaved();
     } catch (e: any) { toast.error(e.response?.data?.error || 'Ошибка сохранения'); }
     finally { setSaving(false); }
@@ -558,9 +564,10 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
               A&nbsp;&nbsp;www&nbsp;→&nbsp;&nbsp;{SERVER_IP}
             </div>
           </li>
-          <li>Сохраните домен в поле выше и нажмите «Проверить подключение». DNS обычно
-            обновляется за 15 минут – 4 часа.</li>
-          <li>Когда проверка покажет, что записи верные, <b>напишите нам</b> на{' '}
+          <li>Сохраните домен в поле выше. Скопируйте появившуюся TXT-запись в DNS-настройки,
+            чтобы подтвердить владение доменом, затем нажмите «Проверить подключение».
+            DNS обычно обновляется за 15 минут – 4 часа.</li>
+          <li>Когда владение доменом подтверждено и A-записи верные, <b>напишите нам</b> на{' '}
             <a href="mailto:support@weddingcraft.ru" style={{ textDecoration: 'underline' }}>support@weddingcraft.ru</a> —
             мы выпустим SSL-сертификат для вашего домена и включим его. Обычно в течение суток.
             До этого шага домен будет открываться с предупреждением о сертификате.</li>
@@ -582,7 +589,19 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
             <div style={{ marginTop: 12, paddingTop: 12, borderTop: BORDER }}>
               <DnsRow label={status.domain} ok={status.dnsOk} ips={status.ips} />
               <DnsRow label={`www.${status.domain}`} ok={status.wwwOk} ips={status.wwwIps} />
-              {status.dnsOk ? (
+              {status.verification && (
+                <div style={{ marginTop: 14, padding: 12, background: '#f5f2ec', borderRadius: 8, fontSize: 13 }}>
+                  <b>{status.verified ? '✓ Владение доменом подтверждено' : 'Подтвердите владение доменом'}</b>
+                  <p style={{ margin: '8px 0' }}>Добавьте у регистратора TXT-запись. Если домен дописывается автоматически, в поле имени укажите только <code>_weddingcraft</code>.</p>
+                  <div>Имя: <code style={{ overflowWrap: 'anywhere' }}>{status.verification.name}</code></div>
+                  <div style={{ marginTop: 6 }}>Значение: <code style={{ overflowWrap: 'anywhere' }}>{status.verification.value}</code></div>
+                  <button type="button" className="btn-outline" style={{ marginTop: 10, padding: '6px 12px', fontSize: 12 }} onClick={async () => {
+                    try { await navigator.clipboard.writeText(status.verification.value); toast.success('Значение TXT скопировано'); }
+                    catch { toast.error('Не удалось скопировать. Выделите значение вручную.'); }
+                  }}>Скопировать значение TXT</button>
+                </div>
+              )}
+              {status.dnsOk && status.verified ? (
                 <div style={{ marginTop: 12, fontSize: 14, color: '#2e8b57' }}>
                   ✓ DNS настроен. Сайт доступен по адресу{' '}
                   <a href={`https://${status.domain}`} target="_blank" rel="noreferrer" style={{ color: '#2e8b57', fontWeight: 700 }}>
@@ -590,12 +609,12 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
                   </a>
                   {' '}(при первом открытии выпуск SSL может занять до минуты).
                 </div>
-              ) : (
+              ) : !status.dnsOk ? (
                 <div style={{ marginTop: 12, fontSize: 13, color: '#b85c5c' }}>
                   A-запись ещё не указывает на {status.expectedIp}. Проверьте настройки DNS
                   у регистратора и повторите — обновление занимает от 15 минут до 4 часов.
                 </div>
-              )}
+              ) : <p style={{ fontSize: 13, color: '#b85c5c' }}>A-запись настроена. Добавьте TXT-запись и повторите проверку, чтобы включить домен.</p>}
             </div>
           )}
         </div>

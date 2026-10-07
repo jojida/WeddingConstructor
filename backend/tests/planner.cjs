@@ -571,7 +571,8 @@ test('меню и рассадка на изолированной базе', as
     assert.ok(!body.includes('орех') && !body.includes('Секрет'), 'ни ограничений, ни гостей');
 
     // то же по своему домену
-    await prisma.invitation.update({ where: { id: site.id }, data: { customDomain: 'planner-site.example' } });
+    // домен открывается гостям только после подтверждения владения (TXT-запись)
+    await prisma.invitation.update({ where: { id: site.id }, data: { customDomain: 'planner-site.example', customDomainVerifiedAt: new Date() } });
     assert.equal((await call('/api/invites/by-domain/planner-site.example')).json.customData.wcMenu.options.length, 2);
     // владельцу планировщик ещё не открыт — сайт не узнаёт ничего
     process.env.FREE_ACCOUNTS = 'planner-stranger@example.test';

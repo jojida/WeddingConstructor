@@ -22,7 +22,7 @@ router.post('/send-code', rateLimit(10, 15 * 60_000), rateLimit(3, 10 * 60_000, 
   try {
     const expiresAt = new Date(Date.now() + 10 * 60_000);
     await prisma.verificationCode.upsert({
-      where: { email }, update: { code: hashed, expiresAt }, create: { email, code: hashed, expiresAt },
+      where: { email }, update: { code: hashed, expiresAt, attempts: 0 }, create: { email, code: hashed, expiresAt },
     });
     if (isEmailConfigured()) {
       await sendEmail({ to: email, subject: 'Код для входа — WeddingCraft',
@@ -44,9 +44,16 @@ router.post('/verify-code', rateLimit(30, 10 * 60_000), rateLimit(5, 10 * 60_000
     return res.status(400).json({ error: 'Укажите email и шестизначный код' });
   }
   try {
-    // Atomic consumption prevents concurrent reuse of the same code.
-    const consumed = await prisma.verificationCode.deleteMany({
-      where: { email, code: hashCode(email, code), expiresAt: { gt: new Date() } },
+    // Persist the attempt budget so process restarts and parallel workers cannot reset it.
+    // Serialise charging an attempt and consuming its exact code in the same transaction.
+    const consumed = await prisma.$transaction(async tx => {
+      const charged = await tx.verificationCode.updateMany({
+        where: { email, expiresAt: { gt: new Date() }, attempts: { lt: 5 } }, data: { attempts: { increment: 1 } },
+      });
+      if (!charged.count) return { count: 0 };
+      return tx.verificationCode.deleteMany({
+        where: { email, code: hashCode(email, code), expiresAt: { gt: new Date() } },
+      });
     });
     if (!consumed.count) return res.status(401).json({ error: 'Неверный код или срок его действия истёк' });
     const user = await prisma.user.upsert({ where: { email }, update: {}, create: { email, name: email.split('@')[0] } });

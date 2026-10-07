@@ -29,6 +29,7 @@ model PrintOrder {
   paidAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  paymentAttempt PaymentAttempt?
 
   @@index([userId])
 }
@@ -39,6 +40,7 @@ model VerificationCode {
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())
+  attempts  Int      @default(0)
 }
 
 model Invitation {
@@ -85,16 +87,19 @@ model Invitation {
 
   // Custom domain (MVP — хранится домен + показывается DNS-инструкция)
   customDomain  String   @default("")
+  customDomainVerifiedAt DateTime?
 
   // Notifications (пара выбирает один канал: telegram | email | none)
   notifyChannel         String @default("none")
   notifyEmail           String @default("")
   notifyTelegramChatId  String @default("")
   telegramConnectToken  String @default("")
+  telegramConnectExpiresAt DateTime?
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   guestResponses GuestResponse[]
+  paymentAttempt PaymentAttempt?
   guests        Guest[]
 
   // Планировщик (рассадка и меню) — см. модели ниже; колонок в Invitation они не добавляют
@@ -103,6 +108,23 @@ model Invitation {
   seatTables    SeatTable[]
   persons       Person[]
   plannerNotices PlannerNotice[]
+}
+
+// One durable, immutable request per product. Rotate only after the gateway
+// confirms cancellation; the id is also the YooKassa idempotence key.
+model PaymentAttempt {
+  id             String @id @default(uuid())
+  invitationId   String? @unique
+  invitation     Invitation? @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  printOrderId   String? @unique
+  printOrder     PrintOrder? @relation(fields: [printOrderId], references: [id], onDelete: Cascade)
+  paymentId      String @default("")
+  plan           String @default("")
+  amountKopecks  Int
+  payload        String
+  createdAt      DateTime @default(now())
+
+  @@index([paymentId])
 }
 
 // Гости продвинутого тарифа (ручной список с персональными ссылками)

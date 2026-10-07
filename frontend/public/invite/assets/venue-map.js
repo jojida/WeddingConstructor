@@ -65,6 +65,14 @@
     });
   }
 
+  function safeMapLink(value) {
+    if (typeof value !== 'string' || !value.trim()) return '';
+    try {
+      var url = new URL(value, window.location.href);
+      return /^https?:$/.test(url.protocol) && !url.username && !url.password ? url.href : '';
+    } catch (_) { return ''; }
+  }
+
   function num(v) { v = parseFloat(v); return isFinite(v) ? v : NaN; }
   function validPoint(lon, lat) {
     return isFinite(lon) && isFinite(lat) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
@@ -128,7 +136,7 @@
     if (!boxes.length) return;
     var address = (state.address || '').trim();
     var q = address || (state.venue || '').trim();
-    var link = (state.mapLink || '').trim();
+    var link = safeMapLink(state.mapLink);
     var linkPoint = fromLink(link);
     var point = linkPoint || geocoded(address);
     var visible = state.show !== false && (!!q || !!point);
@@ -152,7 +160,7 @@
         : '<a class="wc-map__route" href="' + esc(routeUrl(q, point)) + '" target="_blank" rel="noopener">' + PIN + 'Построить маршрут</a>';
       box.innerHTML =
         '<div class="wc-map__frame"><iframe title="' + esc(title) + '"' +
-        ' loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>' + go;
+        ' loading="lazy" allowfullscreen referrerpolicy="no-referrer"></iframe></div>' + go;
       // Native lazy loading may fetch maps several screens ahead. Wait until
       // the map is near the viewport, also inside the editor's iframe.
       var frame = box.querySelector('iframe');

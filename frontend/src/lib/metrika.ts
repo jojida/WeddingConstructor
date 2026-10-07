@@ -17,6 +17,43 @@ declare global {
    localStorage — цель editor_open срабатывает раньше, чем вернётся /me. */
 const MUTE_KEY = 'wc_no_metrics';
 let muted: boolean | null = null;
+let active = false;
+let previousPage = '';
+
+/** Only public product pages belong in analytics; invitation URLs contain guest tokens. */
+export function analyticsPageUrl(value: string, base = 'https://weddingcraft.ru'): string | null {
+  try {
+    const url = new URL(value, base);
+    if (!['weddingcraft.ru', 'www.weddingcraft.ru'].includes(url.hostname) || url.protocol !== 'https:') return null;
+    if (url.searchParams.has('g')) return null;
+    const path = url.pathname.replace(/\/$/, '') || '/';
+    if (!['/', '/templates', '/print', '/contacts', '/privacy', '/oferta'].includes(path) && !/^\/demo\/[a-z0-9-]+$/.test(path)) return null;
+    return url.origin + path;
+  } catch { return null; }
+}
+
+function startCounter(page: string): void {
+  if (active) return;
+  if (!window.ym) {
+    const queue = function (...args: unknown[]) { (queue.a = queue.a || []).push(args); } as NonNullable<Window['ym']>;
+    queue.l = Date.now();
+    window.ym = queue;
+  }
+  const src = `https://mc.yandex.ru/metrika/tag.js?id=${METRIKA_ID}`;
+  if (!Array.from(document.scripts).some(script => script.src === src)) {
+    const script = document.createElement('script');
+    script.async = true;
+    script.referrerPolicy = 'no-referrer';
+    script.src = src;
+    document.head.appendChild(script);
+  }
+  window.ym(METRIKA_ID, 'init', {
+    ssr: true, defer: true, webvisor: false, clickmap: false,
+    trackLinks: false, accurateTrackBounce: false,
+    url: page, referrer: analyticsPageUrl(document.referrer) || '',
+  });
+  active = true;
+}
 
 function isMuted(): boolean {
   if (muted === null) {
@@ -38,6 +75,7 @@ export function muteGoals(on: boolean): void {
 export function reachGoal(goal: string, params?: Record<string, unknown>): void {
   if (isMuted()) return;
   try {
+    if (!active || !analyticsPageUrl(window.location.href)) return;
     window.ym?.(METRIKA_ID, 'reachGoal', goal, params);
   } catch { /* молча: потеря одной цели не стоит упавшей страницы */ }
 }
@@ -46,7 +84,16 @@ export function reachGoal(goal: string, params?: Record<string, unknown>): void 
     init засчитывает только первый URL — остальные шлём сами. */
 export function trackPageView(url: string): void {
   try {
-    window.ym?.(METRIKA_ID, 'hit', url);
+    const page = analyticsPageUrl(url, window.location.origin);
+    if (!page || isMuted()) {
+      if (active) window.ym?.(METRIKA_ID, 'destruct');
+      active = false;
+      previousPage = '';
+      return;
+    }
+    startCounter(page);
+    window.ym?.(METRIKA_ID, 'hit', page, { referer: previousPage || analyticsPageUrl(document.referrer) || '' });
+    previousPage = page;
   } catch { /* см. выше */ }
 }
 

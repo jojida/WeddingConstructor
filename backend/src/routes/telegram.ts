@@ -4,6 +4,7 @@ import { tgSend } from '../lib/notify';
 import { telegramWebhookSecret } from '../lib/security';
 
 import { hasNotifications } from '../lib/plans';
+import { errName } from '../lib/planner/util';
 
 const router = Router();
 
@@ -19,18 +20,19 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const text: string = msg?.text || '';
     const chatId = msg?.chat?.id;
 
-    if (chatId && msg.chat.type === 'private' && typeof text === 'string' && /^\/start(\s|$)/.test(text)) {
+    if (Number.isSafeInteger(chatId) && chatId > 0 && msg.chat.type === 'private' && typeof text === 'string' && /^\/start(\s|$)/.test(text)) {
       const token = text.split(/\s+/)[1] || '';
       if (token) {
-        const invite = await prisma.invitation.findFirst({ where: { telegramConnectToken: token } });
+        if (!/^[a-zA-Z0-9_-]{20,64}$/.test(token)) return res.status(200).send('OK');
+        const invite = await prisma.invitation.findFirst({ where: { telegramConnectToken: token, telegramConnectExpiresAt: { gt: new Date() } } });
         if (invite && !hasNotifications(invite.plan)) {
           await tgSend(chatId, 'Telegram доступен в тарифах «Премиум» и «Максимум».');
           return res.status(200).send('OK');
         }
         if (invite) {
           const connected = await prisma.invitation.updateMany({
-            where: { id: invite.id, telegramConnectToken: token },
-            data: { notifyTelegramChatId: String(chatId), notifyChannel: 'telegram', telegramConnectToken: '' },
+            where: { id: invite.id, telegramConnectToken: token, telegramConnectExpiresAt: { gt: new Date() } },
+            data: { notifyTelegramChatId: String(chatId), notifyChannel: 'telegram', telegramConnectToken: '', telegramConnectExpiresAt: null },
           });
           if (!connected.count) return res.status(200).send('OK');
           await tgSend(chatId, '✅ Уведомления подключены! Ответы гостей будут приходить сюда.');
@@ -44,7 +46,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
     // Telegram ждёт 200 на любой апдейт
     return res.status(200).send('OK');
   } catch (e) {
-    console.error('Telegram webhook error:', e);
+    console.error('Telegram webhook error:', errName(e));
     return res.status(200).send('OK');
   }
 });
