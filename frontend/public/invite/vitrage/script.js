@@ -127,6 +127,7 @@
     setAll('[data-name="bride"]', STATE.bride);
     document.title = STATE.groom + ' и ' + STATE.bride + ' — приглашение на свадьбу';
     fitNames();
+    layoutMono();
   }
 
   // Имена — внутри витражной арки (≈ 960 единиц): длинные ужимаем
@@ -577,6 +578,178 @@
     }
   }
 
+  /* ─── Витражные двери ───────────────────────────────────
+     Створки матового стекла в проёме арки раздвигаются САМИ после загрузки:
+     двери — часть обложки, а не слой поверх сайта, поэтому листать страницу
+     можно сразу. Касание створки — открыть не дожидаясь. Договор с обложкой
+     как у конвертов: WCEnvelope.active, событие 'wc:envelope-open' (имена
+     начинают писаться, когда створки разошлись). Раздел «Витражные двери»
+     в редакторе выключает их: sections.js → WCEnvelope.setEnabled(false). */
+  var DOORS = { el: null, phase: 'closed', timers: [] };   // closed → opening → open
+
+  function doorsLater(fn, ms) { DOORS.timers.push(setTimeout(fn, ms)); }
+
+  function fireOpen() {
+    if (fireOpen.done) return;
+    fireOpen.done = true;
+    window.WCEnvelope.active = false;
+    try { window.dispatchEvent(new Event('wc:envelope-open')); }
+    catch (e) {
+      var ev = document.createEvent('Event');
+      ev.initEvent('wc:envelope-open', false, false);
+      window.dispatchEvent(ev);
+    }
+  }
+
+  function dropDoors() {
+    DOORS.timers.forEach(clearTimeout);
+    DOORS.phase = 'open';
+    if (DOORS.el && DOORS.el.parentNode) DOORS.el.parentNode.removeChild(DOORS.el);
+    DOORS.el = null;
+    fireOpen();
+  }
+
+  function openDoors() {
+    var el = DOORS.el;
+    if (!el || DOORS.phase !== 'closed') return;
+    DOORS.phase = 'opening';
+    el.classList.add('is-open');
+    doorsLater(fireOpen, 1300);                     // створки разошлись примерно на треть
+    doorsLater(function () {
+      DOORS.phase = 'open';
+      var btn = el.querySelector('.doors__replay');
+      if (btn) btn.disabled = false;
+      if (!EDITING) dropDoors();
+    }, 3900);
+  }
+
+  // Редактор: закрыть мгновенно, подождать и открыть, как увидит гость
+  function replayDoors() {
+    var el = DOORS.el;
+    if (!el || DOORS.phase !== 'open') return;
+    var btn = el.querySelector('.doors__replay');
+    if (btn) btn.disabled = true;
+    el.classList.add('is-instant');
+    el.classList.remove('is-open');
+    void el.offsetWidth;
+    el.classList.remove('is-instant');
+    DOORS.phase = 'closed';
+    doorsLater(openDoors, 900);
+  }
+
+  function initDoors() {
+    var el = DOORS.el = document.getElementById('doors');
+    window.WCEnvelope = {
+      active: false,
+      setEnabled: function (on) { if (!on && !EDITING && DOORS.el) dropDoors(); }
+    };
+    if (!el) return;
+    layoutMono();
+    if (EDITING) {
+      // двери открыты: паре нужна обложка; «Посмотреть, как откроются» — по кнопке
+      // и когда редактор показывает раздел дверей (подсветка wc-editor-flash)
+      el.classList.add('is-instant', 'is-open');
+      DOORS.phase = 'open';
+      requestAnimationFrame(function () { el.classList.remove('is-instant'); });
+      var btn = el.querySelector('.doors__replay');
+      if (btn) { btn.hidden = false; btn.addEventListener('click', replayDoors); }
+      if ('MutationObserver' in window) {
+        new MutationObserver(function () {
+          if (el.classList.contains('wc-editor-flash')) replayDoors();
+        }).observe(el, { attributes: true, attributeFilter: ['class'] });
+      }
+      return;
+    }
+    if (REDUCED) { dropDoors(); return; }
+    window.WCEnvelope.active = true;
+    ROOT.classList.add('has-doors');
+    el.querySelectorAll('.doors__sash').forEach(function (sh) { sh.addEventListener('click', openDoors); });
+    // Ждём створки, медальон и шрифт букв (не дольше 2,5 с), даём рассмотреть
+    // закрытые двери — и они раздвигаются. Вкладка в фоне — ждём, пока её откроют;
+    // обложка уже ушла с экрана (страницу вернули ниже) — двери не нужны
+    var load = function (src) { return new Promise(function (res) { var i = new Image(); i.onload = i.onerror = res; i.src = src; }); };
+    var waits = [load('assets/sash-l.webp'), load('assets/sash-r.webp'), load('assets/medallion.webp')];
+    if (document.fonts && document.fonts.load) waits.push(document.fonts.load('100px "HamiltoneSHA"', monoLetters().join('')));
+    var started = false;
+    var go = function () {
+      if (started || DOORS.phase !== 'closed' || !DOORS.el) return;
+      if (document.visibilityState === 'hidden') {
+        document.addEventListener('visibilitychange', go, { once: true });
+        return;
+      }
+      started = true;
+      var hero = document.getElementById('hero');
+      if (hero && hero.getBoundingClientRect().bottom < 0) { dropDoors(); return; }
+      doorsLater(openDoors, 700);
+    };
+    Promise.all(waits).then(go, go);
+    setTimeout(go, 2500);
+  }
+
+  /* ─── Монограмма на медальоне: «буква & буква» ───────
+     Раскладка по реальным контурам букв (canvas): у HamiltoneSHA заглавные
+     с длинными росчерками — вся вязь вписывается в круг центра медальона.
+     Координаты — в пикселях картинки медальона (viewBox 640). */
+  var MONO = { cx: 320, cy: 320, r: 126, amp: .46 };
+  var SCRIPT_FONT = '"HamiltoneSHA", cursive', AMP_FONT = 'Lora, Georgia, serif';
+
+  function monoLetters() {
+    var f = function (v) { return (v || '').trim().charAt(0).toUpperCase(); };
+    return [f(STATE.groom) || 'Г', f(STATE.bride) || 'А'];
+  }
+
+  function layoutMono() {
+    var svg = document.querySelector('.doors__mono');
+    if (!svg) return;
+    var t = svg.querySelectorAll('text');
+    var L = monoLetters();
+    t[0].textContent = L[0];
+    t[2].textContent = L[1];
+    var c = layoutMono.c || (layoutMono.c = document.createElement('canvas'));
+    c.width = 640; c.height = 640;
+    var ctx = c.getContext('2d');
+    if (!ctx || typeof ctx.measureText('A').actualBoundingBoxAscent !== 'number') { svg.classList.add('is-set'); return; }
+    var box = function (font, ch) {
+      ctx.font = font;
+      var m = ctx.measureText(ch);
+      return { l: -m.actualBoundingBoxLeft / 100, r: m.actualBoundingBoxRight / 100, t: -m.actualBoundingBoxAscent / 100, b: m.actualBoundingBoxDescent / 100 };
+    };
+    var A = box('100px ' + SCRIPT_FONT, L[0]);
+    var B = box('100px ' + SCRIPT_FONT, L[1]);
+    var M = box('italic 400 ' + (100 * MONO.amp) + 'px ' + AMP_FONT, '&');
+    // буква, «&» и буква подряд по контурам; «&» — по середине высоты заглавных
+    var gap = -.06;                                   // буквы чуть заходят на «&»
+    var mx = A.r + gap - M.l;
+    var bx = mx + M.r + gap - B.l;
+    var my = -.3 - (M.t + M.b) / 2;
+    var x0 = Math.min(A.l, mx + M.l, bx + B.l), x1 = Math.max(A.r, mx + M.r, bx + B.r);
+    var y0 = Math.min(A.t, my + M.t, B.t), y1 = Math.max(A.b, my + M.b, B.b);
+    var f = Math.min(170, 2 * MONO.r / Math.max(x1 - x0, .01), 2 * MONO.r / Math.max(y1 - y0, .01));
+    var ox = MONO.cx - f * (x0 + x1) / 2, oy = MONO.cy - f * (y0 + y1) / 2;
+    // По пикселям: самая дальняя точка вязи от центра — не дальше радиуса
+    ctx.clearRect(0, 0, 640, 640);
+    ctx.font = f + 'px ' + SCRIPT_FONT; ctx.fillText(L[0], ox, oy); ctx.fillText(L[1], ox + f * bx, oy);
+    ctx.font = 'italic 400 ' + (f * MONO.amp) + 'px ' + AMP_FONT; ctx.fillText('&', ox + f * mx, oy + f * my);
+    var px = ctx.getImageData(0, 0, 640, 640).data, far = 0;
+    for (var i = 3, n = 0; i < px.length; i += 4, n++) {
+      if (px[i] < 96) continue;
+      var dx = n % 640 - MONO.cx, dy = (n / 640 | 0) - MONO.cy, q = dx * dx + dy * dy;
+      if (q > far) far = q;
+    }
+    far = Math.sqrt(far);
+    if (far > MONO.r) {
+      var k = MONO.r / far;
+      f *= k; ox = MONO.cx + (ox - MONO.cx) * k; oy = MONO.cy + (oy - MONO.cy) * k;
+    }
+    var set = function (el, x, y, size) {
+      el.setAttribute('x', x.toFixed(2)); el.setAttribute('y', y.toFixed(2)); el.setAttribute('font-size', size.toFixed(2));
+    };
+    set(t[0], ox, oy, f);
+    set(t[1], ox + f * mx, oy + f * my, f * MONO.amp);
+    set(t[2], ox + f * bx, oy, f);
+    svg.classList.add('is-set');
+  }
+
   /* ─── Обложка ─────────────────────────────────────────
      Ждём шрифты и витраж (не дольше 2,5 с), потом витраж проступает и имена
      пишутся. В редакторе и при «меньше движения» — сразу финал. */
@@ -686,6 +859,7 @@
   });
 
   function init() {
+    initDoors();
     document.querySelectorAll('img[data-edit]').forEach(function (img) {
       img.setAttribute('data-def', img.getAttribute('src') || '');
     });
@@ -701,7 +875,8 @@
     initSnow();
     initHero();
     window.addEventListener('resize', fitNames, { passive: true });
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitNames);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { fitNames(); layoutMono(); });
+    if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', layoutMono);
     try {
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);

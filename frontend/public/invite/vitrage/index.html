@@ -6,6 +6,9 @@
   <title>Григорий и Александра — приглашение на свадьбу</title>
   <link href="/invite/assets/fonts/google/423708c44a2a7900fd37.css" rel="stylesheet" />
   <link rel="preload" as="image" href="assets/cover.jpg" />
+  <link rel="preload" as="image" href="assets/sash-l.webp" />
+  <link rel="preload" as="image" href="assets/sash-r.webp" />
+  <link rel="preload" as="image" href="assets/medallion.webp" />
   <link rel="preload" as="font" type="font/woff2" href="/invite/assets/fonts/HamiltoneSHA.woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
   <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
@@ -14,6 +17,7 @@
       opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important;
       -webkit-mask-image: none !important; mask-image: none !important;
     }
+    .doors { display: none !important; }
   </style></noscript>
 </head>
 <body>
@@ -36,6 +40,30 @@
       <div class="cover__date hero-in" data-wc-section="date" data-edit="heroDate">
         <p class="cover__day" id="dateText">14 августа 2027</p>
         <p class="cover__time">в <span id="dateTime">15:00</span></p>
+      </div>
+      <!-- ВИТРАЖНЫЕ ДВЕРИ: створки матового стекла в проёме арки (маска —
+           opening-mask.png). Раздвигаются сами — листать страницу можно сразу;
+           медальон с инициалами уезжает вместе с правой створкой. Касание —
+           открыть сейчас. В редакторе двери открыты, есть кнопка повтора -->
+      <div class="doors" id="doors" data-wc-section="envelope">
+        <div class="doors__win" aria-hidden="true">
+          <div class="doors__glow"></div>
+          <div class="doors__sash doors__sash--l"></div>
+          <div class="doors__sash doors__sash--r">
+            <div class="doors__medal">
+              <img src="assets/medallion.webp" width="640" height="640" alt="" draggable="false" />
+              <svg class="doors__mono" viewBox="0 0 640 640">
+                <defs>
+                  <linearGradient id="monoInk" gradientUnits="userSpaceOnUse" x1="200" y1="190" x2="440" y2="450">
+                    <stop offset="0" stop-color="#6d8bbd" /><stop offset=".5" stop-color="#3d5a8a" /><stop offset="1" stop-color="#2c4470" />
+                  </linearGradient>
+                </defs>
+                <g fill="url(#monoInk)"><text class="doors__ltr"></text><text class="doors__amp">&amp;</text><text class="doors__ltr"></text></g>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <button class="doors__replay" type="button" hidden>▶ Посмотреть, как откроются двери</button>
       </div>
     </section>
 
