@@ -614,7 +614,7 @@
     if (!el || DOORS.phase !== 'closed') return;
     DOORS.phase = 'opening';
     el.classList.add('is-open');
-    doorsLater(fireOpen, 1100);                     // створки распахнулись примерно на треть
+    doorsLater(fireOpen, 1500);                     // створки распахнулись примерно на треть
     doorsLater(function () {
       DOORS.phase = 'open';
       if (!EDITING) { dropDoors(); return; }
@@ -622,7 +622,7 @@
       el.classList.remove('is-open');
       var btn = el.querySelector('.doors__replay');
       if (btn) btn.disabled = false;
-    }, 3100);
+    }, 3500);
   }
 
   // Редактор: закрыть мгновенно, подождать и открыть, как увидит гость
@@ -666,7 +666,7 @@
     // закрытые двери — и они раздвигаются. Вкладка в фоне — ждём, пока её откроют;
     // обложка уже ушла с экрана (страницу вернули ниже) — двери не нужны
     var load = function (src) { return new Promise(function (res) { var i = new Image(); i.onload = i.onerror = res; i.src = src; }); };
-    var waits = ['sash-l.webp', 'sash-r.webp', 'sash-mask-l.png', 'sash-mask-r.png', 'medallion.webp'].map(function (f) { return load('assets/' + f); });
+    var waits = ['door-l.webp', 'door-r.webp', 'medallion.webp'].map(function (f) { return load('assets/' + f); });
     if (document.fonts && document.fonts.load) waits.push(document.fonts.load('100px "HamiltoneSHA"', monoLetters().join('')));
     var started = false;
     var go = function () {
