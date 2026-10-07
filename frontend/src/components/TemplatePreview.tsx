@@ -1,5 +1,5 @@
 'use client';
-import { planSections } from '@/lib/plans';
+import { planSections, isBrandFree } from '@/lib/plans';
 import { TEMPLATE_DEFAULTS } from '@/lib/constants';
 import dynamic from 'next/dynamic';
 import { isStudioTemplate } from '@/lib/studioTemplates';
@@ -25,6 +25,8 @@ export interface ScheduleItem { time: string; title: string; icon: string; }
 export interface InviteData {
   templateId: string;
   plan?: string;
+  /** draft | paid | published — вместе с тарифом решает, показывать ли бренд WeddingCraft */
+  status?: string;
   groomName: string;
   brideName: string;
   weddingDate: string;
@@ -59,7 +61,8 @@ interface Props {
 }
 
 export default function TemplatePreview({ data, apiBase, fullPage, slug, editing }: Props) {
-  data = { ...data, enabledSections: planSections(data.plan, data.enabledSections), customData: { ...data.customData, plan: data.plan } };
+  // wcBrand — подпись «Создано на WeddingCraft» и водяной знак; их рисуют assets/signature.js и assets/brand.js внутри страницы шаблона
+  data = { ...data, enabledSections: planSections(data.plan, data.enabledSections), customData: { ...data.customData, plan: data.plan, wcBrand: !isBrandFree(data.plan, data.status) } };
   // «Программа дня» не должна оказаться пустой ни у гостей, ни в превью:
   // пустые/битые данные (старые записи в БД) подменяем дефолтами дизайна.
   if (!Array.isArray(data.schedule) || data.schedule.length === 0) {

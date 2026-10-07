@@ -3,7 +3,7 @@ export type Plan = 'free' | 'premium' | 'maximum';
 export const PLANS = [
   {
     id: 'free', name: 'Бесплатный', price: 0, period: 'бесплатно, без срока действия',
-    features: ['Сайт-приглашение по любому шаблону', 'Имена, дата, тексты и фотографии', 'Музыкальный фон', 'Ссылка для гостей и привязка своего домена', 'Правки в любой момент'],
+    features: ['Сайт-приглашение по любому шаблону', 'Имена, дата, тексты и фотографии', 'Музыкальный фон', 'Ссылка для гостей и привязка своего домена', 'Правки в любой момент', 'Надпись «Создано на WeddingCraft» внизу сайта'],
     color: '#9a948a', popular: false, badge: '',
   },
   {
@@ -17,6 +17,13 @@ export const PLANS = [
     color: '#685d4a', popular: false, badge: 'Всё включено',
   },
 ];
+
+/** Платный сайт показывается без подписи «Создано на WeddingCraft» и водяного знака
+    (общие модули шаблонов assets/signature.js и assets/brand.js). С брендом — бесплатный
+    тариф и демо; черновик, пока тариф не оплачен, тоже считается «с брендом». */
+export const isBrandFree = (plan?: string | null, status?: string | null): boolean =>
+  (status === 'paid' || status === 'published') &&
+  ['premium', 'maximum', 'pro', 'lite', 'basic', 'standard'].includes(plan || '');
 
 export const PLAN_TITLES: Record<string, string> = {
   free: 'Бесплатный', premium: 'Премиум', maximum: 'Максимум',

@@ -60,6 +60,8 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
         type: 'wc:data',
         payload: {
           plan: dataRef.current.plan,
+          // Показывать ли подпись «Создано на WeddingCraft» и водяной знак (считает TemplatePreview) — модуль ../assets/brand.js
+          wcBrand: dataRef.current.customData?.wcBrand,
           enabledSections: dataRef.current.enabledSections || {},
           apiBase,
           // Адрес сайта — куда слать анкету; без него (превью, демо) она не уходит

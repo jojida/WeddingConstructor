@@ -5,7 +5,11 @@
    скоро женятся. Это единственный канал, который растёт с каждой продажей
    и ничего не стоит.
 
-   Подключается ДО script.js шаблона. Рисуется сама, данных не ждёт.
+   Подключается ДО script.js шаблона. Только бесплатный тариф и демо:
+   на платных подписи нет. Открытая напрямую страница рисует подпись сама;
+   внутри страницы-хозяина (iframe) решение приходит от brand.js вместе с
+   данными сайта — wcBrand, см. TemplatePreview.tsx; если данных нет 6 секунд,
+   подпись рисуется по умолчанию.
    Ссылка размечена UTM — в Метрике переходы из приглашений видны отдельно
    от прочего трафика, с разбивкой по шаблону.
    ============================================================ */
@@ -17,8 +21,11 @@
   // В редакторе подпись не нужна: пара правит текст и не должна видеть рекламу
   // собственного сервиса поверх своего сайта.
   var EDITING = window.location.search.indexOf('editing=1') !== -1;
+  var FRAMED = false;
+  try { FRAMED = window.parent !== window; } catch (e) { FRAMED = true; }
 
   var box = null;
+  var decided = !FRAMED;                       // в iframe ждём решения по тарифу (set)
 
   /** Имя шаблона из пути /invite/<шаблон>/index.html — для utm_campaign. */
   function templateId() {
@@ -79,8 +86,10 @@
     box = null;
   }
 
-  /** Показать или убрать подпись. hidden:true — тариф с отключённой подписью. */
+  /** Показать или убрать подпись. hidden:true — платный тариф: подписи нет. */
   function set(opts) {
+    if (EDITING) return;                       // в редакторе подписи нет никогда
+    decided = true;
     if (opts && opts.hidden) { remove(); return; }
     build();
   }
@@ -88,7 +97,12 @@
   window.WCSignature = { set: set };
 
   if (!EDITING) {
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
-    else build();
+    if (!FRAMED) {
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+      else build();
+    } else {
+      // Решение по тарифу придёт вместе с данными; не пришло — подпись по умолчанию
+      setTimeout(function () { if (!decided) build(); }, 6000);
+    }
   }
 })();
