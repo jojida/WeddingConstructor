@@ -191,18 +191,85 @@ img, svg { display: block; max-width: 100%; }
   filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff);
 }
 
-/* Подпись под рамкой, вместе с ней наклонена (поворот у .pol). */
+/* ── Цветные плашки детей (и пары) ───────────────────────────────────────────
+   1) Пятно за вырезанным фото — .pol-bg: заливка (.pol-blob) и тот же контур,
+      сдвинутый чернилами (.pol-line), как плохо совмещённая печать. Это
+      CSS-маски по векторным SVG (assets/plaque-blob-*.svg): цвет — из темы.
+      Фото в рамке-«марке» не вырезано — пятна у него нет.
+   2) Подпись — мазок кисти (assets/plaque-brush-*.svg) с белым текстом; тянется
+      по ширине подписи, а у вырезанного фото закрывает ровный срез снизу.
+   Тема лежит в data-theme на .polaroids (поле «Цвета плашек» в редакторе). */
+.polaroids {
+  --blob-l: #2f6bf0; --blob-r: #ff5a4f;      /* «Яркая»: синее и красное пятна */
+  --plq-l:  #ff5d8f; --plq-r:  #8f4de0;      /*          розовая и фиолетовая плашки */
+  --txt-l:  #fff;    --txt-r:  #fff;
+}
+.polaroids[data-theme="sunset"] { --blob-l: #ff8a3d; --blob-r: #7b4fe0; --plq-l: #ffd23f; --plq-r: #ff5d8f; --txt-l: var(--ink); }
+.polaroids[data-theme="mint"]   { --blob-l: #19c3a6; --blob-r: #ffd23f; --plq-l: #3f4fe0; --plq-r: #ff5a4f; }
+.polaroids[data-theme="soft"]   { --blob-l: #a3b8e6; --blob-r: #f6b3c8; --plq-l: #e85d86; --plq-r: #5b7ee0; }
+.pol-l { --blob: var(--blob-l); --plq: var(--plq-l); --txt: var(--txt-l); }
+.pol-r { --blob: var(--blob-r); --plq: var(--plq-r); --txt: var(--txt-r); }
+
+.pol .pol-bg {
+  position: absolute; left: -4%; right: -4%; top: 6%; bottom: 2%;
+  z-index: 0; display: none; pointer-events: none;
+}
+.pol[data-cutout="1"] .pol-bg { display: block; }
+.pol-bg i, .pol-cap::before {
+  display: block;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: 100% 100%;  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.pol-bg i { position: absolute; inset: 0; }
+.pol-blob { background: var(--blob); }
+.pol-line { background: var(--ink); }
+.pol-l .pol-blob { -webkit-mask-image: url("assets/plaque-blob-l.svg");      mask-image: url("assets/plaque-blob-l.svg"); }
+.pol-l .pol-line { -webkit-mask-image: url("assets/plaque-blob-l-line.svg"); mask-image: url("assets/plaque-blob-l-line.svg"); }
+.pol-r .pol-blob { -webkit-mask-image: url("assets/plaque-blob-r.svg");      mask-image: url("assets/plaque-blob-r.svg"); }
+.pol-r .pol-line { -webkit-mask-image: url("assets/plaque-blob-r-line.svg"); mask-image: url("assets/plaque-blob-r-line.svg"); }
+/* вырезанное фото ставим на низ рамки: ровный срез фото — под плашкой */
+.pol[data-cutout="1"] .photo { object-position: 50% 100%; }
+
+/* Подпись: мазок кисти. Наклонена вместе с рамкой (поворот у .pol) и ещё чуть сама. */
 .pol .pol-cap {
   position: absolute;
   left: 50%; top: 100%;
-  transform: translate(-50%, 18%);
+  transform: translate(-50%, -50%) rotate(-2deg);
   z-index: 3;
+  width: max-content; max-width: 106%;
+  padding: .26em .95em .34em;
   font-family: var(--font-title);
-  font-size: 13cqw;
+  font-weight: 700;
+  font-size: 15cqw;
   line-height: 1;
-  color: var(--ink);
-  white-space: nowrap;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--txt);
   pointer-events: none;
+}
+.pol-r .pol-cap { transform: translate(-50%, -50%) rotate(1.6deg); }
+.pol[data-cutout="1"] .pol-cap { top: 92%; }
+.pol-cap::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: var(--plq);
+}
+.pol-l .pol-cap::before { -webkit-mask-image: url("assets/plaque-brush-l.svg"); mask-image: url("assets/plaque-brush-l.svg"); }
+.pol-r .pol-cap::before { -webkit-mask-image: url("assets/plaque-brush-r.svg"); mask-image: url("assets/plaque-brush-r.svg"); }
+
+/* Появление: пятно выскакивает с лёгким пружинным перелетом, мазок «проводится»
+   слева направо. Без движения (prefers-reduced-motion) всё стоит на месте. */
+.polaroids .pol-bg { transform: scale(.6) rotate(-8deg); opacity: 0;
+  transition: transform .9s cubic-bezier(.34, 1.56, .64, 1) .25s, opacity .35s ease .25s; }
+.polaroids.in .pol-bg { transform: none; opacity: 1; }
+.polaroids .pol-r .pol-bg { transform: scale(.6) rotate(8deg); transition-delay: .4s; }
+.polaroids.in .pol-r .pol-bg { transform: none; }
+.polaroids .pol-cap { clip-path: inset(-20% 100% -20% -10%); transition: clip-path .6s cubic-bezier(.4, 0, .2, 1) .8s; }
+.polaroids .pol-r .pol-cap { transition-delay: .95s; }
+.polaroids.in .pol-cap { clip-path: inset(-20% -10% -20% -10%); }
+@media (prefers-reduced-motion: reduce) {
+  .polaroids .pol-bg, .polaroids .pol-r .pol-bg { transform: none; opacity: 1; transition: none; }
+  .polaroids .pol-cap { clip-path: none; transition: none; }
 }
 
 /* Наведение: полароид подрастает, сохраняя свой наклон, и выходит вперёд.

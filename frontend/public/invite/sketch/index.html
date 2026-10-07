@@ -35,16 +35,21 @@
         </div>
       </div>
 
-      <div class="polaroids fu fu-d2">
+      <!-- Вырезанное фото стоит на цветном пятне (pol-bg: заливка + смещённый контур
+           чернилами), подпись — мазок кисти с белым текстом. У фото в рамке-«марке»
+           пятна нет, подпись садится на нижний край рамки. Цвета — тема data-theme -->
+      <div class="polaroids fu fu-d2" data-theme="bright">
         <div class="pol pol-l" data-cutout="1">
+          <div class="pol-bg" aria-hidden="true"><i class="pol-blob"></i><i class="pol-line"></i></div>
           <img decoding="async" class="photo" src="assets/photo-groom-cutout.png" alt="Жених" data-edit="groomPhoto">
           <img decoding="async" class="frame" src="assets/frame-stamp-red.svg" alt="">
-          <span class="pol-cap" data-edit="groomCaption">Жених</span>
+          <span class="pol-cap"><span class="pol-cap-t" data-edit="groomCaption">Жених</span></span>
         </div>
         <div class="pol pol-r" data-cutout="1">
+          <div class="pol-bg" aria-hidden="true"><i class="pol-blob"></i><i class="pol-line"></i></div>
           <img decoding="async" class="photo" src="assets/photo-bride-cutout.png?v=hair2" alt="Невеста" data-edit="bridePhoto">
           <img decoding="async" class="frame" src="assets/frame-stamp-yellow.svg" alt="">
-          <span class="pol-cap" data-edit="brideCaption">Невеста</span>
+          <span class="pol-cap"><span class="pol-cap-t" data-edit="brideCaption">Невеста</span></span>
         </div>
       </div>
     </section>

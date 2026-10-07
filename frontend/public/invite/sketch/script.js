@@ -84,6 +84,14 @@
     }
   }
 
+  // ─── Цвета плашек на обложке (пятна за фото и подписи) ──
+  // Темы описаны в styles.css (.polaroids[data-theme]); не задана или неизвестна — «Яркая»
+  var PLAQUE_THEMES = ['bright', 'sunset', 'mint', 'soft'];
+  function applyPlaqueTheme(theme) {
+    var box = document.querySelector('.polaroids');
+    if (box) box.setAttribute('data-theme', PLAQUE_THEMES.indexOf(theme) >= 0 ? theme : PLAQUE_THEMES[0]);
+  }
+
   // ─── «Наш день»: подсветка дня + соседи N-2 N-1 [N] N+1 N+2 ──
   function applyOurDay(dateStr) {
     if (!dateStr) return;
@@ -323,6 +331,7 @@
 
     setRichText('groomCaption', d.groomCaption);
     setRichText('brideCaption', d.brideCaption);
+    applyPlaqueTheme(d.plaqueTheme);
     setImg('groomPhoto', d.groomPhoto);
     setImg('bridePhoto', d.bridePhoto);
     ['groomPhoto', 'bridePhoto'].forEach(function (id) {

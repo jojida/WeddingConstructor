@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import { InviteData } from './TemplatePreview';
 import { SKETCH_DEMO_PHOTOS } from '@/lib/sketch-demo-photos';
 
@@ -10,6 +10,15 @@ interface Props {
   slug?: string;
   editing?: boolean;
 }
+
+/* Цвета плашек обложки (те же, что .polaroids[data-theme] в public/invite/sketch/styles.css):
+   [пятно жениха, пятно невесты, плашка жениха, плашка невесты, текст на плашке жениха] */
+const PLAQUE_COLORS: Record<string, readonly [string, string, string, string, string]> = {
+  bright: ['#2f6bf0', '#ff5a4f', '#ff5d8f', '#8f4de0', '#fff'],
+  sunset: ['#ff8a3d', '#7b4fe0', '#ffd23f', '#ff5d8f', '#1c1c1c'],
+  mint:   ['#19c3a6', '#ffd23f', '#3f4fe0', '#ff5a4f', '#fff'],
+  soft:   ['#a3b8e6', '#f6b3c8', '#e85d86', '#5b7ee0', '#fff'],
+};
 
 /* ─────────────────────────────────────────────────────────────
    Шаблон «Скетч» — рисованное приглашение
@@ -113,6 +122,15 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
   const A = '/invite/sketch/assets';
   const groom = data?.groomName || 'Артем';
   const bride = data?.brideName || 'Екатерина';
+  const theme = data?.customData?.plaqueTheme;
+  const plaque = PLAQUE_COLORS[typeof theme === 'string' && theme in PLAQUE_COLORS ? theme : 'bright'];
+  // Векторная форма как маска: цвет задаётся заливкой (так же, как в самом приглашении)
+  const mask = (file: string): CSSProperties => ({
+    WebkitMaskImage: `url(${A}/${file})`, maskImage: `url(${A}/${file})`,
+    WebkitMaskSize: '100% 100%', maskSize: '100% 100%',
+    WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat',
+    WebkitMaskPosition: 'center', maskPosition: 'center',
+  });
 
   return (
     <div style={{
@@ -170,18 +188,30 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
         </div>
       </div>
 
-      {/* Вырезанные фото детей */}
+      {/* Вырезанные фото детей на цветных пятнах, подписи — мазки кисти */}
       <div style={{
         display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
         gap: 6, margin: '26px auto 4px', maxWidth: 400,
       }}>
         {([
-          [SKETCH_DEMO_PHOTOS.groomPhoto.resultUrl, 'rotate(-5deg)', 0],
-          [SKETCH_DEMO_PHOTOS.bridePhoto.resultUrl, 'rotate(4deg)', 14],
-        ] as const).map(([photo, transform, marginTop]) => (
-          <div key={photo} style={{ position: 'relative', width: '42%', aspectRatio: '148 / 201.5', transform, marginTop }}>
+          [SKETCH_DEMO_PHOTOS.groomPhoto.resultUrl, 'rotate(-5deg)', 0, 'l', plaque[0], plaque[2], plaque[4], 'Жених', -2],
+          [SKETCH_DEMO_PHOTOS.bridePhoto.resultUrl, 'rotate(4deg)', 14, 'r', plaque[1], plaque[3], '#fff', 'Невеста', 1.6],
+        ] as const).map(([photo, transform, marginTop, side, blob, plaquePaint, capColor, caption, capTilt]) => (
+          <div key={photo} style={{ position: 'relative', width: '42%', aspectRatio: '148 / 201.5', transform, marginTop, containerType: 'inline-size' }}>
+            <div aria-hidden style={{ position: 'absolute', left: '-4%', right: '-4%', top: '6%', bottom: '2%' }}>
+              <span style={{ position: 'absolute', inset: 0, background: blob, ...mask(`plaque-blob-${side}.svg`) }} />
+              <span style={{ position: 'absolute', inset: 0, background: ink, ...mask(`plaque-blob-${side}-line.svg`) }} />
+            </div>
             <img src={photo} alt=""
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)' }} />
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain', objectPosition: '50% 100%', filter: 'drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)' }} />
+            <span style={{
+              position: 'absolute', left: '50%', top: '92%', transform: `translate(-50%, -50%) rotate(${capTilt}deg)`,
+              width: 'max-content', maxWidth: '106%', padding: '.26em .95em .34em',
+              fontFamily: titleFont, fontWeight: 700, fontSize: '15cqw', lineHeight: 1, textAlign: 'center', color: capColor,
+            }}>
+              <span aria-hidden style={{ position: 'absolute', inset: 0, background: plaquePaint, ...mask(`plaque-brush-${side}.svg`) }} />
+              <span style={{ position: 'relative' }}>{caption}</span>
+            </span>
           </div>
         ))}
       </div>

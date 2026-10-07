@@ -516,6 +516,16 @@ export const SEAL_COLORS: ChoiceOption[] = [
   { value: 'blue',     label: 'Голубой', color: '#9fb8d6' },
 ];
 
+/* Цвета плашек обложки «Скетча»: цветные пятна за вырезанными фото и мазки-подписи.
+   value — data-theme в public/invite/sketch/styles.css (.polaroids[data-theme]);
+   образец в редакторе — два круга: пятно жениха и пятно невесты. */
+export const PLAQUE_THEMES: ChoiceOption[] = [
+  { value: 'bright', label: 'Яркая',          color: 'linear-gradient(135deg, #2f6bf0 50%, #ff5a4f 50%)' },
+  { value: 'sunset', label: 'Закат',          color: 'linear-gradient(135deg, #ff8a3d 50%, #7b4fe0 50%)' },
+  { value: 'mint',   label: 'Мята и лимон',   color: 'linear-gradient(135deg, #19c3a6 50%, #ffd23f 50%)' },
+  { value: 'soft',   label: 'Нежная',         color: 'linear-gradient(135deg, #a3b8e6 50%, #f6b3c8 50%)' },
+];
+
 export interface TemplateSection {
   id?: string;               // стабильный ключ в enabledSections / data-wc-section
   required?: boolean;        // обложка, дата, место и завершение остаются всегда
@@ -1303,8 +1313,9 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'groomPhoto', type: 'image', label: 'Фото жениха',  scope: 'custom', removeBackground: true },
         { id: 'bridePhoto', type: 'image', label: 'Фото невесты', scope: 'custom', removeBackground: true },
-        { id: 'groomCaption', type: 'text', label: 'Подпись под фото жениха',  scope: 'custom' },
-        { id: 'brideCaption', type: 'text', label: 'Подпись под фото невесты', scope: 'custom' },
+        { id: 'groomCaption', type: 'text', label: 'Подпись под фото жениха',  scope: 'custom', maxLength: 24 },
+        { id: 'brideCaption', type: 'text', label: 'Подпись под фото невесты', scope: 'custom', maxLength: 24 },
+        { id: 'plaqueTheme', type: 'choice', label: 'Цвета плашек', hint: 'Цветные пятна за вырезанными фото и подписи', scope: 'custom', options: PLAQUE_THEMES },
       ],
     },
     {
