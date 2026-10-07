@@ -3,6 +3,8 @@ import prisma from '../lib/prisma';
 import { tgSend } from '../lib/notify';
 import { telegramWebhookSecret } from '../lib/security';
 
+import { hasNotifications } from '../lib/plans';
+
 const router = Router();
 
 // POST /api/telegram/webhook — приём апдейтов от Telegram.
@@ -21,6 +23,10 @@ router.post('/webhook', async (req: Request, res: Response) => {
       const token = text.split(/\s+/)[1] || '';
       if (token) {
         const invite = await prisma.invitation.findFirst({ where: { telegramConnectToken: token } });
+        if (invite && !hasNotifications(invite.plan)) {
+          await tgSend(chatId, 'Telegram доступен в тарифах «Премиум» и «Максимум».');
+          return res.status(200).send('OK');
+        }
         if (invite) {
           const connected = await prisma.invitation.updateMany({
             where: { id: invite.id, telegramConnectToken: token },

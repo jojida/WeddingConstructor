@@ -14,6 +14,7 @@ process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'planner-guest-suite-secret-at-least-32-chars';
 process.env.DATABASE_URL = `file:${path.join(tmp, 'test.db').replace(/\\/g, '/')}`;
 for (const key of ['BREVO_API_KEY', 'SMTP_USER', 'SMTP_PASS', 'TELEGRAM_BOT_TOKEN', 'YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'PLANNER_PUBLIC']) process.env[key] = '';
+process.env.PLANNER_PUBLIC = '0';
 process.env.FREE_ACCOUNTS = 'guest-owner@example.test';
 const db = new DatabaseSync(path.join(tmp, 'test.db'));
 for (const dir of fs.readdirSync(path.join(root, 'prisma/migrations')).sort()) {
@@ -46,8 +47,8 @@ test('«Ваш стол» по персональной ссылке', async (t)
 
   const owner = await prisma.user.create({ data: { email: 'guest-owner@example.test' } });
   const tok = jwt.sign({ userId: owner.id }, process.env.JWT_SECRET);
-  const inv = await prisma.invitation.create({ data: { userId: owner.id, slug: 'guest-view', templateId: 'tenderness', status: 'paid', plan: 'premium' } });
-  const other = await prisma.invitation.create({ data: { userId: owner.id, slug: 'guest-view-other', templateId: 'calla', status: 'paid', plan: 'premium' } });
+  const inv = await prisma.invitation.create({ data: { userId: owner.id, slug: 'guest-view', templateId: 'tenderness', status: 'paid', plan: 'maximum' } });
+  const other = await prisma.invitation.create({ data: { userId: owner.id, slug: 'guest-view-other', templateId: 'calla', status: 'paid', plan: 'maximum' } });
   const P = (route) => `/api/planner/${inv.id}${route}`;
   const act = async (route, method, body) => {
     const r = await call(P(route), method, body, tok);
@@ -123,9 +124,9 @@ test('«Ваш стол» по персональной ссылке', async (t)
   });
 
   await t.test('тариф без функции, закрытый флаг, неоплаченный сайт', async () => {
-    await prisma.invitation.update({ where: { id: inv.id }, data: { plan: 'basic' } });
-    assert.equal((await resolve(guestA.token)).json.planner, null);
     await prisma.invitation.update({ where: { id: inv.id }, data: { plan: 'premium' } });
+    assert.equal((await resolve(guestA.token)).json.planner, null);
+    await prisma.invitation.update({ where: { id: inv.id }, data: { plan: 'maximum' } });
 
     // Владелец не из тестовых аккаунтов: пока PLANNER_PUBLIC не включён, плашки нет
     process.env.FREE_ACCOUNTS = '';
@@ -134,7 +135,7 @@ test('«Ваш стол» по персональной ссылке', async (t)
       process.env.PLANNER_PUBLIC = '1';
       assert.equal((await resolve(guestA.token)).json.planner.tables[0].name, '5');
     } finally {
-      process.env.PLANNER_PUBLIC = '';
+      process.env.PLANNER_PUBLIC = '0';
       process.env.FREE_ACCOUNTS = 'guest-owner@example.test';
     }
 

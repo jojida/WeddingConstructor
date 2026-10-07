@@ -14,6 +14,7 @@ process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'planner-print-suite-secret-at-least-32-chars';
 process.env.DATABASE_URL = `file:${path.join(tmp, 'test.db').replace(/\\/g, '/')}`;
 for (const key of ['BREVO_API_KEY', 'SMTP_USER', 'SMTP_PASS', 'TELEGRAM_BOT_TOKEN', 'YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'PLANNER_PUBLIC']) process.env[key] = '';
+process.env.PLANNER_PUBLIC = '0';
 process.env.FREE_ACCOUNTS = 'print-owner@example.test';
 const db = new DatabaseSync(path.join(tmp, 'test.db'));
 for (const dir of fs.readdirSync(path.join(root, 'prisma/migrations')).sort()) {
@@ -229,7 +230,7 @@ test('PDF: владелец получает файлы, чужой и тари�
   const stranger = await prisma.user.create({ data: { email: 'print-stranger@example.test' } });
   const tok = jwt.sign({ userId: owner.id }, process.env.JWT_SECRET);
   const other = jwt.sign({ userId: stranger.id }, process.env.JWT_SECRET);
-  const inv = await prisma.invitation.create({ data: { userId: owner.id, slug: 'print-wedding', templateId: 'tenderness', status: 'paid', plan: 'premium', groomName: 'Андрей', brideName: 'Екатерина', weddingDate: '2027-06-19' } });
+  const inv = await prisma.invitation.create({ data: { userId: owner.id, slug: 'print-wedding', templateId: 'tenderness', status: 'paid', plan: 'maximum', groomName: 'Андрей', brideName: 'Екатерина', weddingDate: '2027-06-19' } });
   const call = async (route, method = 'GET', body, token = tok) => {
     const res = await fetch(`${base}/api/planner/${inv.id}${route}`, {
       method, headers: { ...(body ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -280,6 +281,6 @@ test('PDF: владелец получает файлы, чужой и тари�
     assert.equal((await call('/print/menu', 'POST', { text: 'x'.repeat(3001) })).status, 400);
     await prisma.invitation.update({ where: { id: inv.id }, data: { plan: 'basic' } });
     try { assert.equal((await call('/print/cards', 'POST', {})).status, 403); }
-    finally { await prisma.invitation.update({ where: { id: inv.id }, data: { plan: 'premium' } }); }
+    finally { await prisma.invitation.update({ where: { id: inv.id }, data: { plan: 'maximum' } }); }
   });
 });

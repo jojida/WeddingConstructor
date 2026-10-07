@@ -21,8 +21,9 @@ type PayState = 'checking' | 'paid' | 'stalled';
 function SuccessContent() {
   const searchParams = useSearchParams();
   const inviteId = searchParams.get('id') || '';
+  const targetPlan = searchParams.get('plan') || '';
   /* Тестовому аккаунту кассу не показывали — поздравлять с оплатой нечестно. */
-  const isFree = !!useAuthStore((st) => st.user)?.free;
+  const isFree = !!useAuthStore((st) => st.user)?.free || targetPlan === 'free';
   const [invite, setInvite] = useState<any>(null);
   const [state, setState] = useState<PayState>('checking');
   const [paymentStatus, setPaymentStatus] = useState('');
@@ -46,7 +47,7 @@ function SuccessContent() {
         // с другого устройства или потерял сессию.
         const st = await api.get(`/api/payment/public-status/${inviteId}`);
         if (st.data.paymentStatus) setPaymentStatus(st.data.paymentStatus);
-        if (st.data.paid) {
+        if (st.data.paid && (!targetPlan || st.data.plan === targetPlan)) {
           stop();
           reachGoal(GOAL.paymentSuccess, { plan: st.data.plan });
           setInvite({ id: inviteId, slug: st.data.slug, plan: st.data.plan });
@@ -61,7 +62,7 @@ function SuccessContent() {
 
     timerRef.current = setInterval(check, POLL_MS);
     check();
-  }, [inviteId]);
+  }, [inviteId, targetPlan]);
 
   useEffect(() => { startPolling(); return stop; }, [startPolling]);
 

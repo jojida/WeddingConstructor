@@ -81,7 +81,7 @@ model Invitation {
   // Payment
   paymentId     String   @default("")
   paidAt        DateTime?
-  plan          String   @default("basic") // basic | standard | premium
+  plan          String   @default("basic") // free | premium | maximum; старые basic | lite | standard | pro
 
   // Custom domain (MVP — хранится домен + показывается DNS-инструкция)
   customDomain  String   @default("")

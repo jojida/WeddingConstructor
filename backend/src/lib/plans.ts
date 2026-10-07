@@ -1,39 +1,30 @@
-// Тарифы и общие хелперы продукта.
-//
-// Функциональных уровня три:
-//   • лайт         — lite    (сайт + RSVP, ответы только в кабинете)
-//   • базовый      — basic   (+ уведомления об ответах и фоновая музыка)
-//   • продвинутый  — premium (+ кабинет гостей, персональные ссылки, свой домен)
-// Ранее существовал 'standard' — в старых dev-записях мог сохраниться,
-// по возможностям он равен базовому.
+// Тарифы: Бесплатный / Премиум / Максимум. Старые lite/basic/standard/pro не продаются.
+export type Plan = 'free' | 'premium' | 'maximum';
+export const PLANS = {
+  free: { price: 0, label: 'Бесплатный', rank: 0 },
+  premium: { price: 249000, label: 'Премиум', rank: 1 },
+  maximum: { price: 399000, label: 'Максимум', rank: 2 },
+};
+const full = (plan?: string | null) => plan === 'premium' || plan === 'maximum' || plan === 'pro';
+export const hasRsvp = (plan?: string | null): boolean => full(plan) || plan === 'lite' || plan === 'basic' || plan === 'standard';
+export const hasResponseStats = hasRsvp;
+export const hasNotifications = (plan?: string | null): boolean => full(plan) || plan === 'basic' || plan === 'standard';
+export const hasMusic = (plan?: string | null): boolean => plan === 'free' || hasNotifications(plan);
+export const isAdvanced = (plan?: string | null): boolean => full(plan);
+export const hasCustomDomain = (plan?: string | null): boolean => plan === 'free' || full(plan);
+export const hasPlanner = (plan?: string | null): boolean => plan === 'maximum' || plan === 'pro';
 
-export type Plan = 'lite' | 'basic' | 'premium';
-
-/** Уведомления об ответах гостей (Telegram, почта) — с «Базового». */
-export function hasNotifications(plan: string | null | undefined): boolean {
-  return plan === 'basic' || plan === 'premium' || plan === 'standard';
+export const FREE_LOCKED_SECTIONS = ['venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
+export function planSections(plan?: string | null, enabledSections: Record<string, boolean> = {}) {
+  return plan === 'free'
+    ? { ...enabledSections, ...Object.fromEntries(FREE_LOCKED_SECTIONS.map(id => [id, false])) }
+    : plan === 'premium' ? { ...enabledSections, menu: false } : enabledSections;
 }
 
-/** Фоновая мелодия в приглашении — с «Базового». */
-export function hasMusic(plan: string | null | undefined): boolean {
-  return plan === 'basic' || plan === 'premium' || plan === 'standard';
-}
-
-/** Продвинутый тариф (Премиум): доступны кабинет гостей и персональные ссылки. */
-export function isAdvanced(plan: string | null | undefined): boolean {
-  return plan === 'premium';
-}
-
-/** Тарифы с привязкой собственного домена. */
-export function hasCustomDomain(plan: string | null | undefined): boolean {
-  return plan === 'premium';
-}
-
-/** Меню и рассадка гостей (кабинет «Планировщик»). Один выключатель на все её роуты:
-    когда тарифы Бесплатный / Премиум / Про получат состав, правится только эта функция,
-    а не проверки по роутам. */
-export function hasPlanner(plan: string | null | undefined): boolean {
-  return plan === 'premium' || plan === 'pro';
+export function planPriceDue(plan: keyof typeof PLANS, currentPlan?: string, published = false): number {
+  const current = currentPlan && Object.prototype.hasOwnProperty.call(PLANS, currentPlan)
+    ? PLANS[currentPlan as keyof typeof PLANS] : undefined;
+  return Math.max(0, PLANS[plan].price - (published ? current?.price ?? 0 : 0));
 }
 
 /** Печатные PDF по рассадке и меню. Пока входят туда же, где сама рассадка,

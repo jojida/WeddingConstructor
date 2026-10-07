@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
 import api from '@/lib/api';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
+import { isPlanSectionLocked } from '@/lib/plans';
 import { isSectionEnabled } from '@/lib/section-visibility';
 import { withSketchDemoPhotos } from '@/lib/sketch-demo-photos';
 import { useAuthStore } from '@/store/auth';
@@ -44,6 +45,7 @@ export interface InviteData {
   musicUrl: string;
   slug: string;
   status: string;
+  plan?: string;
   enabledSections: Record<string, boolean>;
   customData: Record<string, any>;
 }
@@ -123,8 +125,7 @@ function SetupStep({ templateId, onComplete, initialData }: {
 
   const handleSubmit = () => {
     // Обязательны имена, дата и время. Место и адрес можно указать позже:
-    // пока их нет, в приглашении пример из шаблона, а перед оплатой редактор
-    // попросит их заполнить (handleShare).
+    // они входят в «Премиум» и «Максимум», а в бесплатном тарифе скрыты.
     const next: Partial<Record<SetupKey, string>> = {};
     if (!groomName.trim()) next.groomName = 'Введите имя жениха';
     if (!brideName.trim()) next.brideName = 'Введите имя невесты';
@@ -591,19 +592,7 @@ function EditorContent() {
   const handleShare = async () => {
     if (isPublished) { router.push('/dashboard'); return; }
     if (!data.brideName && !data.groomName) { toast.error('Введите имена'); return; }
-    // Место и адрес на старте можно пропустить — тогда в приглашении пример из
-    // шаблона. Перед оплатой не даём уйти гостям с пустым или чужим адресом.
-    const venue = (data.venue || '').trim();
-    const address = (data.venueAddress || '').trim();
-    if (!venue || !address) {
-      toast.error('Укажите место и адрес свадьбы — без них гости не найдут, куда ехать');
-      return;
-    }
-    const defs = TEMPLATE_DEFAULTS[data.templateId];
-    if ((defs?.venue && venue === defs.venue) || (defs?.venueAddress && address === defs.venueAddress)) {
-      // Не блокируем: вдруг площадка пары и правда совпала с примером
-      if (!window.confirm(`Место и адрес сейчас как в примере шаблона:\n«${venue}», ${address}\n\nВсё верно?`)) return;
-    }
+    // Тариф выбирается на следующем шаге; для бесплатной публикации место не требуется.
     if (!user) { setShowAuthModal(true); return; }
     if (await saveToServer()) router.push(`/payment?id=${data.id}`);
   };
@@ -767,7 +756,8 @@ function EditorContent() {
               </p>}
 
               {sections ? sections.map(section => {
-                const enabled = isSectionEnabled(section, data.enabledSections, data.customData?.showMap);
+                const locked = isPlanSectionLocked(data.plan, section.id);
+                const enabled = !locked && isSectionEnabled(section, data.enabledSections, data.customData?.showMap);
                 const open = enabled && openNow === section.title;
                 const ids = section.fields.map(f => f.id);
                 return (
@@ -783,18 +773,19 @@ function EditorContent() {
                         onClick={e => toggleSection(section, e.currentTarget)}>
                         <span className={styles.sectionLabel}>
                           <span>{section.icon ? section.icon + ' ' : ''}{section.title}</span>
-                          {section.required && <small>Обязательный блок</small>}
-                          {!enabled && <small>Убран с сайта</small>}
+                          {section.required && !locked && <small>Обязательный блок</small>}
+                          {!enabled && <small>{locked ? (section.id === 'menu' ? 'Доступен в тарифе «Максимум»' : 'Доступен с тарифа «Премиум»') : 'Убран с сайта'}</small>}
                         </span>
                         <span className={styles.sectionChevron} aria-hidden="true">›</span>
                       </button>
                       {section.id && <button type="button" role="switch" aria-checked={enabled}
-                        aria-label={`${section.title}: показывать на сайте`} disabled={section.required}
-                        title={section.required ? 'Этот блок всегда остаётся на сайте' : enabled ? 'Убрать блок с сайта' : 'Вернуть блок на сайт'}
+                        aria-label={`${section.title}: показывать на сайте`} disabled={section.required || locked}
+                        title={locked ? 'Улучшите тариф, чтобы включить блок' : section.required ? 'Этот блок всегда остаётся на сайте' : enabled ? 'Убрать блок с сайта' : 'Вернуть блок на сайт'}
                         className={styles.sectionSwitch} onClick={() => setSectionEnabled(section, !enabled)}>
                         <span aria-hidden="true" />
                       </button>}
                     </div>
+                    {locked && <Link href={`/payment?id=${data.id}`} className={styles.sectionSetup}>Улучшить тариф →</Link>}
                     {open && (
                       <div className={styles.sectionBody} id={`section-body-${section.title}`}>
                         {section.fields.length === 0 && (section.required

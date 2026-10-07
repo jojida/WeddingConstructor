@@ -15,6 +15,7 @@ process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'planner-suite-secret-at-least-32-characters-long';
 process.env.DATABASE_URL = `file:${path.join(tmp, 'test.db').replace(/\\/g, '/')}`;
 for (const key of ['RESEND_API_KEY', 'BREVO_API_KEY', 'SMTP_USER', 'SMTP_PASS', 'TELEGRAM_BOT_TOKEN', 'YOOKASSA_SHOP_ID', 'YOOKASSA_SECRET_KEY', 'YUMONEY_SHOP_ID', 'YUMONEY_SECRET_KEY', 'FREE_ACCOUNTS', 'PLANNER_PUBLIC']) process.env[key] = '';
+process.env.PLANNER_PUBLIC = '0';
 const db = new DatabaseSync(path.join(tmp, 'test.db'));
 for (const dir of fs.readdirSync(path.join(root, 'prisma/migrations')).sort()) {
   const file = path.join(root, 'prisma/migrations', dir, 'migration.sql');
@@ -220,7 +221,7 @@ test('меню и рассадка на изолированной базе', as
   const tok = sign(owner), otherTok = sign(stranger);
   process.env.FREE_ACCOUNTS = 'planner-owner@example.test, planner-stranger@example.test';
 
-  const mk = (userId, slug, plan = 'premium') => prisma.invitation.create({ data: { userId, slug, templateId: 'calla', status: 'paid', plan } });
+  const mk = (userId, slug, plan = 'maximum') => prisma.invitation.create({ data: { userId, slug, templateId: 'calla', status: 'paid', plan } });
   const inv = await mk(owner.id, 'planner-main');
   const P = (route = '') => `/api/planner/${inv.id}${route}`;
   const snap = async () => (await call(P(), 'GET', undefined, tok)).json;
@@ -251,7 +252,7 @@ test('меню и рассадка на изолированной базе', as
     assert.equal(closed.json.code, 'beta');
     process.env.PLANNER_PUBLIC = '1';
     try { assert.equal((await call(`/api/planner/${customerInv.id}`, 'GET', undefined, sign(closedFor))).status, 200); }
-    finally { process.env.PLANNER_PUBLIC = ''; }
+    finally { process.env.PLANNER_PUBLIC = '0'; }
     // /auth/me сообщает интерфейсу, открыт ли раздел
     assert.equal((await call('/api/auth/me', 'GET', undefined, tok)).json.planner, true);
     assert.equal((await call('/api/auth/me', 'GET', undefined, sign(closedFor))).json.planner, false);

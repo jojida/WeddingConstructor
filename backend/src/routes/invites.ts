@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { isPaid, hasCustomDomain, hasMusic } from '../lib/plans';
+import { isPaid, hasCustomDomain, hasMusic, hasNotifications, planSections } from '../lib/plans';
 import { botUsername } from '../lib/telegram';
 import { validInviteInput } from '../lib/inviteValidation';
 import { normalizeEmail } from '../lib/security';
@@ -39,14 +39,12 @@ function stripPrivate(invite: any) {
 function publicInvite(invite: any) {
   return {
     ...stripPrivate(invite),
-    // Фоновая мелодия входит в «Базовый» и «Премиум»: на «Лайте» её просто
-    // не отдаём гостям, даже если файл был загружен до смены тарифа.
     musicUrl: hasMusic(invite.plan) ? invite.musicUrl : '',
     galleryPhotos: parseArr(invite.galleryPhotos),
     schedule: parseArr(invite.schedule),
     dressCodeColors: parseArr(invite.dressCodeColors),
-    enabledSections: parseObj(invite.enabledSections),
-    customData: parseObj(invite.customData),
+    enabledSections: planSections(invite.plan, parseObj(invite.enabledSections)),
+    customData: { ...parseObj(invite.customData), plan: invite.plan },
   };
 }
 
@@ -93,7 +91,7 @@ router.post('/', authMiddleware, rateLimit(20, 60 * 60_000, req => (req as AuthR
     const { templateId = 'calla' } = req.body;
     const slug = generateSlug('', '');
     const invite = await prisma.invitation.create({
-      data: { userId: req.userId!, templateId, slug },
+      data: { userId: req.userId!, templateId, slug, plan: 'premium' },
     });
     res.json({ ...invite, galleryPhotos: parseArr(invite.galleryPhotos), schedule: parseArr(invite.schedule),
       dressCodeColors: parseArr(invite.dressCodeColors), enabledSections: parseObj(invite.enabledSections), customData: parseObj(invite.customData) });
@@ -183,6 +181,7 @@ router.patch('/:id/settings', authMiddleware, async (req: AuthRequest, res: Resp
   if (req.body.notifyChannel != null) {
     const ch = String(req.body.notifyChannel);
     if (!['none', 'telegram', 'email'].includes(ch)) return res.status(400).json({ error: 'Неверный канал' });
+    if (ch !== 'none' && !hasNotifications(invite.plan)) return res.status(403).json({ error: 'Уведомления доступны в «Премиум» и «Максимум»' });
     data.notifyChannel = ch;
   }
   if (req.body.notifyEmail != null) {
@@ -236,6 +235,8 @@ router.patch('/:id/slug', authMiddleware, async (req: AuthRequest, res: Response
 router.post('/:id/telegram-connect', authMiddleware, async (req: AuthRequest, res: Response) => {
   const invite = await prisma.invitation.findUnique({ where: { id: req.params.id as string } });
   if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
+
+  if (!hasNotifications(invite.plan)) return res.status(403).json({ error: 'Telegram доступен в «Премиум» и «Максимум»' });
 
   let token = invite.telegramConnectToken;
   if (!token) {

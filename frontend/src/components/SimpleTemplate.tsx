@@ -97,7 +97,7 @@ export default function SimpleTemplate({ data, apiBase }: Props) {
       )}
 
       {/* Venue */}
-      {on('event') && (data.venue || data.venueAddress) && (
+      {on('event') && on('venue') && (data.venue || data.venueAddress) && (
         <>
           <div className={styles.section}>
             <span className={styles.sectionTitle}>📍 Место проведения</span>

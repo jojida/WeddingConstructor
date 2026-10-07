@@ -6,7 +6,7 @@ import { plannerDenial } from '../lib/planner/access';
 import { reconcile } from '../lib/planner/roster';
 import { cleanPeople, loadPublicMenu, peopleAnswer } from '../lib/planner/public';
 import { errName } from '../lib/planner/util';
-import { isPaid } from '../lib/plans';
+import { isPaid, hasRsvp, hasResponseStats } from '../lib/plans';
 import { inviteDrinkLabels } from '../lib/drinks';
 import { rateLimit } from '../middleware/rateLimit';
 import { Attendance, attendanceOf, cleanAnswers, isAttendance, parseAnswers, summarizeAnswers } from '../lib/rsvpDetails';
@@ -23,6 +23,8 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
     if (!isPaid(invite.status)) {
       return res.status(402).json({ error: 'Сайт ещё не опубликован — анкета заработает после оплаты' });
     }
+
+    if (!hasRsvp(invite.plan)) return res.status(403).json({ error: 'Анкета доступна в «Премиум» и «Максимум»' });
 
     const { guestName, attending, attendance, drinkChoice, wishes, guestToken, guestsCount, childrenCount, answers } = req.body;
     // Новые анкеты шлют attendance (yes | no | maybe), старые страницы — только attending
@@ -130,6 +132,8 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
   if (!invite || invite.userId !== req.userId) {
     return res.status(403).json({ error: 'Нет доступа' });
   }
+
+  if (!hasResponseStats(invite.plan)) return res.status(403).json({ error: 'Ответы гостей доступны в «Премиум» и «Максимум»' });
 
   const rows = await prisma.guestResponse.findMany({
     where: { invitationId },

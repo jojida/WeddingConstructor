@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
+import { PLAN_TITLES, hasResponseStats, isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
 
 // Рассадка грузится, только когда открыта её вкладка: остальным владельцам этот код ни к чему
 const PlannerSection = dynamic(() => import('@/components/planner/PlannerSection'), {
@@ -86,7 +86,7 @@ export default function ManageInvitePage() {
   const TABS: { key: Tab; label: string; show: boolean }[] = [
     { key: 'responses', label: '📋 Ответы', show: true },
     { key: 'guests',    label: '👥 Гости', show: true },
-    // «Меню и рассадка»: пока открыта только тестовым аккаунтам (флаг приходит с сервера)
+    // Сервер может временно закрыть планировщик флагом окружения.
     { key: 'seating',   label: '🪑 Рассадка', show: !!user?.planner },
     { key: 'menu',      label: '🍽 Меню', show: !!user?.planner },
     { key: 'print',     label: '🖨 Печать', show: !!user?.planner },
@@ -105,6 +105,7 @@ export default function ManageInvitePage() {
               Тариф: <b>{PLAN_TITLES[invite.plan] || invite.plan}</b>
               {/* Тестовому аккаунту тариф нужно гонять туда-обратно: обычная
                   ссылка «Улучшить тариф» на «Премиуме» уже не показывается. */}
+              {!user?.free && invite.plan !== 'maximum' && <Link href={`/payment?id=${invite.id}`} style={{ color: PRIMARY, marginLeft: 10 }}>Улучшить тариф →</Link>}
               {user?.free && (
                 <>
                   {' · '}
@@ -134,7 +135,7 @@ export default function ManageInvitePage() {
           ))}
         </div>
 
-        {tab === 'responses' && <ResponsesTab inviteId={invite.id} />}
+        {tab === 'responses' && (hasResponseStats(invite.plan) ? <ResponsesTab inviteId={invite.id} /> : <ResponsesUpsell invite={invite} />)}
         {tab === 'guests'    && <GuestsTab invite={invite} advanced={advanced} origin={origin} />}
         {/* Рассадка, меню и печать — один экземпляр раздела: при переключении гости не перезагружаются */}
         {(tab === 'seating' || tab === 'menu' || tab === 'print') && (hasPlanner(invite.plan)
@@ -145,6 +146,14 @@ export default function ManageInvitePage() {
       </div>
     </div>
   );
+}
+
+function ResponsesUpsell({ invite }: { invite: Invite }) {
+  return <div style={{ background: '#fff', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
+    <h3 style={{ margin: '0 0 12px' }}>Анкета и ответы гостей — с тарифа «Премиум»</h3>
+    <p style={{ color: '#7d766c', marginBottom: 20 }}>Собирайте ответы гостей и смотрите таблицы и статистику в личном кабинете.</p>
+    <Link href={`/payment?id=${invite.id}`} className="btn-primary">Улучшить тариф →</Link>
+  </div>;
 }
 
 // ─── Вкладка «Ответы» ──────────────────────────────────────────────────────
@@ -329,7 +338,7 @@ function PlannerUpsell({ invite }: { invite: Invite }) {
   return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>🪑</div>
-      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Меню и рассадка — на тарифе Премиум</h3>
+      <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Меню и рассадка — на тарифе Максимум</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
         Столы и места, выбор блюда у каждого гостя, карточки и план рассадки для печати — гости сами подтягиваются из ответов на анкету.
       </p>
@@ -349,7 +358,7 @@ function NotifyTab({ invite, userEmail, onSaved }: { invite: Invite; userEmail: 
       <div style={{ fontSize: 36, marginBottom: 8 }}>🔔</div>
       <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Уведомления — в тарифе «Премиум»</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
-        На вашем тарифе ответы гостей видны во вкладке «Ответы». В «Премиуме» каждый новый ответ
+        В «Премиуме» и «Максимуме» каждый новый ответ
         приходит сразу в Telegram или на почту — проверять кабинет не нужно.
       </p>
       <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
@@ -639,8 +648,6 @@ function SiteAddressCard({ invite, origin, onSaved }: { invite: Invite; origin: 
 }
 
 // ─── helpers ─────────────────────────────────────────────────────────────
-/* Названия тарифов: сейчас продаётся один «Премиум», у старых сайтов остались Лайт и Базовый */
-const PLAN_TITLES: Record<string, string> = { lite: 'Лайт', basic: 'Базовый', standard: 'Базовый', premium: 'Премиум' };
 
 const MAYBE_COLOR = '#b8862e';
 const STATUS_COLOR: Record<Attendance, string> = { yes: '#2e8b57', maybe: MAYBE_COLOR, no: '#b85c5c' };

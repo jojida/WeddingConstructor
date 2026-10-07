@@ -396,52 +396,7 @@ export const _TEMPLATES_LEGACY = [
   },
 ];
 
-/* Продаётся один тариф — «Премиум», в нём всё. «Лайт» и «Базовый» больше не
-   продаются, но остаются у уже оплаченных сайтов: их функции по-прежнему
-   считают hasNotifications / hasMusic / isAdvancedPlan / hasCustomDomain.
-   Цену держать в согласии с backend/src/routes/payment.ts (там — в копейках). */
-export const PLANS = [
-  {
-    id: 'premium',
-    name: 'Премиум',
-    price: 2490,
-    period: 'разовая оплата за один сайт',
-    features: [
-      'Сайт-приглашение по любому шаблону',
-      'Анкета для гостей и ответы в личном кабинете',
-      'Уведомления об ответах в Telegram или на Email',
-      'Музыкальный фон',
-      'Карта с маршрутом до места',
-      'Личный кабинет гостей и персональные ссылки с именным обращением',
-      'Привязка своего домена',
-      'Правки в любой момент',
-    ],
-    color: '#c9a96e',
-    popular: true,
-    badge: 'Всё включено',
-  },
-];
-
-/** Уведомления об ответах гостей в Telegram и на почту — с «Базового». */
-export const hasNotifications = (plan?: string | null): boolean =>
-  plan === 'basic' || plan === 'premium' || plan === 'standard';
-
-/** Фоновая мелодия в приглашении — с «Базового». */
-export const hasMusic = (plan?: string | null): boolean =>
-  plan === 'basic' || plan === 'premium' || plan === 'standard';
-
-/** Продвинутый тариф (Премиум): личный кабинет гостей + персональные ссылки. */
-export const isAdvancedPlan = (plan?: string | null): boolean =>
-  plan === 'premium';
-
-/** Тарифы с привязкой собственного домена. */
-export const hasCustomDomain = (plan?: string | null): boolean =>
-  plan === 'premium';
-
-/** Меню и рассадка гостей (кабинет «Планировщик»). Одна функция на все проверки — как hasPlanner
-    на бэкенде (backend/src/lib/plans.ts): когда тарифы получат новый состав, правим только их. */
-export const hasPlanner = (plan?: string | null): boolean =>
-  plan === 'premium' || plan === 'pro';
+export { PLANS, PLAN_TITLES, hasRsvp, hasResponseStats, hasNotifications, hasMusic, isAdvancedPlan, hasCustomDomain, hasPlanner } from './plans';
 
 /** «гость» в нужной форме: 1 гость, 2 гостя, 5 гостей, 21 гость. */
 export function guestsWord(n: number): string {

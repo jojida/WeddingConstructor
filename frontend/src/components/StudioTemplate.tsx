@@ -56,6 +56,7 @@ export default function StudioTemplate({ data, apiBase, fullPage, slug, editing 
         type: 'wc:data',
         payload: {
           ...(d.customData || {}),
+          enabledSections: d.enabledSections || {},
           apiBase,
           slug: slug || '',
           groomName: d.groomName,

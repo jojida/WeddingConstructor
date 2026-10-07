@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { TEMPLATES, guestsWord } from '@/lib/constants';
+import { TEMPLATES, guestsWord, hasResponseStats } from '@/lib/constants';
 import styles from './page.module.css';
 
 interface Invite {
@@ -70,7 +70,7 @@ export default function DashboardPage() {
   // «Управление». Ответы бывают только у опубликованных сайтов.
   const [rsvp, setRsvp] = useState<Record<string, RsvpStats>>({});
   useEffect(() => {
-    invites.filter(isPublished).forEach(inv => {
+    invites.filter(inv => isPublished(inv) && hasResponseStats(inv.plan)).forEach(inv => {
       api.get(`/api/rsvp/${inv.id}`)
         .then(res => setRsvp(prev => ({ ...prev, [inv.id]: res.data.stats })))
         .catch(() => {});

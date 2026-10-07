@@ -528,7 +528,7 @@
   gap: 20px;
   max-width: 1020px;
   margin: 0 auto;
-  align-items: start;
+  align-items: stretch;
 }
 /* Один тариф — одна карточка по центру, не растянутая на всю ширину */
 .pricingGridSingle {
@@ -544,7 +544,10 @@
   color: var(--on-surface-variant, #7d766c);
 }
 
+.planExcluded { margin: -8px 0 24px; color: var(--on-surface-variant); font-size: 13px; line-height: 1.7; }
+.planExcluded > span { display: block; font-weight: 600; margin-bottom: 4px; }
 .pricingCard {
+  display: flex; flex-direction: column;
   background: var(--surface-container-lowest);
   border: 1px solid rgba(206,197,186,0.4);
   border-radius: 20px;
@@ -595,6 +598,7 @@
   color: var(--primary); font-size: 11px; font-weight: 700;
   flex-shrink: 0;
 }
+.pricingCard > a { margin-top: auto; }
 .planBtnPrimary {
   display: block; width: 100%; padding: 14px;
   background: var(--charcoal); color: #fff;

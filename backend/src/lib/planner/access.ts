@@ -3,10 +3,8 @@ import prisma from '../prisma';
 import { isFreeAccount } from '../freeAccounts';
 import { hasPlanner, hasPlannerPrint } from '../plans';
 
-/** Пока в окружении бэкенда нет PLANNER_PUBLIC=1, функция открыта только тестовым
-    аккаунтам владельца (см. freeAccounts.ts): её можно выкладывать на прод и проверять
-    на настоящих данных, не показывая клиентам. */
-export const plannerIsPublic = (): boolean => process.env.PLANNER_PUBLIC === '1';
+/** Планировщик входит в «Максимум». PLANNER_PUBLIC=0 временно закрывает его для клиентов. */
+export const plannerIsPublic = (): boolean => process.env.PLANNER_PUBLIC !== '0';
 
 /** Открыта ли функция этому аккаунту — для подсказки интерфейсу (сервер всё равно проверяет сам). */
 export const plannerOpenForEmail = (email: string | null | undefined): boolean =>
@@ -34,6 +32,6 @@ export async function plannerPrintDenial(invite: { plan: string; userId: string 
 }
 
 export const DENIAL_TEXT: Record<'plan' | 'beta', string> = {
-  plan: 'Меню и рассадка доступны на тарифе «Премиум»',
+  plan: 'Меню и рассадка доступны на тарифе «Максимум»',
   beta: 'Меню и рассадка пока открыты не всем — скоро появятся',
 };

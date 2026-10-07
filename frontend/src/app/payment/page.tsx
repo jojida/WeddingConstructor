@@ -5,7 +5,8 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
-import { PLANS, LEGAL } from '@/lib/constants';
+import { planPriceDue } from '@/lib/plans';
+import { PLANS, LEGAL, TEMPLATE_DEFAULTS } from '@/lib/constants';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
 
@@ -18,7 +19,7 @@ function PaymentContent() {
      сколько угодно раз — в том числе у уже опубликованного сайта. */
   const isFree = !!user?.free;
 
-  const [selectedPlan, setSelectedPlan] = useState('premium');
+  const [selectedPlan, setSelectedPlan] = useState(PLANS.some(p => p.id === searchParams.get('plan')) ? searchParams.get('plan')! : 'premium');
   const [loading, setLoading] = useState(false);
   const [invite, setInvite] = useState<any>(null);
   const [promoInput, setPromoInput] = useState('');
@@ -28,9 +29,14 @@ function PaymentContent() {
   useEffect(() => {
     if (!inviteId) return;
     api.get(`/api/invites/${inviteId}`)
-      .then(res => setInvite(res.data))
+      .then(res => {
+        setInvite(res.data);
+        if (!searchParams.get('plan') && (res.data.status === 'paid' || res.data.status === 'published')) {
+          setSelectedPlan(res.data.plan === 'premium' || res.data.plan === 'maximum' ? 'maximum' : 'premium');
+        }
+      })
       .catch(() => toast.error('Приглашение не найдено'));
-  }, [inviteId]);
+  }, [inviteId, searchParams]);
 
   const applyPromo = async () => {
     const code = promoInput.trim();
@@ -52,8 +58,27 @@ function PaymentContent() {
   const priceWithPromo = (price: number) =>
     promo ? Math.round(price * 100 * (100 - promo.percent) / 100) / 100 : price;
 
+  const published = invite?.status === 'paid' || invite?.status === 'published';
+  const currentPrice = published ? PLANS.find(p => p.id === invite?.plan)?.price ?? 0 : 0;
+  const selectedPrice = PLANS.find(p => p.id === selectedPlan)?.price ?? 0;
+  const due = isFree ? 0 : priceWithPromo(planPriceDue(selectedPlan, invite?.plan, published));
+  const freePublication = selectedPlan === 'free' || isFree;
+  const alreadyConnected = published && invite?.plan === selectedPlan && !isFree;
+
   const handlePay = async () => {
     if (!inviteId) return;
+    if (!alreadyConnected && !isFree && selectedPlan !== 'free') {
+      const venue = (invite?.venue || '').trim();
+      const address = (invite?.venueAddress || '').trim();
+      if (!venue || !address) {
+        toast.error('Укажите место и адрес свадьбы в редакторе перед подключением платного тарифа');
+        return;
+      }
+      const defaults = TEMPLATE_DEFAULTS[invite.templateId];
+      if ((defaults?.venue && venue === defaults.venue) || (defaults?.venueAddress && address === defaults.venueAddress)) {
+        if (!window.confirm(`Место и адрес как в примере шаблона:\n«${venue}», ${address}\n\nВсё верно?`)) return;
+      }
+    }
     reachGoal(GOAL.paymentStart, { plan: selectedPlan });
     setLoading(true);
     try {
@@ -64,7 +89,7 @@ function PaymentContent() {
       });
       if (res.data.devMode || res.data.alreadyPaid || res.data.free) {
         if (res.data.message) toast.success(res.data.message);
-        router.push(`/payment/success?id=${inviteId}`);
+        router.push(res.data.redirectUrl || `/payment/success?id=${inviteId}&plan=${selectedPlan}`);
       } else if (res.data.paymentUrl) {
         window.location.href = res.data.paymentUrl;
       }
@@ -93,7 +118,7 @@ function PaymentContent() {
           <p className={styles.subtitle}>
             {isFree
               ? 'Тестовый аккаунт: публикация без оплаты'
-              : 'После оплаты вы получите уникальную ссылку для гостей'}
+              : 'Публикуйте бесплатно или выберите тариф с дополнительными возможностями'}
           </p>
         </div>
 
@@ -108,15 +133,19 @@ function PaymentContent() {
           </div>
         )}
 
-        <div className={`${styles.plans} ${PLANS.length === 1 ? styles.plansSingle : ''}`}>
+        <div role="radiogroup" aria-label="Тариф сайта" className={`${styles.plans} ${PLANS.length === 1 ? styles.plansSingle : ''}`}>
           {PLANS.map(plan => (
             <div
               key={plan.id}
               id={`plan-${plan.id}`}
-              className={`${styles.plan} ${selectedPlan === plan.id ? styles.planActive : ''} ${plan.popular ? styles.planPopular : ''}`}
-              onClick={() => setSelectedPlan(plan.id)}
+              className={`${styles.plan} ${selectedPlan === plan.id ? styles.planActive : ''} ${plan.popular ? styles.planPopular : ''} ${published && !isFree && plan.price < currentPrice ? styles.planUnavailable : ''}`}
+              role="radio" aria-checked={selectedPlan === plan.id} aria-label={`Тариф «${plan.name}», ${plan.price} рублей`}
+              aria-disabled={published && !isFree && plan.price < currentPrice}
+              tabIndex={published && !isFree && plan.price < currentPrice ? -1 : 0}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !(published && !isFree && plan.price < currentPrice)) { e.preventDefault(); setSelectedPlan(plan.id); } }}
+              onClick={() => { if (!(published && !isFree && plan.price < currentPrice)) setSelectedPlan(plan.id); }}
             >
-              {plan.popular && <div className={styles.popularBadge}>{plan.badge || 'Популярный'}</div>}
+              {plan.badge && <div className={styles.popularBadge}>{plan.badge || 'Популярный'}</div>}
               <div className={styles.planHeader}>
                 <div className={styles.planName}>{plan.name}</div>
                 <div className={styles.radio}>
@@ -134,11 +163,12 @@ function PaymentContent() {
                   </li>
                 ))}
               </ul>
+              {plan.excluded.length > 0 && <div className={styles.planExcluded}><b>Не входит:</b>{plan.excluded.map(f => <div key={f}>− {f}</div>)}</div>}
             </div>
           ))}
         </div>
 
-        <div style={{ display: isFree ? 'none' : 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', margin: '18px 0 4px', flexWrap: 'wrap' }}>
+        <div style={{ display: freePublication || alreadyConnected ? 'none' : 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', margin: '18px 0 4px', flexWrap: 'wrap' }}>
           <input
             id="promo-input"
             className="input-field"
@@ -160,23 +190,24 @@ function PaymentContent() {
         </div>
 
         <div className={styles.payBtn}>
-          <button id="pay-button" className="btn-primary" onClick={handlePay} disabled={loading}
-            style={{ fontSize: '17px', padding: '16px 64px' }}>
+          <button id="pay-button" className="btn-primary" onClick={handlePay} disabled={loading || !invite || (published && !isFree && selectedPrice < currentPrice)}
+            style={{ fontSize: '17px', padding: '16px clamp(20px, 4vw, 64px)', maxWidth: '100%', whiteSpace: 'normal' }}>
             {loading
-              ? (isFree ? 'Публикуем…' : 'Перенаправление...')
-              : isFree
+              ? (freePublication ? 'Публикуем…' : 'Перенаправление...')
+              : alreadyConnected ? 'Тариф уже подключён — открыть сайт'
+              : freePublication
                 ? 'Опубликовать бесплатно'
-                : `Оплатить ${priceWithPromo(PLANS.find(p => p.id === selectedPlan)?.price || 0).toLocaleString('ru-RU')} ₽`}
+                : `${published ? 'Доплатить' : 'Оплатить'} ${due.toLocaleString('ru-RU')} ₽`}
           </button>
-          {promo && (
+          {promo && !freePublication && !alreadyConnected && (
             <p className={styles.payNote} style={{ color: '#2e7d32' }}>
               Промокод {promo.code}: скидка {promo.percent}% применена
             </p>
           )}
-          {isFree ? (
+          {freePublication ? (
             <>
               <p className={styles.payNote}>
-                🎁 Тестовый аккаунт: касса не вызывается, сайт публикуется сразу.
+                {isFree ? '🎁 Тестовый аккаунт: сайт публикуется сразу.' : 'Сайт публикуется бесплатно и работает бессрочно. Платные функции можно подключить позже.'}
               </p>
             </>
           ) : (
@@ -196,7 +227,7 @@ function PaymentContent() {
           <p className={styles.payNote} style={{ marginTop: 4 }}>
             Вопросы? <a href="mailto:support@weddingcraft.ru" style={{ textDecoration: 'underline' }}>support@weddingcraft.ru</a> — отвечаем быстро
           </p>
-          {!isFree && (
+          {!freePublication && !alreadyConnected && (
             <>
               <p className={styles.payNote} style={{ marginTop: 4 }}>
                 Нажимая «Оплатить», вы принимаете <Link href="/oferta" style={{ textDecoration: 'underline' }}>условия оферты</Link> и{' '}

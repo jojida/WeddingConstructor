@@ -28,7 +28,7 @@ router.get('/resolve/:token', async (req: Request, res: Response) => {
   const guest = await prisma.guest.findUnique({ where: { token: req.params.token as string } });
   if (!guest) return res.status(404).json({ error: 'Гость не найден' });
   const invitation = await prisma.invitation.findUnique({ where: { id: guest.invitationId } });
-  if (!invitation || !isPaid(invitation.status)) return res.status(404).json({ error: 'Гость не найден' });
+  if (!invitation || !isPaid(invitation.status) || !isAdvanced(invitation.plan)) return res.status(404).json({ error: 'Гость не найден' });
   const site = typeof req.query.invite === 'string' ? req.query.invite : '';
   if (site && site !== invitation.id) return res.status(404).json({ error: 'Гость не найден' });
   let attending: boolean | null = null;
@@ -55,6 +55,8 @@ router.get('/resolve/:token', async (req: Request, res: Response) => {
 router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response) => {
   const invite = await loadOwnedInvite(req.params.inviteId as string, req.userId);
   if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
+
+  if (!isAdvanced(invite.plan)) return res.status(403).json({ error: 'Кабинет гостей доступен в «Премиум» и «Максимум»' });
 
   const guests = await prisma.guest.findMany({
     where: { invitationId: invite.id },
@@ -92,7 +94,7 @@ router.post('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response
   const invite = await loadOwnedInvite(req.params.inviteId as string, req.userId);
   if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
   if (!isAdvanced(invite.plan)) {
-    return res.status(403).json({ error: 'Кабинет гостей доступен на тарифах Стандарт и Премиум' });
+    return res.status(403).json({ error: 'Кабинет гостей доступен в «Премиум» и «Максимум»' });
   }
 
   const salutation = String(req.body.salutation || 'дорогие');

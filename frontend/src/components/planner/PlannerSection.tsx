@@ -14,7 +14,7 @@ export default function PlannerSection({ inviteId, slug, view }: { inviteId: str
   const { snap, load } = planner;
 
   if (load === 'loading') return <div className={styles.note}>Собираем список гостей…</div>;
-  if (load === 'plan') return <div className={styles.note}>Меню и рассадка доступны на тарифе «Премиум».</div>;
+  if (load === 'plan') return <div className={styles.note}>Меню и рассадка доступны на тарифе «Максимум».</div>;
   if (load === 'beta') return <div className={styles.note}>Меню и рассадка скоро откроются — мы вас предупредим.</div>;
   if (load === 'error' || !snap) {
     return <div className={styles.note}>Не удалось загрузить гостей. <button type="button" className={styles.link} onClick={planner.retry}>Повторить</button></div>;

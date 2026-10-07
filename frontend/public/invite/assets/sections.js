@@ -5,14 +5,21 @@
   if (window.WCSections) return;
   var required = ['cover', 'date', 'venue', 'closing'];
   var state = {};
+  var plan = '';
+  var freeLocked = ['venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
   var style = document.createElement('style');
   style.textContent = '.wc-section-hidden{display:none!important}';
   document.head.appendChild(style);
 
-  function enabled(id) { return required.indexOf(id) !== -1 || state[id] !== false; }
+  function enabled(id) {
+    if (plan === 'free' && freeLocked.indexOf(id) !== -1) return false;
+    if (plan === 'premium' && id === 'menu') return false;
+    return required.indexOf(id) !== -1 || state[id] !== false;
+  }
 
   function apply(data) {
     if (!data) return;
+    if (Object.prototype.hasOwnProperty.call(data, 'plan')) plan = data.plan || '';
     if (Object.prototype.hasOwnProperty.call(data, 'enabledSections')) {
       state = data.enabledSections && typeof data.enabledSections === 'object' ? data.enabledSections : {};
     }
