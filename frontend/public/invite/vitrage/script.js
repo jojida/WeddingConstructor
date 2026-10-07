@@ -556,6 +556,30 @@
     });
   }
 
+  /* Фото под рваной кромкой движется медленнее страницы при прокрутке. */
+  function initPhotoParallax() {
+    var frame = document.querySelector('.photo__torn');
+    if (!frame || REDUCED) return;
+    var pending = false;
+    function update() {
+      pending = false;
+      var rect = frame.getBoundingClientRect();
+      var vh = window.innerHeight;
+      if (rect.bottom <= 0 || rect.top >= vh) return;
+      var progress = Math.max(0, Math.min(1, (vh - rect.top) / (vh + rect.height)));
+      var shift = (progress - .5) * 140 * frame.clientWidth / 1366;
+      frame.style.setProperty('--photo-shift', shift.toFixed(1) + 'px');
+    }
+    function schedule() {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(update);
+    }
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule, { passive: true });
+    schedule();
+  }
+
   /* ─── Снег над витражом ──────────────────────────────
      Хлопья разного размера и скорости; пока обложка вне экрана — пауза */
   function initSnow() {
@@ -896,6 +920,7 @@
     initLooks();
     initSched();
     initReveal();
+    initPhotoParallax();
     applySchedule(DEFAULT_SCHEDULE);   // базовое наполнение (сам по себе, без редактора)
     bindFormOptions();
     initRsvp();
