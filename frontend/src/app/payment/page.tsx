@@ -163,7 +163,6 @@ function PaymentContent() {
                   </li>
                 ))}
               </ul>
-              {plan.excluded.length > 0 && <div className={styles.planExcluded}><b>Не входит:</b>{plan.excluded.map(f => <div key={f}>− {f}</div>)}</div>}
             </div>
           ))}
         </div>

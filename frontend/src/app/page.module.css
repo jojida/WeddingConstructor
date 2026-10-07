@@ -544,8 +544,6 @@
   color: var(--on-surface-variant, #7d766c);
 }
 
-.planExcluded { margin: -8px 0 24px; color: var(--on-surface-variant); font-size: 13px; line-height: 1.7; }
-.planExcluded > span { display: block; font-weight: 600; margin-bottom: 4px; }
 .pricingCard {
   display: flex; flex-direction: column;
   background: var(--surface-container-lowest);

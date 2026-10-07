@@ -455,7 +455,6 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              {plan.excluded.length > 0 && <div className={styles.planExcluded}><span>Не входит:</span>{plan.excluded.map(f => <div key={f}>− {f}</div>)}</div>}
               <Link href="/templates" className={plan.popular ? styles.planBtnPrimary : styles.planBtnOutline}>
                 Начать
               </Link>
