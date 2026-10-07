@@ -614,13 +614,15 @@
     if (!el || DOORS.phase !== 'closed') return;
     DOORS.phase = 'opening';
     el.classList.add('is-open');
-    doorsLater(fireOpen, 1300);                     // створки разошлись примерно на треть
+    doorsLater(fireOpen, 1100);                     // створки распахнулись примерно на треть
     doorsLater(function () {
       DOORS.phase = 'open';
+      if (!EDITING) { dropDoors(); return; }
+      el.classList.add('is-gone');
+      el.classList.remove('is-open');
       var btn = el.querySelector('.doors__replay');
       if (btn) btn.disabled = false;
-      if (!EDITING) dropDoors();
-    }, 3900);
+    }, 3100);
   }
 
   // Редактор: закрыть мгновенно, подождать и открыть, как увидит гость
@@ -629,10 +631,7 @@
     if (!el || DOORS.phase !== 'open') return;
     var btn = el.querySelector('.doors__replay');
     if (btn) btn.disabled = true;
-    el.classList.add('is-instant');
-    el.classList.remove('is-open');
-    void el.offsetWidth;
-    el.classList.remove('is-instant');
+    el.classList.remove('is-gone', 'is-open');      // створки сразу закрыты
     DOORS.phase = 'closed';
     doorsLater(openDoors, 900);
   }
@@ -648,9 +647,8 @@
     if (EDITING) {
       // двери открыты: паре нужна обложка; «Посмотреть, как откроются» — по кнопке
       // и когда редактор показывает раздел дверей (подсветка wc-editor-flash)
-      el.classList.add('is-instant', 'is-open');
+      el.classList.add('is-gone');
       DOORS.phase = 'open';
-      requestAnimationFrame(function () { el.classList.remove('is-instant'); });
       var btn = el.querySelector('.doors__replay');
       if (btn) { btn.hidden = false; btn.addEventListener('click', replayDoors); }
       if ('MutationObserver' in window) {
@@ -663,12 +661,12 @@
     if (REDUCED) { dropDoors(); return; }
     window.WCEnvelope.active = true;
     ROOT.classList.add('has-doors');
-    el.querySelectorAll('.doors__sash').forEach(function (sh) { sh.addEventListener('click', openDoors); });
+    el.querySelectorAll('.doors__leaf').forEach(function (lf) { lf.addEventListener('click', openDoors); });
     // Ждём створки, медальон и шрифт букв (не дольше 2,5 с), даём рассмотреть
     // закрытые двери — и они раздвигаются. Вкладка в фоне — ждём, пока её откроют;
     // обложка уже ушла с экрана (страницу вернули ниже) — двери не нужны
     var load = function (src) { return new Promise(function (res) { var i = new Image(); i.onload = i.onerror = res; i.src = src; }); };
-    var waits = [load('assets/sash-l.webp'), load('assets/sash-r.webp'), load('assets/medallion.webp')];
+    var waits = ['sash-l.webp', 'sash-r.webp', 'sash-mask-l.png', 'sash-mask-r.png', 'medallion.webp'].map(function (f) { return load('assets/' + f); });
     if (document.fonts && document.fonts.load) waits.push(document.fonts.load('100px "HamiltoneSHA"', monoLetters().join('')));
     var started = false;
     var go = function () {
