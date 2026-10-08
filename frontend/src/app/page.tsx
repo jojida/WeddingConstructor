@@ -689,8 +689,8 @@ export default function HomePage() {
       <Header />
       <Hero />
       <TemplatesSection />
-      <PrintInvitationsTeaser />
       <FeatureDemo />
+      <PrintInvitationsTeaser />
       <CompareSection />
       <Features />
       <RsvpSection />
