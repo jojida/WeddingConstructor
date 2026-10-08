@@ -82,7 +82,9 @@ function PaymentContent() {
         if (!window.confirm(`Место и адрес как в примере шаблона:\n«${venue}», ${address}\n\nВсё верно?`)) return;
       }
     }
-    reachGoal(GOAL.paymentStart, { plan: selectedPlan });
+    // Бесплатная публикация — не оплата: своя цель засчитывается на странице
+    // успеха, когда сайт действительно опубликован.
+    if (selectedPlan !== 'free') reachGoal(GOAL.paymentStart, { plan: selectedPlan });
     setLoading(true);
     try {
       const res = await api.post('/api/payment/create', {

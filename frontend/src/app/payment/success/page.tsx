@@ -49,7 +49,9 @@ function SuccessContent() {
         if (st.data.paymentStatus) setPaymentStatus(st.data.paymentStatus);
         if (st.data.paid && (!targetPlan || st.data.plan === targetPlan)) {
           stop();
-          reachGoal(GOAL.paymentSuccess, { plan: st.data.plan });
+          // Бесплатный тариф тоже приходит сюда как «paid» — в оплаты его не пишем.
+          if (st.data.plan === 'free') reachGoal(GOAL.freePublish);
+          else reachGoal(GOAL.paymentSuccess, { plan: st.data.plan });
           setInvite({ id: inviteId, slug: st.data.slug, plan: st.data.plan });
           setState('paid');
           return;

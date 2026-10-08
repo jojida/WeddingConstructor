@@ -101,6 +101,7 @@ export function trackPageView(url: string): void {
 export const GOAL = {
   editorOpen:     'editor_open',      // открыл редактор — выбрал шаблон
   signup:         'signup',           // вошёл по коду (регистрация или вход)
-  paymentStart:   'payment_start',    // нажал «Оплатить»
-  paymentSuccess: 'payment_success',  // оплата подтверждена
+  freePublish:    'free_publish',     // опубликовал сайт на бесплатном тарифе
+  paymentStart:   'payment_start',    // нажал «Оплатить» (только платные тарифы)
+  paymentSuccess: 'payment_success',  // оплата подтверждена (только платные тарифы)
 } as const;
