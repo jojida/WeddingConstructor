@@ -163,7 +163,7 @@ export default function TendernessTemplate({ data, apiBase, fullPage, slug, edit
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#f4f0ed', containerType: 'inline-size' }}>
-      <img src="/invite/tenderness/assets/preview.jpg" alt=""
+      <img src="/invite/tenderness/assets/preview.webp" alt=""
         style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', display: 'block' }} />
       <p style={name(656.9, -4, fs)}>{groom}</p>
       <p style={name(816.5, 17, 199)}>&amp;</p>

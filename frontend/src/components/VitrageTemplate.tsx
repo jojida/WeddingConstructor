@@ -129,7 +129,7 @@ export default function VitrageTemplate({ data, apiBase, fullPage, slug, editing
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#f0f7ff', containerType: 'inline-size' }}>
       <style>{"@font-face{font-family:'HamiltoneSHA';src:url('/invite/assets/fonts/HamiltoneSHA.woff2') format('woff2');font-display:swap}"}</style>
-      <img src="/invite/vitrage/assets/preview.jpg" alt=""
+      <img src="/invite/vitrage/assets/preview.webp" alt=""
         style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', display: 'block' }} />
       <p style={name(1080, -30)}>{groom}</p>
       <p style={name(1445.3, 18)}>{bride}</p>

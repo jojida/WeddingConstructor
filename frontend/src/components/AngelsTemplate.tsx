@@ -124,7 +124,7 @@ export default function AngelsTemplate({ data, apiBase, fullPage, slug, editing 
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#ddf3ff', containerType: 'inline-size' }}>
-      <img src="/invite/angels/assets/preview.jpg" alt=""
+      <img src="/invite/angels/assets/preview.webp" alt=""
         style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', display: 'block' }} />
       <p style={{
         position: 'absolute', left: u(749), top: u(1543), margin: 0, whiteSpace: 'nowrap',

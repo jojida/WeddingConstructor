@@ -128,7 +128,7 @@ export default function ForestTemplate({ data, apiBase, fullPage, slug, editing 
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#f7f2ed', containerType: 'inline-size' }}>
-      <img src="/invite/forest/assets/preview.jpg?v=3" alt=""
+      <img src="/invite/forest/assets/preview.webp" alt=""
         style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', display: 'block' }} />
       <p style={line(543 + (248 - fs) * 0.72, longest > 7 ? -40 : -97, fs)}>{groom}</p>
       <p style={line(823, -76, 129)}>и</p>
