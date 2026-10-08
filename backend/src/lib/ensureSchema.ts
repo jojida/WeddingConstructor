@@ -18,11 +18,12 @@ const COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: 'GuestResponse', column: 'attendance', ddl: `"attendance" TEXT NOT NULL DEFAULT ''` },
   { table: 'GuestResponse', column: 'childrenCount', ddl: '"childrenCount" INTEGER NOT NULL DEFAULT 0' },
   { table: 'GuestResponse', column: 'answers', ddl: `"answers" TEXT NOT NULL DEFAULT '[]'` },
+  { table: 'User', column: 'emailOptOut', ddl: '"emailOptOut" BOOLEAN NOT NULL DEFAULT false' },
 ];
 
 /* Миграции, написанные идемпотентно (CREATE … IF NOT EXISTS): новые таблицы бэкенд
    создаёт сам при запуске. Комментарии вычищаем — операторы режутся по «;». */
-const IDEMPOTENT_MIGRATIONS = ['20260928160000_print_orders', '20261006120000_planner', '20261007150000_payment_attempts'];
+const IDEMPOTENT_MIGRATIONS = ['20260928160000_print_orders', '20261006120000_planner', '20261007150000_payment_attempts', '20261008210000_email_lifecycle'];
 
 async function runMigration(dir: string): Promise<void> {
   const file = path.join(__dirname, '../../prisma/migrations', dir, 'migration.sql');

@@ -13,8 +13,22 @@ model User {
   passwordHash  String?
   name          String?
   createdAt     DateTime   @default(now())
+  emailOptOut   Boolean    @default(false) // отписался от серии писем (lifecycleEmails)
   invitations   Invitation[]
   printOrders   PrintOrder[]
+}
+
+/// Письмо серии, отправленное по приглашению (lib/lifecycleEmails.ts).
+/// kind — вид письма; служебные отметки начинаются с «mark:».
+model EmailEvent {
+  id           String   @id @default(uuid())
+  userId       String
+  invitationId String
+  kind         String
+  sentAt       DateTime @default(now())
+
+  @@unique([invitationId, kind])
+  @@index([userId, sentAt])
 }
 
 model PrintOrder {

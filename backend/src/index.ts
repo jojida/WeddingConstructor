@@ -18,8 +18,10 @@ import guestsRouter from './routes/guests';
 import plannerRouter from './routes/planner';
 import telegramRouter from './routes/telegram';
 import domainsRouter from './routes/domains';
+import emailRouter from './routes/email';
 import { initTelegram } from './lib/telegram';
 import { ensureSchema } from './lib/ensureSchema';
+import { startLifecycleEmails } from './lib/lifecycleEmails';
 import { jwtSecret } from './lib/security';
 import { rateLimit } from './middleware/rateLimit';
 
@@ -97,6 +99,7 @@ app.use('/api/guests', guestsRouter);
 app.use('/api/planner', rateLimit(900, 60_000), plannerRouter);
 app.use('/api/telegram', telegramRouter);
 app.use('/api/domains', domainsRouter);
+app.use('/api/email', rateLimit(30, 60_000), emailRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -117,6 +120,8 @@ if (require.main === module) {
       // Бот сервиса настраивается сам, если задан TELEGRAM_BOT_TOKEN:
       // имя берётся через getMe, вебхук ставится на BACKEND_URL.
       initTelegram();
+      // Серия писем после регистрации (напоминания и подсказки) — только на проде.
+      startLifecycleEmails();
     }))
     .catch(async () => {
       console.error('Проверка схемы БД не удалась. API не запущен.');

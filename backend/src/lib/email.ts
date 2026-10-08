@@ -29,6 +29,8 @@ export interface Mail {
   html?: string;
   /** Куда уйдёт ответ. По умолчанию — MAIL_REPLY_TO (ящик поддержки). */
   replyTo?: string;
+  /** Доп. заголовки, например List-Unsubscribe у писем серии. */
+  headers?: Record<string, string>;
 }
 
 /** true, если хоть какой-то способ отправки настроен. */
@@ -53,6 +55,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
         subject: mail.subject,
         text: mail.text,
         ...(mail.html ? { html: mail.html } : {}),
+        ...(mail.headers ? { headers: mail.headers } : {}),
       }),
     });
     if (!res.ok) {
@@ -80,6 +83,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
         subject: mail.subject,
         textContent: mail.text,
         ...(mail.html ? { htmlContent: mail.html } : {}),
+        ...(mail.headers ? { headers: mail.headers } : {}),
       }),
     });
     if (!res.ok) {
@@ -98,6 +102,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
       subject: mail.subject,
       text: mail.text,
       html: mail.html,
+      headers: mail.headers,
     });
     return;
   }
