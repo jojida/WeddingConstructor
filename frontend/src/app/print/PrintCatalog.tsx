@@ -12,7 +12,7 @@ export default function PrintCatalog() {
     <section className={styles.hero}>
       <div className={styles.heroText}><span className={styles.eyebrow}>WEDDINGCRAFT · БУМАЖНАЯ КОЛЛЕКЦИЯ</span>
         <h1>Ваша история.<br /><em>На красивой бумаге.</em></h1>
-        <p>Приглашение, которое хочется сохранить.<br />Выберите дизайн, добавьте ваши слова и распечатайте — дома или в любимой типографии.</p>
+        <p>Приглашение на память о вашем дне.<br />Добавьте ваши слова и скачайте макет для печати.</p>
         <div className={styles.heroActions}><a className={styles.primary} href="#collection">Выбрать приглашение <ArrowDown size={17} /></a><span><b>{PRINT_PRICE} ₽</b> за готовый макет</span></div>
         <div className={styles.benefits}><span><Check size={14} /> PDF для печати</span><span><Check size={14} /> Без подписки</span><span><Check size={14} /> Любой тираж</span></div>
       </div>
@@ -27,13 +27,13 @@ export default function PrintCatalog() {
       <div className={styles.filters} aria-label="Стиль приглашения">{['Все дизайны', 'Минимализм', 'Ботаника', 'Романтика', 'Классика', 'Редакционный', 'Путешествия'].map(f => <button key={f} aria-pressed={filter === f} className={filter === f ? styles.selected : ''} onClick={() => setFilter(f)}>{f}</button>)}</div>
       <div className={styles.grid}>{PRINT_TEMPLATES.filter(t => filter === 'Все дизайны' || t.category === filter).map(t => <Link href={`/print/editor?template=${t.id}`} key={t.id} className={styles.card}><div className={styles.cardArt} style={{ background: t.color }}><span className={styles.tag}>{t.category}</span><img src={`/print/${t.id}.svg`} alt={`Печатное приглашение «${t.name}»`} loading="lazy" /><span className={styles.cardHint}>Настроить приглашение <ArrowUpRight size={17} /></span></div><div className={styles.cardTitle}><h3>{t.name}</h3><span>{PRINT_PRICE} ₽</span></div><p>{t.description}</p><span className={styles.cardMeta}>A6 · {printDimensions(t.id)} · PDF <span>{String(PRINT_TEMPLATES.indexOf(t) + 1).padStart(2, '0')}</span></span></Link>)}</div>
     </section>
-    <section className={styles.printNote}><Printer size={38} strokeWidth={1} /><div><span className={styles.eyebrow}>ОТ ЭКРАНА К ТЁПЛЫМ ВСТРЕЧАМ</span><h2>Красиво в руках.<br /><em>Просто в печати.</em></h2></div><div><p>После оплаты — PDF без водяного знака. Размер A6 для домашней печати и отдельный файл с вылетами 3 мм для типографии.</p><p>Вы покупаете цифровой макет одного дизайна. Меняйте текст и скачивайте его повторно в аккаунте. Бумага, печать и доставка оплачиваются самостоятельно.</p></div></section>
+    <section className={styles.printNote}><Printer size={38} strokeWidth={1} /><div><span className={styles.eyebrow}>ОТ ЭКРАНА К ТЁПЛЫМ ВСТРЕЧАМ</span><h2>Красиво в руках.<br /><em>Просто в печати.</em></h2></div><div><p>Два PDF без водяного знака: A6 для дома и макет с вылетами 3 мм для типографии.</p><p>Текст можно менять, файлы — скачивать повторно. Бумага, печать и доставка оплачиваются отдельно.</p></div></section>
     <section className={styles.faq}><h2>Осталось несколько вопросов?</h2>{[
-      ['Что входит в 290 ₽?', 'Один выбранный дизайн приглашения, редактирование текста и повторное скачивание PDF без водяного знака. Можно напечатать столько экземпляров для вашей свадьбы, сколько нужно.'],
-      ['Можно посмотреть до оплаты?', 'Да. Заполните данные в редакторе и посмотрите готовую композицию. Оплата нужна только для скачивания PDF.'],
-      ['Какую бумагу выбрать?', 'Плотную матовую бумагу, например 250–300 г/м². Сначала уточните допустимую плотность для вашего принтера или типографии и сделайте пробный отпечаток.'],
-      ['Как правильно распечатать?', 'Для дома скачайте A6 и выберите масштаб 100% (реальный размер), без подгонки. Для типографии используйте вариант с вылетами: 111 × 154 мм, после обрезки — 105 × 148 мм. Цвет может отличаться от экрана; согласуйте пробу с типографией.'],
-      ['Нужно ли покупать сайт-приглашение?', 'Нет. Печатные приглашения — отдельный продукт за 290 ₽. Для сохранения покупки и повторного скачивания понадобится вход по email.'],
+      ['Что входит в 290 ₽?', 'Один дизайн, правки текста и повторное скачивание PDF. Тираж для вашей свадьбы не ограничен.'],
+      ['Можно посмотреть до оплаты?', 'Да. Предпросмотр бесплатный; оплачивается скачивание PDF.'],
+      ['Какую бумагу выбрать?', 'Матовую, 250–300 г/м². Уточните допустимую плотность у типографии или в инструкции принтера и сделайте пробный отпечаток.'],
+      ['Как правильно распечатать?', 'Дома: A6, масштаб 100%, без подгонки. В типографии: PDF с вылетами 3 мм. Перед тиражом проверьте пробный отпечаток.'],
+      ['Нужно ли покупать сайт-приглашение?', 'Нет, макет покупается отдельно. Войдите по email, чтобы сохранить покупку и скачивать PDF повторно.'],
     ].map(([q, a]) => <details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</section>
     <footer className={styles.footer}><Link href="/">WeddingCraft</Link><Link href="/print/orders">Мои печатные приглашения</Link><Link href="/oferta">Оферта</Link><Link href="/contacts">Контакты</Link><a href="mailto:support@weddingcraft.ru">Помощь</a></footer>
   </main></>;

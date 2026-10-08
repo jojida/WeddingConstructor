@@ -66,7 +66,7 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
           </h2>
           <p className={styles.subtitle}>
             {step === 'email'
-              ? 'Введите email, чтобы войти и сохранить приглашение. Мы отправим вам код подтверждения.'
+              ? 'Пришлём код на вашу почту, чтобы сохранить приглашение.'
               : `Код отправлен на ${email}`}
           </p>
         </div>

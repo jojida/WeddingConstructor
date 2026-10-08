@@ -239,8 +239,7 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
       <div style={{ fontSize: 36, marginBottom: 8 }}>👥</div>
       <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Кабинет гостей — на тарифе Премиум</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
-        Добавляйте гостей вручную, получайте для каждого персональную ссылку с именным обращением
-        («Дорогие Денис и Мария», «Семья Кореловых») и собирайте ответы по каждому гостю.
+        Добавляйте гостей, отправляйте ссылки с личным обращением и смотрите ответы каждого.
       </p>
       <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
         Улучшить тариф →
@@ -446,10 +445,8 @@ function NotifySettings({ invite, userEmail, onSaved }: { invite: Invite; userEm
                     </button>
                   </div>
                   <div style={{ fontSize: 12, marginTop: 8, color: '#6b87b0' }}>
-                    Открываете с компьютера? Скопируйте ссылку и откройте её на телефоне,
-                    где установлен Telegram. Ссылка личная: она привязывает уведомления
-                    именно к вашему сайту — гостям её отправлять не нужно, они просто
-                    заполняют анкету.
+                    Откройте ссылку на устройстве с Telegram. Она подключает ваши уведомления;
+                    гостям отправляйте ссылку на приглашение.
                   </div>
                 </>
               )
@@ -499,8 +496,7 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
       <div style={{ fontSize: 36, marginBottom: 8 }}>🌐</div>
       <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Привязка своего домена — на тарифе Премиум</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 460, margin: '0 auto 16px' }}>
-        Купите домен у регистратора (например, denis-i-maria.ru) и привяжите его к сайту-приглашению.
-        Сам домен в тариф не входит — мы помогаем его подключить.
+        Купите домен у регистратора и подключите к приглашению. Стоимость домена оплачивается отдельно.
       </p>
       <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>Улучшить тариф →</Link>
     </div>
@@ -544,8 +540,7 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
   return (
     <div style={{ maxWidth: 600 }}>
       <p style={{ fontSize: 14, color: '#5b554c', marginBottom: 16 }}>
-        По умолчанию сайт доступен на нашем домене. Можно привязать свой — например, denis-i-maria.ru.
-        Домен вы покупаете сами у регистратора, мы его не продаём: ниже инструкция, как подключить.
+        Приглашение уже доступно по ссылке WeddingCraft. Свой домен купите у регистратора и подключите ниже.
       </p>
       <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#7d766c', textTransform: 'uppercase', marginBottom: 6 }}>Ваш домен</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -564,9 +559,8 @@ function DomainTab({ invite, advanced, onSaved }: { invite: Invite; advanced: bo
               A&nbsp;&nbsp;www&nbsp;→&nbsp;&nbsp;{SERVER_IP}
             </div>
           </li>
-          <li>Сохраните домен в поле выше. Скопируйте появившуюся TXT-запись в DNS-настройки,
-            чтобы подтвердить владение доменом, затем нажмите «Проверить подключение».
-            DNS обычно обновляется за 15 минут – 4 часа.</li>
+          <li>Сохраните домен, добавьте показанную TXT-запись в DNS и нажмите «Проверить подключение».
+            Обновление DNS обычно занимает от 15 минут до 4 часов.</li>
           <li>Когда владение доменом подтверждено и A-записи верные, <b>напишите нам</b> на{' '}
             <a href="mailto:support@weddingcraft.ru" style={{ textDecoration: 'underline' }}>support@weddingcraft.ru</a> —
             мы выпустим SSL-сертификат для вашего домена и включим его. Обычно в течение суток.

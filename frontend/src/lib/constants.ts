@@ -84,7 +84,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'vitrage',
     name: 'Витраж',
-    description: 'Голубой витраж: первым экраном — двери из полупрозрачного матового стекла с медальоном-инициалами, они сами распахиваются настежь (листать можно сразу), и под снегом пишутся имена пары. Хрустальная люстра, фото места в рамке из рваной бумаги, меню, жемчужная гирлянда, расписание-карусель, рассказ о женихе и невесте, дресс-код с палитрой и образами, анкета для гостей.',
+    description: 'Голубой витраж, мягкий снег и хрустальные детали для зимней свадьбы.',
     tags: ['Витраж', 'Зима', 'Голубой', 'Хрусталь', 'Анимация'],
     colors: ['#f0f7ff', '#556f95', '#45513c'],
     preview: '/invite/vitrage/assets/preview.jpg',
@@ -97,7 +97,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'tenderness',
     name: 'Нежность',
-    description: 'Бежевая акварель: сначала конверт с золотой печатью-монограммой — створки разъезжаются, и под аркой с цветами пишутся имена пары. Фото в овальной рамке, шуточный прогноз на день, меню, программа с сердцем на треке, пара в венке из роз, дресс-код во вкладках «Женщины / Мужчины» — платья и рубашки в цветах вашей палитры и фото-примеры образов, анкета для гостей.',
+    description: 'Бежевая акварель, золотая печать и винтажные детали для нежного праздника.',
     tags: ['Акварель', 'Бежевый', 'Нежный', 'Конверт', 'Анимация'],
     colors: ['#f4f0ed', '#6b4f2f', '#cfaa8e'],
     preview: '/invite/tenderness/assets/preview.jpg',
@@ -110,7 +110,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'angels',
     name: 'Ангелы',
-    description: 'Небесно-голубое приглашение с ангелами и облаками: на обложке Купидон прилетает к ленте с именами пары. Свиток с приветствием, портик с полароидом, программа дня с Купидоном на пунктире, золотой картуш с таймером, дресс-код и анкета для гостей.',
+    description: 'Ангелы, облака и небесно-голубые оттенки для романтичной свадьбы.',
     tags: ['Ангелы', 'Облака', 'Голубой', 'Романтика', 'Анимация'],
     colors: ['#ddf3ff', '#526c9f', '#f2efdd'],
     preview: '/invite/angels/assets/preview.jpg',
@@ -123,7 +123,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'forest',
     name: 'Туманный лес',
-    description: 'Туманный лес на обложке: деревья расступаются, и из-за них появляются имена пары. Фото в винтажной овальной рамке, календарь дня с сердцем, беседка в розах и карта, расписание с жёлудем на треке, таймер, дресс-код мазками кисти и анкета для гостей.',
+    description: 'Туманный лес, природные оттенки и винтажные рамки для свадьбы среди зелени.',
     tags: ['Лес', 'Природа', 'Винтаж', 'Зелёный', 'Анимация'],
     colors: ['#f7f2ed', '#4a552d', '#a0a496'],
     preview: '/invite/forest/assets/preview.jpg?v=3',
@@ -136,7 +136,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'garden-evening',
     name: 'Вечер в саду',
-    description: 'Акварельный вечерний сад с гирляндами и видео раскрытия конверта с сургучом. Программа дня с сердцем на треке, дресс-код с палитрой, табличка с днями до свадьбы, свиток пожеланий и анкета для гостей.',
+    description: 'Акварельный сад, тёплые огни и конверт с сургучом для уютного вечера.',
     tags: ['Акварель', 'Сад', 'Гирлянды', 'Конверт', 'Нежный'],
     colors: ['#f7f0e0', '#c3881e', '#9a824f'],
     preview: '/invite/garden-evening/assets/preview.jpg',
@@ -148,7 +148,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'ivory',
     name: 'Айвори',
-    description: 'Видео раскрытия конверта с сургучом, чёрно-белое фото на обложке, рельефная бумага с пионами и каллиграфия. Календарь дня, программа с сердцем на треке, дресс-код, таймер и анкета для гостей.',
+    description: 'Фактурная бумага, пионы и чёрно-белые фото для сдержанной элегантности.',
     tags: ['Конверт', 'Чёрно-белый', 'Элегантный', 'Каллиграфия', 'Видео'],
     colors: ['#000000', '#c9c9c9', '#f4efe6'],
     preview: '/invite/ivory/assets/couple.jpg',
@@ -161,7 +161,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'calla',
     name: 'Каллы',
-    description: 'Акварельные каллы, жемчуг и тёплая бежевая палитра. Календарь дня, серпантинная программа с жемчужиной на треке, дресс-код с каруселью образов, таймер и анкета для гостей.',
+    description: 'Акварельные каллы, жемчуг и тёплая бежевая палитра.',
     tags: ['Каллы', 'Жемчуг', 'Нежный', 'Акварель', 'Бежевый'],
     colors: ['#d7d3cb', '#7c6a54', '#8c967b'],
     preview: '/invite/calla/assets/couple-photo.jpg',
@@ -173,7 +173,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'sketch',
     name: 'Скетч',
-    description: 'Рисованный игривый стиль: чернильные дудлы, полароиды, пастельное конфетти и серпантинный тайм-лайн дня. Дресс-код со свотчами, программа с иконками и анкета для гостей.',
+    description: 'Рисованные детали, полароиды и яркие акценты для весёлой свадьбы.',
     tags: ['Рисованный', 'Игривый', 'Полароид', 'Пастель', 'Дудл'],
     colors: ['#e85d86', '#a3b8e6', '#f4cf45'],
     preview: '/invite/sketch/assets/couple.lossless.webp',
@@ -185,7 +185,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'floral',
     name: 'Флоральный',
-    description: 'Акварельные цветы, кружевные рамки, тауп-палитра. Таймер, расписание, дресс-код со свотчами ткани и анкета для гостей.',
+    description: 'Акварельные цветы и кружево в мягких природных оттенках.',
     tags: ['Цветы', 'Нежный', 'Бохо', 'Кружево', 'Романтика'],
     colors: ['#d5d0c8', '#a29b88', '#947f57'],
     preview: '/invite/floral/assets/photos/couple3.jpg',
@@ -197,7 +197,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'garden-arch',
     name: 'Цветущая арка',
-    description: 'Акварельная цветущая арка из роз, нежная сине-зелёная палитра. Иллюстрированная пара, сердце с датой, серпантинная программа дня, дресс-код с палитрой, таймер и анкета для гостей.',
+    description: 'Цветущая арка и нежная зелень для свадьбы в саду.',
     tags: ['Цветы', 'Акварель', 'Арка', 'Нежный', 'Зелень'],
     colors: ['#b89a6a', '#8fa07c', '#c98ba0'],
     preview: '/invite/garden-arch/assets/decor/couple_bouquet.png',
@@ -209,7 +209,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'mediterranean',
     name: 'Средиземноморье',
-    description: 'Синие ставни, вид на море, акварельные цветы и ветви. Видео-интро с открытием окна, анимация сердечка по треку расписания.',
+    description: 'Синие ставни, морской вид и акварельные ветви для свадьбы у моря.',
     tags: ['Минимализм', 'Море', 'Синий', 'Цветы'],
     colors: ['#114e88', '#354366', '#dbebff'],
     preview: '/invite/assets/window.jpg',
@@ -219,7 +219,7 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'vadimdarya',
     name: 'Тёмная элегантность',
-    description: 'Тёмный фон, золотые акценты, hero с параллаксом, мини-календарь, программа дня, дресс-код с палитрой и коллажами, таймер обратного отсчёта и анкета для гостей',
+    description: 'Тёмный фон, золото и ваши фотографии для торжественного вечера.',
     tags: ['Тёмный', 'Элегантный', 'Золото', 'Таймер'],
     colors: ['#0d0b09', '#c9a84c', '#f8f3e8'],
     preview: '/invite/vadimdarya/images/couple.jpg',
@@ -823,9 +823,10 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Меню', icon: '🍽',
+      title: 'Наш вечер', icon: '✨',
       fields: [
-        { id: 'menuText',   type: 'textarea', label: 'Текст о меню (абзацы с новой строки)', scope: 'custom', maxLength: 400 },
+        { id: 'menuTitle',  type: 'text', label: 'Заголовок', scope: 'custom', maxLength: 32 },
+        { id: 'menuText',   type: 'textarea', label: 'Короткий текст к иллюстрациям', scope: 'custom', maxLength: 400 },
         { id: 'menu1Title', type: 'text', label: 'Подпись 1 (фонари)',  hint: 'Пусто — без подписи', scope: 'custom', maxLength: 24 },
         { id: 'menu2Title', type: 'text', label: 'Подпись 2 (снежинка)', scope: 'custom', maxLength: 24 },
         { id: 'menu3Title', type: 'text', label: 'Подпись 3 (торт)',    scope: 'custom', maxLength: 24 },
@@ -924,17 +925,17 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Прогноз на день', icon: '☀️',
+      title: 'Детали праздника', icon: '✨',
       fields: [
         { id: 'forecastQuote',  type: 'text', label: 'Девиз', scope: 'custom', maxLength: 70 },
-        { id: 'forecast1Title', type: 'text', label: 'Прогноз 1 (сумочка): заголовок', scope: 'custom', maxLength: 24 },
-        { id: 'forecast1Text',  type: 'text', label: 'Прогноз 1: текст', hint: 'Пусто — без подписи', scope: 'custom', maxLength: 50 },
-        { id: 'forecast2Title', type: 'text', label: 'Прогноз 2 (чашка): заголовок', scope: 'custom', maxLength: 24 },
-        { id: 'forecast2Text',  type: 'text', label: 'Прогноз 2: текст', scope: 'custom', maxLength: 50 },
-        { id: 'forecast3Title', type: 'text', label: 'Прогноз 3 (шкатулка): заголовок', scope: 'custom', maxLength: 24 },
-        { id: 'forecast3Text',  type: 'text', label: 'Прогноз 3: текст', scope: 'custom', maxLength: 50 },
-        { id: 'forecast4Title', type: 'text', label: 'Прогноз 4 (духи): заголовок', scope: 'custom', maxLength: 24 },
-        { id: 'forecast4Text',  type: 'text', label: 'Прогноз 4: текст', scope: 'custom', maxLength: 50 },
+        { id: 'forecast1Title', type: 'text', label: 'Сумочка: заголовок', scope: 'custom', maxLength: 24 },
+        { id: 'forecast1Text',  type: 'text', label: 'Сумочка: подпись', hint: 'Пусто — без подписи', scope: 'custom', maxLength: 50 },
+        { id: 'forecast2Title', type: 'text', label: 'Чашка: заголовок', scope: 'custom', maxLength: 24 },
+        { id: 'forecast2Text',  type: 'text', label: 'Чашка: подпись', scope: 'custom', maxLength: 50 },
+        { id: 'forecast3Title', type: 'text', label: 'Шкатулка: заголовок', scope: 'custom', maxLength: 24 },
+        { id: 'forecast3Text',  type: 'text', label: 'Шкатулка: подпись', scope: 'custom', maxLength: 50 },
+        { id: 'forecast4Title', type: 'text', label: 'Духи: заголовок', scope: 'custom', maxLength: 24 },
+        { id: 'forecast4Text',  type: 'text', label: 'Духи: подпись', scope: 'custom', maxLength: 50 },
       ],
     },
     {
@@ -1649,7 +1650,7 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
     'Пожелания': 'wishes', 'Пожелания и детали': 'wishes', 'Анкета гостя': 'rsvp',
     'Организатор': 'organizer', 'Завершение': 'closing', 'Финальное фото': 'closing',
     'Фотоколлаж': 'closing', 'Музыка': 'music',
-    'Прогноз на день': 'forecast', 'Меню': 'menu',
+    'Детали праздника': 'forecast', 'Наш вечер': 'menu', 'Меню': 'menu',
     'Фото места': 'hall', 'Жених и невеста': 'couple', 'Фото пары': 'photos', 'Витражные двери': 'envelope',
   };
   const result: TemplateSection[] = [];
@@ -1678,16 +1679,15 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
 
 const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
   vitrage: {
-    inviteText: 'Приглашаем вас разделить с нами радость этого незабываемого дня.',
+    inviteText: 'Пусть за окном зима — этот день согреют любовь и ваши улыбки. Приходите на нашу свадьбу!',
     venue: 'Юсуповский дворец',
     venueAddress: 'Санкт-Петербург, наб. реки Мойки, 94',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
+      'Ваше присутствие — лучший подарок. Вместо букетов будем рады вкладу в наши семейные мечты.',
     schedule: [
-      { time: '12:00', title: 'Церемония', icon: '/invite/vitrage/assets/ic-plate.webp' },
-      { time: '15:00', title: 'Банкет',    icon: '/invite/vitrage/assets/ic-bottle.webp' },
-      { time: '18:00', title: 'Торт',      icon: '/invite/vitrage/assets/ic-cake.webp' },
+      { time: '12:00', title: 'Фуршет', icon: '/invite/vitrage/assets/ic-plate.webp' },
+      { time: '15:00', title: 'Банкет', icon: '/invite/vitrage/assets/ic-bottle.webp' },
+      { time: '18:00', title: 'Торт', icon: '/invite/vitrage/assets/ic-cake.webp' },
     ],
     dressCodeColors: ['#ffffff', '#dbe8f6', '#b7cde6', '#8eaad0', '#556f95'],
     dressCodePhoto: '/invite/vitrage/assets/dress-w1.jpg',
@@ -1699,44 +1699,44 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { value: 'no_alcohol', label: 'Без алкоголя' },
     ],
     custom: {
+      menuTitle: 'Наш вечер',
       heroTitle:     'Свадьба',
-      heroText:      'Приглашаем вас присоединиться к нашему празднику',
+      heroText:      'Самый тёплый день этой зимы — вместе с вами',
       greetingTitle: 'Дорогие гости',
-      venueTitle:    'Где пройдёт?',
-      hallTitle:     'Место проведения',
+      venueTitle:    'Место встречи',
+      hallTitle:     'Здесь будет праздник',
       hallPhoto:     '/invite/vitrage/assets/hall.jpg',
-      menuText:      'Меню разнообразно, поэтому сообщите нам заранее, если у вас есть предпочтения или ограничения в еде.',
-      menu1Title: 'Уютный вечер', menu2Title: 'Снежинка', menu3Title: 'Торт', menu4Title: 'Бокалы',
+      menuText:      'За окном — зима. Внутри — тепло, угощения и любимые люди.',
+      menu1Title: 'Тепло встреч', menu2Title: 'Зимняя сказка', menu3Title: 'Сладкий момент', menu4Title: 'За любовь!',
       groomPhoto:    '/invite/vitrage/assets/groom.jpg',
       groomTitle:    'Жених',
-      groomText:     'Григорий — инженер, любитель гор и хорошего кофе. Самый надёжный и заботливый человек, которого я знаю.',
+      groomText:     'Любит горы и хороший кофе. Рядом с ним спокойно и тепло.',
       bridePhoto:    '/invite/vitrage/assets/bride.jpg',
       brideTitle:    'Невеста',
-      brideText:     'Александра — художник по образованию и оптимист по жизни. Обожает зиму, книги и собирать друзей за большим столом.',
-      dressStyle:    'White Tie',
-      dressText:     'Мы будем рады, если вы поддержите стиль нашего торжества и выберете наряд в нежных оттенках',
+      brideText:     'Влюблена в искусство, книги и зиму. Умеет превращать встречи в праздник.',
+      dressStyle:    'Вечерний наряд',
+      dressText:     'Выбирайте наряды в мягких голубых оттенках нашей палитры.',
       dressPhoto2:   '/invite/vitrage/assets/dress-w2.jpg',
       dressMan1:     '/invite/vitrage/assets/dress-m1.jpg',
       dressMan2:     '/invite/vitrage/assets/dress-m2.jpg',
-      wishTitle:     'Пожелания & Детали',
-      surveyText:    'Пожалуйста, ответьте на несколько вопросов до {{rsvpDate}}',
+      wishTitle:     'Пожелания',
+      surveyText:    'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
       closingTitle:  'Ждём встречи!',
     },
   },
 
   tenderness: {
-    inviteText: 'Мы рады сообщить вам, что состоится самое главное торжество в нашей жизни — день нашей свадьбы!',
+    inviteText: 'Мы женимся! Приглашаем вас на день, полный нежности, улыбок и тёплых встреч.',
     venue: 'Дворец бракосочетания №1',
     venueAddress: 'Санкт-Петербург, Английская наб., 28',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
+      'Будем рады подарку в конверте — на мечты нашей семьи. Просим обойтись без букетов.',
     schedule: [
-      { time: '12:00', title: 'Торжественная регистрация',  icon: '/invite/tenderness/assets/ic-cake.webp' },
-      { time: '14:00', title: 'Фуршет',                     icon: '/invite/tenderness/assets/ic-champagne.webp' },
-      { time: '15:00', title: 'Фотосессия',                 icon: '/invite/tenderness/assets/ic-bouquet-s.webp' },
-      { time: '17:00', title: 'Праздничный банкет',         icon: '/invite/tenderness/assets/ic-car.webp' },
-      { time: '23:00', title: 'Окончание праздничного дня', icon: '/invite/tenderness/assets/ic-ringbox.webp' },
+      { time: '12:00', title: 'Церемония', icon: '/invite/tenderness/assets/ic-ringbox.webp' },
+      { time: '14:00', title: 'Фуршет', icon: '/invite/tenderness/assets/ic-champagne.webp' },
+      { time: '15:00', title: 'Фотосессия', icon: '/invite/tenderness/assets/ic-bouquet-s.webp' },
+      { time: '17:00', title: 'Банкет', icon: '/invite/tenderness/assets/ic-bottle.webp' },
+      { time: '23:00', title: 'Завершение вечера', icon: '/invite/tenderness/assets/ic-car.webp' },
     ],
     dressCodeColors: ['#fcfcf8', '#fff8f3', '#e4c49c', '#ffe9e9', '#ffe4c7', '#b0887c'],
     dressCodePhoto: '/invite/tenderness/assets/dress-w1.jpg',
@@ -1752,20 +1752,19 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       envelopeHint:   'Нажмите, чтобы открыть',
       heroTitle:      'Приглашение на свадьбу',
       greetingTitle:  'Дорогие гости',
-      forecastQuote:  'Там, где посеяна любовь, растёт радость!',
-      forecast1Title: 'Игристый акцент',   forecast1Text: 'Вероятность шампанского 100%',
-      forecast2Title: 'Нежный снежок',     forecast2Text: 'Трогательные слёзы счастья — 87%',
-      forecast3Title: 'Праздничные ритмы', forecast3Text: 'Танцы после полуночи неизбежны',
-      forecast4Title: 'Яркий финал',       forecast4Text: 'Осадки — только из конфетти',
+      forecastQuote:  'Маленькие детали большого счастья',
+      forecast1Title: 'С собой — улыбку',   forecast1Text: 'Остальное оставьте в сумочке',
+      forecast2Title: 'Чашка тепла',     forecast2Text: 'За разговоры с теми, кто дорог',
+      forecast3Title: 'Драгоценные моменты', forecast3Text: 'Главное сокровище — вы рядом',
+      forecast4Title: 'Аромат счастья',       forecast4Text: 'Этот день останется с нами',
       menuText:
-        'Меню разнообразно, поэтому сообщите нам заранее, если у вас есть какие-либо предпочтения или диетические ограничения. ' +
-        'После подтверждения вы сможете пройти опрос о своих вкусовых предпочтениях и напитках.',
+        'Сообщите об аллергиях и пожеланиях к еде в анкете — учтём их в меню.',
       menColors:      ['#957a5d', '#d2aa97', '#dbd3cc', '#f2e8d9', '#e3ccba', '#daaa7b'],
       dressMan1:      '/invite/tenderness/assets/dress-m1.jpg',
       dressMan2:      '/invite/tenderness/assets/dress-m2.jpg',
       dressPhoto2:    '/invite/tenderness/assets/dress-w2.jpg',
-      dressText:      'Пожалуйста, избегайте чисто белого и чёрного цветов',
-      surveyText:     'Пожалуйста, ответьте на несколько вопросов до {{rsvpDate}}',
+      dressText:      'Выбирайте оттенки нашей палитры. Просим избегать чисто белого и чёрного.',
+      surveyText:     'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
       rsvpChildren:   true,
       rsvpQuestions:  ['menu'],
       closingTitle:   'С любовью, ваши',
@@ -1775,20 +1774,17 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   angels: {
     inviteText:
-      'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
-      'рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.\n' +
-      'Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.',
+      'Скоро у нашей истории начнётся новая глава. Хотим разделить её первый день с вами!',
     venue: 'Усадьба «Архангельское»',
     venueAddress: 'Московская обл., Красногорск, пос. Архангельское',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты — мы не успеем насладиться ими в полной мере.',
+      'Пусть подарком станет вклад в нашу семейную мечту. Букеты просим оставить в цветочных магазинах.',
     schedule: [
-      { time: '12:00', title: 'Торжественная регистрация', icon: '/invite/angels/assets/icon-rings.webp' },
-      { time: '15:00', title: 'Начало банкета',            icon: '/invite/angels/assets/icon-champagne.webp' },
-      { time: '18:00', title: 'Банкет',                    icon: '/invite/angels/assets/icon-plate.webp' },
-      { time: '20:00', title: 'Торт',                      icon: '/invite/angels/assets/icon-cake.webp' },
-      { time: '22:00', title: 'Фотосессия',                icon: '/invite/angels/assets/icon-camera.webp' },
+      { time: '12:00', title: 'Церемония', icon: '/invite/angels/assets/icon-rings.webp' },
+      { time: '15:00', title: 'Фуршет', icon: '/invite/angels/assets/icon-champagne.webp' },
+      { time: '18:00', title: 'Банкет', icon: '/invite/angels/assets/icon-plate.webp' },
+      { time: '20:00', title: 'Торт', icon: '/invite/angels/assets/icon-cake.webp' },
+      { time: '22:00', title: 'Фотосессия', icon: '/invite/angels/assets/icon-camera.webp' },
     ],
     dressCodeColors: ['#f4dec2', '#c2a07d', '#867c5e', '#d69a67'],
     dressCodePhoto: '/invite/angels/assets/dress-w1.jpg',
@@ -1801,30 +1797,26 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       sealColor:     'beige',
-      greetingTitle: 'Дорогие Гости!',
+      greetingTitle: 'Дорогие гости!',
       polaroidPhoto: '/invite/angels/assets/polaroid.jpg',
       dressPhoto2:   '/invite/angels/assets/dress-w2.jpg',
       dressMan1:     '/invite/angels/assets/dress-m1.jpg',
       dressMan2:     '/invite/angels/assets/dress-m2.jpg',
       dateIntro:     'Наша свадьба состоится',
-      dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей палитры',
-      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
-      closingTitle:  'До новых встреч!',
+      dressText:     'Добавьте в ваш образ нежные оттенки нашей палитры.',
+      surveyText:    'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
+      closingTitle:  'До встречи на свадьбе!',
       closingSign:   '', // Пустое поле — имена пары.
     },
   },
 
   forest: {
     inviteText:
-      'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
-      'рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.\n' +
-      'Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.',
+      'Среди зелени и любимых людей мы скажем друг другу «да». Будем счастливы видеть вас рядом!',
     venue: 'Усадьба Кусково',
     venueAddress: 'Москва, ул. Юности, 2',
     story:
-      'Самый ценный подарок для нас — ваше присутствие. Если захотите порадовать нас чем-то ещё, ' +
-      'мы будем благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить живые цветы — мы не успеем насладиться ими в полной мере.',
+      'Приезжайте с добрыми пожеланиями, без букетов. Подарок в конверте поможет воплотить наши планы.',
     schedule: [
       { time: '15:00', title: 'Сбор гостей',      icon: '' },
       { time: '16:00', title: 'Церемония',        icon: '' },
@@ -1846,35 +1838,32 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       greetingTitle: 'Дорогие гости',
       albumPhoto2:   '/invite/forest/assets/album-2.jpg',
       albumPhoto3:   '/invite/forest/assets/album-3.jpg',
-      dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей лесной палитры',
+      dressText:     'Природные оттенки нашей палитры помогут создать настроение праздника.',
       dressPhoto2:   '/invite/forest/assets/dress-w2.jpg',
       dressMan1:     '/invite/forest/assets/dress-m1.jpg',
       dressMan2:     '/invite/forest/assets/dress-m2.jpg',
       finalPhoto1:   '/invite/forest/assets/final-1.jpg',
       finalPhoto2:   '/invite/forest/assets/final-2.jpg',
       finalPhoto3:   '/invite/forest/assets/final-3.jpg',
-      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
-      closingTitle:  'До скорых встреч!',
+      surveyText:    'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
+      closingTitle:  'Встретимся в нашем лесу!',
       closingSign:   '', // Пустое поле — «Ваши …» из имён пары.
     },
   },
 
   'garden-evening': {
     inviteText:
-      'Если вы читаете это приглашение — значит, вы часть нашей истории. Спасибо, что были с нами всё это время — ' +
-      'рядом, мысленно, в воспоминаниях. Спасибо за тепло, за слова, за молчание, за просто быть.\n' +
-      'Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.',
+      'Огни в саду, музыка и близкие рядом. Приглашаем вас провести этот вечер на нашей свадьбе!',
     venue: 'Дворцовая усадьба',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты — мы не успеем насладиться ими в полной мере.',
+      'Вместо цветов будем рады вкладу в наше свадебное путешествие. А главное — приезжайте сами!',
     schedule: [
-      { time: '15:00', title: 'Welcome',           icon: '/invite/garden-evening/assets/icon-champagne.webp' },
-      { time: '17:00', title: 'Церемония',         icon: '/invite/garden-evening/assets/icon-rings.webp' },
-      { time: '19:00', title: 'Начало банкета',    icon: '/invite/garden-evening/assets/icon-bouquet.webp' },
-      { time: '21:00', title: 'Банкет',            icon: '/invite/garden-evening/assets/icon-candelabra.webp' },
-      { time: '22:00', title: 'Торт',              icon: '/invite/garden-evening/assets/icon-cake.webp' },
-      { time: '22:00', title: 'Завершение вечера', icon: '/invite/garden-evening/assets/icon-lamp.webp' },
+      { time: '15:00', title: 'Сбор гостей', icon: '/invite/garden-evening/assets/icon-champagne.webp' },
+      { time: '17:00', title: 'Церемония', icon: '/invite/garden-evening/assets/icon-rings.webp' },
+      { time: '19:00', title: 'Банкет', icon: '/invite/garden-evening/assets/icon-bouquet.webp' },
+      { time: '21:00', title: 'Танцы', icon: '/invite/garden-evening/assets/icon-candelabra.webp' },
+      { time: '22:00', title: 'Торт', icon: '/invite/garden-evening/assets/icon-cake.webp' },
+      { time: '23:00', title: 'Завершение вечера', icon: '/invite/garden-evening/assets/icon-lamp.webp' },
     ],
     dressCodeColors: ['#e09ba2', '#9a824f', '#af8162', '#c3881e'],
     dressCodePhoto: '/invite/garden-evening/assets/dress-w1.jpg',
@@ -1887,13 +1876,13 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       heroTitle:     'приглашение на свадьбу',
-      greetingTitle: 'Дорогие Друзья',
-      dressText:     'Будем рады, если в ваших нарядах найдутся оттенки нашей палитры',
+      greetingTitle: 'Дорогие друзья',
+      dressText:     'Выберите для вашего образа один из оттенков нашей палитры.',
       dressPhoto2:   '/invite/garden-evening/assets/dress-w2.jpg',
       dressMan1:     '/invite/garden-evening/assets/dress-m1.jpg',
       dressMan2:     '/invite/garden-evening/assets/dress-m2.jpg',
-      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
-      closingTitle:  'До новых встреч!',
+      surveyText:    'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
+      closingTitle:  'До встречи в саду!',
       closingLove:   'С любовью!',
       closingSign:   '', // Пустое поле — имена пары.
     },
@@ -1901,16 +1890,15 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   ivory: {
     inviteText:
-      'Приглашаем вас разделить радость того особенного для нас события и стать частью начала семейной истории',
+      'Начинается наша семейная история. Приглашаем вас разделить этот день с нами.',
     venue: 'Белая роща',
     venueAddress: 'Москва, ул. Дольская, 1',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты — мы не успеем насладиться ими в полной мере.',
+      'Подарок в конверте станет вкладом в нашу новую главу. Просим не дарить букеты.',
     schedule: [
-      { time: '15:00', title: 'Сбор гостей', icon: '', desc: 'Встречаемся, наслаждаемся фуршетом, настраиваемся на весёлую свадьбу' },
-      { time: '16:00', title: 'Церемония',   icon: '', desc: 'Немного радостных, трогательных формальностей' },
-      { time: '17:00', title: 'Банкет',      icon: '', desc: 'Время вкусной еды, музыки, приятных пожеланий и танцев' },
+      { time: '15:00', title: 'Сбор гостей', icon: '', desc: 'Знакомимся и наслаждаемся фуршетом' },
+      { time: '16:00', title: 'Церемония', icon: '', desc: 'Скажем друг другу самое важное «да»' },
+      { time: '17:00', title: 'Банкет', icon: '', desc: 'Ужин, тосты и танцы в кругу близких' },
     ],
     dressCodeColors: ['#f4efe6', '#e3d9c9', '#c8b8a2', '#9c8b78', '#8e8e8e', '#2b2b2b'],
     dressCodePhoto: '/invite/ivory/assets/dress-w1.jpg',
@@ -1924,14 +1912,14 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     custom: {
       heroTitle:     'Приглашение на свадьбу',
       greetingTitle: 'Дорогие гости!',
-      venueLabel:    'Ждем вас в',
+      venueLabel:    'Место встречи',
       venuePhoto:    '/invite/ivory/assets/venue.jpg',
-      dressText:     'Будем рады, если вы поддержите сдержанную палитру нашего праздника',
+      dressText:     'Поддержите спокойные оттенки нашей палитры.',
       dressPhoto2:   '/invite/ivory/assets/dress-w2.jpg',
       dressMan1:     '/invite/ivory/assets/dress-m1.jpg',
       dressMan2:     '/invite/ivory/assets/dress-m2.jpg',
-      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните, пожалуйста, анкету до {{rsvpDate}}',
-      closingTitle:  'Будем ждать вас!',
+      surveyText:    'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
+      closingTitle:  'До встречи в наш день!',
       closingSign:   '', // Пустое поле — подпись из имён пары.
       finalPhoto:    '/invite/ivory/assets/final.jpg',
     },
@@ -1939,19 +1927,17 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   calla: {
     inviteText:
-      'Мы безмерно рады пригласить вас разделить с нами одно из самых значимых и счастливых ' +
-      'событий в нашей жизни — торжество нашей любви',
+      'Мы скажем друг другу «да». И очень хотим, чтобы в этот момент вы были рядом.',
     venue: 'Дворцовая усадьба 12',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
+      'Ваши улыбки дороже цветов. Если захотите сделать подарок, будем рады вкладу в планы нашей семьи.',
     schedule: [
-      { time: '12:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/couple-illustration.webp' },
-      { time: '13:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/champagne.webp' },
-      { time: '14:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/rings.webp' },
-      { time: '15:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/bouquet.svg' },
-      { time: '16:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/cake.webp' },
-      { time: '17:00', title: 'Дворцовая усадьба 12', icon: '/invite/calla/assets/car.webp' },
+      { time: '12:00', title: 'Сбор гостей', icon: '/invite/calla/assets/couple-illustration.webp' },
+      { time: '13:00', title: 'Фуршет', icon: '/invite/calla/assets/champagne.webp' },
+      { time: '14:00', title: 'Церемония', icon: '/invite/calla/assets/rings.webp' },
+      { time: '15:00', title: 'Поздравления', icon: '/invite/calla/assets/bouquet.svg' },
+      { time: '16:00', title: 'Торт', icon: '/invite/calla/assets/cake.webp' },
+      { time: '17:00', title: 'Завершение вечера', icon: '/invite/calla/assets/car.webp' },
     ],
     dressCodeColors: ['#d7bca4', '#e1d5c6', '#8c967b', '#7b9365', '#c9985e', '#eccb90', '#916743', '#bec9d0'],
     dressCodePhoto: '/invite/calla/assets/dress1.jpg',
@@ -1963,8 +1949,8 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       greetingTitle: 'Дорогие гости',
-      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
-      closingTitle:  'Будем ждать вас с нетерпением!',
+      surveyText:    'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
+      closingTitle:  'Ждём вас в наш день!',
       closingSign:   '', // Пустое поле — автоматическая подпись с именами пары.
       dressPhoto2:   '/invite/calla/assets/dress2.jpg',
       dressPhoto3:   '/invite/calla/assets/dress3.jpg',
@@ -1977,16 +1963,13 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   sketch: {
     inviteText:
-      'Если вы читаете это приглашение — значит, вы часть нашей истории. ' +
-      'Спасибо, что были с нами всё это время — рядом, мысленно, в воспоминаниях. ' +
-      'Спасибо за тепло, за слова, за молчание, за просто быть.\n\n' +
-      'Мы с радостью приглашаем вас стать частью нового воспоминания — нашей свадьбы.',
+      'Мы женимся! Будут объятия, тосты и танцы. Не хватает только вас.',
     schedule: [
       { time: '15:30', title: 'Сбор гостей', icon: '/invite/sketch/assets/glasses-cheers.svg' },
-      { time: '16:00', title: 'Церемония',   icon: '/invite/sketch/assets/rings.svg' },
-      { time: '17:00', title: 'Церемония',   icon: '/invite/sketch/assets/polaroids-deco.svg' },
-      { time: '18:00', title: 'Банкет',      icon: '/invite/sketch/assets/cake-slice.lossless.webp' },
-      { time: '20:00', title: 'Дискотека',   icon: '/invite/sketch/assets/disco-ball.svg' },
+      { time: '16:00', title: 'Церемония', icon: '/invite/sketch/assets/rings.svg' },
+      { time: '17:00', title: 'Фотосессия', icon: '/invite/sketch/assets/polaroids-deco.svg' },
+      { time: '18:00', title: 'Банкет', icon: '/invite/sketch/assets/cake-slice.lossless.webp' },
+      { time: '20:00', title: 'Танцы', icon: '/invite/sketch/assets/disco-ball.svg' },
     ],
     dressCodeColors: ['#c79bd6', '#ceb48a', '#ab311a', '#df5d84', '#f5eedf'],
     dressCodePhoto: '/invite/sketch/assets/dress1.lossless.webp',
@@ -1999,9 +1982,9 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     custom: {
       guestsTitle:  'Дорогие гости',
       locationText: 'Праздник пройдёт на базе отдыха «Барвиха»',
-      dressText:    'Одевайтесь в пастельных тонах, пожалуйста, избегайте ярких насыщенных цветов',
-      surveyText:   'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
-      wishesText:   'Будем рады вашим тёплым словам и пожеланиям — они для нас самый дорогой подарок',
+      dressText:    'Смело выбирайте оттенки нашей палитры — от нежных до ярких.',
+      surveyText:   'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
+      wishesText:   'Приносите тёплые слова и хорошее настроение — остальное мы подготовим.',
       dressPhoto2:  '/invite/sketch/assets/dress2.lossless.webp',
       dressMan1:    '/invite/sketch/assets/man1.jpg',
       dressMan2:    '/invite/sketch/assets/man2.jpg',
@@ -2014,12 +1997,10 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   floral: {
     inviteText:
-      'СПЕШИМ СООБЩИТЬ РАДОСТНУЮ НОВОСТЬ — МЫ ЖЕНИМСЯ! ' +
-      'В ЭТОТ ДЕНЬ МЫ ХОТИМ, ЧТОБЫ ВЫ ПРИСУТСТВОВАЛИ НА НАШЕМ ПРАЗДНИКЕ',
+      'МЫ ЖЕНИМСЯ! ПРИХОДИТЕ РАЗДЕЛИТЬ С НАМИ РАДОСТЬ ЭТОГО ДНЯ.',
     venue: 'Дворец бракосочетания 12/8',
     story:
-      'ДОРОГИЕ ГОСТИ, ВАШ ВЕЧЕР\nБУДЕТ ОСОБЕННЫМ.\nНАША ПРОСЬБА — НЕ ДАРИТЬ\n' +
-      'ЦВЕТЫ, МЫ НЕ УСПЕЕМ\nНАСЛАДИТЬСЯ ИХ КРАСОТОЙ',
+      'ВАШИ УЛЫБКИ — ЛУЧШЕ ЛЮБЫХ БУКЕТОВ. ПРОСИМ НЕ ДАРИТЬ ЦВЕТЫ.',
     schedule: [
       { time: '14:00', title: 'РЕГИСТРАЦИЯ', icon: '/invite/floral/assets/icons/icon(6).svg' },
       { time: '15:00', title: 'ФОТОСЕССИЯ',  icon: '/invite/floral/assets/icons/photo.svg' },
@@ -2038,7 +2019,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     custom: {
       dearGuests: 'Дорогие гости',
       weAwait:    'Мы ждём вас',
-      surveyText: 'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
+      surveyText: 'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
       closing:    'Будем рады видеть вас',
       dressPhoto2: '/invite/floral/assets/photos/dress2.jpg',
       dressMan1:   '/invite/floral/assets/photos/man1.jpg',
@@ -2051,11 +2032,10 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   'garden-arch': {
     inviteText:
-      'Приглашаем вас разделить с нами это чудесное событие. Очень ждём вас на нашей свадьбе!',
+      'Под цветущей аркой начнётся наша семейная история. Приглашаем вас стать частью этого дня!',
     venue: 'Хвойный 17',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи. ' +
-      'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
+      'Цветы уже украсят наш праздник. Вместо букета будем рады подарку в конверте на семейные планы.',
     schedule: [
       { time: '12:00', title: 'Встреча',   icon: '/invite/garden-arch/assets/icons/ic_bikes.png' },
       { time: '14:00', title: 'Церемония', icon: '/invite/garden-arch/assets/icons/ic_rings.png' },
@@ -2072,7 +2052,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       dearGuests: 'Дорогие друзья',
-      surveyText: 'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
+      surveyText: 'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
       closing:    'Ждём вас на нашей свадьбе!',
       dressPhoto2: '/invite/garden-arch/assets/photos/dress2.jpg',
       dressMan1:   '/invite/garden-arch/assets/photos/man1.jpg',
@@ -2086,14 +2066,13 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     venue: 'СПА Отель',
     venueAddress: 'г. Сочи, ул. Приморская, 15',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
+      'Пусть вместо букета будет вклад в наше свадебное путешествие. Спасибо, что разделите с нами этот день!',
     schedule: [
-      { time: '11:00', title: 'Ceremony at the church', icon: '/invite/assets/icons/church.svg' },
-      { time: '12:00', title: 'Say yes, I do!',         icon: '/invite/assets/icons/rings.svg' },
-      { time: '13:00', title: 'Wedding lunch',          icon: '/invite/assets/icons/plate.svg' },
-      { time: '14:00', title: 'Cheer for the couple',   icon: '/invite/assets/icons/botles.svg' },
-      { time: '18:00', title: 'Evening party',          icon: '/invite/assets/icons/globe.svg' },
+      { time: '11:00', title: 'Венчание', icon: '/invite/assets/icons/church.svg' },
+      { time: '12:00', title: 'Церемония', icon: '/invite/assets/icons/rings.svg' },
+      { time: '13:00', title: 'Свадебный обед', icon: '/invite/assets/icons/plate.svg' },
+      { time: '14:00', title: 'Тосты за любовь', icon: '/invite/assets/icons/botles.svg' },
+      { time: '18:00', title: 'Танцы', icon: '/invite/assets/icons/globe.svg' },
     ],
     dressCodePhoto: '/invite/assets/dresscode-bride.jpg',
     drinks: [
@@ -2104,10 +2083,10 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       greetingTitle: 'Любимые друзья!',
-      greetingSub:   'приглашаем вас на нашу свадьбу',
-      surveyText:    'Чтобы мы знали, сколько стульев и бокалов готовить, заполните анкету до {{rsvpDate}}',
-      closingTitle:  'Ждем вас на нашей\nсвадьбе!',
-      organizerText: 'По всем вопросам обращайтесь к нашему организатору',
+      greetingSub:   'Море, любовь и вы рядом. Приглашаем на нашу свадьбу!',
+      surveyText:    'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
+      closingTitle:  'До встречи у моря!',
+      organizerText: 'По вопросам праздника — наш организатор',
       organizerPhone: '+7 922 222 22 22',
       dressPhoto2: '/invite/assets/dresscode-guest.jpg',
       dressMan1:   '/invite/assets/dresscode-man1.jpg',
@@ -2121,16 +2100,14 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
 
   vadimdarya: {
     inviteText:
-      'Мы безмерно рады пригласить вас разделить с нами одно из самых значимых и счастливых ' +
-      'событий в нашей жизни — торжество нашей любви.',
+      'Один особенный вечер, два счастливых сердца и самые близкие рядом. Приглашаем вас на нашу свадьбу.',
     story:
-      'Если вы хотите подарить нам ценный и нужный подарок, мы будем очень благодарны за вклад в бюджет нашей молодой семьи.\n' +
-      'Просим не дарить букеты, так как мы не успеем насладиться ими в полной мере.',
+      'Будем рады вкладу в наши семейные планы. Просим не дарить букеты — ваше присутствие важнее.',
     schedule: [
-      { time: '15:00', title: 'Welcome',           icon: '', desc: 'Ведущий знакомится и общается с гостями, помогает сориентироваться на площадке.' },
-      { time: '16:00', title: 'Церемония',          icon: '', desc: 'Собираемся у арки, гости располагаются на стулья.' },
-      { time: '17:00', title: 'Начало банкета',     icon: '', desc: 'Вступительное слово ведущего, приветствие и анонс вечера, поднимаем бокалы за молодожёнов.' },
-      { time: '23:00', title: 'Завершение вечера',  icon: '', desc: 'Яркий финал праздника, тёплые слова и прощание с гостями.' },
+      { time: '15:00', title: 'Сбор гостей', icon: '', desc: 'Знакомимся и наслаждаемся фуршетом' },
+      { time: '16:00', title: 'Церемония', icon: '', desc: 'Встречаемся у арки, чтобы услышать наше «да»' },
+      { time: '17:00', title: 'Банкет', icon: '', desc: 'Ужинаем, поднимаем бокалы и танцуем' },
+      { time: '23:00', title: 'Завершение вечера', icon: '', desc: 'Обнимаемся и говорим друг другу до встречи' },
     ],
   },
 };

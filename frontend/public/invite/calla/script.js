@@ -13,12 +13,12 @@
                 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
   var DEFAULT_SCHEDULE = [
-    { time: '12:00', title: 'Дворцовая усадьба 12', icon: 'assets/couple-illustration.webp' },
-    { time: '13:00', title: 'Дворцовая усадьба 12', icon: 'assets/champagne.webp' },
-    { time: '14:00', title: 'Дворцовая усадьба 12', icon: 'assets/rings.webp' },
-    { time: '15:00', title: 'Дворцовая усадьба 12', icon: 'assets/bouquet.svg' },
-    { time: '16:00', title: 'Дворцовая усадьба 12', icon: 'assets/cake.webp' },
-    { time: '17:00', title: 'Дворцовая усадьба 12', icon: 'assets/car.webp' }
+    { time: '12:00', title: 'Сбор гостей', icon: 'assets/couple-illustration.webp' },
+    { time: '13:00', title: 'Фуршет', icon: 'assets/champagne.webp' },
+    { time: '14:00', title: 'Церемония', icon: 'assets/rings.webp' },
+    { time: '15:00', title: 'Поздравления', icon: 'assets/bouquet.svg' },
+    { time: '16:00', title: 'Торт', icon: 'assets/cake.webp' },
+    { time: '17:00', title: 'Завершение вечера', icon: 'assets/car.webp' }
   ];
 
   function pad(n) { return String(n).padStart(2, '0'); }

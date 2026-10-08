@@ -16,7 +16,7 @@ const SAMPLE_DATA = {
   weddingTime: '16:00',
   venue: 'Усадьба «Белый сад»',
   venueAddress: 'Москва, ул. Крымский Вал, 9',
-  inviteText: 'С радостью приглашаем вас разделить с нами один из самых счастливых дней нашей жизни',
+  inviteText: 'Приглашаем вас разделить с нами радость нашего свадебного дня.',
   story: 'Мы встретились пять лет назад и с тех пор не расставались. Наш путь был полон приключений и любви.',
   dressCode: 'White Tie',
   dressCodeColors: [],
@@ -83,7 +83,7 @@ function DemoAbout({ template }: { template: Tpl }) {
         <h1 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 400, fontSize: 'clamp(26px, 5vw, 36px)', lineHeight: 1.2, color: '#0e1d26', margin: '0 0 10px' }}>
           Шаблон свадебного приглашения «{template.name}»
         </h1>
-        {phrase && <p style={{ ...p, fontSize: 18, color: '#685d4a' }}>{phrase} — электронное приглашение в виде сайта с анкетой для гостей.</p>}
+        {phrase && <p style={{ ...p, fontSize: 18, color: '#685d4a' }}>{phrase}</p>}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: '4px 0 20px' }}>
           {template.tags.map(tag => <span key={tag} style={chip}>{tag}</span>)}
         </div>
@@ -91,18 +91,17 @@ function DemoAbout({ template }: { template: Tpl }) {
 
         <h2 style={h2}>Что можно настроить</h2>
         <p style={p}>
-          Имена, дату и время, место торжества с картой, тексты, фото и музыку вы меняете в редакторе — прямо на странице
-          приглашения. Ненужные разделы можно скрыть. Готовый сайт открывается по ссылке на любом телефоне: отправьте её
-          гостям в WhatsApp, Telegram или по SMS. С тарифом «Премиум» в приглашении работает анкета: ответы гостей приходят вам в Telegram или на почту.
+          Замените имена, дату, тексты, фото и музыку. Лишние разделы можно скрыть.
+          Анкета, карта и программа дня доступны в платных тарифах.
         </p>
         <p style={p}>
-          Собрать приглашение и посмотреть результат можно бесплатно и без регистрации.
-          {minPrice > 0 && <> Платные тарифы — от {minPrice.toLocaleString('ru-RU')} ₽, оплата разовая, без подписки.</>}
+          Редактор без регистрации, публикация от 0 ₽.
+          {minPrice > 0 && <> Платные тарифы — от {minPrice.toLocaleString('ru-RU')} ₽, без подписки.</>}
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '24px 0 8px' }}>
           <a href={`/editor?template=${template.id}`} style={{ padding: '14px 32px', borderRadius: 50, background: 'linear-gradient(135deg, #d3c5ad, #685d4a)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
-            Создать приглашение в этом стиле
+            Выбрать этот шаблон
           </a>
           <Link href="/templates" style={{ padding: '14px 28px', borderRadius: 50, border: '1px solid #c9bda9', color: '#685d4a', textDecoration: 'none', fontSize: 15 }}>
             Все шаблоны

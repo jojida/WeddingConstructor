@@ -57,7 +57,7 @@ const EMPTY: InviteData = {
   weddingDate: '', weddingTime: '15:00',
   venue: '', venueAddress: '', mapLink: '',
   story: '',
-  inviteText: 'С радостью приглашаем вас разделить с нами один из самых счастливых дней нашей жизни!',
+  inviteText: 'Приглашаем вас разделить с нами радость нашего свадебного дня!',
   dressCode: 'Пастельные тона',
   dressCodeColors: [], dressCodePhoto: '',
   schedule: [],
@@ -89,7 +89,7 @@ const PASTEL_COLORS = [
 
 const PRESET_SCHEDULE = [
   { time: '14:00', title: 'Сбор гостей', icon: '🥂' },
-  { time: '15:00', title: 'Welcome',      icon: '👋' },
+  { time: '15:00', title: 'Сбор гостей',      icon: '👋' },
   { time: '16:00', title: 'Церемония',    icon: '💍' },
   { time: '17:00', title: 'Банкет',       icon: '🍽️' },
   { time: '19:00', title: 'Торт',         icon: '🎂' },

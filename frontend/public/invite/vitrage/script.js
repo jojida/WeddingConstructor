@@ -32,9 +32,9 @@
   var ICONS = ['assets/ic-plate.webp', 'assets/ic-bottle.webp', 'assets/ic-cake.webp'];
 
   var DEFAULT_SCHEDULE = [
-    { time: '12:00', title: 'Церемония', icon: ICONS[0] },
-    { time: '15:00', title: 'Банкет', icon: ICONS[1] },
-    { time: '18:00', title: 'Торт', icon: ICONS[2] }
+    { time: '12:00', title: 'Фуршет', icon: 'assets/ic-plate.webp' },
+    { time: '15:00', title: 'Банкет', icon: 'assets/ic-bottle.webp' },
+    { time: '18:00', title: 'Торт', icon: 'assets/ic-cake.webp' }
   ];
 
   var MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];

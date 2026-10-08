@@ -29,11 +29,11 @@
   ];
 
   var DEFAULT_SCHEDULE = [
-    { time: '12:00', title: 'Торжественная регистрация', icon: ICONS[0] },
-    { time: '14:00', title: 'Фуршет', icon: ICONS[1] },
-    { time: '15:00', title: 'Фотосессия', icon: ICONS[2] },
-    { time: '17:00', title: 'Праздничный банкет', icon: ICONS[3] },
-    { time: '23:00', title: 'Окончание праздничного дня', icon: ICONS[4] }
+    { time: '12:00', title: 'Церемония', icon: 'assets/ic-ringbox.webp' },
+    { time: '14:00', title: 'Фуршет', icon: 'assets/ic-champagne.webp' },
+    { time: '15:00', title: 'Фотосессия', icon: 'assets/ic-bouquet-s.webp' },
+    { time: '17:00', title: 'Банкет', icon: 'assets/ic-bottle.webp' },
+    { time: '23:00', title: 'Завершение вечера', icon: 'assets/ic-car.webp' }
   ];
 
   // Цвета рубашек из макета (платья — в разметке)

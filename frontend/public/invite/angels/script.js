@@ -29,11 +29,11 @@
   ];
 
   var DEFAULT_SCHEDULE = [
-    { time: '12:00', title: 'Торжественная регистрация', icon: ICONS[0] },
-    { time: '15:00', title: 'Начало банкета', icon: ICONS[1] },
-    { time: '18:00', title: 'Банкет', icon: ICONS[2] },
-    { time: '20:00', title: 'Торт', icon: ICONS[3] },
-    { time: '22:00', title: 'Фотосессия', icon: ICONS[4] }
+    { time: '12:00', title: 'Церемония', icon: 'assets/icon-rings.webp' },
+    { time: '15:00', title: 'Фуршет', icon: 'assets/icon-champagne.webp' },
+    { time: '18:00', title: 'Банкет', icon: 'assets/icon-plate.webp' },
+    { time: '20:00', title: 'Торт', icon: 'assets/icon-cake.webp' },
+    { time: '22:00', title: 'Фотосессия', icon: 'assets/icon-camera.webp' }
   ];
 
   var MONTHS_GEN = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];

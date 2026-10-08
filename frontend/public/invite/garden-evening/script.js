@@ -25,12 +25,12 @@
   ];
 
   var DEFAULT_SCHEDULE = [
-    { time: '15:00', title: 'Welcome', icon: ICONS[0] },
-    { time: '17:00', title: 'Церемония', icon: ICONS[1] },
-    { time: '19:00', title: 'Начало банкета', icon: ICONS[2] },
-    { time: '21:00', title: 'Банкет', icon: ICONS[3] },
-    { time: '22:00', title: 'Торт', icon: ICONS[4] },
-    { time: '22:00', title: 'Завершение вечера', icon: ICONS[5] }
+    { time: '15:00', title: 'Сбор гостей', icon: 'assets/icon-champagne.webp' },
+    { time: '17:00', title: 'Церемония', icon: 'assets/icon-rings.webp' },
+    { time: '19:00', title: 'Банкет', icon: 'assets/icon-bouquet.webp' },
+    { time: '21:00', title: 'Танцы', icon: 'assets/icon-candelabra.webp' },
+    { time: '22:00', title: 'Торт', icon: 'assets/icon-cake.webp' },
+    { time: '23:00', title: 'Завершение вечера', icon: 'assets/icon-lamp.webp' }
   ];
 
   /* ─── Утилиты ─────────────────────────────────────── */
