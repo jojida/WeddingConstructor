@@ -14,6 +14,7 @@
    событие 'wc:envelope-open'.
 
    В редакторе (editing=1) конверта нет: паре нужен сам сайт.
+   intro=0 — анимация открытия не входит в тариф (бесплатный): тоже без конверта.
    ============================================================ */
 (function () {
   'use strict';
@@ -21,12 +22,14 @@
   var env = document.getElementById('envelope');
   if (!env) { window.WCEnvelope = { active: false }; return; }
 
-  var EDITING = new URLSearchParams(window.location.search).get('editing') === '1';
+  var Q = new URLSearchParams(window.location.search);
+  var EDITING = Q.get('editing') === '1';
+  var NO_INTRO = Q.get('intro') === '0';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var root = document.documentElement;
   var video = document.getElementById('envelopeVideo');
 
-  if (EDITING) {
+  if (EDITING || NO_INTRO) {
     env.parentNode.removeChild(env);
     window.WCEnvelope = { active: false };
     return;

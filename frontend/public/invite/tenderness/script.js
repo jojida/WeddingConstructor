@@ -10,6 +10,8 @@
   var ROOT = document.documentElement;
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var EDITING = new URLSearchParams(window.location.search).get('editing') === '1';
+  // intro=0 — анимация открытия не входит в тариф: обложка сразу в финале, как в редакторе
+  var NO_INTRO = new URLSearchParams(window.location.search).get('intro') === '0';
 
   var STATE = {
     apiBase: '', slug: '', guestToken: '', guestName: '',
@@ -609,11 +611,11 @@
     fitNames();
     ROOT.classList.add('hero-go');
     var fl = document.querySelector('.cover__flowers');
-    if (fl) setTimeout(function () { fl.classList.add('done'); }, EDITING || REDUCED ? 0 : 3200);
+    if (fl) setTimeout(function () { fl.classList.add('done'); }, EDITING || REDUCED || NO_INTRO ? 0 : 3200);
   }
 
   function initHero() {
-    if (EDITING || REDUCED) {
+    if (EDITING || REDUCED || NO_INTRO) {
       ROOT.classList.add('no-anim');
       startHero();
       return;

@@ -6,12 +6,13 @@
   <title>Свадьба Катерины и Максима</title>
   <link rel="stylesheet" href="styles.css">
   <link href="/invite/assets/fonts/google/450eafd6ffefbeb06855.css" rel="stylesheet">
-  <!-- В редакторе видео-заставки нет (см. скрипт внизу), и без неё были бы видны
-       старые CSS-ставни. Класс ставится до отрисовки — окно сразу открыто. -->
+  <!-- Без анимации открытия — окно сразу открыто: в редакторе (без видео-заставки
+       были бы видны старые CSS-ставни) и при intro=0 (анимация не входит в тариф).
+       Класс ставится до отрисовки. -->
   <script>
     (function () {
       var p = new URLSearchParams(location.search);
-      if (p.get('editing') === '1' && p.get('intro') !== '1') document.documentElement.classList.add('wc-no-intro');
+      if ((p.get('editing') === '1' && p.get('intro') !== '1') || p.get('intro') === '0') document.documentElement.classList.add('wc-no-intro');
     })();
   </script>
 
@@ -523,9 +524,9 @@
         setTimeout(remove, 900);
       }
 
-      // Skip the intro in the editor; the landing preview explicitly opts in.
-      var introParams = new URLSearchParams(location.search);
-      if (introParams.get('editing') === '1' && introParams.get('intro') !== '1') { remove(); return; }
+      // Skip the intro in the editor (the landing preview explicitly opts in)
+      // and when the plan has no opening animation (intro=0).
+      if (document.documentElement.classList.contains('wc-no-intro')) { remove(); return; }
       vid.src = vid.getAttribute('data-src');
       var playback = vid.play();
       if (playback && playback.catch) playback.catch(remove);

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { InviteData } from './TemplatePreview';
+import { hasIntro } from '@/lib/plans';
 import WeddingEnvelope from './WeddingEnvelope';
 
 interface Props {
@@ -21,7 +22,8 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dataRef = useRef(data);
   useEffect(() => { dataRef.current = data; }, [data]);
-  const [revealed, setRevealed] = useState(false);
+  // Конверт — анимация открытия: на бесплатном тарифе гость сразу видит приглашение
+  const [revealed, setRevealed] = useState(!hasIntro(data.plan));
 
   const live = !!(fullPage || editing);
 
@@ -30,6 +32,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
     p.set('apiBase', apiBase || '');
     if (slug) p.set('slug', slug);
     if (editing) p.set('editing', '1');
+    if (!hasIntro(data.plan)) p.set('intro', '0');   // анимация открытия — платная
     if (data.groomName) p.set('groom', data.groomName);
     if (data.brideName) p.set('bride', data.brideName);
     if (data.weddingDate) p.set('date', data.weddingDate);

@@ -6,7 +6,7 @@
   var required = ['cover', 'date', 'venue', 'closing'];
   var state = {};
   var plan = '';
-  var freeLocked = ['venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
+  var freeLocked = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
   var style = document.createElement('style');
   style.textContent = '.wc-section-hidden{display:none!important}';
   document.head.appendChild(style);

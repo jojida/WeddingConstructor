@@ -10,6 +10,8 @@
   var ROOT = document.documentElement;
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var EDITING = new URLSearchParams(window.location.search).get('editing') === '1';
+  // intro=0 — анимация открытия не входит в тариф: обложка сразу в финале, как в редакторе
+  var NO_INTRO = new URLSearchParams(window.location.search).get('intro') === '0';
 
   // Дата по умолчанию — через 212 дней, как на таймере в макете
   function isoDate(t) {
@@ -681,7 +683,7 @@
       setEnabled: function (on) { if (!on && !EDITING && DOORS.el) dropDoors(); }
     };
     if (!el) return;
-    if (!REDUCED && window.WCDoors3D) {
+    if (!REDUCED && !NO_INTRO && window.WCDoors3D) {
       try {
         DOORS.gl = window.WCDoors3D.mount(el, {
           frost: 'assets/frost.jpg',
@@ -711,7 +713,7 @@
       }
       return;
     }
-    if (REDUCED) { dropDoors(); return; }
+    if (REDUCED || NO_INTRO) { dropDoors(); return; }
     window.WCEnvelope.active = true;
     ROOT.classList.add('has-doors');
     el.querySelectorAll('.doors__leaf').forEach(function (lf) { lf.addEventListener('click', openDoors); });
@@ -814,7 +816,7 @@
   }
 
   function initHero() {
-    if (EDITING || REDUCED) {
+    if (EDITING || REDUCED || NO_INTRO) {
       ROOT.classList.add('no-anim');
       startHero();
       return;

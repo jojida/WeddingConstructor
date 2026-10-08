@@ -8,6 +8,8 @@
   <!-- цифры на табличке «Дней до свадьбы» — из шрифта нужны только они -->
   <link href="/invite/assets/fonts/google/3ae13a38cd3de58f367e.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <!-- intro=0: анимация открытия не входит в тариф — прячем её до первой отрисовки -->
+  <script>if (new URLSearchParams(location.search).get('intro') === '0') document.documentElement.classList.add('wc-no-intro');</script>
   <!-- Без скриптов конверт не открыть и появление при прокрутке не сработает —
        показываем приглашение сразу -->
   <noscript><style>

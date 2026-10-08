@@ -21,7 +21,8 @@
    (блок с data-edit="sealColor", к нему листает раздел «Конверт»), и кнопка
    «Посмотреть, как откроется».
 
-   Без WebGL2 конверта нет — сайт открывается как обычно.
+   Без WebGL2 конверта нет — сайт открывается как обычно. Так же при intro=0:
+   анимация открытия не входит в тариф (бесплатный).
    ============================================================ */
 (function () {
   'use strict';
@@ -45,7 +46,7 @@
       return true;
     } catch (e) { return false; }
   }
-  if (!document.body || !hasGL2() || typeof Promise === 'undefined') {
+  if (Q.get('intro') === '0' || !document.body || !hasGL2() || typeof Promise === 'undefined') {
     window.WCEnvelope = { active: false };
     return;
   }

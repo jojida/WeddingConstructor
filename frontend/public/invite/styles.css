@@ -277,8 +277,11 @@ body {
   to   { opacity:1; transform:translate(-50%,-50%) translateY(0)    scale(1);   }
 }
 
-/* Редактор: видео-заставки нет — CSS-ставни не показываем, плашка сразу на месте */
-.wc-no-intro .win-shutters { display: none; }
+/* Без анимации открытия (редактор, бесплатный тариф): ни заставки, ни ставен,
+   ни чаек — окно открыто, плашка сразу на месте */
+.wc-no-intro .intro-wrap,
+.wc-no-intro .win-shutters,
+.wc-no-intro .win-birds { display: none; }
 .wc-no-intro .name-card { animation: none; }
 
 /* Accessibility: skip animations for reduced-motion users */

@@ -10,6 +10,8 @@
   <link rel="preload" as="image" href="assets/medallion.webp" />
   <link rel="preload" as="font" type="font/woff2" href="/invite/assets/fonts/HamiltoneSHA.woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
+  <!-- intro=0: анимация открытия не входит в тариф — прячем её до первой отрисовки -->
+  <script>if (new URLSearchParams(location.search).get('intro') === '0') document.documentElement.classList.add('wc-no-intro');</script>
   <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
   <noscript><style>
     .hero-in, .rv, .rv-soft, .rv-write, .rv-pop > *, .rv-line, .cover__bg, .cover__name, .cover__amp {

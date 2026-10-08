@@ -18,6 +18,7 @@
 
    Редактор (editing=1): конверт — первый экран превью, а не поверх сайта
    (к нему листает раздел «Конверт»), и кнопка «Посмотреть, как откроется».
+   intro=0 — анимация открытия не входит в тариф (бесплатный): конверта нет.
    ============================================================ */
 (function () {
   'use strict';
@@ -30,7 +31,7 @@
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var root = document.documentElement;
 
-  if (!document.body) { window.WCEnvelope = { active: false }; return; }
+  if (!document.body || Q.get('intro') === '0') { window.WCEnvelope = { active: false }; return; }
 
   var D = {
     groom: (Q.get('groom') || attr('data-groom', '')).trim(),

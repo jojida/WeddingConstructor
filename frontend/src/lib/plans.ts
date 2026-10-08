@@ -8,7 +8,7 @@ export const PLANS = [
   },
   {
     id: 'premium', name: 'Премиум', price: 2490, period: 'разовая оплата за один сайт',
-    features: ['Всё из бесплатного тарифа', 'Анкета для гостей', 'Место проведения и карта с маршрутом', 'Программа дня и дресс-код', 'Таблицы и графики ответов гостей', 'Личный кабинет в Telegram и уведомления на Email', 'Кабинет гостей и персональные ссылки'],
+    features: ['Всё из бесплатного тарифа', 'Анимация открытия приглашения', 'Анкета для гостей', 'Место проведения и карта с маршрутом', 'Программа дня и дресс-код', 'Таблицы и графики ответов гостей', 'Личный кабинет в Telegram и уведомления на Email', 'Кабинет гостей и персональные ссылки'],
     color: '#c9a96e', popular: true, badge: 'Популярный',
   },
   {
@@ -38,8 +38,12 @@ export const hasMusic = (plan?: string | null): boolean => plan === 'free' || ha
 export const isAdvancedPlan = (plan?: string | null): boolean => full(plan);
 export const hasCustomDomain = (plan?: string | null): boolean => plan === 'free' || full(plan);
 export const hasPlanner = (plan?: string | null): boolean => plan === 'maximum' || plan === 'pro';
+/** Анимация открытия. Обёртки шаблонов передают запрет в iframe параметром intro=0 —
+    так гость бесплатного сайта не увидит ни кадра заставки, пока идут данные. */
+export const hasIntro = (plan?: string | null): boolean => plan !== 'free';
 
-export const FREE_LOCKED_SECTIONS = ['venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
+/** envelope — анимация открытия (конверт, двери, видео-заставка): только платным тарифам. */
+export const FREE_LOCKED_SECTIONS = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
 export const isPlanSectionLocked = (plan: string | null | undefined, id?: string): boolean =>
   !!id && ((plan === 'free' && FREE_LOCKED_SECTIONS.includes(id)) || (plan === 'premium' && id === 'menu'));
 
