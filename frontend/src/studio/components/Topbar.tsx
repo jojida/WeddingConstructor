@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import {
   Undo2,
   Redo2,
@@ -102,10 +103,19 @@ export default function Topbar() {
 
   return (
     <header className={css.top}>
-      <div className={css.brand}>
+      {/* Логотип ведёт на главную сайта. Переход внутри приложения не вызывает
+          beforeunload, поэтому несохранённое спрашиваем сами — как при закрытии проекта. */}
+      <Link
+        href="/"
+        className={css.brand}
+        title="На главную WeddingCraft"
+        onClick={(e) => {
+          if (dirty && !confirm('Есть несохранённые изменения. Уйти на главную?')) e.preventDefault();
+        }}
+      >
         <span className={css.brandMark}>◲</span>
         <span>Верстак</span>
-      </div>
+      </Link>
 
       <span className={css.projectName}>{project.catalog.name || project.slug}</span>
       <span className={css.projectSlug}>/{project.slug}</span>

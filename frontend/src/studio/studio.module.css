@@ -59,7 +59,11 @@
   padding-right: 6px;
   font-weight: 600;
   letter-spacing: -0.01em;
+  color: inherit;
+  text-decoration: none;
 }
+
+.brand:hover { color: var(--s-accent); }
 
 .brandMark {
   color: var(--s-accent);
