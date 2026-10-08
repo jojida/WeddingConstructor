@@ -277,6 +277,10 @@ body {
   to   { opacity:1; transform:translate(-50%,-50%) translateY(0)    scale(1);   }
 }
 
+/* Редактор: видео-заставки нет — CSS-ставни не показываем, плашка сразу на месте */
+.wc-no-intro .win-shutters { display: none; }
+.wc-no-intro .name-card { animation: none; }
+
 /* Accessibility: skip animations for reduced-motion users */
 @media (prefers-reduced-motion: reduce) {
   .win-sl, .win-sr, .bird { animation: none !important; }

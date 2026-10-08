@@ -6,6 +6,14 @@
   <title>Свадьба Катерины и Максима</title>
   <link rel="stylesheet" href="styles.css">
   <link href="/invite/assets/fonts/google/450eafd6ffefbeb06855.css" rel="stylesheet">
+  <!-- В редакторе видео-заставки нет (см. скрипт внизу), и без неё были бы видны
+       старые CSS-ставни. Класс ставится до отрисовки — окно сразу открыто. -->
+  <script>
+    (function () {
+      var p = new URLSearchParams(location.search);
+      if (p.get('editing') === '1' && p.get('intro') !== '1') document.documentElement.classList.add('wc-no-intro');
+    })();
+  </script>
 
   <!-- SVG defs: black-bg removal filter + wavy clip-path -->
   <svg width="0" height="0" style="position:absolute">
