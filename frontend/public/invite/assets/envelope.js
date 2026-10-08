@@ -13,8 +13,11 @@
    window.WCEnvelope.active = true; когда обложке пора появляться —
    событие 'wc:envelope-open'.
 
-   В редакторе (editing=1) конверта нет: паре нужен сам сайт.
-   intro=0 — анимация открытия не входит в тариф (бесплатный): тоже без конверта.
+   В редакторе (editing=1) обложка готовая, а конверт — скрытый слой ровно
+   поверх неё (../assets/intro-preview.js): WCEnvelope.preview(onReveal, onDone)
+   проигрывает его по кнопке «▶ Посмотреть, как откроется» (её ставит script.js
+   шаблона — после конверта у него идёт живое видео обложки).
+   intro=0 — анимация открытия не входит в тариф (бесплатный): конверта нет.
    ============================================================ */
 (function () {
   'use strict';
@@ -29,10 +32,60 @@
   var root = document.documentElement;
   var video = document.getElementById('envelopeVideo');
 
+  var IP = EDITING && !NO_INTRO && window.WCIntroPreview && window.WCIntroPreview.on ? window.WCIntroPreview : null;
+  if (IP && video) {
+    IP.layer(env);
+    if (REDUCED || !(window.CSS && typeof window.CSS.registerProperty === 'function')) env.classList.add('no-iris');
+    window.WCEnvelope = { active: false, preview: preview };
+    return;
+  }
   if (EDITING || NO_INTRO) {
     env.parentNode.removeChild(env);
     window.WCEnvelope = { active: false };
     return;
+  }
+
+  // Редактор: закрытый конверт поверх обложки → видео → свет раскрывается кругом,
+  // под ним обложка (onReveal) → конверт снова спрятан (onDone)
+  function preview(onReveal, onDone) {
+    var lit = false, safetyT = 0, startT = 0;
+    if (!video.getAttribute('src') && video.getAttribute('data-src')) video.src = video.getAttribute('data-src');
+    env.classList.remove('is-playing', 'is-light', 'is-out');
+    try { video.pause(); video.currentTime = 0; } catch (e) {}
+    IP.show(true);
+    function near() { if (video.duration && video.currentTime >= video.duration - 0.55) light(); }
+    function light() {
+      if (lit) return;
+      lit = true;
+      clearTimeout(safetyT);
+      clearTimeout(startT);
+      video.removeEventListener('timeupdate', near);
+      video.removeEventListener('ended', light);
+      video.removeEventListener('error', light);
+      env.classList.add('is-light');
+      setTimeout(function () {
+        env.classList.add('is-out');
+        if (onReveal) onReveal();
+      }, REDUCED ? 120 : 760);
+      setTimeout(function () {
+        IP.show(false);
+        env.classList.remove('is-playing', 'is-light', 'is-out');
+        try { video.pause(); video.currentTime = 0; } catch (e) {}
+        if (onDone) onDone();
+      }, REDUCED ? 900 : 760 + 1900);
+    }
+    video.addEventListener('timeupdate', near);
+    video.addEventListener('ended', light);
+    video.addEventListener('error', light);
+    // дать рассмотреть закрытый конверт, затем — как от касания гостя
+    startT = setTimeout(function () {
+      env.classList.add('is-playing');
+      if (REDUCED || video.error) { light(); return; }
+      var p;
+      try { p = video.play(); } catch (err) { light(); return; }
+      if (p && typeof p.catch === 'function') p.catch(light);
+      safetyT = setTimeout(light, 7000);
+    }, 700);
   }
 
   window.WCEnvelope = { active: true };

@@ -739,8 +739,13 @@
     function stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; }
     function redraw() { if (!running) frame(performance.now()); }
 
+    // Двери спрятаны: открыты в редакторе (is-gone) или скрытый слой показа на обложке
+    // (../assets/intro-preview.js) — кадры не нужны
+    var asleep = function () {
+      return el.classList.contains('is-gone') || (el.classList.contains('wc-ip-layer') && !el.classList.contains('wc-ip-on'));
+    };
     var onPointer = function (e) {
-      if (S.openAt != null || el.classList.contains('is-gone')) return;
+      if (S.openAt != null || asleep()) return;
       var r = el.getBoundingClientRect();
       if (!r.width || !r.height) return;
       S.pointer = [Math.max(-0.25, Math.min(0.25, ((e.clientX - r.left) / r.width - 0.5) * 0.4)),
@@ -792,8 +797,8 @@
           if (io) io.observe(el);
           window.addEventListener('pointermove', onPointer, { passive: true });
           document.addEventListener('visibilitychange', onVis);
-          // в редакторе двери открыты (is-gone) — холст ждёт повтора, кадры не нужны
-          if (!el.classList.contains('is-gone')) { wake(); start(); }
+          // в редакторе двери спрятаны до показа — холст ждёт, кадры не нужны
+          if (!asleep()) { wake(); start(); }
           resolve();
         }, reject);
       }, 30);

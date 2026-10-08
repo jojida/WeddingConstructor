@@ -561,10 +561,26 @@
     ROOT.classList.add('hero-go');
   }
 
+  // Редактор: «▶ Посмотреть, как откроется» на обложке (../assets/intro-preview.js) —
+  // деревья снова сомкнуты и расходятся, имена проявляются, как у гостя
+  function replayHero(done) {
+    ROOT.classList.add('no-anim');
+    ROOT.classList.remove('hero-go');
+    void ROOT.offsetWidth;                       // сомкнуть без обратного хода
+    ROOT.classList.remove('no-anim');
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        ROOT.classList.add('hero-go');
+        setTimeout(done, 3900);                  // передние имена и цветы на месте
+      });
+    });
+  }
+
   function initHero() {
     if (EDITING || REDUCED || NO_INTRO) {
       ROOT.classList.add('no-anim');
       startHero();
+      if (EDITING && !REDUCED && window.WCIntroPreview && window.WCIntroPreview.on) window.WCIntroPreview.button(replayHero);
       return;
     }
     var waits = [];

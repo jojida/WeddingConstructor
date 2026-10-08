@@ -1,15 +1,19 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Props {
   onOpen: () => void;
   /** Первые буквы имён — рисуются монограммой на сургучной печати */
   brideInitial?: string;
   groomInitial?: string;
+  /** Редактор: по размеру рамки (обложки в превью), а не на весь экран */
+  fill?: boolean;
+  /** Редактор: открыться самому через столько миллисекунд, без касания */
+  autoOpenMs?: number;
 }
 
-export default function WeddingEnvelope({ onOpen, brideInitial = 'О', groomInitial = 'С' }: Props) {
+export default function WeddingEnvelope({ onOpen, brideInitial = 'О', groomInitial = 'С', fill, autoOpenMs }: Props) {
   const [open, setOpen] = useState(false);
   const FLAP_DURATION = 2.8;
 
@@ -32,10 +36,19 @@ export default function WeddingEnvelope({ onOpen, brideInitial = 'О', groomInit
     setTimeout(() => onOpen(), (FLAP_DURATION + 0.4) * 1000);
   }
 
+  useEffect(() => {
+    if (autoOpenMs == null) return;
+    const t = setTimeout(handleClick, autoOpenMs);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenMs]);
+
   return (
     <div
-      className="relative h-screen w-full overflow-hidden select-none cursor-pointer"
+      className={`relative ${fill ? 'h-full' : 'h-screen'} w-full overflow-hidden select-none cursor-pointer`}
       style={{
+        // в рамке размеры печати считаются от её высоты (cqh), а не от экрана
+        ...(fill ? { containerType: 'size' as const } : {}),
         background: RED_DEEP,
         boxShadow: [
           '0 6px 0 0 oklch(0.36 0.06 46)',
@@ -192,7 +205,7 @@ export default function WeddingEnvelope({ onOpen, brideInitial = 'О', groomInit
             src={seal}
             alt=""
             style={{
-              width: 'min(44vh, 520px)',
+              width: fill ? 'min(44cqh, 520px)' : 'min(44vh, 520px)',
               display: 'block',
               // tint seal to #7a3a2e (warm dark brownish-red)
               filter: [

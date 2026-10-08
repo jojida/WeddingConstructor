@@ -569,13 +569,60 @@
     env.addEventListener('keydown', prime);
   }
 
+  /* Редактор: «▶ Посмотреть, как откроется» на обложке — всё, что видит гость:
+     конверт (../assets/envelope.js) → живое видео обложки → надпись и имена.
+     Пока конверт закрыт, обложка под ним возвращается к началу. */
+  function previewIntro(done) {
+    var v = document.getElementById('heroLive');
+    var live = !!(v && !REDUCED && v.canPlayType && v.canPlayType('video/mp4'));
+    ROOT.classList.remove('hero-go');
+    if (live) {
+      if (!v.getAttribute('src')) {
+        v.muted = true;
+        v.poster = v.getAttribute('data-poster');
+        v.preload = 'auto';
+        v.src = v.getAttribute('data-src');
+      }
+      try { v.pause(); v.currentTime = 0; } catch (e) {}
+      ROOT.classList.add('hero-live');
+    }
+    var finished = false, t = 0;
+    function names() {
+      if (finished) return;
+      finished = true;
+      clearTimeout(t);
+      if (v) {
+        v.removeEventListener('timeupdate', near);
+        v.removeEventListener('ended', names);
+        v.removeEventListener('error', names);
+      }
+      startHero();
+      // видео погасло, надпись и имена написаны
+      setTimeout(function () { if (v) { try { v.pause(); } catch (e) {} } done(); }, 3400);
+    }
+    function near() { if (v.duration && v.currentTime >= v.duration - 0.3) names(); }
+    window.WCEnvelope.preview(function () {
+      if (!live) { names(); return; }
+      v.addEventListener('timeupdate', near);
+      v.addEventListener('ended', names);
+      v.addEventListener('error', names);
+      t = setTimeout(names, 9000);
+      var p;
+      try { p = v.play(); } catch (e) { names(); return; }
+      if (p && typeof p.catch === 'function') p.catch(names);
+    });
+  }
+
   function initHero() {
     if (window.WCEnvelope && window.WCEnvelope.active) {
       initLive();
       window.addEventListener('wc:envelope-open', playLive);
       return;
     }
-    dropLive();
+    var IP = window.WCEnvelope && window.WCEnvelope.preview && window.WCIntroPreview && window.WCIntroPreview.on
+      ? window.WCIntroPreview : null;
+    if (IP) IP.button(previewIntro);
+    else dropLive();
     // Без конверта ждём шрифты (не дольше секунды), чтобы имена не мигнули запасным
     var started = false;
     var go = function () { if (!started) { started = true; startHero(); } };

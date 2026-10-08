@@ -10,8 +10,14 @@
   <link rel="preload" as="image" href="assets/medallion.webp" />
   <link rel="preload" as="font" type="font/woff2" href="/invite/assets/fonts/HamiltoneSHA.woff2" crossorigin />
   <link rel="stylesheet" href="styles.css" />
-  <!-- intro=0: анимация открытия не входит в тариф — прячем её до первой отрисовки -->
-  <script>if (new URLSearchParams(location.search).get('intro') === '0') document.documentElement.classList.add('wc-no-intro');</script>
+  <!-- intro=0: анимация открытия не входит в тариф — прячем её до первой отрисовки.
+       В редакторе двери до скрипта не показываем: иначе они мелькают при входе -->
+  <script>(function () {
+    var p = new URLSearchParams(location.search);
+    if (p.get('intro') === '0') document.documentElement.classList.add('wc-no-intro');
+    if (p.get('editing') === '1') document.documentElement.classList.add('wc-edit');
+  })();</script>
+  <script src="../assets/intro-preview.js"></script>
   <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
   <noscript><style>
     .hero-in, .rv, .rv-soft, .rv-write, .rv-pop > *, .rv-line, .cover__bg, .cover__name, .cover__amp {
@@ -32,7 +38,8 @@
          инициалами — на правой створке. Касание — открыть сейчас.
          Основная версия — WebGL (doors3d.js рисует холст .doors__gl поверх);
          разметка ниже — первый кадр и запасной вариант без WebGL2.
-         В редакторе двери открыты, есть кнопка повтора -->
+         В редакторе двери — скрытый слой на обложке, их показывает кнопка
+         «▶ Посмотреть, как откроются двери» (../assets/intro-preview.js) -->
     <div class="doors" id="doors" data-wc-section="envelope">
       <div class="doors__glow" aria-hidden="true"></div>
       <div class="doors__stage" aria-hidden="true">
@@ -60,7 +67,6 @@
           </div></div>
         </div>
       </div>
-      <button class="doors__replay" type="button" hidden>▶ Посмотреть, как откроются двери</button>
     </div>
 
     <!-- 1 — ОБЛОЖКА: витражная арка, «Свадьба», имена, приглашение и дата.

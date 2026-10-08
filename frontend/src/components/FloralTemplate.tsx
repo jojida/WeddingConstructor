@@ -85,16 +85,53 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, apiBase, slug]);
 
+  /* Редактор: кнопка «▶ Посмотреть, как откроется» на обложке (в iframe) просит
+     показать конверт гостя — рисуем его поверх обложки превью, по её высоте,
+     он открывается сам и гаснет; iframe узнаёт об этом из 'wc:intro-done'. */
+  const [intro, setIntro] = useState<{ height: number; fading: boolean } | null>(null);
+  useEffect(() => {
+    if (!editing) return;
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || e.source !== iframeRef.current?.contentWindow) return;
+      if (e.data?.type === 'wc:intro-play') setIntro({ height: Math.max(200, Number(e.data.height) || 0), fading: false });
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [editing]);
+  const introOpened = () => {
+    setIntro(cur => (cur ? { ...cur, fading: true } : cur));
+    setTimeout(() => {
+      setIntro(null);
+      iframeRef.current?.contentWindow?.postMessage({ type: 'wc:intro-done' }, window.location.origin);
+    }, 650);
+  };
+
   if (live) {
     // Редактор — iframe напрямую (живое превью, скролл внутри)
     if (editing) {
       return (
-        <iframe
-          ref={iframeRef}
-          src={initialSrc}
-          style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#d5d0c8' }}
-          title="Превью «Флоральный»"
-        />
+        <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+          <iframe
+            ref={iframeRef}
+            src={initialSrc}
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#d5d0c8' }}
+            title="Превью «Флоральный»"
+          />
+          {intro && (
+            <div style={{
+              position: 'absolute', left: 0, top: 0, width: '100%', height: intro.height, overflow: 'hidden', zIndex: 2,
+              opacity: intro.fading ? 0 : 1, transition: 'opacity .6s ease',
+            }}>
+              <WeddingEnvelope
+                fill
+                autoOpenMs={900}
+                onOpen={introOpened}
+                brideInitial={(data.brideName || 'Оливия').trim().charAt(0).toUpperCase()}
+                groomInitial={(data.groomName || 'Себастьян').trim().charAt(0).toUpperCase()}
+              />
+            </div>
+          )}
+        </div>
       );
     }
     // Гость — сначала конверт, затем приглашение

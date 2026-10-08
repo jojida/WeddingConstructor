@@ -17,9 +17,12 @@
    видео-конверта (envelope.js): window.WCEnvelope.active = true, пока
    конверт закрыт; событие 'wc:envelope-open', когда обложке пора появляться.
 
-   Редактор (editing=1): конверт — первый экран превью, а не поверх сайта
-   (блок с data-edit="sealColor", к нему листает раздел «Конверт»), и кнопка
-   «Посмотреть, как откроется».
+   Редактор (editing=1): обложка готовая, конверт — скрытый слой ровно поверх
+   обложки (../assets/intro-preview.js; на слое data-edit="sealColor", к нему
+   листает раздел «Конверт»). Кнопка «▶ Посмотреть, как откроется» на обложке
+   проигрывает открытие; смена цвета печати показывает конверт закрытым на
+   пару секунд. Движок в редакторе запускается только на время показа —
+   скрытый конверт не греет телефон.
 
    Без WebGL2 конверта нет — сайт открывается как обычно. Так же при intro=0:
    анимация открытия не входит в тариф (бесплатный).
@@ -82,11 +85,7 @@
     '.wc-env3d.is-opening .wc-env3d__hint{opacity:0}' +
     '.wc-env3d__hand{animation:wcEnvTap 1.9s ease-in-out infinite}' +
     '@keyframes wcEnvTap{0%,100%{transform:translateY(0)}45%{transform:translateY(3px)}}' +
-    '.wc-env3d--inline{position:relative;inset:auto;z-index:auto;height:100vh;cursor:default;touch-action:auto}' +
-    '.wc-env3d__replay{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);z-index:2;' +
-      'font:500 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#6d5b40;background:rgba(255,250,240,.94);' +
-      'border:1px solid #d8c7a6;border-radius:999px;padding:10px 18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}' +
-    '.wc-env3d__replay[disabled]{opacity:.55;cursor:default}' +
+    '.wc-env3d--preview{cursor:default;touch-action:auto}' +
     '@media (prefers-reduced-motion:reduce){.wc-env3d__hand{animation:none}}';
   var st = document.createElement('style');
   st.textContent = css;
@@ -103,7 +102,7 @@
   if (SERIF === 'Cormorant Garamond') ensureFontCss('000cb0ed3e9570f8d8a7.css');
 
   var el = document.createElement('div');
-  el.className = 'wc-env3d' + (EDITING ? ' wc-env3d--inline' : '');
+  el.className = 'wc-env3d' + (EDITING ? ' wc-env3d--preview' : '');
   if (EDITING) {
     el.setAttribute('data-edit', 'sealColor');
   } else {
@@ -111,13 +110,17 @@
     el.setAttribute('tabindex', '0');
     el.setAttribute('aria-label', 'Открыть приглашение');
   }
-  el.innerHTML = '<div class="wc-env3d__stage"><canvas></canvas><svg class="wc-env3d__hint" aria-hidden="true"></svg></div>' +
-    (EDITING ? '<button type="button" class="wc-env3d__replay">▶ Посмотреть, как откроется</button>' : '');
+  el.innerHTML = '<div class="wc-env3d__stage"><canvas></canvas><svg class="wc-env3d__hint" aria-hidden="true"></svg></div>';
   document.body.insertBefore(el, document.body.firstChild);
   el.setAttribute('data-wc-section', 'envelope');
   var stage = el.querySelector('.wc-env3d__stage');
   var hint = el.querySelector('.wc-env3d__hint');
-  var replay = el.querySelector('.wc-env3d__replay');
+  // Редактор: слой поверх обложки и кнопка показа на ней (общий модуль)
+  var IP = EDITING && window.WCIntroPreview && window.WCIntroPreview.on ? window.WCIntroPreview : null;
+  if (EDITING) {
+    if (IP) IP.layer(el);
+    else el.style.display = 'none';
+  }
 
   window.WCEnvelope = {
     active: !EDITING,
@@ -170,21 +173,48 @@
     beginOpen();
   }
 
-  function preview() {
-    if (!engine || phase !== 'closed') return;
-    phase = 'opening';
-    el.classList.add('is-opening');
-    if (replay) replay.disabled = true;
-    engine.open();
+  /* ─── Редактор: показ на обложке ─── */
+  var mounting = null, previewDone = null;
+  function ensure() {
+    if (!mounting) mounting = mount().catch(function (err) { mounting = null; throw err; });
+    return mounting;
   }
-  function previewEnd() {
-    setTimeout(function () {
-      if (!engine) return;
-      engine.reset();
-      phase = 'closed';
-      el.classList.remove('is-opening');
-      if (replay) replay.disabled = false;
-    }, 1200);
+  function release() {
+    if (engine) { engine.destroy(); engine = null; }
+    mounting = null;
+    el.classList.remove('is-ready', 'is-opening', 'is-out');
+  }
+  // Закрытый конверт поверх обложки → открытие, как у гостя → растворяется над обложкой
+  function preview(done) {
+    if (phase !== 'closed') { done(); return; }
+    phase = 'opening';
+    previewDone = done;
+    IP.show(true);
+    var shownAt = Date.now();
+    ensure().then(function (api) {
+      // дать рассмотреть закрытый конверт
+      setTimeout(function () {
+        if (engine !== api || phase !== 'opening') return;
+        el.classList.add('is-opening');
+        api.open();
+      }, Math.max(300, 1000 - (Date.now() - shownAt)));
+    }, finishPreview);
+  }
+  function previewReveal() {
+    el.classList.add('is-out');
+    setTimeout(finishPreview, 1350);
+  }
+  function finishPreview() {
+    IP.show(false);
+    release();
+    phase = 'closed';
+    var d = previewDone;
+    previewDone = null;
+    if (d) d();
+  }
+  if (IP) {
+    IP.onPeek = function () { if (phase === 'closed') ensure().catch(function () {}); };
+    IP.onPeekEnd = function () { if (phase === 'closed') release(); };
   }
 
   if (!EDITING) {
@@ -195,15 +225,18 @@
     // Пока конверт закрыт, страница под ним не прокручивается
     el.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
     el.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
-  } else if (replay) {
-    replay.addEventListener('click', preview);
+  } else if (IP) {
+    IP.button(preview);
   }
 
   /* ─── Данные редактора и страницы гостя ─── */
+  var seenData = false;
   window.addEventListener('message', function (e) {
     if (e.origin !== window.location.origin || e.source !== window.parent) return;
     var p = e.data && e.data.type === 'wc:data' && e.data.payload;
     if (!p) return;
+    var first = !seenData;
+    seenData = true;
     var lettersChanged = false, cardChanged = false;
     ['groom', 'bride'].forEach(function (k) {
       var v = p[k + 'Name'];
@@ -214,6 +247,8 @@
     if (typeof p.weddingDate === 'string' && p.weddingDate && p.weddingDate !== D.date) { D.date = p.weddingDate; cardChanged = true; }
     var waxChanged = typeof p.sealColor === 'string' && WAXES.indexOf(p.sealColor) >= 0 && p.sealColor !== D.wax;
     if (waxChanged) D.wax = p.sealColor;
+    // пара сменила цвет печати или имена — показать конверт закрытым
+    if ((waxChanged || lettersChanged) && !first && IP) IP.peek(3200);
     if (!engine) return;                       // движок возьмёт свежие D при запуске
     if (lettersChanged) engine.setInitials(letters()[0], letters()[1]);
     if (cardChanged) engine.setNames(namesLine(), dateLine());
@@ -221,34 +256,41 @@
   });
 
   /* ─── Запуск движка ─── */
-  var mountedWith = null;
-  import(BASE + 'engine.js').then(function (m) {
-    mountedWith = { l: letters().join(''), n: namesLine(), d: dateLine(), w: D.wax };
-    return m.mountEnvelope(stage, {
-      base: BASE,
-      letters: letters(),
-      wax: D.wax,
-      names: namesLine(),
-      date: dateLine(),
-      serifFont: SERIF,
-      onLayout: function (L) { m.drawHint(hint, L, { font: SERIF }); },
-      onReveal: reveal,
-      onEnd: EDITING ? previewEnd : null
+  function mount() {
+    var mountedWith = null;
+    return import(BASE + 'engine.js').then(function (m) {
+      mountedWith = { l: letters().join(''), n: namesLine(), d: dateLine(), w: D.wax };
+      return m.mountEnvelope(stage, {
+        base: BASE,
+        letters: letters(),
+        wax: D.wax,
+        names: namesLine(),
+        date: dateLine(),
+        serifFont: SERIF,
+        onLayout: function (L) { m.drawHint(hint, L, { font: SERIF }); },
+        onReveal: EDITING ? previewReveal : reveal,
+        onEnd: null
+      });
+    }).then(function (api) {
+      if (!EDITING && phase === 'done') { api.destroy(); return api; }
+      engine = api;
+      // Данные, пришедшие, пока движок грузил шрифты и бумагу (цвет печати у гостя
+      // приходит только сообщением от обёртки)
+      if (letters().join('') !== mountedWith.l) api.setInitials(letters()[0], letters()[1]);
+      if (namesLine() !== mountedWith.n || dateLine() !== mountedWith.d) api.setNames(namesLine(), dateLine());
+      if (D.wax !== mountedWith.w) api.setWax(D.wax);
+      el.classList.add('is-ready');
+      if (wantOpen) { clearTimeout(waitTimer); beginOpen(); }
+      return api;
     });
-  }).then(function (api) {
-    engine = api;
-    if (phase === 'done') { api.destroy(); engine = null; return; }
-    // Данные, пришедшие, пока движок грузил шрифты и бумагу (цвет печати у гостя
-    // приходит только сообщением от обёртки)
-    if (letters().join('') !== mountedWith.l) api.setInitials(letters()[0], letters()[1]);
-    if (namesLine() !== mountedWith.n || dateLine() !== mountedWith.d) api.setNames(namesLine(), dateLine());
-    if (D.wax !== mountedWith.w) api.setWax(D.wax);
-    el.classList.add('is-ready');
-    if (wantOpen) { clearTimeout(waitTimer); beginOpen(); }
-  }).catch(function (err) {
-    // Не смогли показать конверт — не держим гостя: сразу сайт
-    if (window.console) console.warn('Конверт не запустился:', err);
-    if (EDITING) { if (el.parentNode) el.parentNode.removeChild(el); return; }
-    reveal();
-  });
+  }
+
+  // Гость — сразу; редактор — по кнопке (ensure)
+  if (!EDITING) {
+    mount().catch(function (err) {
+      // Не смогли показать конверт — не держим гостя: сразу сайт
+      if (window.console) console.warn('Конверт не запустился:', err);
+      reveal();
+    });
+  }
 })();

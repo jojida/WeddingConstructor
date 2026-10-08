@@ -657,22 +657,22 @@
     doorsLater(function () {
       DOORS.phase = 'open';
       if (!EDITING) { dropDoors(); return; }
-      el.classList.add('is-gone');
+      // редактор: распахнулись — слой прячем, створки закрываем к следующему показу
+      window.WCIntroPreview.show(false);
       el.classList.remove('is-open');
-      var btn = el.querySelector('.doors__replay');
-      if (btn) btn.disabled = false;
+      if (DOORS.gl) DOORS.gl.reset();
+      DOORS.phase = 'closed';
+      var done = DOORS.previewDone;
+      DOORS.previewDone = null;
+      if (done) done();
     }, 3500);
   }
 
-  // Редактор: закрыть мгновенно, подождать и открыть, как увидит гость
-  function replayDoors() {
-    var el = DOORS.el;
-    if (!el || DOORS.phase !== 'open') return;
-    var btn = el.querySelector('.doors__replay');
-    if (btn) btn.disabled = true;
-    el.classList.remove('is-gone', 'is-open');      // створки сразу закрыты
-    if (DOORS.gl) DOORS.gl.reset();
-    DOORS.phase = 'closed';
+  // Редактор: закрытые двери поверх обложки → открываются, как увидит гость
+  function previewDoors(done) {
+    if (!DOORS.el || DOORS.phase !== 'closed') { done(); return; }
+    DOORS.previewDone = done;
+    window.WCIntroPreview.show(true);
     doorsLater(openDoors, 900);
   }
 
@@ -694,23 +694,20 @@
     }
     var gl = DOORS.gl;
     if (gl) {
-      gl.canvas.addEventListener('click', openDoors);
+      gl.canvas.addEventListener('click', EDITING ? function () { if (window.WCIntroPreview) window.WCIntroPreview.play(); } : openDoors);
       gl.ready.then(function () { if (DOORS.gl === gl && DOORS.el) DOORS.el.classList.add('is-3d'); },
         function () { if (DOORS.gl === gl) dropGl(); });
     }
     layoutMono();
     if (EDITING) {
-      // двери открыты: паре нужна обложка; «Посмотреть, как откроются» — по кнопке
-      // и когда редактор показывает раздел дверей (подсветка wc-editor-flash)
-      el.classList.add('is-gone');
-      DOORS.phase = 'open';
-      var btn = el.querySelector('.doors__replay');
-      if (btn) { btn.hidden = false; btn.addEventListener('click', replayDoors); }
-      if ('MutationObserver' in window) {
-        new MutationObserver(function () {
-          if (el.classList.contains('wc-editor-flash')) replayDoors();
-        }).observe(el, { attributes: true, attributeFilter: ['class'] });
-      }
+      // Обложка готовая; двери — скрытый слой ровно на ней (не выходят за её края).
+      // «▶ Посмотреть, как откроются двери» — проиграть; раздел дверей в редакторе
+      // (подсветка wc-editor-flash) — показать их закрытыми (../assets/intro-preview.js)
+      var IP = window.WCIntroPreview && window.WCIntroPreview.on ? window.WCIntroPreview : null;
+      if (!IP) { dropDoors(); return; }
+      IP.layer(el);
+      DOORS.phase = 'closed';
+      IP.button(previewDoors, 'Посмотреть, как откроются двери');
       return;
     }
     if (REDUCED || NO_INTRO) { dropDoors(); return; }

@@ -16,8 +16,10 @@
    закрыт, window.WCEnvelope.active = true; когда обложке пора появляться —
    событие 'wc:envelope-open'.
 
-   Редактор (editing=1): конверт — первый экран превью, а не поверх сайта
-   (к нему листает раздел «Конверт»), и кнопка «Посмотреть, как откроется».
+   Редактор (editing=1): обложка готовая, конверт — скрытый слой ровно поверх
+   обложки (../assets/intro-preview.js). Кнопка «▶ Посмотреть, как откроется»
+   на обложке проигрывает открытие; раздел «Конверт» и правка надписи
+   показывают конверт закрытым на пару секунд.
    intro=0 — анимация открытия не входит в тариф (бесплатный): конверта нет.
    ============================================================ */
 (function () {
@@ -66,8 +68,9 @@
     '.wc-slide{position:fixed;inset:0;z-index:90;overflow:hidden;cursor:pointer;outline:none;' +
       '--seal:min(30.6vw,17.2vh,240px);' +
       'touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}' +
-    '.wc-slide--inline{position:relative;inset:auto;z-index:auto;height:100vh;cursor:default;touch-action:auto;' +
-      'background:#f4f0ed}' +
+    '.wc-slide--preview{cursor:default;touch-action:auto}' +
+    // сброс в закрытое положение без обратного хода створок
+    '.wc-slide.is-snap .wc-slide__half,.wc-slide.is-snap .wc-slide__seal{transition:none!important}' +
     // Створки — бумага с фактурой (envelope-slide/paper.jpg, бесшовная): квадратами,
     // по высоте створки ровно три штуки (мелкое зерно на любом экране). Поверх
     // лёгкая светотень: левая створка чуть светлее и лежит на правой, у шва — складка и тень.
@@ -126,10 +129,6 @@
       'filter:drop-shadow(0 3px 4px rgba(90,64,50,.16));animation:wcSlideSpin var(--r) ease-in-out var(--d) infinite alternate}' +
     '@keyframes wcSlideFall{from{transform:translate3d(0,-12vh,0)}to{transform:translate3d(var(--dx),112vh,0)}}' +
     '@keyframes wcSlideSpin{from{transform:rotate(var(--a0)) rotateX(8deg) rotateY(0deg)}to{transform:rotate(var(--a1)) rotateX(58deg) rotateY(35deg)}}' +
-    '.wc-slide__replay{position:absolute;left:50%;bottom:72px;transform:translateX(-50%);z-index:4;' +
-      'font:500 14px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#6b4f2f;background:rgba(255,252,247,.95);' +
-      'border:1px solid #dcc8a9;border-radius:999px;padding:10px 18px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.12);white-space:nowrap}' +
-    '.wc-slide__replay[disabled]{opacity:.55;cursor:default}' +
     '@media (prefers-reduced-motion:reduce){.wc-slide__petal,.wc-slide__petal i,.wc-slide__glow{animation:none!important}' +
       '.wc-slide__half{transition-duration:.01s}}';
   var st = document.createElement('style');
@@ -139,7 +138,7 @@
   /* ─── Разметка ─── */
   var uid = 'wcSlideArc' + Math.random().toString(36).slice(2, 7);
   var el = document.createElement('div');
-  el.className = 'wc-slide' + (EDITING ? ' wc-slide--inline' : '');
+  el.className = 'wc-slide' + (EDITING ? ' wc-slide--preview' : '');
   el.setAttribute('data-wc-section', 'envelope');
   if (!EDITING) {
     el.setAttribute('role', 'button');
@@ -165,13 +164,17 @@
         '</svg>' +
       '</div>' +
     '</div>' +
-    '<div class="wc-slide__petals" aria-hidden="true"></div>' +
-    (EDITING ? '<button type="button" class="wc-slide__replay">▶ Посмотреть, как откроется</button>' : '');
+    '<div class="wc-slide__petals" aria-hidden="true"></div>';
   document.body.insertBefore(el, document.body.firstChild);
+  // Редактор: слой поверх обложки и кнопка показа на ней (общий модуль)
+  var IP = EDITING && window.WCIntroPreview && window.WCIntroPreview.on ? window.WCIntroPreview : null;
+  if (EDITING) {
+    if (IP) IP.layer(el);
+    else el.style.display = 'none';
+  }
   var monoSvg = el.querySelector('.wc-slide__mono');
   var mono = monoSvg.querySelectorAll('text');
   var hintPath = el.querySelector('.wc-slide__hint textPath');
-  var replay = el.querySelector('.wc-slide__replay');
 
   /* ─── Монограмма: две буквы внутри лица печати ───
      Размер и место — по реальным контурам букв (canvas): вторая буква правее
@@ -333,15 +336,22 @@
     }, 380 + 1550);
   }
 
-  // Редактор: проиграть открытие и вернуть конверт на место
-  function preview() {
-    if (phase !== 'closed') return;
+  // Редактор: закрытый конверт поверх обложки → открытие, как у гостя → снова обложка
+  function preview(done) {
+    if (phase !== 'closed') { done(); return; }
     phase = 'opening';
-    if (replay) replay.disabled = true;
-    el.classList.add('is-pressed');
-    later(function () { el.classList.add('is-open'); }, 380);
-    later(function () { el.classList.remove('is-open', 'is-pressed'); }, 380 + 2600);
-    later(function () { phase = 'closed'; if (replay) replay.disabled = false; }, 380 + 4300);
+    IP.show(true);
+    later(function () { el.classList.add('is-pressed'); }, 700);             // печать вдавливается
+    later(function () { el.classList.add('is-open'); }, 700 + 380);           // створки разъезжаются
+    later(function () {
+      IP.show(false);                                                         // под ними — обложка
+      el.classList.add('is-snap');
+      el.classList.remove('is-open', 'is-pressed');
+      void el.offsetWidth;
+      el.classList.remove('is-snap');
+      phase = 'closed';
+      done();
+    }, 700 + 380 + 1650);
   }
 
   if (!EDITING) {
@@ -352,15 +362,18 @@
     // Пока конверт закрыт, страница под ним не прокручивается
     el.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
     el.addEventListener('wheel', function (e) { e.preventDefault(); }, { passive: false });
-  } else if (replay) {
-    replay.addEventListener('click', preview);
+  } else if (IP) {
+    IP.button(preview);
   }
 
   /* ─── Данные редактора и страницы гостя ─── */
+  var seenData = false;
   window.addEventListener('message', function (e) {
     if (e.origin !== window.location.origin || e.source !== window.parent) return;
     var p = e.data && e.data.type === 'wc:data' && e.data.payload;
     if (!p) return;
+    var first = !seenData;
+    seenData = true;
     var changed = false;
     ['groom', 'bride'].forEach(function (k) {
       var v = p[k + 'Name'];
@@ -371,5 +384,6 @@
       if (h !== D.hint) { D.hint = h; changed = true; }
     }
     if (changed) render();
+    if (changed && !first && IP) IP.peek(3200);
   });
 })();

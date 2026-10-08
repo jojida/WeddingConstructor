@@ -278,8 +278,9 @@ body {
 }
 
 /* Без анимации открытия (редактор, бесплатный тариф): ни заставки, ни ставен,
-   ни чаек — окно открыто, плашка сразу на месте */
-.wc-no-intro .intro-wrap,
+   ни чаек — окно открыто, плашка сразу на месте. В редакторе заставка — слой
+   в рамке обложки (wc-ip-layer), её показывает кнопка на обложке */
+.wc-no-intro .intro-wrap:not(.wc-ip-layer),
 .wc-no-intro .win-shutters,
 .wc-no-intro .win-birds { display: none; }
 .wc-no-intro .name-card { animation: none; }

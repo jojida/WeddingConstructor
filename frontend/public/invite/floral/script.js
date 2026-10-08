@@ -319,11 +319,38 @@
     if (msg && msg.type === 'wc:data' && msg.payload) applyData(msg.payload);
   });
 
+  /* Редактор: «▶ Посмотреть, как откроется» на обложке (../assets/intro-preview.js).
+     Конверт гостя — React-компонент обёртки (FloralTemplate.tsx, WeddingEnvelope):
+     просим её показать конверт поверх обложки и ждём, когда он откроется. */
+  function initIntroPreview() {
+    var IP = window.WCIntroPreview;
+    if (!IP || !IP.on || !window.parent || window.parent === window) return;
+    IP.button(function (done) {
+      var cover = document.querySelector('[data-wc-section="cover"]');
+      var height = cover ? Math.round(cover.getBoundingClientRect().height) : window.innerHeight;
+      var over = false;
+      var t = setTimeout(finish, 9000);
+      function finish() {
+        if (over) return;
+        over = true;
+        clearTimeout(t);
+        window.removeEventListener('message', onMsg);
+        done();
+      }
+      function onMsg(e) {
+        if (e.origin === window.location.origin && e.source === window.parent && e.data && e.data.type === 'wc:intro-done') finish();
+      }
+      window.addEventListener('message', onMsg);
+      window.parent.postMessage({ type: 'wc:intro-play', height: height }, window.location.origin);
+    });
+  }
+
   function init() {
     applyData(dataFromUrl());
     restartCountdown();
     initRsvp();
     initDressTabs();
+    initIntroPreview();
     try {
       if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'wc:ready' }, window.location.origin);

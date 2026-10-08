@@ -50,6 +50,8 @@
       </clipPath>
     </defs>
   </svg>
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="assets/intro-preview.js"></script>
 </head>
 <body>
 
@@ -526,7 +528,45 @@
 
       // Skip the intro in the editor (the landing preview explicitly opts in)
       // and when the plan has no opening animation (intro=0).
-      if (document.documentElement.classList.contains('wc-no-intro')) { remove(); return; }
+      if (document.documentElement.classList.contains('wc-no-intro')) {
+        // Редактор: заставка — по кнопке «▶ Посмотреть, как откроется», прямо
+        // в рамке обложки (../assets/intro-preview.js). Видео грузится по нажатию.
+        var IP = window.WCIntroPreview && window.WCIntroPreview.on ? window.WCIntroPreview : null;
+        if (!IP) { remove(); return; }
+        window.dispatchEvent(new Event('wc:intro-done'));
+        btn.hidden = true;
+        IP.layer(wrap);
+        IP.button(function (done) {
+          var over = false, safetyT = 0;
+          function end() {
+            if (over) return;
+            over = true;
+            clearTimeout(safetyT);
+            vid.removeEventListener('playing', show);
+            vid.removeEventListener('ended', end);
+            vid.removeEventListener('error', end);
+            wrap.classList.add('fade-out');
+            setTimeout(function () {
+              IP.show(false);
+              wrap.classList.remove('fade-out');
+              try { vid.pause(); vid.currentTime = 0; } catch (e) {}
+              done();
+            }, 900);
+          }
+          // слой — с первым кадром: тёмный фон заставки, пока видео грузится, не нужен
+          function show() { IP.show(true); }
+          vid.addEventListener('playing', show);
+          vid.addEventListener('ended', end);
+          vid.addEventListener('error', end);
+          if (!vid.getAttribute('src')) vid.src = vid.getAttribute('data-src');
+          try { vid.currentTime = 0; } catch (e) {}
+          var p;
+          try { p = vid.play(); } catch (e) { end(); return; }
+          if (p && p.catch) p.catch(end);
+          safetyT = setTimeout(end, 12000);
+        });
+        return;
+      }
       vid.src = vid.getAttribute('data-src');
       var playback = vid.play();
       if (playback && playback.catch) playback.catch(remove);
