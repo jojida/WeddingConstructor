@@ -1,6 +1,6 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface Props {
   onOpen: () => void;
@@ -15,6 +15,9 @@ interface Props {
 
 export default function WeddingEnvelope({ onOpen, brideInitial = 'О', groomInitial = 'С', fill, autoOpenMs }: Props) {
   const [open, setOpen] = useState(false);
+  const opening = useRef(false);
+  const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (revealTimer.current) clearTimeout(revealTimer.current); }, []);
   const FLAP_DURATION = 2.8;
 
 
@@ -30,10 +33,11 @@ export default function WeddingEnvelope({ onOpen, brideInitial = 'О', groomInit
   const seal  = '/envelope/wax-seal.png';
 
   function handleClick() {
-    if (open) return;
+    if (opening.current) return;
+    opening.current = true;
     setOpen(true);
     // Reveal the template after flap animation completes
-    setTimeout(() => onOpen(), (FLAP_DURATION + 0.4) * 1000);
+    revealTimer.current = setTimeout(() => onOpen(), (FLAP_DURATION + 0.4) * 1000);
   }
 
   useEffect(() => {

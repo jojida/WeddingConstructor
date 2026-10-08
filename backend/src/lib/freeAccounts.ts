@@ -17,11 +17,11 @@ import crypto from 'crypto';
      FREE_ACCOUNTS="a@mail.ru, b@mail.ru"
    (после правки: pm2 restart wedding-api --update-env)                      */
 
-const HASHES = new Set<string>([
+const OWNER_EMAIL_HASHES = new Set<string>([
   'b977f932459d5cbd57e4c89b92d975c32db5eafc61185d5d74afca627987c10a', // владелец
 ]);
 
-/** sha256 нормализованной почты — ровно так заполняется HASHES. */
+/** sha256 нормализованной почты — ровно так заполняется OWNER_EMAIL_HASHES. */
 export function emailHash(email: string): string {
   return crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex');
 }
@@ -36,5 +36,11 @@ const fromEnv = (): string[] =>
 export function isFreeAccount(email: string | null | undefined): boolean {
   const e = (email || '').trim().toLowerCase();
   if (!e) return false;
-  return HASHES.has(emailHash(e)) || fromEnv().includes(e);
+  return isServiceOwnerAccount(e) || fromEnv().includes(e);
+}
+
+/** Promotional/test accounts must never acquire access to service support messages. */
+export function isServiceOwnerAccount(email: string | null | undefined): boolean {
+  const e = (email || '').trim().toLowerCase();
+  return !!e && OWNER_EMAIL_HASHES.has(emailHash(e));
 }

@@ -5,7 +5,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+import { findPublicDomain } from './lib/domains';
 import prisma from './lib/prisma';
+import { uploadsDir } from './lib/storage';
 import authRouter from './routes/auth';
 import inviteRouter from './routes/invites';
 import uploadRouter from './routes/upload';
@@ -27,7 +29,7 @@ app.disable('x-powered-by');
 app.set('trust proxy', 'loopback');
 app.use((_req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Referrer-Policy', 'no-referrer');
   next();
 });
 const PORT = process.env.PORT || 4000;
@@ -36,10 +38,10 @@ const PORT = process.env.PORT || 4000;
 // CORS: разрешаем основной домен, www-вариант и localhost (для разработки).
 // Один жёсткий origin ломал вход при заходе на www.weddingcraft.ru.
 const allowedOrigins = new Set([
-  process.env.FRONTEND_URL || 'http://localhost:3000',
+  process.env.FRONTEND_URL || (process.env.NODE_ENV === 'production' ? 'https://weddingcraft.ru' : 'http://localhost:3000'),
   'https://weddingcraft.ru',
   'https://www.weddingcraft.ru',
-  'http://localhost:3000',
+  ...(process.env.NODE_ENV === 'production' ? [] : ['http://localhost:3000']),
 ]);
 app.use(cors({
   async origin(origin, cb) {
@@ -49,9 +51,10 @@ app.use(cors({
     // RSVP/guest-запросы на api.weddingcraft.ru — это cross-origin. Разрешаем
     // origin, если его хост привязан к какому-либо приглашению (customDomain).
     try {
-      const host = new URL(origin).hostname.replace(/^www\./, '').toLowerCase();
-      if (host) {
-        const bound = await prisma.invitation.findFirst({ where: { customDomain: host }, select: { id: true } });
+      const url = new URL(origin);
+      const host = url.hostname.replace(/^www\./, '').toLowerCase();
+      if (host && url.origin === origin && url.protocol === 'https:' && !url.port) {
+        const bound = await findPublicDomain(host);
         if (bound) return cb(null, true);
       }
     } catch { /* кривой Origin — просто не разрешаем */ }
@@ -64,7 +67,16 @@ app.use(express.urlencoded({ extended: false, limit: '64kb' }));
 app.use('/api', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
 
 // Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+app.use('/uploads', (req, res, next) => {
+  // A misplaced database, backup or active document must never become public.
+  if (!/^\/[a-z0-9][a-z0-9_-]*\.(?:jpg|png|gif|webp|mp3|m4a|ogg|wav|aac|webm)$/i.test(req.path)) {
+    res.sendStatus(404);
+    return;
+  }
+  next();
+}, express.static(uploadsDir, {
+  dotfiles: 'deny',
+  index: false,
   setHeaders(res, filePath) {
     res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
     // Each upload receives a fresh UUID; legacy filenames remain revalidated.
@@ -100,12 +112,16 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 if (require.main === module) {
   // Недостающие колонки — до первого запроса к ним: деплой миграции не запускает.
   ensureSchema()
-    .catch((e) => console.error('Проверка схемы БД не удалась:', e))
-    .finally(() => app.listen(PORT, () => {
+    .then(() => app.listen(PORT, () => {
       console.log(`🚀 Wedding Constructor API running on http://localhost:${PORT}`);
       // Бот сервиса настраивается сам, если задан TELEGRAM_BOT_TOKEN:
       // имя берётся через getMe, вебхук ставится на BACKEND_URL.
       initTelegram();
-    }));
+    }))
+    .catch(async () => {
+      console.error('Проверка схемы БД не удалась. API не запущен.');
+      process.exitCode = 1;
+      await prisma.$disconnect();
+    });
 }
 export default app;

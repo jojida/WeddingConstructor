@@ -89,6 +89,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
      показать конверт гостя — рисуем его поверх обложки превью, по её высоте,
      он открывается сам и гаснет; iframe узнаёт об этом из 'wc:intro-done'. */
   const [intro, setIntro] = useState<{ height: number; fading: boolean } | null>(null);
+  const introTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!editing) return;
     const onMsg = (e: MessageEvent) => {
@@ -96,11 +97,15 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       if (e.data?.type === 'wc:intro-play') setIntro({ height: Math.max(200, Number(e.data.height) || 0), fading: false });
     };
     window.addEventListener('message', onMsg);
-    return () => window.removeEventListener('message', onMsg);
+    return () => {
+      window.removeEventListener('message', onMsg);
+      if (introTimer.current) clearTimeout(introTimer.current);
+    };
   }, [editing]);
   const introOpened = () => {
     setIntro(cur => (cur ? { ...cur, fading: true } : cur));
-    setTimeout(() => {
+    if (introTimer.current) clearTimeout(introTimer.current);
+    introTimer.current = setTimeout(() => {
       setIntro(null);
       iframeRef.current?.contentWindow?.postMessage({ type: 'wc:intro-done' }, window.location.origin);
     }, 650);

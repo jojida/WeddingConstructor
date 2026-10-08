@@ -134,6 +134,7 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
     const upload = await realFetch(base + '/api/upload/image', { method: 'POST', body: form });
     assert.equal(upload.status, 200);
     const { url } = await upload.json();
+    const normalizedPhoto = fs.readFileSync(path.join(root, 'uploads', path.basename(url)));
     try {
       const data = { ...PRINT_SAMPLE, photo: url, photoPosition: 'xMinYMax' };
       const preview = await request('/preview', 'POST', { templateId: 'azure-bloom', data }, '');
@@ -142,7 +143,7 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
       assert.equal((await request(`/orders/${sample.id}`, 'PUT', { data })).status, 200);
       assert.equal((await (await request(`/orders/${sample.id}`)).json()).data.photo, url);
       const result = await request(`/orders/${sample.id}/pdf`); assert.equal(result.status, 200);
-      assert.ok(Buffer.from(await result.arrayBuffer()).includes(bytes));
+      assert.ok(Buffer.from(await result.arrayBuffer()).includes(normalizedPhoto));
       const photoFrame = { x: 23.4, y: 78.1, z: 1.75, r: 32 };
       assert.throws(() => validatePrintData({ ...data, photoFrame: { ...photoFrame, z: 20 } }));
       assert.throws(() => validatePrintData({ ...data, photoFrame: { ...photoFrame, x: -1 } }));
@@ -153,7 +154,7 @@ test('print purchase and PDF use a separate, owner-bound product', async t => {
       assert.match(await cropped.text(), /rotate\(32\)/);
       const croppedPdf = await request(`/orders/${sample.id}/pdf`);
       assert.equal(croppedPdf.status, 200);
-      assert.ok(Buffer.from(await croppedPdf.arrayBuffer()).includes(bytes));
+      assert.ok(Buffer.from(await croppedPdf.arrayBuffer()).includes(normalizedPhoto));
       assert.equal((await request(`/orders/${sample.id}`, 'PUT', { data: { ...data, photo: '' } })).status, 200);
       assert.ok(!(await (await request(`/orders/${sample.id}`)).json()).data.photo);
     } finally { fs.unlinkSync(path.join(root, 'uploads', path.basename(url))); }

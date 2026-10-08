@@ -1502,8 +1502,9 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 function EditorForSelection() {
   const params = useSearchParams();
+  const accountId = useAuthStore(state => state.user?.id || 'guest');
   const key = params.get('id') ? 'id:' + params.get('id') : 'template:' + (params.get('template') || 'vadimdarya');
-  return <EditorContent key={key} />;
+  return <EditorContent key={`${accountId}:${key}`} />;
 }
 
 export default function EditorPage() {

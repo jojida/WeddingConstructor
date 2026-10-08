@@ -5,8 +5,9 @@ import PDFDocument from 'pdfkit';
 import SVGtoPDF from 'svg-to-pdfkit';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { kassaAuth, kassaRequest } from './payment';
-import { confirmPrintPayment } from '../lib/printPayment';
+import { kassaAuth, kassaRequest, paymentRedirect } from '../lib/paymentGateway';
+import { confirmPrintPayment, matchesPrintPayment } from '../lib/printPayment';
+import { PaymentConflict, reservePaymentAttempt, requestAttemptPayment } from '../lib/paymentAttempt';
 import { PRINT_PRICE, PRINT_TEMPLATES, renderPrintSvg, validatePrintData, printFont, printSize } from '../lib/printDesign';
 
 const router = Router();
@@ -14,7 +15,7 @@ router.post('/preview', (req, res) => {
   try {
     const data = validatePrintData(req.body?.data);
     res.type('image/svg+xml').send(renderPrintSvg(req.body?.templateId, data));
-  } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : 'Неверный макет' }); }
+  } catch { res.status(400).json({ error: 'Не удалось подготовить макет. Проверьте данные и фотографию.' }); }
 });
 router.use(authMiddleware);
 router.get('/orders', async (req: AuthRequest, res) => {
@@ -27,7 +28,7 @@ router.post('/orders', async (req: AuthRequest, res) => {
     const data = validatePrintData(req.body?.data);
     const order = await prisma.printOrder.create({ data: { userId: req.userId!, templateId: req.body.templateId, data: JSON.stringify(data) } });
     res.status(201).json({ id: order.id });
-  } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : 'Не удалось сохранить макет' }); }
+  } catch { res.status(400).json({ error: 'Не удалось сохранить макет. Проверьте данные приглашения.' }); }
 });
 router.get('/orders/:id', async (req: AuthRequest, res) => {
   let order = await prisma.printOrder.findFirst({ where: { id: String(req.params.id), userId: req.userId } });
@@ -50,7 +51,7 @@ router.put('/orders/:id', async (req: AuthRequest, res) => {
     const result = await prisma.printOrder.updateMany({ where: { id: String(req.params.id), userId: req.userId }, data: { data: JSON.stringify(data) } });
     if (!result.count) return res.status(404).json({ error: 'Заказ не найден' });
     res.json({ saved: true });
-  } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : 'Проверьте данные' }); }
+  } catch { res.status(400).json({ error: 'Не удалось сохранить изменения. Проверьте данные приглашения.' }); }
 });
 router.post('/orders/:id/pay', async (req: AuthRequest, res) => {
   let order = await prisma.printOrder.findFirst({ where: { id: String(req.params.id), userId: req.userId } });
@@ -64,29 +65,41 @@ router.post('/orders/:id/pay', async (req: AuthRequest, res) => {
   }
   if (!kassaAuth().configured) return res.status(503).json({ error: 'Оплата временно недоступна. Макет сохранён — попробуйте позже.' });
   try {
-    if (order.paymentId) {
-      const previous = await kassaRequest('GET', `/payments/${order.paymentId}`);
+    const previousAttempt = await prisma.paymentAttempt.findUnique({ where: { printOrderId: order.id } });
+    if (order.paymentId || previousAttempt) {
+      const previous = previousAttempt ? await requestAttemptPayment(previousAttempt) : await kassaRequest('GET', `/payments/${order.paymentId}`);
+      if (!matchesPrintPayment(previous, order, previousAttempt?.amountKopecks)) throw new PaymentConflict('Не удалось сверить предыдущий платёж. Обратитесь в поддержку.');
       if (await confirmPrintPayment(previous)) return res.json({ paymentUrl: returnUrl });
-      if (previous.status === 'pending' && previous.confirmation?.confirmation_url) return res.json({ paymentUrl: previous.confirmation.confirmation_url });
+      if (previous.status === 'pending' && paymentRedirect(previous)) return res.json({ paymentUrl: paymentRedirect(previous) });
       if (previous.status !== 'canceled') return res.status(409).json({ error: 'Платёж обрабатывается. Проверьте статус через минуту.' });
       const oldKey = order.paymentKey;
-      await prisma.printOrder.updateMany({ where: { id: order.id, paymentKey: oldKey, status: { not: 'paid' } }, data: { paymentId: '', paymentKey: crypto.randomUUID() } });
+      await prisma.$transaction(async tx => {
+        const changed = await tx.printOrder.updateMany({ where: { id: order!.id, paymentKey: oldKey, status: { not: 'paid' } }, data: { paymentId: '', paymentKey: crypto.randomUUID() } });
+        if (changed.count && previousAttempt) await tx.paymentAttempt.deleteMany({ where: { id: previousAttempt.id } });
+      });
       order = (await prisma.printOrder.findUnique({ where: { id: order.id } }))!;
       if (order.status === 'paid') return res.json({ paymentUrl: returnUrl });
     }
     const amount = { value: PRINT_PRICE.toFixed(2), currency: 'RUB' };
     const description = `Печатное приглашение WeddingCraft — ${PRINT_TEMPLATES.find(t => t.id === order!.templateId)!.name}`;
     const user = await prisma.user.findUnique({ where: { id: req.userId! } });
-    const payment = await kassaRequest('POST', '/payments', {
+    const attempt = await reservePaymentAttempt({ printOrderId: order.id, key: order.paymentKey, amountKopecks: PRINT_PRICE * 100, payload: key => ({
       amount, capture: true, description,
       confirmation: { type: 'redirect', return_url: returnUrl },
-      metadata: { product: 'print', printOrderId: order.id, paymentKey: order.paymentKey },
+      metadata: { product: 'print', printOrderId: order!.id, paymentKey: key },
       ...(process.env.YOOKASSA_RECEIPT === 'true' ? { receipt: { customer: { email: user!.email }, items: [{ description, quantity: '1.00', amount, vat_code: 1, payment_subject: 'service', payment_mode: 'full_payment' }] } } : {}),
-    }, order.paymentKey);
-    await prisma.printOrder.updateMany({ where: { id: order.id, paymentKey: order.paymentKey }, data: { paymentId: payment.id } });
-    if (!payment.confirmation?.confirmation_url) throw new Error('No confirmation URL');
-    res.json({ paymentUrl: payment.confirmation.confirmation_url });
-  } catch { res.status(502).json({ error: 'Не удалось связаться с оплатой. Попробуйте ещё раз — повторный запрос не создаст второй платёж.' }); }
+    }) });
+    const payment = await requestAttemptPayment(attempt);
+    const currentOrder = (await prisma.printOrder.findUnique({ where: { id: order.id } }))!;
+    if (!matchesPrintPayment(payment, currentOrder, attempt.amountKopecks)) throw new Error('Invalid payment');
+    if (await confirmPrintPayment(payment)) return res.json({ paymentUrl: returnUrl });
+    const paymentUrl = paymentRedirect(payment);
+    if (payment.status !== 'pending' || !paymentUrl) throw new PaymentConflict('Платёж обрабатывается. Проверьте статус через минуту.');
+    res.json({ paymentUrl });
+  } catch (error) {
+    if (error instanceof PaymentConflict) return res.status(409).json({ error: error.message });
+    res.status(502).json({ error: 'Не удалось связаться с оплатой. Попробуйте ещё раз — повторный запрос использует тот же платёж.' });
+  }
 });
 router.get('/orders/:id/pdf', async (req: AuthRequest, res) => {
   const order = await prisma.printOrder.findFirst({ where: { id: String(req.params.id), userId: req.userId } });

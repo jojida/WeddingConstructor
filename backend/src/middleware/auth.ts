@@ -16,7 +16,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   const token = authHeader.slice(7);
   try {
     const payload = jwt.verify(token, jwtSecret(), { algorithms: ['HS256'] });
-    if (typeof payload === 'string' || typeof payload.userId !== 'string' || !payload.userId) throw new Error('Invalid subject');
+    if (typeof payload === 'string' || typeof payload.userId !== 'string' || !/^[a-zA-Z0-9_-]{1,128}$/.test(payload.userId)) throw new Error('Invalid subject');
     req.userId = payload.userId;
     next();
   } catch {

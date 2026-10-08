@@ -51,6 +51,12 @@ const BORDER = '1px solid rgba(206,197,186,0.5)';
 
 export default function ManageInvitePage() {
   const params = useParams();
+  const accountId = useAuthStore(state => state.user?.id || 'guest');
+  return <ManageInviteSession key={`${accountId}:${params?.id || ''}`} />;
+}
+
+function ManageInviteSession() {
+  const params = useParams();
   const id = (params?.id as string) || '';
   const router = useRouter();
   const { user, loading } = useAuthStore();
@@ -71,7 +77,7 @@ export default function ManageInvitePage() {
 
   useEffect(() => { if (user) loadInvite(); }, [user, loadInvite]);
 
-  if (loading || !invite) return (
+  if (loading || !user || !invite) return (
     <div style={{ minHeight: '100vh', background: '#faf8f5' }}>
       <Navbar />
       <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>

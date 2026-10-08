@@ -10,10 +10,11 @@ interface Props {
 }
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export const metadata = { robots: { index: false, follow: false } };
 
 async function getByDomain(host: string) {
   try {
-    const res = await fetch(`${API}/api/invites/by-domain/${host}`, { cache: 'no-store' });
+    const res = await fetch(`${API}/api/invites/by-domain/${encodeURIComponent(host)}`, { cache: 'no-store' });
     if (res.status === 402) return { unpaid: true }; // сайт есть, но не оплачен
     if (!res.ok) return null;
     return res.json();
@@ -23,7 +24,7 @@ async function getByDomain(host: string) {
 export default async function DomainInvitePage({ params, searchParams }: Props) {
   const { host } = await params;
   const { g } = await searchParams;
-  const invite = await getByDomain(decodeURIComponent(host));
+  const invite = await getByDomain(host);
   if (!invite) notFound();
   if (invite.unpaid) return <UnpublishedNotice />;
 

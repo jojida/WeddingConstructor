@@ -174,12 +174,19 @@
   }
 
   /* ─── Редактор: показ на обложке ─── */
-  var mounting = null, previewDone = null;
+  var mounting = null, previewDone = null, mountVersion = 0;
   function ensure() {
-    if (!mounting) mounting = mount().catch(function (err) { mounting = null; throw err; });
+    if (!mounting) {
+      var attempt = mount().catch(function (err) {
+        if (mounting === attempt) mounting = null;
+        throw err;
+      });
+      mounting = attempt;
+    }
     return mounting;
   }
   function release() {
+    mountVersion += 1; // A pending import/image load may finish after the preview was hidden.
     if (engine) { engine.destroy(); engine = null; }
     mounting = null;
     el.classList.remove('is-ready', 'is-opening', 'is-out');
@@ -257,6 +264,7 @@
 
   /* ─── Запуск движка ─── */
   function mount() {
+    var version = mountVersion;
     var mountedWith = null;
     return import(BASE + 'engine.js').then(function (m) {
       mountedWith = { l: letters().join(''), n: namesLine(), d: dateLine(), w: D.wax };
@@ -272,7 +280,7 @@
         onEnd: null
       });
     }).then(function (api) {
-      if (!EDITING && phase === 'done') { api.destroy(); return api; }
+      if ((EDITING && version !== mountVersion) || (!EDITING && phase === 'done')) { api.destroy(); return api; }
       engine = api;
       // Данные, пришедшие, пока движок грузил шрифты и бумагу (цвет печати у гостя
       // приходит только сообщением от обёртки)

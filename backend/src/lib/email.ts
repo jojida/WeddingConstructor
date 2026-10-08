@@ -15,6 +15,7 @@ const smtpTransport = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.yandex.ru',
   port: SMTP_PORT,
   secure: SMTP_PORT === 465, // 465 → SSL, 587 → STARTTLS
+  requireTLS: true,
   auth: { user: process.env.SMTP_USER || '', pass: process.env.SMTP_PASS || '' },
   connectionTimeout: 10000,
   greetingTimeout: 10000,
@@ -42,6 +43,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
   if (resendKey) {
     const res = await fetch('https://api.resend.com/emails', {
       signal: AbortSignal.timeout(15_000),
+      redirect: 'error',
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -54,8 +56,8 @@ export async function sendEmail(mail: Mail): Promise<void> {
       }),
     });
     if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error(`Resend API ${res.status}: ${body.slice(0, 300)}`);
+      await res.body?.cancel();
+      throw new Error(`Resend API ${res.status}`);
     }
     return;
   }
@@ -64,6 +66,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
   if (key) {
     const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       signal: AbortSignal.timeout(15_000),
+      redirect: 'error',
       method: 'POST',
       headers: {
         'api-key': key,
@@ -80,8 +83,8 @@ export async function sendEmail(mail: Mail): Promise<void> {
       }),
     });
     if (!res.ok) {
-      const body = await res.text().catch(() => '');
-      throw new Error(`Brevo API ${res.status}: ${body.slice(0, 300)}`);
+      await res.body?.cancel();
+      throw new Error(`Brevo API ${res.status}`);
     }
     return;
   }

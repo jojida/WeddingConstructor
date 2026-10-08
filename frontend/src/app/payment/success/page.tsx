@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { isAdvancedPlan, LEGAL } from '@/lib/constants';
@@ -22,30 +23,48 @@ function SuccessContent() {
   const searchParams = useSearchParams();
   const inviteId = searchParams.get('id') || '';
   const targetPlan = searchParams.get('plan') || '';
+  const returnToken = searchParams.get('token') || '';
   /* Тестовому аккаунту кассу не показывали — поздравлять с оплатой нечестно. */
   const isFree = !!useAuthStore((st) => st.user)?.free || targetPlan === 'free';
   const [invite, setInvite] = useState<any>(null);
   const [state, setState] = useState<PayState>('checking');
   const [paymentStatus, setPaymentStatus] = useState('');
   const [copied, setCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const triesRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestRef = useRef<AbortController | null>(null);
+  const runRef = useRef(0);
 
-  const stop = () => { if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; } };
+  const stop = useCallback(() => {
+    runRef.current += 1;
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
+    requestRef.current?.abort();
+    requestRef.current = null;
+  }, []);
 
   const startPolling = useCallback(() => {
-    if (!inviteId) { setState('stalled'); return; }
     stop();
-    triesRef.current = 0;
+    if (!inviteId) { setState('stalled'); return; }
+    const run = runRef.current;
+    let tries = 0;
+    const deadline = Date.now() + MAX_TRIES * POLL_MS;
     setState('checking');
     setPaymentStatus('');
+    setInvite(null);
 
     const check = async () => {
-      triesRef.current += 1;
+      if (run !== runRef.current) return;
+      tries += 1;
+      const request = new AbortController();
+      requestRef.current = request;
       try {
-        // Публичный роут: подтверждение работает, даже если покупатель вернулся
-        // с другого устройства или потерял сессию.
-        const st = await api.get(`/api/payment/public-status/${inviteId}`);
+        // The return token grants access only to this payment status, even when
+        // the purchaser returns from another browser without their login session.
+        const st = await api.get(`/api/payment/public-status/${encodeURIComponent(inviteId)}`, {
+          params: returnToken ? { token: returnToken } : undefined,
+          signal: request.signal,
+          timeout: Math.max(1, Math.min(10_000, deadline - Date.now())),
+        });
+        if (run !== runRef.current) return;
         if (st.data.paymentStatus) setPaymentStatus(st.data.paymentStatus);
         if (st.data.paid && (!targetPlan || st.data.plan === targetPlan)) {
           stop();
@@ -58,31 +77,44 @@ function SuccessContent() {
         }
         // Платёж отменён — ждать больше нечего.
         if (st.data.paymentStatus === 'canceled') { stop(); setState('stalled'); return; }
-      } catch { /* сеть моргнула — попробуем на следующем тике */ }
-      if (triesRef.current >= MAX_TRIES) { stop(); setState('stalled'); }
+      } catch (error) {
+        if (run !== runRef.current) return;
+        const status = (error as { response?: { status?: number } }).response?.status;
+        if (status === 401 || status === 403) {
+          stop(); setPaymentStatus('auth-required'); setState('stalled'); return;
+        }
+      }
+      if (run !== runRef.current) return;
+      if (tries >= MAX_TRIES || Date.now() >= deadline) { stop(); setState('stalled'); return; }
+      // Await each request before the next: slow connections cannot accumulate
+      // concurrent status requests, and unmounted pages cannot restart polling.
+      timerRef.current = setTimeout(check, Math.min(POLL_MS, deadline - Date.now()));
     };
 
-    timerRef.current = setInterval(check, POLL_MS);
-    check();
-  }, [inviteId, targetPlan]);
+    void check();
+  }, [inviteId, targetPlan, returnToken, stop]);
 
-  useEffect(() => { startPolling(); return stop; }, [startPolling]);
+  useEffect(() => { startPolling(); return stop; }, [startPolling, stop]);
 
   // Канонический адрес сайта пары — короткий, без /invite (его же отдаёт кабинет).
   const siteUrl = invite ? `${window.location.origin}/${invite.slug}` : '';
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(siteUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(siteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { toast.error('Не удалось скопировать. Выделите ссылку вручную.'); }
   };
 
   const title = state === 'paid' ? (isFree ? 'Сайт опубликован!' : 'Оплата прошла!')
     : state === 'checking' ? (isFree ? 'Публикуем сайт…' : 'Проверяем оплату…')
+      : paymentStatus === 'auth-required' ? 'Войдите для проверки оплаты'
       : paymentStatus === 'canceled' ? 'Платёж не прошёл' : 'Оплата пока не подтверждена';
 
   const subtitle = state === 'paid' ? 'Ваш сайт-приглашение готов к отправке гостям'
     : state === 'checking' ? 'Это занимает несколько секунд — не закрывайте страницу'
+      : paymentStatus === 'auth-required' ? 'Ссылка проверки истекла. Войдите в свой аккаунт и откройте приглашение в личном кабинете.'
       : paymentStatus === 'canceled' ? 'Платёж был отменён, деньги не списаны'
         : 'Банк ещё не подтвердил платёж. Если деньги списались, сайт активируется автоматически';
 
@@ -138,6 +170,7 @@ function SuccessContent() {
         ) : (
           <div style={{ marginTop: 18 }}>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {paymentStatus === 'auth-required' && <Link href="/auth" className="btn-primary">Войти в аккаунт</Link>}
               <button className="btn-primary" onClick={startPolling}>Проверить ещё раз</button>
               <Link href={inviteId ? `/payment?id=${inviteId}` : '/dashboard'} className="btn-outline">
                 {paymentStatus === 'canceled' ? 'Оплатить заново' : 'Вернуться к оплате'}

@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.WC_BUILD_DIR || '.next',
   poweredByHeader: false,
   // Keep original TS/TSX sources out of publicly served production bundles.
   productionBrowserSourceMaps: false,
   async headers() {
     return [{ source: '/:path*', headers: [
       { key: 'X-Content-Type-Options', value: 'nosniff' },
-      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'Referrer-Policy', value: 'strict-origin' },
       { key: 'Content-Security-Policy', value: "frame-ancestors 'self'; object-src 'none'" },
     ] }, {
       // Mutable public assets get a bounded cache; HTML and code stay revalidated.

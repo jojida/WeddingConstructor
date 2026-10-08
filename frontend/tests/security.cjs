@@ -34,7 +34,7 @@ test('studio proxy blocks private/reserved IPs and unsafe URL schemes', async ()
 });
 
 test('all invitation runtimes reject executable links and attribute injection', () => {
-  for (const name of ['script.js', 'calla/script.js', 'floral/script.js', 'garden-arch/script.js', 'sketch/script.js', 'vadimdarya/script.js', 'assets/studio-runtime.js']) {
+  for (const name of ['script.js', 'calla/script.js', 'floral/script.js', 'garden-arch/script.js', 'sketch/script.js', 'vadimdarya/script.js', 'ivory/script.js', 'garden-evening/script.js', 'forest/script.js', 'angels/script.js', 'tenderness/script.js', 'vitrage/script.js', 'assets/studio-runtime.js']) {
     const filename = path.join(__dirname, '../public/invite', name);
     const source = fs.readFileSync(filename, 'utf8');
     // Parse the actual runtime functions; exercise malicious persisted field values.
@@ -57,5 +57,43 @@ test('all invitation runtimes reject executable links and attribute injection', 
     assert.equal(context.imageUrl('/uploads/test.png'), '/uploads/test.png', name);
     assert.match(source, /e\.origin !== window\.location\.origin \|\| e\.source !== window\.parent/, name);
     new vm.Script(source, { filename });
+  }
+});
+
+test('map links reject executable URLs and do not send guest URLs to the map provider', () => {
+  const filename = path.join(__dirname, '../public/invite/assets/venue-map.js');
+  const source = fs.readFileSync(filename, 'utf8');
+  const ast = ts.createSourceFile(filename, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  let safeMapLink;
+  const visit = node => {
+    if (ts.isFunctionDeclaration(node) && node.name?.text === 'safeMapLink') safeMapLink = node.getText(ast);
+    ts.forEachChild(node, visit);
+  };
+  visit(ast);
+  const context = { URL, window: { location: { href: 'https://weddingcraft.ru/couple?g=private-token' } } };
+  vm.createContext(context);
+  vm.runInContext(safeMapLink, context);
+  for (const value of ['javascript:alert(1)', 'java\nscript:alert(1)', 'data:text/html,x', 'https://user:secret@example.com', null, {}]) {
+    assert.equal(context.safeMapLink(value), '');
+  }
+  assert.equal(context.safeMapLink('https://yandex.ru/maps/?pt=1,2'), 'https://yandex.ru/maps/?pt=1,2');
+  assert.match(source, /var link = safeMapLink\(state\.mapLink\)/);
+  assert.match(source, /referrerpolicy="no-referrer"/);
+});
+
+test('private authoring assets are denied by the actual Next proxy before static serving', () => {
+  const { NextRequest } = require('next/server');
+  const { proxy } = require('../src/proxy.ts');
+  for (const suffix of [
+    'calla/_studio.json', '_studio-registry.json', 'calla/%5fstudio.json',
+    'calla/_backup-2026-10-07/index.html', 'calla/script.js.bak', 'calla/index.html.orig',
+  ]) {
+    const result = proxy(new NextRequest(`https://weddingcraft.ru/invite/${suffix}`));
+    assert.equal(result.status, 404, suffix);
+    assert.equal(result.headers.get('cache-control'), 'no-store');
+  }
+  for (const suffix of ['calla/index.html', 'calla/styles.css', 'calla/_studio.css', 'assets/studio-runtime.js']) {
+    const result = proxy(new NextRequest(`https://weddingcraft.ru/invite/${suffix}`));
+    assert.equal(result.headers.get('x-middleware-next'), '1', suffix);
   }
 });

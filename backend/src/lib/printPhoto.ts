@@ -1,10 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { uploadsDir } from './storage';
 
 /** Only locally uploaded, normalized JPEGs; never URLs or caller-supplied paths. */
 export function readPrintPhoto(value: string): Buffer {
   if (!/^\/uploads\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jpg$/i.test(value)) throw new Error('Загрузите фотографию через редактор');
-  const file = path.join(__dirname, '../../uploads', path.basename(value));
+  const file = path.join(uploadsDir, path.basename(value));
   if (!fs.existsSync(file) || fs.statSync(file).size > 10 * 1024 * 1024) throw new Error('Фотография недоступна. Загрузите её заново');
   const bytes = fs.readFileSync(file);
   if (bytes[0] !== 255 || bytes[1] !== 216) throw new Error('Неверный формат фотографии');

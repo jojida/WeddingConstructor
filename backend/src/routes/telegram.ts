@@ -2,7 +2,8 @@ import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { tgSend } from '../lib/notify';
 import { telegramWebhookSecret } from '../lib/security';
-import { isFreeAccount } from '../lib/freeAccounts';
+import { isServiceOwnerAccount } from '../lib/freeAccounts';
+import { messageGate, supportRecipient, supportRoute } from '../lib/telegramSupport';
 
 import { hasNotifications } from '../lib/plans';
 import { errName } from '../lib/planner/util';
@@ -16,7 +17,7 @@ const router = Router();
       ответ реплаем возвращается человеку от имени бота.
 
    Куда идёт поддержка: TELEGRAM_SUPPORT_CHAT_ID из env, а если его нет —
-   чат, где владелец (аккаунт из freeAccounts) подключил уведомления
+   чат, где владелец сервиса подключил уведомления (промо-аккаунты не подходят)
    своего приглашения. Так ничего не нужно настраивать на сервере. */
 
 const SITE = (process.env.FRONTEND_URL || 'https://weddingcraft.ru').replace(/\/$/, '');
@@ -137,61 +138,58 @@ let supportCache: { id: string; at: number } | null = null;
 /** Чат владельца для обращений. Кэш на 10 минут, чтобы не ходить в БД на каждое сообщение. */
 async function supportChatId(): Promise<string> {
   const fromEnv = (process.env.TELEGRAM_SUPPORT_CHAT_ID || '').trim();
-  if (fromEnv) return fromEnv;
+  if (fromEnv) return /^[1-9]\d{0,15}$/.test(fromEnv) && Number.isSafeInteger(Number(fromEnv)) ? fromEnv : '';
   if (supportCache && Date.now() - supportCache.at < 10 * 60_000) return supportCache.id;
   const invites = await prisma.invitation.findMany({
     where: { notifyTelegramChatId: { not: '' } },
     select: { notifyTelegramChatId: true, user: { select: { email: true } } },
     orderBy: { updatedAt: 'desc' },
   });
-  const own = invites.find(i => isFreeAccount(i.user.email));
+  const own = invites.find(i => isServiceOwnerAccount(i.user.email));
   supportCache = { id: own?.notifyTelegramChatId || '', at: Date.now() };
   return supportCache.id;
 }
 
 // Защита от потока сообщений: не больше 20 обращений в час от одного человека,
 // и «спасибо, передали» — не чаще раза в 10 минут.
-const recent = new Map<number, { count: number; since: number; ackAt: number }>();
-function allow(chatId: number): { ok: boolean; ack: boolean } {
-  const now = Date.now();
-  let r = recent.get(chatId);
-  if (!r || now - r.since > 3600_000) { r = { count: 0, since: now, ackAt: 0 }; recent.set(chatId, r); }
-  if (recent.size > 5000) recent.clear();
-  r.count += 1;
-  const ack = now - r.ackAt > 10 * 60_000;
-  if (ack) r.ackAt = now;
-  return { ok: r.count <= 20, ack };
-}
+const allow = messageGate(20, 3600_000, 10 * 60_000);
+const allowUpdate = messageGate(30, 60_000);
 
-const TAG = /#u(\d{3,20})\b/;
-
-async function forwardToSupport(msg: any, support: string) {
+async function forwardToSupport(msg: any, support: string): Promise<boolean> {
   const from = msg.from || {};
-  const name = [from.first_name, from.last_name].filter(Boolean).join(' ') || 'Без имени';
-  const header = `✉️ ${name}${from.username ? ' @' + from.username : ''} · #u${msg.chat.id}`;
+  const plain = (value: unknown) => typeof value === 'string' ? value.replace(/[\x00-\x1f\x7f]/g, ' ').slice(0, 64) : '';
+  const name = [plain(from.first_name), plain(from.last_name)].filter(Boolean).join(' ') || 'Без имени';
+  const username = plain(from.username);
+  const header = `${supportRoute(support, msg.chat.id, msg.message_id)}\n✉️ ${name}${username ? ' @' + username : ''}`;
   if (typeof msg.text === 'string') {
-    await tg('sendMessage', { chat_id: support, text: `${header}\n\n${msg.text}` });
+    const room = 4096 - header.length - 2;
+    const body = msg.text.slice(0, 4096);
+    for (let at = 0; at < body.length; at += room) {
+      const result = await tg('sendMessage', { chat_id: support, text: `${header}\n\n${body.slice(at, at + room)}` });
+      if (!result?.ok) return false;
+    }
+    return body.length > 0;
   } else {
-    // Фото, файл, голосовое: шапка с #u-номером, а копия получает её же
+    // Фото, файл, голосовое: подписанная шапка, а копия получает её же
     // в подпись — тогда реплай можно делать и на саму картинку.
     // (Telegram не передаёт вложенные реплаи, поэтому номер должен быть
     // в том сообщении, на которое отвечают.)
-    await tg('sendMessage', { chat_id: support, text: header });
-    const caption = [header, msg.caption].filter(Boolean).join('\n\n').slice(0, 1024);
-    await tg('copyMessage', { chat_id: support, from_chat_id: msg.chat.id, message_id: msg.message_id, caption });
+    const sent = await tg('sendMessage', { chat_id: support, text: header });
+    if (!sent?.ok) return false;
+    const caption = [header, typeof msg.caption === 'string' ? msg.caption : ''].filter(Boolean).join('\n\n').slice(0, 1024);
+    const copied = await tg('copyMessage', { chat_id: support, from_chat_id: msg.chat.id, message_id: msg.message_id, caption });
+    return copied?.ok === true;
   }
 }
 
 /** Владелец ответил реплаем на обращение — отправляем ответ человеку. */
 async function replyFromSupport(msg: any): Promise<void> {
-  const replied = msg.reply_to_message;
-  const src = String(replied?.text || replied?.caption || '');
-  const m = TAG.exec(src);
-  if (!m) {
-    await tgSend(msg.chat.id, 'Чтобы ответить человеку, сделайте реплай на сообщение с его #u-номером.');
+  const recipient = supportRecipient(String(msg.chat.id), msg.reply_to_message);
+  if (!recipient) {
+    await tgSend(msg.chat.id, 'Для ответа сделайте реплай на новое обращение, пересланное этим ботом. Старое обращение попросите прислать повторно.');
     return;
   }
-  const res = await tg('copyMessage', { chat_id: Number(m[1]), from_chat_id: msg.chat.id, message_id: msg.message_id });
+  const res = await tg('copyMessage', { chat_id: recipient, from_chat_id: msg.chat.id, message_id: msg.message_id });
   await tgSend(msg.chat.id, res?.ok ? '✅ Отправлено' : '⚠️ Не доставлено — возможно, человек остановил бота.');
 }
 
@@ -219,10 +217,13 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const msg = req.body?.message;
     const text: string = typeof msg?.text === 'string' ? msg.text : '';
     const chatId = msg?.chat?.id;
-    if (!Number.isSafeInteger(chatId) || chatId <= 0 || msg.chat.type !== 'private') return res.status(200).send('OK');
+    if (!Number.isSafeInteger(chatId) || chatId <= 0 || msg.chat.type !== 'private' ||
+        !Number.isSafeInteger(msg.message_id) || msg.message_id <= 0 || msg.from?.id !== chatId || msg.from?.is_bot !== false) return res.status(200).send('OK');
+    // Apply the budget before commands too: menu requests also send paid API work.
+    if (!allowUpdate(chatId).ok) return res.status(200).send('OK');
     void ensureCommands();
 
-    const token = /^\/start\s+(\S+)/.exec(text)?.[1] || '';
+    const token = /^\/start(?:@\w+)?\s+(\S+)/.exec(text)?.[1] || '';
     if (token) {
       if (!/^[a-zA-Z0-9_-]{20,64}$/.test(token)) { await sendMenu(chatId); return res.status(200).send('OK'); }
       const invite = await prisma.invitation.findFirst({ where: { telegramConnectToken: token, telegramConnectExpiresAt: { gt: new Date() } } });
@@ -250,7 +251,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
     if (fromSupport && msg.reply_to_message) { await replyFromSupport(msg); return res.status(200).send('OK'); }
     if (await handleMenu(chatId, text)) return res.status(200).send('OK');
     if (fromSupport) {
-      await tgSend(chatId, 'Это чат поддержки: обращения людей приходят сюда. Отвечайте реплаем на сообщение с #u-номером.');
+      await tgSend(chatId, 'Это чат поддержки: обращения людей приходят сюда. Отвечайте реплаем на обращение, пересланное ботом.');
       return res.status(200).send('OK');
     }
 
@@ -258,8 +259,8 @@ router.post('/webhook', async (req: Request, res: Response) => {
     const gate = allow(chatId);
     if (!gate.ok) return res.status(200).send('OK');
     if (support) {
-      await forwardToSupport(msg, support);
-      if (gate.ack) await tgSend(chatId, TEXT.received);
+      const delivered = await forwardToSupport(msg, support);
+      if (gate.ack) await tgSend(chatId, delivered ? TEXT.received : 'Не удалось передать обращение. Повторите позже или напишите на почту, указанную на сайте.');
     } else {
       console.error('Telegram support: чат поддержки не найден — обращение не переслано');
       if (gate.ack) await tgSend(chatId, 'Поддержка временно недоступна. Напишите, пожалуйста, на почту, указанную на сайте.');

@@ -19,15 +19,17 @@ export async function initTelegram(): Promise<void> {
   if (!token) return; // бот не подключён — уведомления пойдут только на email
 
   try {
-    const me: any = await fetch(`https://api.telegram.org/bot${token}/getMe`).then(r => r.json());
+    const me: any = await fetch(`https://api.telegram.org/bot${token}/getMe`, {
+      signal: AbortSignal.timeout(10_000), redirect: 'error',
+    }).then(r => r.json());
     if (!me?.ok || !me.result?.username) {
-      console.error('🤖 Telegram: не удалось определить бота —', me?.description || 'пустой ответ getMe');
+      console.error('Telegram getMe failed');
       return;
     }
     cachedUsername = me.result.username;
     console.log(`🤖 Telegram-бот: @${cachedUsername}`);
-  } catch (e) {
-    console.error('🤖 Telegram getMe:', e);
+  } catch {
+    console.error('Telegram getMe failed');
     return;
   }
 
@@ -43,12 +45,14 @@ export async function initTelegram(): Promise<void> {
   try {
     const res: any = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
       method: 'POST',
+      signal: AbortSignal.timeout(10_000),
+      redirect: 'error',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url, secret_token: telegramWebhookSecret(), allowed_updates: ['message'] }),
     }).then(r => r.json());
     if (res?.ok) console.log(`🤖 Telegram: вебхук установлен на ${url}`);
-    else console.error('🤖 Telegram setWebhook:', res?.description || res);
-  } catch (e) {
-    console.error('🤖 Telegram setWebhook:', e);
+    else console.error('Telegram setWebhook failed');
+  } catch {
+    console.error('Telegram setWebhook failed');
   }
 }

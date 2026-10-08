@@ -1,5 +1,4 @@
 import { Router, Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
@@ -83,7 +82,8 @@ function generateSlug(groomName: string, brideName: string): string {
       .replace(/[яЯ]/g, 'ya').replace(/[^a-z0-9]/g, '');
   const g = clean(groomName) || 'groom';
   const b = clean(brideName) || 'bride';
-  return `${g}-i-${b}-${uuidv4().slice(0, 6)}`;
+  // 96 random bits avoid collisions and make unshared default links hard to guess.
+  return `${g}-i-${b}-${crypto.randomBytes(12).toString('hex')}`;
 }
 
 // GET /api/invites — список приглашений текущего пользователя
@@ -91,6 +91,9 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   const invites = await prisma.invitation.findMany({
     where: { userId: req.userId! },
     orderBy: { updatedAt: 'desc' },
+    // Cards do not need notification tokens, payment details or the full editor JSON.
+    select: { id: true, slug: true, status: true, groomName: true, brideName: true,
+      weddingDate: true, templateId: true, plan: true, updatedAt: true, coverPhoto: true, title: true },
   });
   res.json(invites);
 });

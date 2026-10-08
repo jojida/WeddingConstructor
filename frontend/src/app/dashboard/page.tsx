@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { writeStorage } from '@/lib/browser-storage';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
 import { TEMPLATES, guestsWord, hasResponseStats } from '@/lib/constants';
@@ -49,6 +50,11 @@ const TEMPLATE_COLORS: Record<string, [string, string]> = {
 };
 
 export default function DashboardPage() {
+  const accountId = useAuthStore(state => state.user?.id || 'guest');
+  return <DashboardSession key={accountId} />;
+}
+
+function DashboardSession() {
   const { user, loading } = useAuthStore();
   const router = useRouter();
   const [invites, setInvites] = useState<Invite[]>([]);
@@ -78,7 +84,7 @@ export default function DashboardPage() {
   }, [invites]);
 
   const createNew = async () => {
-    sessionStorage.removeItem('wc_draft_id');
+    writeStorage('sessionStorage', 'wc_draft_id', null);
     router.push('/templates');
   };
 
@@ -102,7 +108,7 @@ export default function DashboardPage() {
 
   const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('ru-RU') : '';
 
-  if (loading || fetching) return (
+  if (loading || fetching || !user) return (
     <div className={styles.page}>
       <Navbar />
       <div className={styles.loadingWrap}><div className={styles.spinner} /></div>

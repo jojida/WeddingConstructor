@@ -12,7 +12,7 @@ export function jwtSecret(): string {
 export function normalizeEmail(value: unknown): string | null {
   if (typeof value !== 'string') return null;
   const email = value.trim().toLowerCase();
-  return email.length <= 254 && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email) ? email : null;
+  return email.length <= 254 && !/[\x00-\x1f\x7f]/.test(email) && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email) ? email : null;
 }
 export function hashCode(email: string, code: string): string {
   return crypto.createHmac('sha256', jwtSecret()).update(`${email}:${code}`).digest('hex');

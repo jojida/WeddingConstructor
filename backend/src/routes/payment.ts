@@ -1,281 +1,174 @@
 import { Router, Request, Response } from 'express';
-import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
 import { isFreeAccount } from '../lib/freeAccounts';
 import { confirmPrintPayment } from '../lib/printPayment';
 import { PLANS, isPaid, planPriceDue } from '../lib/plans';
+import { jwtSecret } from '../lib/security';
+import { kassaAuth, kassaRequest, paymentIdValid, paymentRedirect } from '../lib/paymentGateway';
+import { PaymentConflict, reservePaymentAttempt, requestAttemptPayment } from '../lib/paymentAttempt';
+import { confirmInvitationPayment, matchesInvitationPayment, promoPercent } from '../lib/invitePayment';
 
+export { kassaAuth, kassaRequest } from '../lib/paymentGateway';
 const router = Router();
 
-/* ── Промокоды ────────────────────────────────────────────────────────────────
-   Задаются в env без деплоя кода: PROMO_CODES="СВАДЬБА10:10,PARTNER-IRA:15"
-   (код:процент скидки, 1–90). Регистр кода не важен. Использованный код
-   пишется в metadata платежа ЮKassa — по нему считаем партнёрские комиссии. */
-function promoPercent(code: unknown): number | null {
-  if (typeof code !== 'string' || !code.trim()) return null;
-  const wanted = code.trim().toUpperCase();
-  for (const pair of (process.env.PROMO_CODES || '').split(',')) {
-    const [c, p] = pair.split(':').map(s => (s || '').trim());
-    const pct = Number(p);
-    if (c && c.toUpperCase() === wanted && Number.isFinite(pct) && pct >= 1 && pct <= 90) return pct;
-  }
-  return null;
+function successUrl(inviteId: string, plan: string) {
+  const token = jwt.sign({ purpose: 'payment-return', inviteId }, jwtSecret(), { algorithm: 'HS256', expiresIn: '24h' });
+  return `${(process.env.FRONTEND_URL || 'http://localhost:3000').replace(/\/$/, '')}/payment/success?id=${encodeURIComponent(inviteId)}&plan=${encodeURIComponent(plan)}&token=${encodeURIComponent(token)}`;
 }
 
-/* ── ЮKassa (API v3) ─────────────────────────────────────────────────────────
-   Магазин идентифицируется парой shopId + секретный ключ (Basic auth).
-   Старые имена переменных YUMONEY_* принимаются как запасные, чтобы не
-   ломать уже настроенный env на сервере. */
-const YOOKASSA_API = 'https://api.yookassa.ru/v3';
-
-export const kassaAuth = () => {
-  const shopId = process.env.YOOKASSA_SHOP_ID || process.env.YUMONEY_SHOP_ID || '';
-  const secretKey = process.env.YOOKASSA_SECRET_KEY || process.env.YUMONEY_SECRET_KEY || '';
-  const configured = Boolean(shopId && secretKey && shopId !== 'your_shop_id');
-  return { shopId, secretKey, configured };
-};
-
-export async function kassaRequest(method: 'GET' | 'POST', path: string, body?: unknown, idempotenceKey?: string) {
-  const { shopId, secretKey } = kassaAuth();
-  const headers: Record<string, string> = {
-    Authorization: 'Basic ' + Buffer.from(`${shopId}:${secretKey}`).toString('base64'),
-  };
-  if (method === 'POST') {
-    headers['Content-Type'] = 'application/json';
-    headers['Idempotence-Key'] = idempotenceKey || crypto.randomUUID();
-  }
-  const res = await fetch(`${YOOKASSA_API}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(15_000),
-  });
-  const data: any = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    console.error(`YooKassa ${method} ${path} → ${res.status}:`, data);
-    throw new Error(data?.description || `YooKassa error ${res.status}`);
-  }
-  return data;
-}
-
-/** Подтверждаем только текущий платёж. Улучшение действует после оплаты. */
-async function markPaid(inviteId: string, plan: string, paymentId: string) {
-  if (!['lite', 'basic', 'premium', 'standard', 'maximum'].includes(plan)) throw new Error('Invalid payment plan');
-  const invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
-  if (!invite || invite.paymentId !== paymentId) return;
-  if (isPaid(invite.status) && invite.plan === plan) return;
-  await prisma.invitation.updateMany({
-    where: { id: inviteId, paymentId, plan: invite.plan },
-    data: { status: 'paid', plan, paidAt: new Date(), paymentId },
-  });
-  console.log(`✅ Payment received for invite ${inviteId}, plan: ${plan}`);
-}
-
-// POST /api/payment/create — создать платёж в ЮKassa, вернуть ссылку на оплату
 router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { inviteId, plan = 'premium', promoCode } = req.body;
-
-    const invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
-    if (!invite || invite.userId !== req.userId) {
-      return res.status(404).json({ error: 'Приглашение не найдено' });
-    }
-
-    const planData = typeof plan === 'string' && Object.prototype.hasOwnProperty.call(PLANS, plan) ? PLANS[plan as keyof typeof PLANS] : undefined;
-    if (!planData) return res.status(400).json({ error: 'Неверный тариф' });
-
-    const successUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/success?id=${encodeURIComponent(inviteId)}&plan=${plan}`;
-
-    /* Тестовый аккаунт владельца: публикуем без кассы. Статус ставим тот же
-       ('paid'), что и настоящая оплата, иначе проверка отличалась бы от того,
-       что увидит покупатель. Тариф меняется и у уже опубликованного сайта —
-       так старый тестовый сайт можно перевести на «Премиум», не заводя новое. */
+    const { inviteId, plan = 'premium', promoCode } = req.body || {};
+    if (typeof inviteId !== 'string' || !inviteId || inviteId.length > 64) return res.status(400).json({ error: 'Неверное приглашение' });
+    if (typeof plan !== 'string' || !Object.prototype.hasOwnProperty.call(PLANS, plan)) return res.status(400).json({ error: 'Неверный тариф' });
+    const target = plan as keyof typeof PLANS;
+    let invite = await prisma.invitation.findFirst({ where: { id: inviteId, userId: req.userId } });
+    if (!invite) return res.status(404).json({ error: 'Приглашение не найдено' });
+    const redirectUrl = successUrl(inviteId, plan);
     const buyer = await prisma.user.findUnique({ where: { id: req.userId! } });
     if (isFreeAccount(buyer?.email)) {
-      await prisma.invitation.update({
-        where: { id: inviteId },
-        data: { status: 'paid', plan, paidAt: invite.paidAt ?? new Date(), paymentId: 'free_account' },
-      });
-      console.log(`🎁 Бесплатная публикация (тестовый аккаунт): invite ${inviteId}, тариф ${plan}`);
-      return res.json({
-        free: true,
-        plan,
-        redirectUrl: successUrl,
-        message: `Тестовый аккаунт: сайт опубликован по тарифу «${planData.label}» без оплаты`,
-      });
+      await prisma.invitation.update({ where: { id: inviteId }, data: { status: plan === 'free' ? 'published' : 'paid', plan, paidAt: plan === 'free' ? null : invite.paidAt ?? new Date(), paymentId: 'free_account' } });
+      return res.json({ free: true, plan, redirectUrl, message: 'Сайт опубликован для тестового аккаунта' });
     }
-
-    if (isPaid(invite.status) && invite.plan === plan) {
-      return res.json({ alreadyPaid: true, redirectUrl: successUrl });
-    }
-    const currentPlan = Object.prototype.hasOwnProperty.call(PLANS, invite.plan)
-      ? PLANS[invite.plan as keyof typeof PLANS] : undefined;
-    if (isPaid(invite.status) && (planData.rank < (currentPlan?.rank ?? 1))) {
-      return res.status(400).json({ error: 'Выберите тариф выше текущего' });
-    }
-
+    if (isPaid(invite.status) && invite.plan === plan) return res.json({ alreadyPaid: true, redirectUrl });
+    const currentRank = Object.prototype.hasOwnProperty.call(PLANS, invite.plan) ? PLANS[invite.plan as keyof typeof PLANS].rank : 1;
+    if (isPaid(invite.status) && PLANS[target].rank < currentRank) return res.status(400).json({ error: 'Выберите тариф выше текущего' });
     if (plan === 'free') {
-      await prisma.invitation.update({
-        where: { id: inviteId },
-        data: { status: 'published', plan: 'free', paymentId: '', paidAt: null },
-      });
-      return res.json({ free: true, plan, redirectUrl: successUrl, message: 'Сайт опубликован бесплатно' });
+      const result = await prisma.invitation.updateMany({ where: { id: inviteId, plan: invite.plan, status: invite.status }, data: { status: 'published', plan, paidAt: null } });
+      if (!result.count) throw new PaymentConflict('Тариф изменился. Обновите страницу.');
+      return res.json({ free: true, plan, redirectUrl, message: 'Сайт опубликован бесплатно' });
     }
-
     if (!kassaAuth().configured) {
-      // В проде без настроенной кассы оплату НЕ имитируем — иначе публикация бесплатна.
-      if (process.env.NODE_ENV !== 'development' || process.env.ALLOW_TEST_PAYMENTS !== 'true') {
-        return res.status(503).json({ error: 'Оплата временно недоступна. Напишите нам — поможем опубликовать сайт.' });
+      if (process.env.NODE_ENV === 'development' && process.env.ALLOW_TEST_PAYMENTS === 'true') {
+        await prisma.invitation.update({ where: { id: inviteId }, data: { status: 'paid', plan, paidAt: new Date(), paymentId: 'dev_test' } });
+        return res.json({ devMode: true, redirectUrl });
       }
-      // Dev mode: auto-approve for testing
-      await prisma.invitation.update({
-        where: { id: inviteId },
-        data: { status: 'paid', plan, paidAt: new Date(), paymentId: 'dev_test' },
-      });
-      return res.json({
-        devMode: true,
-        message: 'Тестовый режим: оплата автоматически принята',
-        redirectUrl: successUrl,
-      });
+      return res.status(503).json({ error: 'Оплата временно недоступна. Напишите нам — поможем опубликовать сайт.' });
     }
 
-    // Промокод: неверный код — явная ошибка (а не молчаливая полная цена).
-    let priceKopecks = planPriceDue(plan as keyof typeof PLANS, invite.plan, isPaid(invite.status));
+    let attempt = await prisma.paymentAttempt.findUnique({ where: { invitationId: inviteId } });
+    // Do not abandon a chargeable payment when plan, promo or request changes.
+    if (attempt || (invite.paymentId && !['dev_test', 'free_account'].includes(invite.paymentId))) {
+      const payment = attempt ? await requestAttemptPayment(attempt) : await kassaRequest('GET', `/payments/${invite.paymentId}`);
+      if (!matchesInvitationPayment(payment, invite, attempt)) throw new PaymentConflict('Не удалось сверить предыдущий платёж. Обратитесь в поддержку.');
+      if (await confirmInvitationPayment(payment)) {
+        invite = (await prisma.invitation.findUnique({ where: { id: inviteId } }))!;
+        if (invite.plan === plan) return res.json({ alreadyPaid: true, redirectUrl });
+      } else if (payment.status === 'pending') {
+        if (payment.metadata.plan !== plan) throw new PaymentConflict('Завершите или отмените предыдущий платёж перед выбором другого тарифа.');
+        if (promoCode && (typeof promoCode !== 'string' || promoCode.trim().toUpperCase() !== (payment.metadata.promoCode || ''))) throw new PaymentConflict('Промокод нельзя изменить у уже созданного платежа. Сначала отмените предыдущий платёж.');
+        const paymentUrl = paymentRedirect(payment);
+        if (!paymentUrl) throw new Error('Missing confirmation');
+        return res.json({ paymentUrl });
+      } else if (payment.status !== 'canceled') {
+        throw new PaymentConflict('Платёж обрабатывается. Проверьте статус через минуту.');
+      }
+      await prisma.$transaction(async tx => {
+        if (attempt) await tx.paymentAttempt.deleteMany({ where: { id: attempt.id, paymentId: payment.id } });
+        if (payment.status === 'canceled') await tx.invitation.updateMany({ where: { id: inviteId, paymentId: payment.id }, data: { paymentId: '' } });
+      });
+      invite = (await prisma.invitation.findUnique({ where: { id: inviteId } }))!;
+      attempt = null;
+    }
+
+    let priceKopecks = planPriceDue(target, invite.plan, isPaid(invite.status));
+    if (priceKopecks <= 0) throw new PaymentConflict('Тариф уже изменился. Обновите страницу.');
     let promo: { code: string; percent: number } | null = null;
-    if (promoCode != null && String(promoCode).trim() !== '') {
-      const pct = promoPercent(promoCode);
-      if (pct == null) return res.status(400).json({ error: 'Промокод не найден или недействителен' });
-      promo = { code: String(promoCode).trim().toUpperCase(), percent: pct };
-      priceKopecks = Math.round(priceKopecks * (100 - pct) / 100);
+    if (promoCode != null && promoCode !== '') {
+      const percent = promoPercent(promoCode);
+      if (percent === null) return res.status(400).json({ error: 'Промокод не найден или недействителен' });
+      promo = { code: promoCode.trim().toUpperCase(), percent };
+      priceKopecks = Math.round(priceKopecks * (100 - percent) / 100);
     }
-
     const amount = { value: (priceKopecks / 100).toFixed(2), currency: 'RUB' };
-    const payload: any = {
-      amount,
-      capture: true, // одностадийный платёж — списываем сразу
-      confirmation: { type: 'redirect', return_url: successUrl },
-      // У ЮKassa description ограничен 128 символами — длинный промокод не должен ломать платёж.
-      description: (`Сайт-приглашение WeddingCraft — тариф «${planData.label}»`
-        + (promo ? ` (промокод ${promo.code}, −${promo.percent}%)` : '')).slice(0, 128),
-      metadata: { inviteId, plan, ...(promo ? { promoCode: promo.code } : {}) },
-    };
-
-    // Чек 54-ФЗ: включается флагом, когда в кабинете ЮKassa настроена фискализация.
-    if (process.env.YOOKASSA_RECEIPT === 'true') {
-      const user = await prisma.user.findUnique({ where: { id: req.userId! } });
-      payload.receipt = {
-        customer: { email: user?.email },
-        items: [{
-          description: `Создание сайта-приглашения, тариф «${planData.label}»`,
-          quantity: '1.00',
-          amount,
-          vat_code: 1, // без НДС
-          payment_subject: 'service',
-          payment_mode: 'full_payment',
-        }],
-      };
-    }
-
-    const payment = await kassaRequest('POST', '/payments', payload);
-
-    // Запоминаем id платежа: по нему /status дозапросит ЮKassa, если вебхук не дошёл.
-    await prisma.invitation.update({
-      where: { id: inviteId },
-      data: { paymentId: payment.id },
-    });
-
-    return res.json({ paymentUrl: payment.confirmation?.confirmation_url });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ error: 'Ошибка создания платёжа' });
+    const description = (`Сайт-приглашение WeddingCraft — тариф «${PLANS[target].label}»` + (promo ? ` (промокод ${promo.code}, −${promo.percent}%)` : '')).slice(0, 128);
+    attempt = await reservePaymentAttempt({ invitationId: inviteId, plan, amountKopecks: priceKopecks, payload: key => ({
+      amount, capture: true, description,
+      confirmation: { type: 'redirect', return_url: redirectUrl },
+      metadata: { product: 'website', inviteId, plan, paymentKey: key, ...(promo ? { promoCode: promo.code } : {}) },
+      ...(process.env.YOOKASSA_RECEIPT === 'true' ? { receipt: { customer: { email: buyer!.email }, items: [{ description, quantity: '1.00', amount, vat_code: 1, payment_subject: 'service', payment_mode: 'full_payment' }] } } : {}),
+    }) });
+    if (attempt.plan !== plan) throw new PaymentConflict('Для приглашения уже создаётся платёж другого тарифа. Обновите страницу.');
+    const payment = await requestAttemptPayment(attempt);
+    const current = (await prisma.invitation.findUnique({ where: { id: inviteId } }))!;
+    if (!matchesInvitationPayment(payment, current, attempt)) throw new Error('Payment verification failed');
+    if (await confirmInvitationPayment(payment)) return res.json({ alreadyPaid: true, redirectUrl });
+    const paymentUrl = paymentRedirect(payment);
+    if (payment.status !== 'pending' || !paymentUrl) throw new PaymentConflict('Платёж обрабатывается. Проверьте статус через минуту.');
+    return res.json({ paymentUrl });
+  } catch (error) {
+    if (error instanceof PaymentConflict) return res.status(409).json({ error: error.message });
+    console.error('Payment creation failed:', error instanceof Error ? error.name : 'Error');
+    return res.status(502).json({ error: 'Не удалось связаться с оплатой. Попробуйте ещё раз — повторный запрос использует тот же платёж.' });
   }
 });
 
-// GET /api/payment/promo/:code — проверка промокода (страница оплаты показывает скидку)
-router.get('/promo/:code', authMiddleware, (req: AuthRequest, res: Response) => {
+router.get('/promo/:code', authMiddleware, (req, res) => {
   const percent = promoPercent(req.params.code);
-  if (percent == null) return res.status(404).json({ error: 'Промокод не найден или недействителен' });
+  if (percent === null) return res.status(404).json({ error: 'Промокод не найден или недействителен' });
   return res.json({ code: String(req.params.code).trim().toUpperCase(), percent });
 });
 
-// POST /api/payment/webhook — уведомление от ЮKassa (payment.succeeded и др.).
-// Подписи в уведомлениях нет, поэтому телу не доверяем: берём из него только
-// id платежа и перечитываем платёж из API ЮKassa — оплату подтверждает API.
 router.post('/webhook', async (req: Request, res: Response) => {
   try {
     const { event, object } = req.body || {};
-    const paymentId = object?.id;
-    if (!event || typeof paymentId !== 'string' || !/^[a-zA-Z0-9-]{1,64}$/.test(paymentId)) return res.status(400).send('Bad notification');
-
-    // Прочие события (waiting_for_capture, canceled, refund.*) нам не важны.
+    if (typeof event !== 'string' || !paymentIdValid(object?.id)) return res.status(400).send('Bad notification');
     if (event !== 'payment.succeeded') return res.status(200).send('OK');
-
     if (!kassaAuth().configured) return res.status(503).send('Kassa not configured');
-
-    const payment = await kassaRequest('GET', `/payments/${paymentId}`);
-    if (payment.status !== 'succeeded' || !payment.paid) {
-      return res.status(200).send('OK'); // API оплату не подтвердил — игнорируем
-    }
-
-    if (payment.metadata?.product === 'print') {
-      await confirmPrintPayment(payment);
-      return res.status(200).send('OK');
-    }
-    const inviteId = payment.metadata?.inviteId;
-    if (inviteId) await markPaid(inviteId, payment.metadata?.plan || 'premium', payment.id);
+    const payment = await kassaRequest('GET', `/payments/${object.id}`);
+    if (payment?.id !== object.id) return res.status(400).send('Invalid payment');
+    if (payment.metadata?.product === 'print') await confirmPrintPayment(payment);
+    else await confirmInvitationPayment(payment);
     return res.status(200).send('OK');
-  } catch (e) {
-    console.error('Webhook error:', e);
-    return res.status(500).send('Error'); // ЮKassa повторит уведомление позже
+  } catch (error) {
+    console.error('Webhook failed:', error instanceof Error ? error.name : 'Error');
+    return res.status(500).send('Error');
   }
 });
 
-/* GET /api/payment/public-status/:inviteId — факт оплаты БЕЗ авторизации.
-   Покупатель может вернуться из ЮKassa на другом устройстве или с потерянной сессией —
-   тогда страница успеха не смогла бы узнать об оплате даже после вебхука. Отдаём только
-   то, что и так станет публичным: факт оплаты, адрес сайта и тариф. id — UUID, перебором не найти. */
+async function paymentStatus(inviteId: string) {
+  let invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
+  if (!invite) return null;
+  let paymentStatus: string | undefined;
+  if (invite.paymentId && !['dev_test', 'free_account'].includes(invite.paymentId) && kassaAuth().configured) {
+    try {
+      const payment = await kassaRequest('GET', `/payments/${invite.paymentId}`);
+      const attempt = await prisma.paymentAttempt.findUnique({ where: { invitationId: invite.id } });
+      if (matchesInvitationPayment(payment, invite, attempt)) {
+        paymentStatus = payment.status;
+        if (await confirmInvitationPayment(payment)) invite = (await prisma.invitation.findUnique({ where: { id: invite.id } }))!;
+      }
+    } catch { paymentStatus = 'unavailable'; }
+  }
+  return { paid: isPaid(invite.status), status: invite.status, plan: invite.plan, slug: invite.slug, paidAt: invite.paidAt, paymentStatus };
+}
+
+// A return token grants only billing status for one invitation, not account access.
 router.get('/public-status/:inviteId', async (req: Request, res: Response) => {
-  let invite = await prisma.invitation.findUnique({ where: { id: req.params.inviteId as string } });
-  if (!invite) return res.status(404).json({ error: 'Не найдено' });
-
-  let paymentStatus: string | undefined;
-  if (invite.paymentId && !['dev_test', 'free_account'].includes(invite.paymentId) && kassaAuth().configured) {
+  const inviteId = String(req.params.inviteId);
+  const bearer = req.headers.authorization?.startsWith('Bearer ') ? req.headers.authorization.slice(7) : '';
+  let allowed = false;
+  try {
+    const payload = jwt.verify(typeof req.query.token === 'string' ? req.query.token : '', jwtSecret(), { algorithms: ['HS256'] });
+    allowed = typeof payload !== 'string' && payload.purpose === 'payment-return' && payload.inviteId === inviteId;
+  } catch { /* Accept owner sessions for legacy return URLs. */ }
+  if (!allowed && bearer) {
     try {
-      const payment = await kassaRequest('GET', `/payments/${invite.paymentId}`);
-      paymentStatus = payment.status;
-      if (payment.status === 'succeeded' && payment.paid) {
-        await markPaid(invite.id, payment.metadata?.plan || invite.plan, payment.id);
-        invite = await prisma.invitation.findUnique({ where: { id: invite.id } });
-      }
-    } catch { /* временная ошибка — вернём текущее состояние */ }
+      const payload = jwt.verify(bearer, jwtSecret(), { algorithms: ['HS256'] });
+      if (typeof payload !== 'string' && typeof payload.userId === 'string') allowed = !!await prisma.invitation.findFirst({ where: { id: inviteId, userId: payload.userId }, select: { id: true } });
+    } catch { /* Invalid token. */ }
   }
-
-  const paid = invite!.status === 'paid' || invite!.status === 'published';
-  return res.json({ paid, status: invite!.status, plan: invite!.plan, slug: invite!.slug, paymentStatus });
+  if (!allowed) return res.status(401).json({ error: 'Войдите в аккаунт, чтобы проверить оплату' });
+  const status = await paymentStatus(inviteId);
+  return status ? res.json(status) : res.status(404).json({ error: 'Не найдено' });
 });
 
-// GET /api/payment/status/:inviteId — статус оплаты; если вебхук ещё не дошёл,
-// дозапрашиваем платёж у ЮKassa напрямую (страница успеха опрашивает этот роут).
 router.get('/status/:inviteId', authMiddleware, async (req: AuthRequest, res: Response) => {
-  let invite = await prisma.invitation.findUnique({ where: { id: req.params.inviteId as string } });
-  if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
-
-  // Статус самого платежа (pending | waiting_for_capture | succeeded | canceled) —
-  // страница успеха по нему отличает «ещё ждём» от «отменён, платить заново».
-  let paymentStatus: string | undefined;
-  if (invite.paymentId && !['dev_test', 'free_account'].includes(invite.paymentId) && kassaAuth().configured) {
-    try {
-      const payment = await kassaRequest('GET', `/payments/${invite.paymentId}`);
-      paymentStatus = payment.status;
-      if (payment.status === 'succeeded' && payment.paid) {
-        await markPaid(invite.id, payment.metadata?.plan || invite.plan, payment.id);
-        invite = await prisma.invitation.findUnique({ where: { id: invite.id } });
-      }
-    } catch { /* временная ошибка сети/кассы — вернём текущий статус */ }
-  }
-
-  return res.json({ status: invite!.status, plan: invite!.plan, paidAt: invite!.paidAt, paymentStatus });
+  const inviteId = String(req.params.inviteId);
+  if (!await prisma.invitation.findFirst({ where: { id: inviteId, userId: req.userId }, select: { id: true } })) return res.status(404).json({ error: 'Не найдено' });
+  return res.json(await paymentStatus(inviteId));
 });
 
 export default router;

@@ -8,9 +8,10 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   if (typeof window !== 'undefined') {
     const token = readAuthToken();
-    const apiBase = new URL(config.baseURL || '/', window.location.origin);
-    const requestOrigin = new URL(config.url || '', apiBase).origin;
-    if (token && requestOrigin === apiBase.origin) config.headers.Authorization = `Bearer ${token}`;
+    const trustedOrigin = new URL(api.defaults.baseURL || '/', window.location.origin).origin;
+    const requestBase = new URL(config.baseURL || '/', window.location.origin);
+    const requestOrigin = new URL(config.url || '', requestBase).origin;
+    if (token && requestOrigin === trustedOrigin) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });

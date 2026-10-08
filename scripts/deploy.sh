@@ -58,6 +58,14 @@ if [ "$local_rev" = "$remote_rev" ]; then state='всё свежее'; else stat
 
 log "новый коммит $remote_rev — обновляюсь"
 
+# Legacy runtime files are still tracked. A merge that removes or changes them
+# could erase real customer data. Migrate data outside the checkout and review
+# the rollout before accepting any such change. Never reset these paths.
+if ! git diff --quiet "$local_rev" "$remote_rev" -- backend/dev.db backend/prisma/dev.db backend/uploads; then
+  log "ОСТАНОВЛЕНО: коммит меняет рабочие БД или загрузки. Сначала резервная копия и перенос данных за пределы checkout."
+  exit 1
+fi
+
 # Лок-файл на сервере расходится с репозиторием после npm install — из-за
 # него pull спотыкается, хотя менять его никто не собирался.
 git checkout -- frontend/package-lock.json 2>/dev/null || true

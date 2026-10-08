@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { DatabaseSync } = require('node:sqlite');
 const jwt = require('jsonwebtoken');
+const sharp = require('sharp');
 
 const root = path.resolve(__dirname, '..');
 const tmpRoot = path.join(root, '.test-tmp');
@@ -101,7 +102,7 @@ test('security and functional regressions on an isolated migrated database', asy
     }
     assert.equal((await upload('<svg onload="alert(1)">', 'image/svg+xml', 'test.svg')).status, 400);
     assert.equal((await upload('<html>payload</html>', 'image/png', 'test.png')).status, 400);
-    const image = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN1sAAAAASUVORK5CYII=', 'base64');
+    const image = await sharp({ create: { width: 2, height: 2, channels: 3, background: '#336699' } }).png().toBuffer();
     const result = await upload(image, 'image/png', 'payload.html');
     assert.equal(result.status, 200);
     const { url } = await result.json();
@@ -111,18 +112,35 @@ test('security and functional regressions on an isolated migrated database', asy
     assert.equal(served.headers.get('x-content-type-options'), 'nosniff');
     assert.match(served.headers.get('content-security-policy'), /sandbox/);
     assert.equal(served.headers.get('cache-control'), 'public, max-age=31536000, immutable');
-    assert.deepEqual(Buffer.from(await served.arrayBuffer()), image);
+    const cleanImage = Buffer.from(await served.arrayBuffer());
+    assert.deepEqual(await sharp(cleanImage).raw().toBuffer(), await sharp(image).raw().toBuffer());
     const cached = await fetch(base + url, { cache: 'no-cache', headers: { 'If-None-Match': served.headers.get('etag') } });
     assert.equal(cached.status, 304);
     const range = await fetch(base + url, { headers: { Range: 'bytes=0-7' } });
     assert.equal(range.status, 206);
-    assert.deepEqual(Buffer.from(await range.arrayBuffer()), image.subarray(0, 8));
+    assert.deepEqual(Buffer.from(await range.arrayBuffer()), cleanImage.subarray(0, 8));
     assert.equal((await request('/api/health')).headers.get('cache-control'), 'no-store');
     const legacy = path.join(root, 'uploads', 'cache-regression-legacy.png');
     fs.writeFileSync(legacy, image); uploaded.push(legacy);
     const legacyResponse = await fetch(base + '/uploads/cache-regression-legacy.png');
     assert.equal(legacyResponse.headers.get('cache-control'), 'public, max-age=0');
-
+    for (const name of ['private.db', 'backup.json', 'index.html', '.env', '.incoming/partial.png']) {
+      assert.equal((await fetch(base + '/uploads/' + name)).status, 404);
+    }
+  });
+  await t.test('CORS only trusts a verified, published customer domain', async () => {
+    const origin = 'https://privacy-audit.example';
+    const cors = async () => (await fetch(base + '/api/health', { headers: { Origin: origin } })).headers.get('access-control-allow-origin');
+    await prisma.invitation.update({ where: { id: draft.id }, data: { customDomain: 'privacy-audit.example', plan: 'premium' } });
+    assert.equal(await cors(), null);
+    await prisma.invitation.update({ where: { id: draft.id }, data: { customDomainVerifiedAt: new Date() } });
+    assert.equal(await cors(), null);
+    await prisma.invitation.update({ where: { id: draft.id }, data: { status: 'published' } });
+    assert.equal(await cors(), origin);
+    for (const untrusted of ['http://privacy-audit.example', 'https://privacy-audit.example:8443', 'https://privacy-audit.example.evil.test']) {
+      assert.equal((await fetch(base + '/api/health', { headers: { Origin: untrusted } })).headers.get('access-control-allow-origin'), null);
+    }
+    await prisma.invitation.update({ where: { id: draft.id }, data: { status: 'draft' } });
   });
   await t.test('telegram spoofing and implicit test payments are blocked', async () => {
     assert.equal((await request('/api/telegram/webhook', 'POST', { message: {} })).status, 403);

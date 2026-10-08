@@ -18,7 +18,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 async function getInvite(slug: string) {
   try {
-    const res = await fetch(`${API}/api/invites/by-slug/${slug}`, { cache: 'no-store' });
+    const res = await fetch(`${API}/api/invites/by-slug/${encodeURIComponent(slug)}`, { cache: 'no-store' });
     if (res.status === 402) return { unpaid: true }; // сайт есть, но не оплачен
     if (!res.ok) return null;
     return res.json();

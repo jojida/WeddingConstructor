@@ -13,13 +13,17 @@ const TG_API = (method: string) =>
 export async function tgSend(chatId: string | number, text: string): Promise<void> {
   if (!process.env.TELEGRAM_BOT_TOKEN || !chatId) return;
   try {
-    await fetch(TG_API('sendMessage'), {
+    const response = await fetch(TG_API('sendMessage'), {
       method: 'POST',
+      signal: AbortSignal.timeout(10_000),
+      redirect: 'error',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ chat_id: chatId, text }),
     });
-  } catch (e) {
-    console.error('Telegram send error:', e);
+    const result = await response.json() as { ok?: boolean };
+    if (!response.ok || !result.ok) console.error('Telegram send failed');
+  } catch {
+    console.error('Telegram send failed');
   }
 }
 
@@ -112,8 +116,8 @@ export async function notifyOwner(invite: InviteLike, r: ResponseLike): Promise<
     const channel = invite.notifyChannel || 'none';
     if (channel === 'none') return;
     await deliver(invite, formatMessage(invite, r));
-  } catch (e) {
-    console.error('notifyOwner error:', e);
+  } catch {
+    console.error('Owner notification failed');
   }
 }
 

@@ -6,10 +6,14 @@ import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
 import { BackgroundRemovalError, removeBackground } from '../lib/backgroundRemoval';
+import { InvalidUploadImage, normalizeUploadImage } from '../lib/uploadImage';
+import { uploadsDir } from '../lib/storage';
 
 const router = Router();
-const uploadsDir = path.join(__dirname, '../../uploads');
-fs.mkdirSync(uploadsDir, { recursive: true });
+const incomingDir = path.join(uploadsDir, '.incoming');
+fs.mkdirSync(incomingDir, { recursive: true });
+let activeUploads = 0;
+let reservedBytes = 0;
 
 const formats: Record<string, { ext: string; kind: 'image' | 'audio'; valid: (b: Buffer) => boolean }> = {
   'image/jpeg': { ext: '.jpg', kind: 'image', valid: b => b[0] === 255 && b[1] === 216 && b[2] === 255 },
@@ -27,24 +31,57 @@ formats['audio/mp3'] = formats['audio/mpeg'];
 formats['audio/x-wav'] = formats['audio/wav'];
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
+  destination: (_req, _file, cb) => cb(null, incomingDir),
   filename: (_req, file, cb) => cb(null, crypto.randomUUID() + formats[file.mimetype].ext),
 });
 
 function receive(kind: 'image' | 'audio', field: string, count: number, cutout = false) {
+  const fileSize = (kind === 'image' ? 10 : 15) * 1024 * 1024;
   const parser = multer({ storage,
-    limits: { fileSize: (kind === 'image' ? 10 : 15) * 1024 * 1024, files: count, fields: 0, parts: count },
+    limits: { fileSize, files: count, fields: 0, parts: count },
     fileFilter: (_req, file, cb) => {
       if (formats[file.mimetype]?.kind === kind) cb(null, true);
       else cb(new Error('Неподдерживаемый формат файла'));
     },
   });
   const middleware = count === 1 ? parser.single(field) : parser.array(field, count);
-  return (req: Request, res: Response) => {
+  return async (req: Request, res: Response) => {
+    // Bound disk and decode work across all upload endpoints, including drafts.
+    if (activeUploads >= 2) {
+      res.setHeader('Retry-After', '5');
+      return res.status(429).json({ error: 'Загрузка занята. Повторите через несколько секунд' });
+    }
+    activeUploads++;
+    const reservation = fileSize * count;
+    reservedBytes += reservation;
+    let released = false;
+    const deadline = setTimeout(() => req.destroy(), 120_000);
+    deadline.unref();
+    const release = () => {
+      if (released) return;
+      released = true;
+      clearTimeout(deadline);
+      activeUploads--; reservedBytes -= reservation;
+    };
+    try {
+      const space = await fs.promises.statfs(uploadsDir);
+      if (space.bavail * space.bsize - reservedBytes < 512 * 1024 * 1024) {
+        release();
+        return res.status(503).json({ error: 'Загрузка временно недоступна' });
+      }
+    } catch {
+      release();
+      return res.status(503).json({ error: 'Загрузка временно недоступна' });
+    }
+    if (req.destroyed) { release(); return; }
     middleware(req, res, async err => {
+      // Multer handles abort/error, removes partial files, then calls back.
+      // Stop the receive deadline here; keep the slot during image processing.
+      clearTimeout(deadline);
       const files = req.file ? [req.file] : (req.files as Express.Multer.File[] || []);
-      const cleanup = () => Promise.all(files.map(f => fs.promises.unlink(f.path).catch(() => {})));
+      const cleanup = () => Promise.all(files.filter(f => f.path).map(f => fs.promises.unlink(f.path).catch(() => {})));
       try {
+        if (req.aborted || res.destroyed) { await cleanup(); return; }
         if (err) {
           await cleanup();
           return res.status(400).json({ error: err.code === 'LIMIT_FILE_SIZE' ? 'Файл слишком большой' : 'Неподдерживаемый файл или превышен лимит загрузки' });
@@ -58,22 +95,36 @@ function receive(kind: 'image' | 'audio', field: string, count: number, cutout =
             await cleanup();
             return res.status(400).json({ error: 'Содержимое файла не соответствует формату' });
           }
+          // Background removal already decodes and produces a clean PNG.
+          if (kind === 'image' && !cutout) {
+            const normalized = await normalizeUploadImage(file.path, file.mimetype);
+            await fs.promises.writeFile(file.path, normalized);
+          }
         }
         if (cutout) {
           const png = await removeBackground(files[0].path);
           const filename = crypto.randomUUID() + '.png';
-          const outputPath = path.join(uploadsDir, filename);
+          const outputPath = path.join(incomingDir, filename);
           await fs.promises.writeFile(outputPath, png);
           await cleanup();
           files[0].path = outputPath;
           files[0].filename = filename;
         }
+        if (res.destroyed) { await cleanup(); return; }
+        for (const file of files) {
+          const publishedPath = path.join(uploadsDir, file.filename);
+          await fs.promises.rename(file.path, publishedPath);
+          file.path = publishedPath;
+        }
         const urls = files.map(f => `/uploads/${f.filename}`);
         return res.json(count === 1 ? { url: urls[0] } : { urls });
       } catch (error) {
         await cleanup();
+        if (error instanceof InvalidUploadImage) return res.status(400).json({ error: error.message });
         if (error instanceof BackgroundRemovalError) return res.status(error.status).json({ error: error.message });
         return res.status(500).json({ error: 'Ошибка загрузки файла' });
+      } finally {
+        release();
       }
     });
   };

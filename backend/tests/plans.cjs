@@ -113,6 +113,8 @@ test('публикация, ограничения и улучшение тар�
       assert.match(String(url), /^https:\/\/api\.yookassa\.ru\/v3\/payments/);
       if (options.method === 'POST') {
         payload = JSON.parse(options.body);
+        payment.amount = payload.amount;
+        payment.metadata = payload.metadata;
         return Response.json({ ...payment, confirmation: { confirmation_url: 'https://checkout.example.test/pay' } });
       }
       return Response.json(payment);

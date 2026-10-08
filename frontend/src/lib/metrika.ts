@@ -92,7 +92,9 @@ export function trackPageView(url: string): void {
       return;
     }
     startCounter(page);
-    window.ym?.(METRIKA_ID, 'hit', page, { referer: previousPage || analyticsPageUrl(document.referrer) || '' });
+    // Router transitions start before the previous DOM disappears. Its title can
+    // still contain a couple's names, so do not let the counter read it implicitly.
+    window.ym?.(METRIKA_ID, 'hit', page, { title: 'WeddingCraft', referer: previousPage || analyticsPageUrl(document.referrer) || '' });
     previousPage = page;
   } catch { /* см. выше */ }
 }
