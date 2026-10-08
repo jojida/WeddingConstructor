@@ -1,13 +1,14 @@
 'use client';
 import Link from 'next/link';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_DEFAULTS, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint } from '@/lib/constants';
+import { TEMPLATES, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
 import PreviewScale from '@/components/PreviewScale';
-import MediterraneanTemplate from '@/components/MediterraneanTemplate';
+import HeroPhone from '@/components/landing/HeroPhone';
+import FeatureDemo from '@/components/landing/FeatureDemo';
 import styles from './page.module.css';
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -85,75 +86,8 @@ function Header() {
 }
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
-/* Данные для живого превью «Средиземноморья» в hero: реальные тексты, фото и
-   программа дня из TEMPLATE_DEFAULTS — как на странице /demo/mediterranean. */
-function heroMediterraneanData() {
-  const defs = TEMPLATE_DEFAULTS['mediterranean'] || {};
-  const weddingDate = sampleWeddingDate(120);
-  return {
-    templateId: 'mediterranean',
-    groomName: 'Максим',
-    brideName: 'Катерина',
-    weddingDate,
-    weddingTime: '16:00',
-    venue: defs.venue ?? 'СПА Отель',
-    venueAddress: defs.venueAddress ?? '',
-    inviteText: '',
-    story: defs.story ?? '',
-    dressCode: '',
-    dressCodeColors: [],
-    dressCodePhoto: defs.dressCodePhoto ?? '',
-    coverPhoto: '',
-    galleryPhotos: [],
-    mapLink: '',
-    schedule: defs.schedule ?? [],
-    customData: {
-      ...templateCustomDefaults('mediterranean', weddingDate),
-      mapPoint: demoMapPoint(defs.venueAddress),
-    },
-  };
-}
-
-/* Живой шаблон «Средиземноморье» в окошке hero. Сам шаблон — iframe с фото,
-   видео и Яндекс.Картой (мегабайты), поэтому сначала показываем лёгкую
-   миниатюру того же дизайна, а iframe подключаем после window.load и появления
-   окошка в поле зрения. Так открывание дверей видно и на телефоне, где окошко
-   находится ниже текста, а тап по-прежнему открывает полное демо. */
-function HeroLivePreview() {
-  const data = useMemo(() => heroMediterraneanData(), []);
-  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-  const [live, setLive] = useState(false);
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const mount = () => { timer = setTimeout(() => setLive(true), 200); };
-    if (document.readyState === 'complete') mount();
-    else window.addEventListener('load', mount, { once: true });
-    return () => { window.removeEventListener('load', mount); clearTimeout(timer); };
-  }, []);
-
-  // Миниатюра лежит под iframe, пока тот не загрузится, — окошко не пустеет.
-  // Страховка на случай, если load так и не придёт (виснет карта или видео).
-  useEffect(() => {
-    if (!live) return;
-    const t = setTimeout(() => setShown(true), 3000);
-    return () => clearTimeout(t);
-  }, [live]);
-
-  return (
-    <>
-      <MediterraneanTemplate data={data} apiBase={apiBase} />
-      {live && (
-        <div style={{ position: 'absolute', inset: 0, opacity: shown ? 1 : 0, transition: 'opacity .5s ease' }}>
-          {/* editing отключает скролл-гейт; showIntro сохраняет открывание дверей. */}
-          <MediterraneanTemplate data={data} apiBase={apiBase} editing showIntro onFrameLoad={() => setShown(true)} />
-        </div>
-      )}
-    </>
-  );
-}
-
+/* Первый экран: слева обещание и кнопка, справа телефон с живым приглашением
+   и плавающими акварельными предметами (components/landing/HeroPhone). */
 function Hero() {
   return (
     <section className={styles.hero}>
@@ -166,44 +100,34 @@ function Hero() {
         <div className={styles.heroText}>
           <div className={styles.heroBadge}>
             <span className={styles.heroBadgeDot} />
-            <span>КОЛЛЕКЦИЯ 2026</span>
+            <span>Сезон 2027</span>
           </div>
 
           <h1 className={styles.heroHeadline}>
-            Сайт-приглашение на свадьбу —{' '}
+            <span className={styles.nowrap}>Сайт-приглашение</span> на свадьбу —{' '}
             <em className={styles.heroItalic}>готов за один вечер</em>
           </h1>
 
           <p className={styles.heroSubtitle}>
-            Ваши фото, любимая музыка и одна ссылка для всех гостей.
-            Анкета и карта проезда — в платных тарифах от 2 490 ₽.
+            Ваши фото и музыка в одной красивой ссылке для всех гостей.
+            Начните бесплатно, а анкету и карту добавьте, когда будете готовы.
           </p>
 
           <div className={styles.heroCtas}>
             <Link href="/templates" className={styles.heroCtaPrimary}>Создать бесплатно</Link>
-            <div style={{ marginTop: 10, fontSize: 13, color: '#8a8378', letterSpacing: '0.02em' }}>
-              Редактор без регистрации · Публикация от 0 ₽
-            </div>
+            <a href="#how" className={styles.heroCtaLink}>Как это работает ↓</a>
           </div>
+          <div className={styles.heroNote}>Редактор без регистрации · Разовая оплата, без подписки</div>
+
+          <ul className={styles.heroPerks}>
+            <li><span aria-hidden="true">✉</span>Конверт и живая обложка</li>
+            <li><span aria-hidden="true">✓</span>Анкета для гостей</li>
+            <li><span aria-hidden="true">✈</span>Ответы в Telegram</li>
+          </ul>
         </div>
 
         <div className={styles.heroDevice}>
-          <div className={styles.heroDeviceFrame}>
-            <div className={styles.heroDeviceScreen}>
-              <LazyMount rootMargin="0px" placeholder={
-                <MediterraneanTemplate data={heroMediterraneanData()} apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'} />
-              }>
-                <HeroLivePreview />
-              </LazyMount>
-              {/* На мобильных прокрутка внутри окошка «съедает» свайпы —
-                  поэтому там iframe не интерактивен, а тап открывает демо. */}
-              <Link href="/demo/mediterranean" className={styles.heroDeviceTapLink} aria-label="Открыть демо шаблона «Средиземноморье»">
-                <span className={styles.heroDeviceTapPill}>Полистать приглашение ↗</span>
-              </Link>
-            </div>
-            <div className={styles.heroDeviceHint}>Живой пример — прокрутите приглашение</div>
-          </div>
-          <div className={styles.heroDeviceOrb} />
+          <HeroPhone />
         </div>
       </div>
     </section>
@@ -280,87 +204,6 @@ function TemplatesSection() {
 
         <div className={styles.templatesCta}>
           <Link href="/templates" className="btn-primary">Выбрать шаблон</Link>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── How It Works ─────────────────────────────────────────────────────────────
-function HowItWorks() {
-  const steps = [
-    {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 20, height: 20 }}>
-          <rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" />
-        </svg>
-      ),
-      title: 'Выберите шаблон',
-      text: 'Найдите дизайн, который подходит вашей свадьбе.',
-    },
-    {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 20, height: 20 }}>
-          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-        </svg>
-      ),
-      title: 'Добавьте ваши детали',
-      text: 'Укажите имена и дату, загрузите фото и выберите музыку.',
-    },
-    {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 20, height: 20 }}>
-          <line x1="22" y1="2" x2="11" y2="13" /><polygon points="22 2 15 22 11 13 2 9 22 2" />
-        </svg>
-      ),
-      title: 'Пригласите гостей',
-      text: 'Опубликуйте сайт и отправьте ссылку в любимый мессенджер.',
-    },
-  ];
-
-  return (
-    <section className={styles.howSection}>
-      <div className={styles.sectionInner}>
-        <div className={styles.howHeader} data-animate>
-          <div className={styles.howLabelRow}>
-            <span className={styles.howLabelLine} />
-            <span className={styles.howLabelText}>КАК ЭТО РАБОТАЕТ</span>
-            <span className={styles.howLabelLine} />
-          </div>
-          <h2 className={styles.howTitle}>
-            Три простых шага до{' '}
-            <em className={styles.howTitleItalic}>идеального приглашения</em>
-          </h2>
-        </div>
-
-        <div className={styles.howSteps}>
-          {steps.map((step, i) => (
-            <div key={i} className={styles.howStep} data-animate data-delay={String(i * 150)}>
-              {/* Mobile: left column with icon + connector */}
-              <div className={styles.howMobileCol}>
-                <div className={styles.howCircle}>{step.icon}</div>
-                {i < steps.length - 1 && <div className={styles.howMobileConnector} />}
-              </div>
-
-              {/* Card (desktop) / content (mobile) */}
-              <div className={styles.howCard}>
-                {/* Desktop: icon + label + number row */}
-                <div className={styles.howCardRow}>
-                  <div className={styles.howCircle}>{step.icon}</div>
-                  <span className={styles.howStepLabel}>ШАГ {i + 1}</span>
-                  <span className={styles.howStepNum}>0{i + 1}</span>
-                </div>
-                {/* Mobile: label + number inline */}
-                <div className={styles.howMobileLabel}>
-                  <span className={styles.howStepLabel}>ШАГ {i + 1}</span>
-                  <span className={styles.howMobileNum}>&nbsp;— 0{i + 1}</span>
-                </div>
-                <h4 className={styles.howStepTitle}>{step.title}</h4>
-                <p className={styles.howStepText}>{step.text}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
@@ -847,7 +690,7 @@ export default function HomePage() {
       <Hero />
       <TemplatesSection />
       <PrintInvitationsTeaser />
-      <HowItWorks />
+      <FeatureDemo />
       <CompareSection />
       <Features />
       <RsvpSection />

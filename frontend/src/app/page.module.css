@@ -146,7 +146,7 @@
 /* ── Hero ───────────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  min-height: 870px;
+  min-height: min(900px, 100vh);
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -166,16 +166,16 @@
 
 .heroGrid {
   position: relative; z-index: 1;
-  max-width: 860px; margin: 0 auto;
-  padding: 80px 40px 60px;
-  display: flex;
-  flex-direction: column;
+  max-width: 1280px; margin: 0 auto;
+  padding: 48px 80px 40px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 560px);
   align-items: center;
-  text-align: center;
+  gap: 48px;
   width: 100%;
 }
 
-.heroText { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.heroText { display: flex; flex-direction: column; align-items: flex-start; gap: 22px; text-align: left; }
 
 /* Появление первого экрана — чистый CSS, без ожидания JS. Раньше эти блоки
    были [data-animate] и оставались прозрачными до гидратации: на медленной
@@ -184,14 +184,15 @@
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: none; }
 }
-.heroBadge, .heroHeadline, .heroSubtitle, .heroCtas {
+.heroBadge, .heroHeadline, .heroSubtitle, .heroCtas, .heroNote, .heroPerks {
   animation: heroIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 .heroHeadline { animation-delay: 0.08s; }
 .heroSubtitle { animation-delay: 0.16s; }
 .heroCtas { animation-delay: 0.24s; }
+.heroNote, .heroPerks { animation-delay: 0.32s; }
 @media (prefers-reduced-motion: reduce) {
-  .heroBadge, .heroHeadline, .heroSubtitle, .heroCtas { animation: none; }
+  .heroBadge, .heroHeadline, .heroSubtitle, .heroCtas, .heroNote, .heroPerks { animation: none; }
 }
 
 .heroBadge {
@@ -215,7 +216,7 @@
 
 .heroHeadline {
   font-family: var(--font-playfair);
-  font-size: 64px;
+  font-size: 58px;
   font-weight: 400;
   line-height: 1.1;
   letter-spacing: -0.02em;
@@ -223,6 +224,7 @@
   max-width: 700px;
 }
 .heroItalic { font-style: italic; }
+.nowrap { white-space: nowrap; }
 
 .heroSubtitle {
   font-size: 18px;
@@ -232,7 +234,24 @@
   font-family: var(--font-inter);
 }
 
-.heroCtas { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.heroCtas { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; }
+.heroCtaLink {
+  font-family: var(--font-inter); font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--on-surface); text-decoration: none; border-bottom: 1px solid rgba(54,69,79,0.35);
+  padding-bottom: 2px; transition: border-color .2s, color .2s;
+}
+.heroCtaLink:hover { color: var(--primary); border-color: var(--primary); }
+.heroNote { margin-top: -8px; font-family: var(--font-inter); font-size: 13px; color: #8a8378; letter-spacing: 0.02em; }
+.heroPerks {
+  display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 6px 0 0; padding: 0;
+}
+.heroPerks li {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  background: rgba(255,255,255,0.7); border: 1px solid rgba(206,197,186,0.55);
+  font-family: var(--font-inter); font-size: 13px; color: #5b554c;
+}
+.heroPerks li span { color: #b08f52; font-size: 13px; }
 .heroCtaPrimary {
   padding: 16px 40px;
   background: var(--charcoal);
@@ -280,56 +299,7 @@
 
 .heroDevice {
   position: relative;
-  display: flex; align-items: center; justify-content: center;
-  margin-top: 56px;
-  width: 100%; max-width: 540px;
-}
-.heroDeviceFrame {
-  position: relative; z-index: 2;
-  background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(12px);
-  border: 0.5px solid rgba(212,163,163,0.3);
-  border-radius: 32px;
-  padding: 14px;
-  box-shadow: 0 40px 80px -16px rgba(14,29,38,0.1);
   width: 100%;
-}
-/* Окошко с живым шаблоном: фиксированная высота, контент прокручивается внутри iframe */
-.heroDeviceScreen {
-  position: relative;
-  height: clamp(420px, 64vh, 620px);
-  border-radius: 22px;
-  overflow: hidden;
-  background: #dbeeff;
-}
-/* Мобильный оверлей «тап — открыть демо»: на десктопе скрыт */
-.heroDeviceTapLink { display: none; }
-.heroDeviceTapPill {
-  background: rgba(14, 29, 38, 0.78);
-  color: #fff;
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-family: var(--font-inter);
-  box-shadow: 0 6px 24px rgba(14, 29, 38, 0.25);
-}
-.heroDeviceHint {
-  text-align: center;
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  color: #7d766c;
-  padding-top: 10px;
-  font-family: var(--font-inter);
-}
-.heroDeviceOrb {
-  position: absolute;
-  top: -40px; right: -40px;
-  width: 200px; height: 200px;
-  background: rgba(124, 84, 84, 0.12);
-  border-radius: 50%;
-  filter: blur(50px);
-  z-index: 0;
 }
 
 /* ── Templates Section ─────────────────────────────────────────────────────── */
@@ -722,7 +692,8 @@
 @media (max-width: 1024px) {
   .sectionInner { padding: 0 40px; }
   .headerInner { padding: 16px 40px; }
-  .heroGrid { padding: 60px 40px; }
+  .heroGrid { padding: 40px 40px; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 32px; }
+  .heroHeadline { font-size: 52px; }
   .templateScrollItem { height: 420px; }
   .footerGrid { grid-template-columns: 1fr 1fr; gap: 40px; }
   .pricingNote { padding: 0 20px; }
@@ -732,25 +703,12 @@
 @media (max-width: 768px) {
   .sectionInner { padding: 0 20px; }
   .headerInner { padding: 14px 20px; }
-  .heroGrid { grid-template-columns: 1fr; padding: 48px 20px; gap: 40px; }
-  .heroDevice { margin-top: 36px; }
-  /* Свайп по iframe листал бы приглашение (5000+ px) и «запирал» страницу —
-     на тач-экранах виджет живой, но не скроллится: тап открывает демо. */
-  .heroDeviceScreen { height: clamp(360px, 56vh, 520px); }
-  .heroDeviceScreen iframe { pointer-events: none; }
-  .heroDeviceHint { display: none; }
-  .heroDeviceTapLink {
-    display: flex;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    align-items: flex-end;
-    justify-content: center;
-    padding-bottom: 18px;
-    text-decoration: none;
-  }
+  .heroGrid { grid-template-columns: 1fr; padding: 28px 20px 24px; gap: 8px; }
+  .heroText { align-items: center; text-align: center; gap: 18px; }
+  .heroCtas { justify-content: center; }
+  .heroPerks { justify-content: center; gap: 8px; }
+  .heroPerks li { padding: 7px 12px; font-size: 12px; }
+  .templatesSection { padding-top: 48px; }
   .heroHeadline { font-size: 36px; }
   .sectionTitle { font-size: 30px; }
   .howSteps { display: flex; flex-direction: column; gap: 0; }

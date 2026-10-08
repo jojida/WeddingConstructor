@@ -1,0 +1,96 @@
+/* Сцена держит пропорцию 560×720: телефон и предметы позиционируются в %,
+   поэтому на телефоне и на компьютере раскладка одна и та же, меняется
+   только масштаб. */
+.stage {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 560 / 720;
+  margin: 0 auto;
+}
+
+.glow {
+  position: absolute; inset: 12% 10%;
+  background: radial-gradient(closest-side, rgba(201, 169, 110, 0.22), rgba(201, 169, 110, 0) 70%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+/* ── Телефон ─────────────────────────────────────────────────────────── */
+.phone {
+  position: absolute;
+  left: 50%; top: 4%;
+  width: 46%;
+  aspect-ratio: 9 / 19.5;
+  transform: translateX(-50%);
+  padding: 2.2%;
+  border-radius: 13% / 6%;
+  background: linear-gradient(145deg, #2c2a28, #121110 60%, #2a2725);
+  box-shadow:
+    0 0 0 1.5px #3b3733 inset,
+    0 40px 70px -20px rgba(40, 30, 20, 0.45),
+    0 18px 30px -18px rgba(40, 30, 20, 0.35);
+  z-index: 2;
+  animation: phoneIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+.island {
+  position: absolute; z-index: 3;
+  left: 50%; top: 3.4%;
+  width: 30%; height: 3.1%;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #0b0a0a;
+}
+.screen {
+  position: relative;
+  width: 100%; height: 100%;
+  border-radius: 11% / 5.2%;
+  overflow: hidden;
+  background: #e9e2d6;
+}
+.video {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+/* ── Плавающие предметы ──────────────────────────────────────────────── */
+.deco {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  animation: decoIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--delay);
+}
+.deco img {
+  display: block;
+  width: 100%; height: auto;
+  filter: drop-shadow(0 10px 14px rgba(70, 50, 30, 0.14));
+  transform: rotate(var(--rot));
+  animation: float var(--dur) ease-in-out infinite;
+  animation-delay: calc(var(--delay) + 0.9s);
+  will-change: transform;
+}
+
+@keyframes phoneIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(24px); }
+  to   { opacity: 1; transform: translateX(-50%); }
+}
+@keyframes decoIn {
+  from { opacity: 0; transform: scale(0.82) translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes float {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--rot)); }
+  50%      { transform: translate3d(0, -9px, 0) rotate(calc(var(--rot) * -0.4)); }
+}
+
+/* На узком экране — только часть предметов, чтобы не теснить телефон. */
+@media (max-width: 768px) {
+  .stage { max-width: 440px; }
+  .decoDesktop { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone, .deco, .deco img { animation: none; }
+}
