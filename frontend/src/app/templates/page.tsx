@@ -44,7 +44,7 @@ export default function TemplatesPage() {
             {TEMPLATES.length} дизайнов для вашего дня. Откройте пример и найдите свой стиль.
           </p>
           <p className={styles.subtitle} style={{ marginTop: 6, fontSize: 14, opacity: 0.85 }}>
-            Редактор без регистрации. Публикация от 0 ₽; анкета и карта — в платных тарифах.
+            Редактор без регистрации. Начать можно бесплатно.
           </p>
         </div>
       </div>

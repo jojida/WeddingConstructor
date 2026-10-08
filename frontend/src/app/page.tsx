@@ -248,7 +248,7 @@ function Features() {
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
           <h2 className={styles.sectionTitle}>Всё, что нужно в приглашении</h2>
-          <p className={styles.howSubtitle}>Анкета, карта и программа дня доступны в платных тарифах</p>
+          <p className={styles.howSubtitle}>Всё, что гостям важно знать, — в одной ссылке</p>
         </div>
 
         <div className={styles.featuresGrid}>
@@ -424,7 +424,7 @@ function RsvpSection() {
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
           <h2 className={styles.sectionTitle}>Анкета для гостей на свадьбу</h2>
-          <p className={styles.howSubtitle}>Меньше переписок перед свадьбой · В платных тарифах</p>
+          <p className={styles.howSubtitle}>Меньше переписок перед свадьбой</p>
         </div>
 
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', maxWidth: 920, margin: '0 auto' }} data-animate>
@@ -468,7 +468,7 @@ function CompareSection() {
   const site = [
     'Приглашение открывается на телефоне',
     'Публикация от 0 ₽',
-    'Анкета и карта — в платных тарифах',
+    'Анкета для гостей и карта проезда',
     'Тексты и фото можно менять после публикации',
   ];
 
