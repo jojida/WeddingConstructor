@@ -80,6 +80,11 @@ export function demoMapPoint(address?: string): { q: string; lat: number; lon: n
   return p && address ? { q: address, ...p } : undefined;
 }
 
+/* Порядок в каталоге: тёмные обложки с белыми именами на фото (Туманный лес,
+   Вечер в саду, Айвори, Вадим и Дарья) в сетке на 3 колонки и в ленте на
+   телефоне не стоят рядом — между ними светлые шаблоны. В 2 колонки (планшет)
+   четыре таких на 12 мест полностью не развести: рядом по вертикали только
+   Вечер в саду и Айвори. */
 const HANDMADE_TEMPLATES = [
   {
     id: 'vitrage',
@@ -93,6 +98,19 @@ const HANDMADE_TEMPLATES = [
     sampleBride: 'Александра',
     sampleGroom: 'Григорий',
     sampleDaysAhead: 212,
+  },
+  {
+    id: 'forest',
+    name: 'Туманный лес',
+    description: 'Туманный лес, природные оттенки и винтажные рамки для свадьбы среди зелени.',
+    tags: ['Лес', 'Природа', 'Винтаж', 'Зелёный', 'Анимация'],
+    colors: ['#f7f2ed', '#4a552d', '#a0a496'],
+    preview: '/invite/forest/assets/preview.jpg?v=3',
+    defaultCover: '/invite/forest/assets/album-1.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Мария',
+    sampleGroom: 'Антон',
+    sampleDaysAhead: 140,
   },
   {
     id: 'tenderness',
@@ -121,17 +139,16 @@ const HANDMADE_TEMPLATES = [
     sampleDaysAhead: 260,
   },
   {
-    id: 'forest',
-    name: 'Туманный лес',
-    description: 'Туманный лес, природные оттенки и винтажные рамки для свадьбы среди зелени.',
-    tags: ['Лес', 'Природа', 'Винтаж', 'Зелёный', 'Анимация'],
-    colors: ['#f7f2ed', '#4a552d', '#a0a496'],
-    preview: '/invite/forest/assets/preview.jpg?v=3',
-    defaultCover: '/invite/forest/assets/album-1.jpg',
+    id: 'calla',
+    name: 'Каллы',
+    description: 'Акварельные каллы, жемчуг и тёплая бежевая палитра.',
+    tags: ['Каллы', 'Жемчуг', 'Нежный', 'Акварель', 'Бежевый'],
+    colors: ['#d7d3cb', '#7c6a54', '#8c967b'],
+    preview: '/invite/calla/assets/couple-photo.jpg',
+    defaultCover: '/invite/calla/assets/couple-photo.jpg',
     defaultGallery: [] as string[],
-    sampleBride: 'Мария',
-    sampleGroom: 'Антон',
-    sampleDaysAhead: 140,
+    sampleBride: 'Дарья',
+    sampleGroom: 'Вадим',
   },
   {
     id: 'garden-evening',
@@ -144,6 +161,18 @@ const HANDMADE_TEMPLATES = [
     defaultGallery: [] as string[],
     sampleBride: 'Ольга',
     sampleGroom: 'Даниил',
+  },
+  {
+    id: 'floral',
+    name: 'Флоральный',
+    description: 'Акварельные цветы и кружево в мягких природных оттенках.',
+    tags: ['Цветы', 'Нежный', 'Бохо', 'Кружево', 'Романтика'],
+    colors: ['#d5d0c8', '#a29b88', '#947f57'],
+    preview: '/invite/floral/assets/photos/couple3.jpg',
+    defaultCover: '/invite/floral/assets/photos/cover.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Оливия',
+    sampleGroom: 'Себастьян',
   },
   {
     id: 'ivory',
@@ -159,18 +188,6 @@ const HANDMADE_TEMPLATES = [
     sampleDaysAhead: 200,
   },
   {
-    id: 'calla',
-    name: 'Каллы',
-    description: 'Акварельные каллы, жемчуг и тёплая бежевая палитра.',
-    tags: ['Каллы', 'Жемчуг', 'Нежный', 'Акварель', 'Бежевый'],
-    colors: ['#d7d3cb', '#7c6a54', '#8c967b'],
-    preview: '/invite/calla/assets/couple-photo.jpg',
-    defaultCover: '/invite/calla/assets/couple-photo.jpg',
-    defaultGallery: [] as string[],
-    sampleBride: 'Дарья',
-    sampleGroom: 'Вадим',
-  },
-  {
     id: 'sketch',
     name: 'Скетч',
     description: 'Рисованные детали, полароиды и яркие акценты для весёлой свадьбы.',
@@ -183,16 +200,14 @@ const HANDMADE_TEMPLATES = [
     sampleGroom: 'Артем',
   },
   {
-    id: 'floral',
-    name: 'Флоральный',
-    description: 'Акварельные цветы и кружево в мягких природных оттенках.',
-    tags: ['Цветы', 'Нежный', 'Бохо', 'Кружево', 'Романтика'],
-    colors: ['#d5d0c8', '#a29b88', '#947f57'],
-    preview: '/invite/floral/assets/photos/couple3.jpg',
-    defaultCover: '/invite/floral/assets/photos/cover.jpg',
+    id: 'mediterranean',
+    name: 'Средиземноморье',
+    description: 'Синие ставни, морской вид и акварельные ветви для свадьбы у моря.',
+    tags: ['Минимализм', 'Море', 'Синий', 'Цветы'],
+    colors: ['#114e88', '#354366', '#dbebff'],
+    preview: '/invite/assets/window.jpg',
+    defaultCover: '/invite/assets/window.jpg',
     defaultGallery: [] as string[],
-    sampleBride: 'Оливия',
-    sampleGroom: 'Себастьян',
   },
   {
     id: 'garden-arch',
@@ -207,16 +222,6 @@ const HANDMADE_TEMPLATES = [
     sampleGroom: 'Елис',
   },
   {
-    id: 'mediterranean',
-    name: 'Средиземноморье',
-    description: 'Синие ставни, морской вид и акварельные ветви для свадьбы у моря.',
-    tags: ['Минимализм', 'Море', 'Синий', 'Цветы'],
-    colors: ['#114e88', '#354366', '#dbebff'],
-    preview: '/invite/assets/window.jpg',
-    defaultCover: '/invite/assets/window.jpg',
-    defaultGallery: [] as string[],
-  },
-  {
     id: 'vadimdarya',
     name: 'Тёмная элегантность',
     description: 'Тёмный фон, золото и ваши фотографии для торжественного вечера.',
@@ -227,7 +232,7 @@ const HANDMADE_TEMPLATES = [
     defaultGallery: [] as string[],
     sampleBride: 'Анна',
     sampleGroom: 'Александр',
-  }
+  },
 ];
 
 /* Каталог = рукописные шаблоны + собранные в «Верстаке».
