@@ -5,7 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
-import { isAdvancedPlan, LEGAL } from '@/lib/constants';
+import { isAdvancedPlan, LEGAL, PLANS } from '@/lib/constants';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
 
@@ -13,6 +13,64 @@ import styles from './page.module.css';
    оплаты, и после отмены. Поэтому страница не имеет права поздравлять сразу:
    сначала подтверждаем оплату (вебхук или дозапрос статуса), и только потом
    показываем ссылку. Если за минуту подтверждения нет — честно об этом говорим. */
+
+/* Что даёт каждый платный тариф — коротко, языком пользы для пары и гостей.
+   Полные списки — в PLANS, здесь только то, ради чего доплачивают. */
+const UPGRADE_HIGHLIGHTS: Record<string, string[]> = {
+  premium: [
+    'Анимация открытия — гости открывают конверт или двери',
+    'Анкета: кто придёт, с кем, что пьёт',
+    'Карта проезда, программа дня и дресс-код',
+    'Ответы гостей сразу в Telegram и на почту',
+    'Именные ссылки для каждого гостя',
+  ],
+  maximum: [
+    'Всё из «Премиум»',
+    'Рассадка гостей по столам',
+    'Меню и выбор блюд гостями',
+    'Печать плана рассадки, карточек и меню',
+  ],
+};
+
+/** Предложение после бесплатной публикации: сайт уже работает, платный тариф
+    включает остальное на этой же ссылке. */
+function UpgradeOffer({ inviteId }: { inviteId: string }) {
+  const plans = PLANS.filter(p => UPGRADE_HIGHLIGHTS[p.id]);
+  return (
+    <section className={styles.upgrade} aria-labelledby="upgrade-title">
+      <h2 id="upgrade-title" className={styles.upgradeTitle}>
+        Выберите тариф и <em>разблокируйте все функции</em>
+      </h2>
+      <p className={styles.upgradeText}>
+        Всё появится на этом же сайте — ссылка для гостей не изменится.
+        Разовая оплата, без подписки.
+      </p>
+      <div className={styles.upgradeGrid}>
+        {plans.map(plan => (
+          <div key={plan.id} className={`${styles.upgradeCard} ${plan.popular ? styles.upgradeCardPopular : ''}`}>
+            {plan.badge && <div className={styles.upgradeBadge}>{plan.badge}</div>}
+            <div className={styles.upgradeName}>{plan.name}</div>
+            <div className={styles.upgradePrice}>{plan.price.toLocaleString('ru-RU')} ₽</div>
+            <ul className={styles.upgradeList}>
+              {UPGRADE_HIGHLIGHTS[plan.id].map(t => <li key={t}>{t}</li>)}
+            </ul>
+            <Link
+              href={`/payment?id=${encodeURIComponent(inviteId)}&plan=${plan.id}`}
+              className={plan.popular ? 'btn-primary' : 'btn-outline'}
+              style={{ width: '100%', textAlign: 'center', textDecoration: 'none' }}
+              onClick={() => reachGoal(GOAL.upgradeClick, { from: 'publish_success', plan: plan.id })}
+            >
+              Выбрать «{plan.name}»
+            </Link>
+          </div>
+        ))}
+      </div>
+      <p className={styles.upgradeNote}>
+        Можно решить позже — тариф подключается в кабинете в любой момент.
+      </p>
+    </section>
+  );
+}
 
 const POLL_MS = 2500;
 const MAX_TRIES = 24; // ~60 секунд ожидания
@@ -127,6 +185,7 @@ function SuccessContent() {
           ))}
         </div>
       )}
+      <div className={styles.column}>
       <div className={styles.card}>
         {state === 'paid' && <div className={styles.check}>✓</div>}
         <h1 className={styles.title}>{title}</h1>
@@ -186,6 +245,8 @@ function SuccessContent() {
             </p>
           </div>
         )}
+      </div>
+      {state === 'paid' && invite?.plan === 'free' && <UpgradeOffer inviteId={invite.id} />}
       </div>
     </div>
   );

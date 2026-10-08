@@ -104,6 +104,7 @@ export const GOAL = {
   editorOpen:     'editor_open',      // открыл редактор — выбрал шаблон
   signup:         'signup',           // вошёл по коду (регистрация или вход)
   freePublish:    'free_publish',     // опубликовал сайт на бесплатном тарифе
+  upgradeClick:   'upgrade_click',    // нажал «улучшить тариф» (параметр from — где)
   paymentStart:   'payment_start',    // нажал «Оплатить» (только платные тарифы)
   paymentSuccess: 'payment_success',  // оплата подтверждена (только платные тарифы)
 } as const;
