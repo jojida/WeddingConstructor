@@ -1,5 +1,5 @@
 'use client';
-import { planSections, isBrandFree } from '@/lib/plans';
+import { planSections, isBrandFree, hasWatermark } from '@/lib/plans';
 import { TEMPLATE_DEFAULTS } from '@/lib/constants';
 import dynamic from 'next/dynamic';
 import { isStudioTemplate } from '@/lib/studioTemplates';
@@ -61,8 +61,8 @@ interface Props {
 }
 
 export default function TemplatePreview({ data, apiBase, fullPage, slug, editing }: Props) {
-  // wcBrand — подпись «Создано на WeddingCraft» и водяной знак; их рисуют assets/signature.js и assets/brand.js внутри страницы шаблона
-  data = { ...data, enabledSections: planSections(data.plan, data.enabledSections), customData: { ...data.customData, plan: data.plan, wcBrand: !isBrandFree(data.plan, data.status) } };
+  // wcBrand — подпись «Создано на WeddingCraft» (assets/signature.js), wcWatermark — водяной знак (assets/brand.js); оба рисуются внутри страницы шаблона
+  data = { ...data, enabledSections: planSections(data.plan, data.enabledSections), customData: { ...data.customData, plan: data.plan, wcBrand: !isBrandFree(data.plan, data.status), wcWatermark: hasWatermark(data.status) } };
   // «Программа дня» не должна оказаться пустой ни у гостей, ни в превью:
   // пустые/битые данные (старые записи в БД) подменяем дефолтами дизайна.
   if (!Array.isArray(data.schedule) || data.schedule.length === 0) {

@@ -18,12 +18,19 @@ export const PLANS = [
   },
 ];
 
-/** Платный сайт показывается без подписи «Создано на WeddingCraft» и водяного знака
-    (общие модули шаблонов assets/signature.js и assets/brand.js). С брендом — бесплатный
-    тариф и демо; черновик, пока тариф не оплачен, тоже считается «с брендом». */
+/** Сайт опубликован — его видят гости. Бесплатная публикация тоже ставит статус paid. */
+export const isPublished = (status?: string | null): boolean => status === 'paid' || status === 'published';
+
+/** Платный сайт показывается без подписи «Создано на WeddingCraft» (общий модуль шаблонов
+    assets/signature.js). С подписью — бесплатный тариф и демо; черновик, пока тариф не
+    оплачен, тоже считается «с подписью». */
 export const isBrandFree = (plan?: string | null, status?: string | null): boolean =>
-  (status === 'paid' || status === 'published') &&
+  isPublished(status) &&
   ['premium', 'maximum', 'pro', 'lite', 'basic', 'standard'].includes(plan || '');
+
+/** Водяной знак WeddingCraft (assets/brand.js) — только у неопубликованного: демо шаблонов
+    и предпросмотр черновика. Опубликованным сайтам, бесплатным тоже, знака нет (с 08.10.26). */
+export const hasWatermark = (status?: string | null): boolean => !isPublished(status);
 
 export const PLAN_TITLES: Record<string, string> = {
   free: 'Бесплатный', premium: 'Премиум', maximum: 'Максимум',

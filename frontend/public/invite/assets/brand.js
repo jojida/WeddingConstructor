@@ -1,19 +1,20 @@
 /* ── Бренд WeddingCraft на странице приглашения (общий модуль всех шаблонов) ──
-   Бесплатный тариф и демо шаблонов:
-     · внизу страницы — подпись «Создано на WeddingCraft» (её рисует signature.js);
+     · внизу страницы — подпись «Создано на WeddingCraft» (её рисует signature.js):
+       бесплатный тариф и демо шаблонов, на платных подписи нет;
      · поверх страницы — еле заметный водяной знак: надпись WeddingCraft косой
        шахматкой (плитка assets/brand-wm.svg). Слой НЕПОДВИЖНЫЙ (position: fixed
        внутри окна приглашения): страницу листают, знак стоит на месте — как у
-       демо Digital Yes. Кликов не перехватывает.
-   Платные тарифы: ни подписи, ни знака.
+       демо Digital Yes. Кликов не перехватывает. Только у неопубликованного —
+       демо шаблонов и предпросмотр черновика; опубликованным сайтам, бесплатным
+       тоже, знака нет (с 08.10.26).
    В редакторе (editing=1) бренда нет — как и у подписи: пара правит свой сайт
    и не должна видеть рекламу сервиса поверх него.
 
-   Решает страница-хозяин (TemplatePreview.tsx): в данных wc:data приходит
-   wcBrand — true (показать) или false (платный сайт). Пока данных нет, ничего не
-   рисуем, чтобы у платных не мелькало. Страницу открыли напрямую (без родителя)
-   или данных нет 6 секунд — бренд показывается: так выглядят демо и сырые
-   файлы шаблонов.
+   Решает страница-хозяин (TemplatePreview.tsx): в данных wc:data приходят
+   wcBrand (подпись) и wcWatermark (знак) — true или false. Пока данных нет,
+   ничего не рисуем, чтобы у опубликованных не мелькало. Страницу открыли
+   напрямую (без родителя) или данных нет 6 секунд — показываются оба: так
+   выглядят демо и сырые файлы шаблонов.
 
    Подключение: <script src="../assets/brand.js"></script> ПОСЛЕ signature.js в
    каждом шаблоне (и в генераторе студии — studio/export/generate.ts). Больше
@@ -38,7 +39,7 @@
     '@media (prefers-reduced-motion:reduce){.wc-wm{transition:none}}' +
     '@media print{.wc-wm{display:none}}';
 
-  var wm = null, state = framed ? null : true;   // null — ждём данные страницы-хозяина
+  var wm = null, mark = false, decided = !framed;   // в iframe ждём решения страницы-хозяина
 
   function ensure() {
     if (wm || !document.body) return;
@@ -52,29 +53,38 @@
     document.body.appendChild(wm);
   }
 
-  function set(on) {
-    state = !!on;
+  /* sig — подпись внизу, mk — водяной знак: true/false, null — без изменений.
+     Один аргумент — оба сразу. */
+  function set(sig, mk) {
+    if (arguments.length < 2) mk = sig;
+    decided = true;
     // подпись внизу — отдельный модуль; он сам убирается на платных тарифах
-    if (window.WCSignature) window.WCSignature.set({ hidden: !state });
+    if (typeof sig === 'boolean' && window.WCSignature) window.WCSignature.set({ hidden: !sig });
+    if (typeof mk !== 'boolean') return;
+    mark = mk;
     if (!wm) {
-      if (!state) return;                        // платный сайт: слой не создаём вовсе
+      if (!mark) return;                         // знака нет: слой не создаём вовсе
       ensure();
       if (!wm) return;
     }
     // в следующем кадре — чтобы появление было плавным, а не мгновенным
-    requestAnimationFrame(function () { wm.classList.toggle('is-on', state); });
+    requestAnimationFrame(function () { wm.classList.toggle('is-on', mark); });
   }
 
   window.addEventListener('message', function (e) {
     if (e.origin !== window.location.origin || e.source !== window.parent) return;
-    var m = e.data;
-    // Только когда флаг есть в данных: частичное сообщение без него не должно вернуть бренд платному сайту
-    if (m && m.type === 'wc:data' && m.payload && typeof m.payload.wcBrand === 'boolean') set(m.payload.wcBrand);
+    var p = e.data && e.data.type === 'wc:data' && e.data.payload;
+    if (!p) return;
+    // Только флаги, которые есть в данных: частичное сообщение без них не должно вернуть бренд
+    var sig = typeof p.wcBrand === 'boolean' ? p.wcBrand : null;
+    // Страница-хозяин старой сборки шлёт один wcBrand — тогда знак вместе с подписью, как раньше
+    var mk = typeof p.wcWatermark === 'boolean' ? p.wcWatermark : sig;
+    if (sig !== null || mk !== null) set(sig, mk);
   });
 
   function start() {
-    if (state === true) set(true);
-    else if (state === null) setTimeout(function () { if (state === null) set(true); }, 6000);
+    if (!framed) set(true, true);
+    else setTimeout(function () { if (!decided) set(true, true); }, 6000);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
