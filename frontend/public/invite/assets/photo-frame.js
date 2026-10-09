@@ -202,7 +202,8 @@
       ctx.translate(box.w / 2, box.h / 2);
       ctx.rotate(g.th);
       ctx.drawImage(img, g.left, g.top, g.w, g.h);
-      var type = /\.png([?#]|$)/i.test(src) ? 'image/png' : 'image/jpeg';
+      // PNG и WebP бывают с прозрачностью (вырезанные фото) — в JPEG она стала бы чёрной
+      var type = /\.(png|webp)([?#]|$)/i.test(src) ? 'image/png' : 'image/jpeg';
       try {
         cv.toBlob(function (blob) {
           cv.width = cv.height = 0;

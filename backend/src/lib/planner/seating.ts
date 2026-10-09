@@ -96,6 +96,23 @@ export async function createTable(inviteId: string, body: Record<string, unknown
   }
 }
 
+/** Первое открытие рассадки: два круглых стола по 8 мест, чтобы было с чего начать —
+    пустой экран «Столов пока нет» оставлял пару в недоумении. Их можно удалить или поменять.
+    Строка настроек планировщика служит отметкой «раздел уже открывали»: удалённые столы
+    при следующем открытии не вернутся, а две вкладки сразу не создадут четыре стола. */
+export const DEFAULT_TABLES = { count: 2, capacity: 8, shape: 'round' } as const;
+export async function seedDefaultTables(inviteId: string): Promise<boolean> {
+  try {
+    await prisma.plannerSettings.create({ data: { invitationId: inviteId } });
+  } catch (e) {
+    if (isNameTaken(e)) return false;   // настройки уже есть — раздел открывали раньше
+    throw e;
+  }
+  if (await prisma.seatTable.count({ where: { invitationId: inviteId } })) return false;
+  await createTables(inviteId, { ...DEFAULT_TABLES });
+  return true;
+}
+
 /** Несколько столов сразу: «7 столов по 10 мест». Названия — свободные номера по порядку. */
 export async function createTables(inviteId: string, body: Record<string, unknown>) {
   const count = intInRange(body.count, 1, 50);

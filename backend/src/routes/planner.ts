@@ -15,7 +15,7 @@ import {
 import { PlannerError, errName } from '../lib/planner/util';
 import { reconcile } from '../lib/planner/roster';
 import { buildSnapshot } from '../lib/planner/snapshot';
-import { assignPersons, createTable, createTables, deleteTable, updateTable } from '../lib/planner/seating';
+import { assignPersons, createTable, createTables, deleteTable, seedDefaultTables, updateTable } from '../lib/planner/seating';
 import { createOption, deleteOption, reorderOptions, saveSettings, updateOption } from '../lib/planner/menu';
 import { createParty, createPerson, importGuests, setPartyTag, updatePerson } from '../lib/planner/people';
 import { buildGuestsCsv } from '../lib/planner/csv';
@@ -58,8 +58,9 @@ const param = (req: AuthRequest, name: string): string => String(req.params[name
 
 router.get('/:inviteId', route(async (c) => { c.res.json(await buildSnapshot(c.id)); }));
 
-// Привести людей в соответствие с ответами анкеты (при открытии раздела и по кнопке)
-router.post('/:inviteId/sync', route(async (c) => { await reconcile(c.id); await reply(c); }));
+// Привести людей в соответствие с ответами анкеты (при открытии раздела и по кнопке).
+// В самый первый раз заодно ставит два стола по умолчанию.
+router.post('/:inviteId/sync', route(async (c) => { await seedDefaultTables(c.id); await reconcile(c.id); await reply(c); }));
 
 router.put('/:inviteId/settings', route(async (c) => { await reply(c, await saveSettings(c.id, c.body)); }));
 

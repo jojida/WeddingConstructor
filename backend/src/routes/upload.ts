@@ -1,11 +1,11 @@
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, json } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
-import { BackgroundRemovalError, removeBackground } from '../lib/backgroundRemoval';
+import { BackgroundRemovalError, removeBackground, warmBackgroundRemoval } from '../lib/backgroundRemoval';
 import { InvalidUploadImage, normalizeUploadImage } from '../lib/uploadImage';
 import { uploadsDir } from '../lib/storage';
 
@@ -95,17 +95,17 @@ function receive(kind: 'image' | 'audio', field: string, count: number, cutout =
             await cleanup();
             return res.status(400).json({ error: 'Содержимое файла не соответствует формату' });
           }
-          // Background removal already decodes and produces a clean PNG.
+          // Background removal already decodes and produces a clean image.
           if (kind === 'image' && !cutout) {
             const normalized = await normalizeUploadImage(file.path, file.mimetype);
             await fs.promises.writeFile(file.path, normalized);
           }
         }
         if (cutout) {
-          const png = await removeBackground(files[0].path);
-          const filename = crypto.randomUUID() + '.png';
+          const image = await removeBackground(files[0].path);
+          const filename = crypto.randomUUID() + '.webp';
           const outputPath = path.join(incomingDir, filename);
-          await fs.promises.writeFile(outputPath, png);
+          await fs.promises.writeFile(outputPath, image);
           await cleanup();
           files[0].path = outputPath;
           files[0].filename = filename;
@@ -129,9 +129,46 @@ function receive(kind: 'image' | 'audio', field: string, count: number, cutout =
     });
   };
 }
+/* Background removal for a photo that is already on the server (every own photo is
+   uploaded first): the editor sends its address instead of downloading the original
+   and uploading it back — on a phone that round trip was most of the wait. */
+const UPLOADED_PHOTO = /^\/uploads\/([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(?:jpg|png|webp))$/i;
+async function cutoutExisting(req: Request, res: Response) {
+  const match = typeof req.body?.source === 'string' ? UPLOADED_PHOTO.exec(req.body.source) : null;
+  if (!match) return res.status(400).json({ error: 'Фото не найдено' });
+  const input = path.join(uploadsDir, match[1]);
+  if (activeUploads >= 2) {
+    res.setHeader('Retry-After', '5');
+    return res.status(429).json({ error: 'Загрузка занята. Повторите через несколько секунд' });
+  }
+  activeUploads++;
+  let outputPath = '';
+  try {
+    try { await fs.promises.access(input, fs.constants.R_OK); } catch { return res.status(404).json({ error: 'Фото не найдено' }); }
+    const image = await removeBackground(input);
+    const filename = crypto.randomUUID() + '.webp';
+    outputPath = path.join(incomingDir, filename);
+    await fs.promises.writeFile(outputPath, image);
+    if (res.destroyed) return;
+    await fs.promises.rename(outputPath, path.join(uploadsDir, filename));
+    outputPath = '';
+    return res.json({ url: `/uploads/${filename}` });
+  } catch (error) {
+    if (error instanceof BackgroundRemovalError) return res.status(error.status).json({ error: error.message });
+    return res.status(500).json({ error: 'Ошибка обработки фото' });
+  } finally {
+    if (outputPath) await fs.promises.unlink(outputPath).catch(() => {});
+    activeUploads--;
+  }
+}
+
 // Anonymous uploads support the draft editor. The application applies a shared IP limit.
+const cutoutLimit = rateLimit(12, 10 * 60_000);
 router.post('/image', receive('image', 'image', 1));
-router.post('/remove-background', rateLimit(12, 10 * 60_000), receive('image', 'image', 1, true));
+router.post('/remove-background', cutoutLimit, receive('image', 'image', 1, true));
+router.post('/remove-background/existing', cutoutLimit, json({ limit: '4kb' }), cutoutExisting);
+// The editor asks for a warm model when the pointer reaches «Убрать фон»; cheap when warm
+router.post('/remove-background/warm', rateLimit(30, 10 * 60_000), (_req, res) => { warmBackgroundRemoval(); res.status(204).end(); });
 router.post('/gallery', authMiddleware, receive('image', 'images', 10));
 router.post('/audio', receive('audio', 'audio', 1));
 export default router;

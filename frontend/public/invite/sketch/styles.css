@@ -315,6 +315,18 @@ img, svg { display: block; max-width: 100%; }
 .location { padding-top: 18px; padding-bottom: 30px; text-align: center; }
 .location .loc-icon { width: 150px; margin: 0 auto 6px; }
 .location .h-marker { font-size: 46px; margin-bottom: 18px; }
+.location .venue-name {
+  display: table; max-width: 340px; margin: 4px auto 0;
+  font-family: var(--font-title); font-weight: 700; font-size: 32px; line-height: 1.1; color: var(--ink);
+  overflow-wrap: anywhere;
+}
+/* подчёркивание-мазок, как у имён на обложке */
+.location .venue-name::after {
+  content: ''; display: block; height: 3px; margin-top: 2px;
+  background: var(--pink); border-radius: 3px; transform: rotate(-1deg);
+}
+.location .venue-addr { max-width: 340px; margin: 8px auto 0; font-family: var(--font-body); font-size: 15px; line-height: 1.5; color: var(--text); overflow-wrap: anywhere; }
+.location [hidden] { display: none; }
 .location .car { width: 200px; margin: 18px auto 0; }
 
 /* ━━━━━━━━━━━━━━━━━━━━ ПРОГРАММА ДНЯ ━━━━━━━━━━━━━ */

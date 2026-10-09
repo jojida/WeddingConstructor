@@ -8,6 +8,16 @@ import styles from './page.module.css';
 
 export interface PhotoCutout { originalUrl: string; resultUrl: string; }
 
+/* Пока курсор на «Убрать фон», сервер заранее поднимает модель: холодный старт на
+   сервере занимал несколько секунд. Не чаще раза в полторы минуты — сервер держит
+   модель две минуты, а адрес считается в общий лимит загрузок. */
+let warmedAt = 0;
+function warmModel() {
+  if (Date.now() - warmedAt < 90_000) return;
+  warmedAt = Date.now();
+  api.post('/api/upload/remove-background/warm').catch(() => {});
+}
+
 export default function BackgroundRemovalEditor({ src, originalUrl, saved, apiBase, onApply, onRestore }: {
   src: string; originalUrl: string; saved?: PhotoCutout;
   apiBase: string; onApply: (photo: PhotoCutout) => void; onRestore: () => void;
@@ -42,12 +52,26 @@ export default function BackgroundRemovalEditor({ src, originalUrl, saved, apiBa
     const abort = new AbortController();
     controller.current = abort;
     try {
-      const response = await fetch(src, { signal: abort.signal });
-      if (!response.ok) throw new Error('Не удалось загрузить исходное фото.');
-      const image = await response.blob();
-      const form = new FormData();
-      form.append('image', image, 'photo');
-      const output = await api.post<{ url: string }>('/api/upload/remove-background', form, { signal: abort.signal, timeout: 55_000 });
+      const options = { signal: abort.signal, timeout: 55_000 };
+      // Своё фото уже лежит на сервере — передаём адрес, а не скачиваем оригинал
+      // и не загружаем его обратно (на телефоне это было основное ожидание).
+      const uploaded = src.startsWith(apiBase + '/uploads/') ? src.slice(apiBase.length).split(/[?#]/)[0] : '';
+      let output = uploaded
+        ? await api.post<{ url: string }>('/api/upload/remove-background/existing', { source: uploaded }, options)
+          .catch((error: unknown) => {
+            // Старое имя файла или сервер без этого адреса — по-старому, загрузкой файла
+            const status = axios.isAxiosError(error) ? error.response?.status : 0;
+            if (status === 400 || status === 404) return null;
+            throw error;
+          })
+        : null;
+      if (!output) {
+        const response = await fetch(src, { signal: abort.signal });
+        if (!response.ok) throw new Error('Не удалось загрузить исходное фото.');
+        const form = new FormData();
+        form.append('image', await response.blob(), 'photo');
+        output = await api.post<{ url: string }>('/api/upload/remove-background', form, options);
+      }
       if (!abort.signal.aborted) setResult(output.data.url);
     } catch (error) {
       if (!abort.signal.aborted) {
@@ -62,7 +86,7 @@ export default function BackgroundRemovalEditor({ src, originalUrl, saved, apiBa
   return <>
     <div className={styles.cutoutActions}>
       {saved ? <button type="button" onClick={onRestore}>Вернуть оригинал</button>
-        : <button type="button" onClick={start} disabled={!src || busy}>✂ Убрать фон</button>}
+        : <button type="button" onClick={start} disabled={!src || busy} onPointerEnter={warmModel} onFocus={warmModel}>✂ Убрать фон</button>}
     </div>
     {open && createPortal(<div className={styles.cutoutBackdrop} onClick={close}>
       <div ref={dialogRef} className={styles.cutoutDialog} role="dialog" aria-modal="true" aria-labelledby="cutout-title" onClick={event => event.stopPropagation()}>

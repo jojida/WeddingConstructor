@@ -103,7 +103,7 @@ function ManageInviteSession() {
   return (
     <div style={{ minHeight: '100vh', background: '#faf8f5' }}>
       <Navbar />
-      <div style={{ maxWidth: tab === 'seating' ? 1180 : tab === 'menu' || tab === 'print' ? 980 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
+      <div style={{ maxWidth: tab === 'seating' ? 1440 : tab === 'menu' || tab === 'print' ? 980 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>

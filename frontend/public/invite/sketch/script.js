@@ -84,6 +84,30 @@
     }
   }
 
+  // ─── Локация: текст + место + адрес ───────────────
+  // Раньше место было зашито в сам текст. У сохранённых сайтов с этим текстом
+  // и своим местом показываем новый текст — иначе вышло бы два разных места подряд.
+  var LEGACY_LOCATION = 'Праздник пройдёт на базе отдыха «Барвиха»';
+  var LOCATION_TEXT = 'Праздник пройдёт здесь:';
+  function setLine(key, value) {
+    var el = document.querySelector('[data-edit="' + key + '"]');
+    if (!el || typeof value !== 'string') return;   // нет в данных — оставляем как в вёрстке
+    var text = value.trim();
+    el.textContent = text;
+    el.hidden = !text;
+  }
+  function applyLocation(d) {
+    var hasVenue = typeof d.venue === 'string' && !!d.venue.trim();
+    var text = d.locationText;
+    if (text === LEGACY_LOCATION) {
+      if (hasVenue) text = LOCATION_TEXT;
+      else if (typeof d.venue === 'string') d = Object.assign({}, d, { venue: '' });   // старый вид: место уже в тексте
+    }
+    setRichText('locationText', text);
+    setLine('venue', d.venue);
+    setLine('venueAddress', d.venueAddress);
+  }
+
   // ─── Цвета плашек на обложке (пятна за фото и подписи) ──
   // Темы описаны в styles.css (.polaroids[data-theme]); не задана или неизвестна — «Яркая»
   var PLAQUE_THEMES = ['bright', 'sunset', 'mint', 'soft'];
@@ -324,7 +348,7 @@
 
     setRichText('guestsTitle', d.guestsTitle);
     setRichText('inviteText', d.inviteText);
-    setRichText('locationText', d.locationText);
+    applyLocation(d);
     setRichText('dressText', d.dressText);
     setRichText('surveyText', d.surveyText);
     setRichText('wishesText', d.wishesText);

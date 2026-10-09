@@ -69,6 +69,7 @@ export default function SketchTemplate({ data, apiBase, fullPage, slug, editing 
           inviteText: d.inviteText,
           dressCodeColors: d.dressCodeColors,
           dressCodePhoto: d.dressCodePhoto,
+          venue: d.venue,
           venueAddress: d.venueAddress,
           mapLink: d.mapLink,
           musicUrl: d.musicUrl,

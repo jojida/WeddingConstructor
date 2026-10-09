@@ -3,7 +3,7 @@ import { useMemo, useRef, useState, type MutableRefObject } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import {
-  DEFAULT_FILTERS, errorText, indexSnapshot, peopleText, plural, tableTitle, type PlannerPerson, type PlannerSnapshot, type PlannerTable,
+  DEFAULT_FILTERS, errorText, indexSnapshot, nextTableName, peopleText, plural, tableTitle, type PlannerPerson, type PlannerSnapshot, type PlannerTable,
   type PoolFilters, type SnapshotIndex,
 } from '@/lib/planner';
 import type { PlannerCtl } from './usePlanner';
@@ -20,6 +20,7 @@ export interface BoardCtl {
   pick(ids: string[], title: string): void;
   unseat(ids: string[]): void;
   editTable(t: PlannerTable): void;
+  deleteTable(t: PlannerTable): void;
   fillTable(t: PlannerTable): void;
   patchPerson(id: string, patch: Record<string, unknown>): Promise<void>;
   addPerson(partyKey: string, name: string): Promise<void>;
@@ -53,6 +54,7 @@ export default function SeatingBoard({ planner, snap }: { planner: PlannerCtl; s
     pick: (ids, title) => setDialog({ kind: 'seat', ids, title }),
     unseat: (ids) => { void seat(ids, null); },
     editTable: (table) => setDialog({ kind: 'table', table }),
+    deleteTable: (table) => setDialog({ kind: 'deleteTable', table }),
     fillTable: (table) => setDialog({ kind: 'fill', tableId: table.id }),
     patchPerson: async (id, patch) => { await act('put', `/persons/${id}`, patch); },
     addPerson: async (partyKey, name) => { await act('post', '/persons', { partyKey, name }); },
@@ -108,6 +110,12 @@ export default function SeatingBoard({ planner, snap }: { planner: PlannerCtl; s
     { label: 'Посажено', num: seated, note: toSeat ? `из ${toSeat}` : undefined, onClick: () => setPane('tables') },
     { label: 'Без стола', num: sm.unseated.count, onClick: () => showStatus('all', true), active: filters.status === 'all' && filters.unseatedOnly },
   ];
+
+  // «Добавить стол» — сразу, без окна: следующий номер, столько же мест, как у последнего.
+  // Название и места потом меняются карандашом на карточке.
+  const latest = [...snap.tables].sort((a, b) => b.sort - a.sort)[0];
+  const addTable = () => act('post', '/tables', { name: nextTableName(snap.tables), capacity: latest?.capacity ?? 8, shape: latest?.shape ?? 'round' });
+  const canAdd = snap.tables.length < snap.limits.tables;
 
   const dlg = dialog;
   const fillTable = dlg?.kind === 'fill' ? index.tableById.get(dlg.tableId) : undefined;
@@ -218,13 +226,20 @@ export default function SeatingBoard({ planner, snap }: { planner: PlannerCtl; s
         </section>
         <section className={`${styles.pane} ${pane !== 'tables' ? styles.paneOff : ''}`} aria-label="Столы">
           <h3 className={styles.paneTitle}>Столы <span className={styles.paneHint}>{snap.tables.length} {plural(snap.tables.length, 'стол', 'стола', 'столов')}</span></h3>
-          {index.tables.length === 0 ? (
-            <p className={styles.note}>Столов пока нет. Нажмите «+ Стол» или «Столы пачкой».</p>
-          ) : (
-            <div className={styles.tables}>
-              {index.tables.map((t) => <TableCard key={t.id} table={t} people={seatedBy.get(t.id) ?? []} index={index} ctl={ctl} />)}
-            </div>
-          )}
+          <p className={styles.planHint}>
+            Нажмите на <b>свободное место</b>, чтобы посадить гостя, или перетащите гостя из списка на стол.
+            Нажмите на гостя за столом, чтобы пересадить его.
+          </p>
+          <div className={styles.tables}>
+            {index.tables.map((t) => <TableCard key={t.id} table={t} people={seatedBy.get(t.id) ?? []} index={index} ctl={ctl} />)}
+            {canAdd && (
+              <button type="button" className={styles.addTile} onClick={() => { void addTable(); }} disabled={planner.pending > 0}>
+                <span className={styles.addPlus} aria-hidden>+</span>
+                Добавить стол
+                <span className={styles.addTileHint}>{latest ? `на ${latest.capacity} ${plural(latest.capacity, 'место', 'места', 'мест')}, как предыдущий` : 'круглый, на 8 мест'}</span>
+              </button>
+            )}
+          </div>
         </section>
       </div>
 

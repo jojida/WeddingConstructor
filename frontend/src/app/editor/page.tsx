@@ -10,6 +10,7 @@ import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
 import { isPlanSectionLocked } from '@/lib/plans';
 import { isSectionEnabled } from '@/lib/section-visibility';
 import { withSketchDemoPhotos } from '@/lib/sketch-demo-photos';
+import { withSketchLocation } from '@/lib/sketch-location';
 import { useAuthStore } from '@/store/auth';
 import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
@@ -386,8 +387,15 @@ function EditorContent() {
   }, []);
 
   // ── Load draft ──────────────────────────────────────────────────────────────
+  // Один раз на пользователя: повторный запуск (новый объект user после повторного
+  // /auth/me, двойной эффект в dev, возврат из «Имена и дата») создавал второй черновик
+  // и затирал данные первого шага и несохранённые правки ответом сервера.
+  const draftLoadedFor = useRef<string | null>(null);
   useEffect(() => {
     if (step !== 'editor' || authLoading || (idFromUrl && !user)) return;
+    const loadKey = user?.id ?? 'guest';
+    if (draftLoadedFor.current === loadKey) return;
+    draftLoadedFor.current = loadKey;
     const setup = pendingSetupRef.current;
     pendingSetupRef.current = null;
 
@@ -445,6 +453,8 @@ function EditorContent() {
       // возвращается. Опубликованным сайтам музыку сами не добавляем.
       const published = prev.status === 'paid' || prev.status === 'published';
       const cd = prev.templateId === 'sketch' && !published ? withSketchDemoPhotos(currentCd) : currentCd;
+      // «Скетч»: место из первого шага — в поле «Место проведения», а не внутри текста
+      const fixLocation = (d: InviteData) => (prev.templateId === 'sketch' && !published ? withSketchLocation(d) : d);
       const seedMusic = () => prev.musicUrl || (published ? '' : templateMusic(prev.templateId));
       if (cd.__seededTemplate === prev.templateId) {
         let next = cd === currentCd ? prev : { ...prev, customData: cd };
@@ -457,7 +467,7 @@ function EditorContent() {
         if (!cd.__musicSeeded) {
           next = { ...next, musicUrl: seedMusic(), customData: { ...cd, __musicSeeded: true } };
         }
-        return next;
+        return fixLocation(next);
       }
       // wasOther — данные пришли от ДРУГОГО шаблона → сбрасываем на дефолты текущего
       const wasOther = !!cd.__seededTemplate && cd.__seededTemplate !== prev.templateId;
@@ -485,7 +495,7 @@ function EditorContent() {
       const musicUrl = !cd.__musicSeeded ? seedMusic()
         : (wasOther && prev.musicUrl === templateMusic(cd.__seededTemplate)) ? templateMusic(prev.templateId)
           : prev.musicUrl;
-      return {
+      return fixLocation({
         ...prev,
         musicUrl,
         inviteText: (!wasOther && prev.inviteText && prev.inviteText !== EMPTY.inviteText)
@@ -499,7 +509,7 @@ function EditorContent() {
           ? (defs.dressCodePhoto ?? prev.dressCodePhoto)
           : (prev.dressCodePhoto || defs.dressCodePhoto || prev.dressCodePhoto),
         customData: seededCustom,
-      };
+      });
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, data.templateId, data.id]);
@@ -1434,13 +1444,14 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon }: {
                 ))}
               </div>
             )}
-            <div style={{ display: 'grid', gridTemplateColumns: icons.length > 0 || noIcon ? '78px 1fr auto' : '78px 44px 1fr auto', gap: 6, alignItems: 'center' }}>
+            {/* Название — отдельной строкой во всю ширину: в одной строке со временем и
+                кнопками в узкой панели от него оставалось «Сбор гос…» */}
+            <div style={{ display: 'grid', gridTemplateColumns: icons.length > 0 || noIcon ? '96px 1fr' : '96px 44px 1fr', gap: 6, alignItems: 'center' }}>
               <input className="input-field" type="time" style={{ padding: '6px 4px', fontSize: 12, textAlign: 'center' }} value={item.time} onChange={e => update(i, { time: e.target.value })} />
               {icons.length === 0 && !noIcon && (
                 <input className="input-field" style={{ padding: '6px 2px', fontSize: 16, textAlign: 'center' }} placeholder="✦" value={item.icon} onChange={e => update(i, { icon: e.target.value })} title="Эмодзи (необязательно)" />
               )}
-              <input className="input-field" style={{ padding: '6px 8px', fontSize: 12 }} placeholder="Событие" value={item.title} onChange={e => update(i, { title: e.target.value })} />
-              <div style={{ display: 'flex', gap: 2 }}>
+              <div style={{ display: 'flex', gap: 2, justifySelf: 'end' }}>
                 <button type="button" onClick={() => move(i, -1)} disabled={i === 0} style={iconBtn(i === 0)}>↑</button>
                 <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} style={iconBtn(i === items.length - 1)}>↓</button>
                 <button type="button" onClick={() => remove(i)} disabled={lastOne}
@@ -1448,6 +1459,8 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon }: {
                   style={{ ...iconBtn(lastOne), color: lastOne ? '#ccc' : '#e74c3c' }}>×</button>
               </div>
             </div>
+            <input className="input-field" style={{ marginTop: 6, padding: '7px 10px', fontSize: 13 }} placeholder="Событие, например «Сбор гостей»"
+              value={item.title} onChange={e => update(i, { title: e.target.value })} aria-label="Название пункта" />
             {withDesc && (
               <textarea className="input-field" rows={2} placeholder="Описание (необязательно)" style={{ marginTop: 6, fontSize: 12 }}
                 value={item.desc || ''} onChange={e => update(i, { desc: e.target.value })} />

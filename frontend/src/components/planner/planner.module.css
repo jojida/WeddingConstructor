@@ -91,7 +91,7 @@
 .switchOn { background: #36454f; border-color: #36454f; color: #fff; }
 .switchOn:hover { background: #2b3841; border-color: #2b3841; }
 
-.board { display: grid; grid-template-columns: minmax(330px, 440px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.board { display: grid; grid-template-columns: minmax(300px, 400px) minmax(0, 1fr); gap: 18px; align-items: start; }
 .pane { min-width: 0; }
 .paneTitle { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 8px; font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .paneHint { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 12px; }
@@ -145,7 +145,7 @@
 .hidden summary { cursor: pointer; }
 
 /* ── Столы ───────────────────────────────────────────────────────────────── */
-.tables { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.tables { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr)); gap: 16px; }
 .tableCard { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .tableOver { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(104, 93, 74, 0.2); }
 .tableFull { background: #fbfaf7; }
@@ -153,8 +153,6 @@
 .tableName { font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
 .tableCount { font-size: 12px; color: var(--muted); }
 .tableCountFull { color: var(--yes); font-weight: 700; }
-.tableMid { display: flex; gap: 10px; align-items: center; }
-.diagram { flex: 0 0 auto; }
 .bar { flex: 1; height: 6px; border-radius: 99px; background: var(--soft); overflow: hidden; }
 .barFill { height: 100%; background: var(--accent); border-radius: 99px; }
 .seated { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
@@ -163,7 +161,59 @@
 .seatedName { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 13px; }
 .seatedSub { display: block; font-size: 11px; color: var(--muted); }
 .emptyTable { font-size: 12px; color: var(--muted); padding: 6px 0; }
-.tableFoot { display: flex; gap: 6px; flex-wrap: wrap; }
+.tableFoot { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tableTools { display: flex; gap: 2px; flex: 0 0 auto; }
+.iconDanger:hover { background: #fbeeee; color: var(--no); }
+.planHint { margin: -2px 0 12px; font-size: 13px; color: var(--muted); }
+.planHint b { color: var(--ink); font-weight: 600; }
+
+/* Схема стола: стол в центре, вокруг — таблички мест. Размеры заданы в cqw от ширины
+   схемы (TableCard.tsx), поэтому она целиком масштабируется под карточку. */
+.plan { position: relative; width: 100%; margin: 2px auto 4px; container-type: inline-size; }
+.planTable {
+  position: absolute; transform: translate(-50%, -50%); padding: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; font: inherit; color: var(--ink); cursor: pointer;
+  background: radial-gradient(circle at 50% 38%, #fffdf9, #f1ebe2); border: 1.5px solid #d9cfc0;
+  box-shadow: inset 0 0 0 0.6em rgba(255, 255, 255, 0.75), 0 3px 12px rgba(14, 29, 38, 0.08);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.planTable:hover { border-color: var(--accent); box-shadow: inset 0 0 0 0.6em rgba(255, 255, 255, 0.75), 0 3px 14px rgba(104, 93, 74, 0.2); }
+.planTableName { max-width: 84%; font-family: var(--font-playfair, Georgia), serif; font-weight: 700; line-height: 1.1; overflow-wrap: anywhere; }
+.planTableCount { margin-top: 0.25em; color: var(--muted); font-weight: 600; }
+.seat {
+  position: absolute; display: flex; align-items: center; gap: 0.4em; padding: 0 0.7em 0 0.22em;
+  border: 1px solid #d9cfc0; border-radius: 999px; background: #fff; color: var(--ink); font-family: inherit;
+  line-height: 1.12; text-align: left; cursor: pointer; box-shadow: 0 1px 4px rgba(14, 29, 38, 0.1);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.seat:hover, .seat:focus-visible { border-color: var(--accent); box-shadow: 0 2px 8px rgba(104, 93, 74, 0.25); z-index: 2; outline: none; }
+.seat[draggable='true'] { cursor: grab; }
+.seatFlip { flex-direction: row-reverse; padding: 0 0.22em 0 0.7em; text-align: right; }
+.seatNum {
+  flex: 0 0 auto; width: 2em; height: 2em; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; font-size: 0.95em; line-height: 1;
+}
+.seatName {
+  flex: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  font-weight: 600; overflow-wrap: anywhere;
+}
+.seatEmpty { border-style: dashed; border-color: #cfc4b3; background: rgba(255, 255, 255, 0.6); color: var(--muted); box-shadow: none; }
+.seatEmpty .seatNum { color: var(--muted); border: 1px dashed #cfc4b3; background: #fff; }
+.seatEmpty .seatName { font-weight: 400; }
+.seatEmpty:hover { background: #fff; color: var(--accent); }
+
+.addTile {
+  min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  border: 2px dashed var(--line); border-radius: 14px; background: transparent; color: var(--accent);
+  font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; transition: border-color 0.15s, background 0.15s;
+}
+.addTile:hover:not(:disabled) { border-color: var(--accent); background: var(--card); }
+.addTile:disabled { opacity: 0.5; cursor: progress; }
+.addPlus {
+  width: 72px; height: 72px; margin-bottom: 4px; border: 2px dashed currentColor; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 38px; font-weight: 300; line-height: 1;
+}
+.addTileHint { font-size: 12px; font-weight: 400; color: var(--muted); }
 
 /* ── Меню ────────────────────────────────────────────────────────────────── */
 .panel { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 14px 16px; margin-bottom: 14px; }
@@ -249,6 +299,7 @@
   .switch { display: flex; }
   .paneOff { display: none; }
   .tables { grid-template-columns: minmax(0, 1fr); }
+  .addTile { min-height: 140px; }
 }
 @media (max-width: 599px) {
   .paneHint { display: none; }

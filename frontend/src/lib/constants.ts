@@ -1,6 +1,7 @@
 /** Публичный адрес сайта (канонические URL, sitemap, OG). */
 import { STUDIO_TEMPLATES } from './studioTemplates';
 import { SKETCH_DEMO_DEFAULTS } from './sketch-demo-photos';
+import { SKETCH_DEMO_VENUE, SKETCH_LOCATION_TEXT } from './sketch-location';
 
 export const SITE_URL = 'https://weddingcraft.ru';
 
@@ -1333,8 +1334,9 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Локация', icon: '📍',
       fields: [
-        { id: 'locationText', type: 'textarea', label: 'Текст локации', hint: 'Например: Праздник пройдёт на базе отдыха «Барвиха»', scope: 'custom' },
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: База отдыха «Барвиха»', scope: 'data', maxLength: 50 },
         MAP_ADDRESS, MAP_LINK,
+        { id: 'locationText', type: 'textarea', label: 'Текст над местом', hint: 'Например: Праздник пройдёт здесь:', scope: 'custom', maxLength: 120 },
       ],
     },
     {
@@ -1969,6 +1971,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
   sketch: {
     inviteText:
       'Мы женимся! Будут объятия, тосты и танцы. Не хватает только вас.',
+    venue: SKETCH_DEMO_VENUE,
     schedule: [
       { time: '15:30', title: 'Сбор гостей', icon: '/invite/sketch/assets/glasses-cheers.svg' },
       { time: '16:00', title: 'Церемония', icon: '/invite/sketch/assets/rings.svg' },
@@ -1986,7 +1989,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       guestsTitle:  'Дорогие гости',
-      locationText: 'Праздник пройдёт на базе отдыха «Барвиха»',
+      locationText: SKETCH_LOCATION_TEXT,
       dressText:    'Смело выбирайте оттенки нашей палитры — от нежных до ярких.',
       surveyText:   'Подтвердите участие и выберите напитки до {{rsvpDate}}.',
       wishesText:   'Приносите тёплые слова и хорошее настроение — остальное мы подготовим.',
