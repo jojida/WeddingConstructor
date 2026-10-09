@@ -8,8 +8,10 @@ import styles from './FeatureDemo.module.css';
    видео): чёткие на любом экране и почти ничего не весят.
 
    Сцена рисуется на холсте 640×440 и масштабируется под ширину блока.
-   Вкладки переключаются сами; пока блок не на экране — всё стоит. При
-   «уменьшении движения» каждая сцена сразу показывает итоговый кадр. */
+   Шаги меняются прокруткой: слева список шагов, по центру сцена стоит на
+   месте (sticky), справа прокручиваются пункты — какой пересекает середину
+   экрана, тот и активен, его сцена проигрывается. Пока блок не на экране —
+   всё стоит. При «уменьшении движения» сцена сразу показывает итоговый кадр. */
 
 const W = 640, H = 440;
 const IMG = '/landing/demo';
@@ -366,7 +368,7 @@ function Phone({ left, top, width, light, hiddenUntil, children }: {
   );
 }
 
-// ─── Вкладки ─────────────────────────────────────────────────────────────
+// ─── Шаги ─────────────────────────────────────────────────────────────
 const SCENES = [
   { tab: 'Редактор', lead: 'Редактор без регистрации.', text: 'Меняйте имена, дату, фото и музыку — приглашение обновляется на глазах.', plan: '', ms: 8200, Scene: EditorScene },
   { tab: 'Анкета гостя', lead: 'Гости отвечают за минуту.', text: 'Придут ли, сколько их, что будут пить — без приложений и звонков.', plan: 'Премиум', ms: 7400, Scene: RsvpScene },
@@ -377,18 +379,17 @@ const SCENES = [
 
 export default function FeatureDemo() {
   const [tab, setTab] = useState(0);
-  const [cycle, setCycle] = useState(0);
   const [inView, setInView] = useState(false);
   const [still, setStill] = useState(false);
   const [scale, setScale] = useState(1);
   const [viewW, setViewW] = useState(W);
-  const tabsRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
+  const blockRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     setStill(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.3 });
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.05 });
     if (sectionRef.current) io.observe(sectionRef.current);
     const el = viewRef.current;
     const ro = new ResizeObserver(() => { if (el) { setScale(Math.min(1.3, el.clientWidth / W)); setViewW(el.clientWidth); } });
@@ -396,24 +397,28 @@ export default function FeatureDemo() {
     return () => { io.disconnect(); ro.disconnect(); };
   }, []);
 
-  // Автопереключение вкладок, пока блок на экране.
+  // Шаг меняется прокруткой: активен пункт, который пересекает середину экрана.
   useEffect(() => {
-    if (!inView || still) return;
-    const t = setTimeout(() => { setTab(i => (i + 1) % SCENES.length); setCycle(c => c + 1); }, SCENES[tab].ms);
-    return () => clearTimeout(t);
-  }, [tab, cycle, inView, still]);
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (!e.isIntersecting) return;
+        const i = blockRefs.current.indexOf(e.target as HTMLElement);
+        if (i >= 0) setTab(i);
+      });
+    // на телефоне верх экрана занимает липкая сцена — линия ниже неё
+    }, { rootMargin: window.matchMedia('(max-width: 900px)').matches ? '-66% 0px -34% 0px' : '-50% 0px -50% 0px' });
+    blockRefs.current.forEach(b => b && io.observe(b));
+    return () => io.disconnect();
+  }, []);
 
-  // На телефоне лента вкладок листается к активной — без прыжка страницы.
-  useEffect(() => {
-    const strip = tabsRef.current;
-    const btn = strip?.children[tab] as HTMLElement | undefined;
-    if (!strip || !btn || strip.scrollWidth <= strip.clientWidth) return;
-    strip.scrollTo({ left: btn.offsetLeft - 20, behavior: 'smooth' });
-  }, [tab]);
-
-  const pick = (i: number) => { setTab(i); setCycle(c => c + 1); };
-  const cur = SCENES[tab];
-  const Scene = cur.Scene;
+  // Клик по шагу слева — прокрутить к его пункту (сцена сменится сама).
+  const go = (i: number) => {
+    const b = blockRefs.current[i];
+    if (!b) return;
+    const r = b.getBoundingClientRect();
+    window.scrollTo({ top: window.scrollY + r.top + r.height / 2 - window.innerHeight / 2, behavior: still ? 'auto' : 'smooth' });
+  };
+  const Scene = SCENES[tab].Scene;
 
   return (
     <section id="how" ref={sectionRef} className={styles.section}>
@@ -423,37 +428,36 @@ export default function FeatureDemo() {
           <h2 className={styles.title}>Всё для приглашения — <em>в одном сервисе</em></h2>
         </div>
 
-        <div className={styles.tabs} ref={tabsRef} role="tablist" aria-label="Возможности WeddingCraft">
-          {SCENES.map((sc, i) => (
-            <button
-              key={sc.tab}
-              role="tab"
-              aria-selected={i === tab}
-              className={`${styles.tab} ${i === tab ? styles.tabOn : ''}`}
-              onClick={() => pick(i)}
-            >
-              <span className={styles.tabNum}>0{i + 1}</span>
-              <span className={styles.tabName}>{sc.tab}</span>
-              <span className={styles.tabBar}>
-                {i === tab && !still && (
-                  <i key={cycle} style={{ animationDuration: `${sc.ms}ms`, animationPlayState: inView ? 'running' : 'paused' }} />
-                )}
-              </span>
-            </button>
-          ))}
-        </div>
+        <div className={styles.scroller}>
+          <nav className={styles.steps} aria-label="Возможности WeddingCraft">
+            {SCENES.map((sc, i) => (
+              <button key={sc.tab} type="button" aria-current={i === tab ? 'step' : undefined}
+                className={`${styles.step} ${i === tab ? styles.stepOn : ''}`} onClick={() => go(i)}>
+                <span className={styles.stepNum}>0{i + 1}</span>
+                <span className={styles.stepName}>{sc.tab}</span>
+              </button>
+            ))}
+          </nav>
 
-        <div className={styles.body}>
-          <div className={styles.copy} role="tabpanel" aria-live="polite">
-            <p className={styles.copyText}><b>{cur.lead}</b> {cur.text}</p>
-            {cur.plan && <span className={styles.plan}>Тариф «{cur.plan}»</span>}
-            <Link href="/templates" className={styles.cta}>Попробовать бесплатно</Link>
+          <div className={styles.stage} aria-hidden="true">
+            <div className={styles.view} ref={viewRef} style={{ height: H * scale }}>
+              <div className={styles.canvas} style={{ width: W, height: H, left: Math.max(0, (viewW - W * scale) / 2), transform: `scale(${scale})` }}>
+                <Scene key={tab} play={inView} still={still} />
+              </div>
+            </div>
           </div>
 
-          <div className={styles.view} ref={viewRef} style={{ height: H * scale }} aria-hidden="true">
-            <div className={styles.canvas} style={{ width: W, height: H, left: Math.max(0, (viewW - W * scale) / 2), transform: `scale(${scale})` }}>
-              <Scene key={`${tab}-${cycle}`} play={inView} still={still} />
-            </div>
+          <div className={styles.blocks}>
+            {SCENES.map((sc, i) => (
+              <article key={sc.tab} ref={el => { blockRefs.current[i] = el; }}
+                className={`${styles.block} ${i === tab ? styles.blockOn : ''}`}>
+                <span className={styles.blockNum}>0{i + 1}</span>
+                <h3 className={styles.blockTitle}>{sc.lead}</h3>
+                <p className={styles.copyText}>{sc.text}</p>
+                {sc.plan && <span className={styles.plan}>Тариф «{sc.plan}»</span>}
+                {i === SCENES.length - 1 && <Link href="/templates" className={styles.cta}>Попробовать бесплатно</Link>}
+              </article>
+            ))}
           </div>
         </div>
       </div>

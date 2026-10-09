@@ -7,7 +7,8 @@
     radial-gradient(40% 40% at 10% 90%, rgba(201, 169, 110, 0.08), rgba(201, 169, 110, 0) 70%),
     #1d1b18;
   color: #f3eee6;
-  overflow: hidden;
+  /* clip, а не hidden: hidden делает блок прокручиваемым, и sticky внутри не липнет */
+  overflow: clip;
   scroll-margin-top: 60px;
 }
 .inner { max-width: 1280px; margin: 0 auto; padding: 0 80px; }
@@ -24,52 +25,53 @@
 }
 .title em { font-style: italic; color: #e2c992; }
 
-/* ── Вкладки ────────────────────────────────────────────────────────────── */
-.tabs {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+/* ── Шаги по прокрутке: шаги и сцена стоят, пункты справа листаются ───── */
+.scroller {
+  display: grid; grid-template-columns: 170px minmax(0, 1fr) 340px;
+  gap: 48px; align-items: start;
+}
+.steps {
+  position: sticky; top: calc(50vh - 90px);
+  display: flex; flex-direction: column;
+}
+.step {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 12px 0; background: none; border: none; cursor: pointer; text-align: left;
   border-bottom: 1px solid rgba(243, 238, 230, 0.1);
-  margin-bottom: 48px;
+  color: rgba(243, 238, 230, 0.4); font-family: var(--font-inter);
+  transition: color .3s;
 }
-.tab {
-  position: relative; display: flex; align-items: baseline; gap: 10px;
-  padding: 14px 6px 18px; background: none; border: none; cursor: pointer;
-  color: rgba(243, 238, 230, 0.45); text-align: left;
-  font-family: var(--font-inter); transition: color .25s;
-}
-.tab:hover { color: rgba(243, 238, 230, 0.8); }
-.tabOn { color: #f7f2ea; }
-.tabNum { font-size: 11px; letter-spacing: .08em; color: #c9a96e; opacity: .8; }
-.tabName { font-size: 15px; font-weight: 500; }
-.tabBar {
-  position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
-  background: transparent; overflow: hidden;
-}
-.tabOn .tabBar { background: rgba(243, 238, 230, 0.12); }
-.tabBar i {
-  display: block; height: 100%; width: 100%;
-  background: #c9a96e; transform-origin: left;
-  animation: progress linear both;
-}
-@keyframes progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.step:hover { color: rgba(243, 238, 230, 0.75); }
+.stepOn { color: #f7f2ea; }
+.stepNum { font-size: 11px; letter-spacing: .08em; color: #c9a96e; opacity: .55; transition: opacity .3s; }
+.stepOn .stepNum { opacity: 1; }
+.stepName { font-size: 14px; font-weight: 500; }
 
-/* ── Текст + сцена ──────────────────────────────────────────────────────── */
-.body {
-  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
-  gap: 56px; align-items: center;
+.stage { position: sticky; top: calc(50vh - 200px); }
+
+.blocks { padding: 18vh 0 22vh; }
+.block {
+  min-height: 62vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 14px;
+  opacity: .28; transition: opacity .5s ease;
 }
-.copy { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.blockOn { opacity: 1; }
+.blockNum { font-family: var(--font-playfair); font-size: 20px; color: #c9a96e; }
+.blockTitle {
+  margin: 0; font-family: var(--font-playfair); font-weight: 400; font-style: italic;
+  font-size: 34px; line-height: 1.15; color: #f7f2ea;
+}
 .copyText {
-  margin: 0; font-family: var(--font-inter); font-size: 18px; line-height: 1.65;
+  margin: 0; font-family: var(--font-inter); font-size: 17px; line-height: 1.65;
   color: rgba(243, 238, 230, 0.72);
 }
-.copyText b { color: #f7f2ea; font-weight: 600; }
 .plan {
   font-family: var(--font-inter); font-size: 12px; letter-spacing: .04em;
   color: #e2c992; border: 1px solid rgba(201, 169, 110, 0.45);
   padding: 5px 12px; border-radius: 999px;
 }
 .cta {
-  margin-top: 8px; padding: 15px 34px; border-radius: 999px;
+  margin-top: 10px; padding: 15px 34px; border-radius: 999px;
   background: #f3eee6; color: #1d1b18; text-decoration: none;
   font-family: var(--font-inter); font-size: 12px; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase;
@@ -273,30 +275,28 @@
 .letterDate { font-size: 11px; letter-spacing: .14em; color: #8a8378; }
 
 /* ── Адаптив ────────────────────────────────────────────────────────────── */
-@media (max-width: 1024px) {
+@media (max-width: 1180px) {
   .inner { padding: 0 40px; }
-  .body { grid-template-columns: 1fr; gap: 28px; }
-  .copy { order: 2; align-items: center; text-align: center; }
-  .view { order: 1; max-width: 640px; margin: 0 auto; }
+  .scroller { grid-template-columns: 150px minmax(0, 1fr) 300px; gap: 32px; }
+  .blockTitle { font-size: 30px; }
 }
-@media (max-width: 768px) {
-  .section { padding: 64px 0 72px; }
+/* Планшет и телефон: сцена липнет под шапкой, пункты листаются под ней */
+@media (max-width: 900px) {
+  .section { padding: 64px 0 40px; }
   .inner { padding: 0 20px; }
   .title { font-size: 30px; }
   .head { margin-bottom: 24px; }
-  .tabs {
-    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-    margin: 0 -20px 28px; padding: 0 20px; border-bottom: none;
-    scroll-snap-type: x mandatory;
+  .scroller { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .steps { display: none; }
+  .stage {
+    top: 64px; z-index: 2;
+    max-width: 640px; width: 100%; margin: 0 auto;
+    padding: 12px 0 16px;
+    background: linear-gradient(#1d1b18 88%, rgba(29, 27, 24, 0));
   }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    flex: 0 0 auto; scroll-snap-align: start;
-    padding: 9px 14px 11px; border-radius: 999px; border: 1px solid rgba(243, 238, 230, 0.16);
-  }
-  .tabOn { border-color: rgba(201, 169, 110, 0.7); background: rgba(201, 169, 110, 0.12); }
-  .tabName { font-size: 13px; }
-  .tabBar { left: 14px; right: 14px; bottom: 4px; border-radius: 2px; }
+  .blocks { padding: 4vh 0 10vh; }
+  .block { min-height: 52vh; align-items: center; text-align: center; }
+  .blockTitle { font-size: 26px; }
   .copyText { font-size: 16px; }
 }
 
