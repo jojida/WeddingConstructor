@@ -26,10 +26,17 @@
 .title em { font-style: italic; color: #e2c992; }
 
 /* ── Вкладки ────────────────────────────────────────────────────────────── */
+/* вкладки прилипают под шапкой сайта и подсвечивают пункт в фокусе */
+.tabsWrap {
+  position: sticky; top: var(--hdr, 64px); z-index: 3;
+  background: #1d1b18;
+  /* фон полосы — во всю ширину экрана, а не колонки */
+  box-shadow: 0 0 0 100vmax #1d1b18;
+  clip-path: inset(0 -100vmax);
+}
 .tabs {
   display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
   border-bottom: 1px solid rgba(243, 238, 230, 0.1);
-  margin-bottom: 48px;
 }
 .tab {
   position: relative; display: flex; align-items: baseline; gap: 10px;
@@ -46,35 +53,38 @@
   background: transparent; overflow: hidden;
 }
 .tabOn .tabBar { background: rgba(243, 238, 230, 0.12); }
+/* полоска — сколько пункта уже пролистано */
 .tabBar i {
   display: block; height: 100%; width: 100%;
   background: #c9a96e; transform-origin: left;
-  animation: progress linear both;
+  transition: transform .12s linear;
 }
-@keyframes progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-.tabBar i.tabBarScroll { animation: none; transition: transform .12s linear; }
-
-/* ── Закрепление: блок стоит, прокрутка листает вкладки (как у Seatory) ── */
-.track { position: relative; }
-.pinOn { position: sticky; }
-/* смена вкладки: сцена проступает из размытия, текст — проявляется */
-.sceneIn { animation: sceneIn .6s cubic-bezier(.2, .7, .2, 1) both; }
-@keyframes sceneIn { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: none; } }
-.swapIn { animation: swapIn .45s ease both; }
-@keyframes swapIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-/* ── Текст + сцена ──────────────────────────────────────────────────────── */
-.body {
-  display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
-  gap: 56px; align-items: center;
+/* ── Пункты слева листаются, сцена справа стоит (как у Seatory) ─────────── */
+.scroller {
+  display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.35fr);
+  gap: 56px; align-items: start;
 }
-.copy { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
+.blocks { padding: 4vh 0 10vh; }
+.block {
+  min-height: 74vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 18px;
+}
+.blockTitle {
+  margin: 0; font-family: var(--font-playfair); font-weight: 400;
+  font-size: 42px; line-height: 1.06; color: #f7f2ea;
+}
+.blockTitle em { font-style: italic; color: #e2c992; }
 .copyText {
-  margin: 0; font-family: var(--font-inter); font-size: 18px; line-height: 1.65;
-  color: rgba(243, 238, 230, 0.72);
+  margin: 0; max-width: 515px; font-family: var(--font-inter); font-size: 17px; line-height: 1.625;
+  color: rgba(243, 238, 230, 0.75);
 }
-.copyText b { color: #f7f2ea; font-weight: 600; }
+.stage { position: sticky; }
+/* смена пункта: уходящая сцена растворяется в размытии, новая проступает из него */
+.sceneIn { animation: sceneIn .6s cubic-bezier(.2, .7, .2, 1) both; }
+.sceneOut { animation: sceneOut .55s ease both; pointer-events: none; }
+@keyframes sceneIn { from { opacity: 0; filter: blur(14px); } to { opacity: 1; filter: none; } }
+@keyframes sceneOut { from { opacity: 1; filter: none; } to { opacity: 0; filter: blur(14px); } }
 .plan {
   font-family: var(--font-inter); font-size: 12px; letter-spacing: .04em;
   color: #e2c992; border: 1px solid rgba(201, 169, 110, 0.45);
@@ -287,18 +297,31 @@
 /* ── Адаптив ────────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .inner { padding: 0 40px; }
-  .body { grid-template-columns: 1fr; gap: 28px; }
-  .copy { order: 2; align-items: center; text-align: center; }
-  .view { order: 1; max-width: 640px; margin: 0 auto; }
+  .scroller { gap: 32px; }
+  .blockTitle { font-size: 36px; }
+}
+/* Планшет и телефон: прилипают вкладки и сцена под ними, пункты листаются ниже */
+@media (max-width: 900px) {
+  .scroller { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .stage {
+    order: -1; z-index: 2;
+    padding: 12px 0 18px;
+    background: linear-gradient(#1d1b18 86%, rgba(29, 27, 24, 0));
+  }
+  .view { max-width: 640px; margin: 0 auto; }
+  .blocks { padding: 2vh 0 8vh; }
+  .block { min-height: 0; padding: 36px 0 44px; justify-content: flex-start; align-items: center; text-align: center; }
+  .copyText { margin: 0 auto; }
 }
 @media (max-width: 768px) {
   .section { padding: 64px 0 72px; }
   .inner { padding: 0 20px; }
   .title { font-size: 30px; }
   .head { margin-bottom: 24px; }
+  .tabsWrap { margin: 0 -20px; padding: 8px 0; }
   .tabs {
     display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-    margin: 0 -20px 28px; padding: 0 20px; border-bottom: none;
+    padding: 0 20px; border-bottom: none;
     scroll-snap-type: x mandatory;
   }
   .tabs::-webkit-scrollbar { display: none; }
@@ -309,6 +332,7 @@
   .tabOn { border-color: rgba(201, 169, 110, 0.7); background: rgba(201, 169, 110, 0.12); }
   .tabName { font-size: 13px; }
   .tabBar { left: 14px; right: 14px; bottom: 4px; border-radius: 2px; }
+  .blockTitle { font-size: 30px; }
   .copyText { font-size: 16px; }
 }
 

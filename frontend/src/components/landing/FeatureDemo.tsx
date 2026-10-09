@@ -8,11 +8,13 @@ import styles from './FeatureDemo.module.css';
    видео): чёткие на любом экране и почти ничего не весят.
 
    Сцена рисуется на холсте 640×440 и масштабируется под ширину блока.
-   Как у Seatory: блок со вкладками встаёт на экране, а прокрутка листает
-   вкладки — у каждой свой отрезок прокрутки, полоска под вкладкой показывает,
-   сколько до следующей; сцена сменяется через лёгкое размытие. Экран ниже
-   блока — вкладки по таймеру, пока блок на экране. При «уменьшении движения»
-   каждая сцена сразу показывает итоговый кадр. */
+   Как у Seatory: слева обычной прокруткой идут пункты с крупными заголовками,
+   справа сцена стоит на месте (sticky) и при смене пункта перетекает в
+   следующую через размытие; вкладки сверху прилипают под шапкой и подсвечивают
+   пункт в фокусе, полоска под вкладкой — сколько до следующего. На телефоне
+   прилипают вкладки и сцена, пункты листаются под ними. Пока блок не на
+   экране — всё стоит. При «уменьшении движения» сцена сразу показывает
+   итоговый кадр. */
 
 const W = 640, H = 440;
 const IMG = '/landing/demo';
@@ -371,179 +373,180 @@ function Phone({ left, top, width, light, hiddenUntil, children }: {
 
 // ─── Вкладки ─────────────────────────────────────────────────────────────
 const SCENES = [
-  { tab: 'Редактор', lead: 'Редактор без регистрации.', text: 'Меняйте имена, дату, фото и музыку — приглашение обновляется на глазах.', plan: '', ms: 8200, Scene: EditorScene },
-  { tab: 'Анкета гостя', lead: 'Гости отвечают за минуту.', text: 'Придут ли, сколько их, что будут пить — без приложений и звонков.', plan: 'Премиум', ms: 7400, Scene: RsvpScene },
-  { tab: 'Ответы в Telegram', lead: 'Ответы сразу у вас.', text: 'Каждый ответ приходит в Telegram и на почту, а в кабинете — сводка: кто придёт, кто нет.', plan: 'Премиум', ms: 7600, Scene: TelegramScene },
-  { tab: 'Рассадка', lead: 'Рассадка без таблиц.', text: 'Перетащите гостей по столам — план зала и карточки на столы можно распечатать.', plan: 'Максимум', ms: 7400, Scene: SeatingScene },
-  { tab: 'Именные ссылки', lead: 'Каждому — своё приглашение.', text: 'Отдельная ссылка с личным обращением для каждого гостя, и видно, кто уже ответил.', plan: 'Премиум', ms: 7600, Scene: LinksScene },
-];
+  { tab: 'Редактор', head: ['Редактор', 'без регистрации'], text: 'Меняйте имена, дату, фото и музыку — приглашение обновляется на глазах.', plan: '', cta: ['Выбрать шаблон', '/templates'], Scene: EditorScene },
+  { tab: 'Анкета гостя', head: ['Гости отвечают', 'за минуту'], text: 'Придут ли, сколько их, что будут пить — без приложений и звонков.', plan: 'Премиум', cta: ['Посмотреть пример', '/demo/vitrage'], Scene: RsvpScene },
+  { tab: 'Ответы в Telegram', head: ['Ответы', 'сразу у вас'], text: 'Каждый ответ приходит в Telegram и на почту, а в кабинете — сводка: кто придёт, кто нет.', plan: 'Премиум', cta: ['Сравнить тарифы', '/#pricing'], Scene: TelegramScene },
+  { tab: 'Рассадка', head: ['Рассадка', 'без таблиц'], text: 'Перетащите гостей по столам — план зала и карточки на столы можно распечатать.', plan: 'Максимум', cta: ['Сравнить тарифы', '/#pricing'], Scene: SeatingScene },
+  { tab: 'Именные ссылки', head: ['Каждому —', 'своё приглашение'], text: 'Отдельная ссылка с личным обращением для каждого гостя, и видно, кто уже ответил.', plan: 'Премиум', cta: ['Попробовать бесплатно', '/templates'], Scene: LinksScene },
+] as const;
+
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+/** Высота шапки сайта — под ней прилипают вкладки. */
+const headerH = () => Math.round(document.querySelector('header')?.getBoundingClientRect().height || 64);
+const stacked = () => window.matchMedia('(max-width: 900px)').matches;
+/** Линия фокуса: активен пункт, чей центр к ней ближе. Компьютер — середина экрана
+    под вкладками; телефон — ниже середины свободного места под прилипшей сценой
+    (stageBottom), чтобы заголовок активного пункта не уезжал под сцену. */
+function focusLine(stageBottom: number): number {
+  if (!stacked()) return (headerH() + (document.querySelector('#how nav')?.getBoundingClientRect().height || 0) + window.innerHeight) / 2;
+  const top = Math.max(0, stageBottom);
+  return top + (window.innerHeight - top) * 0.6;
+}
 
 export default function FeatureDemo() {
   const [tab, setTab] = useState(0);
-  const [cycle, setCycle] = useState(0);
+  const [bar, setBar] = useState(0);
   const [inView, setInView] = useState(false);
   const [still, setStill] = useState(false);
   const [scale, setScale] = useState(1);
   const [viewW, setViewW] = useState(W);
-  // Как у Seatory: блок встаёт на экране, а прокрутка листает вкладки.
-  // pinned — экран вмещает блок целиком; иначе (низкий экран) — вкладки по таймеру, как раньше.
-  const [pinned, setPinned] = useState(false);
-  const [pinH, setPinH] = useState(0);
-  const [seg, setSeg] = useState(0);
-  const [bar, setBar] = useState(0);
+  const [hdr, setHdr] = useState(64);
+  const [stageTop, setStageTop] = useState(120);
+  // Сцены поверх друг друга на время перехода: уходящая растворяется в размытии,
+  // новая проступает из него (как у Seatory). id — чтобы уходящая не перезапускалась.
+  const [layers, setLayers] = useState([{ id: 0, idx: 0 }]);
   const tabsRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const pinRef = useRef<HTMLDivElement>(null);
+  const blockRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     setStill(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.15 });
+    const io = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.05 });
     if (sectionRef.current) io.observe(sectionRef.current);
+    return () => io.disconnect();
+  }, []);
+
+  // Размер сцены и место, где она стоит: по ширине колонки, а на компьютере ещё
+  // и по высоте экрана под вкладками — сцена целиком в кадре и по центру.
+  useEffect(() => {
     const el = viewRef.current;
-    // На компьютере сцена ещё и по высоте экрана: на низком ноутбуке блок
-    // должен целиком влезть, чтобы встать на экране
     const fit = () => {
       if (!el) return;
-      const byH = window.matchMedia('(min-width: 1025px)').matches ? (window.innerHeight - pinTop() - 150) / H : Infinity;
-      setScale(Math.max(0.6, Math.min(1.3, el.clientWidth / W, byH)));
+      const h = headerH();
+      const tabsH = tabsRef.current?.offsetHeight || 0;
+      const room = window.innerHeight - h - tabsH;
+      const k = Math.max(0.45, Math.min(1.3, el.clientWidth / W, stacked() ? Infinity : (room - 48) / H));
+      setHdr(h);
+      setScale(k);
       setViewW(el.clientWidth);
+      setStageTop(stacked() ? h + tabsH : Math.max(h + tabsH + 16, Math.round(h + tabsH + (room - H * k) / 2)));
     };
+    fit();
     const ro = new ResizeObserver(fit);
     if (el) ro.observe(el);
     window.addEventListener('resize', fit);
-    return () => { io.disconnect(); ro.disconnect(); window.removeEventListener('resize', fit); };
+    return () => { ro.disconnect(); window.removeEventListener('resize', fit); };
   }, []);
 
-  // Высота закреплённого блока и длина «шага» прокрутки на вкладку
+  // Прокрутка → какой пункт сейчас «в фокусе»: ближе всех к середине свободной
+  // части экрана (под вкладками; на телефоне — под прилипшей сценой).
   useEffect(() => {
-    const pin = pinRef.current;
-    if (!pin) return;
-    const measure = () => {
-      const h = pin.offsetHeight;
-      setPinH(h);
-      setSeg(Math.round(window.innerHeight * 0.6));
-      setPinned(window.innerHeight >= h + pinTop() + 12);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(pin);
-    window.addEventListener('resize', measure);
-    return () => { ro.disconnect(); window.removeEventListener('resize', measure); };
-  }, []);
-
-  // Прокрутка → вкладка и полоска прогресса под ней
-  useEffect(() => {
-    if (!pinned || !seg) return;
     let raf = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const track = trackRef.current;
-        if (!track) return;
-        const d = pinTop() - track.getBoundingClientRect().top;
-        const i = Math.max(0, Math.min(SCENES.length - 1, Math.floor(d / seg)));
-        setTab(prev => (prev === i ? prev : i));
-        setBar(Math.max(0, Math.min(1, (d - i * seg) / seg)));
+    const update = () => {
+      const blocks = blockRefs.current.filter(Boolean) as HTMLElement[];
+      if (!blocks.length) return;
+      const focus = focusLine(stageRef.current?.getBoundingClientRect().bottom || 0);
+      let best = 0, dist = Infinity;
+      blocks.forEach((b, i) => {
+        const r = b.getBoundingClientRect();
+        const d = Math.abs(r.top + r.height / 2 - focus);
+        if (d < dist) { dist = d; best = i; }
       });
+      const r = blocks[best].getBoundingClientRect();
+      setTab(best);
+      setBar(clamp01((focus - r.top) / r.height));
     };
-    onScroll();
+    const onScroll = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(update); };
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('scroll', onScroll); };
-  }, [pinned, seg]);
+    window.addEventListener('resize', onScroll);
+    return () => { cancelAnimationFrame(raf); window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); };
+  }, []);
 
-  // Без закрепления — автопереключение вкладок, пока блок на экране (как раньше).
   useEffect(() => {
-    if (pinned || !inView || still) return;
-    const t = setTimeout(() => { setTab(i => (i + 1) % SCENES.length); setCycle(c => c + 1); }, SCENES[tab].ms);
+    setLayers(ls => (ls[ls.length - 1].idx === tab ? ls : [...ls.slice(-1), { id: ls[ls.length - 1].id + 1, idx: tab }]));
+  }, [tab]);
+  useEffect(() => {
+    if (layers.length < 2) return;
+    const t = setTimeout(() => setLayers(ls => ls.slice(-1)), 650);
     return () => clearTimeout(t);
-  }, [tab, cycle, inView, still, pinned]);
+  }, [layers]);
 
   // На телефоне лента вкладок листается к активной — без прыжка страницы.
   useEffect(() => {
-    const strip = tabsRef.current;
+    const strip = tabsRef.current?.firstElementChild as HTMLElement | null;
     const btn = strip?.children[tab] as HTMLElement | undefined;
     if (!strip || !btn || strip.scrollWidth <= strip.clientWidth) return;
     strip.scrollTo({ left: btn.offsetLeft - 20, behavior: 'smooth' });
   }, [tab]);
 
-  const pick = (i: number) => {
-    const track = trackRef.current;
-    if (pinned && track) {
-      // вкладка = свой отрезок прокрутки: едем к его началу
-      const y = window.scrollY + track.getBoundingClientRect().top - pinTop() + i * seg + 2;
-      window.scrollTo({ top: y, behavior: still ? 'auto' : 'smooth' });
-      return;
-    }
-    setTab(i); setCycle(c => c + 1);
+  // Клик по вкладке — плавно к её пункту
+  const go = (i: number) => {
+    const b = blockRefs.current[i];
+    if (!b) return;
+    const r = b.getBoundingClientRect();
+    // где окажется низ сцены, когда она прилипнет (на телефоне)
+    const stuckBottom = hdr + (tabsRef.current?.offsetHeight || 0) + (stageRef.current?.offsetHeight || 0);
+    const y = r.top + r.height / 2 - focusLine(stuckBottom);
+    window.scrollTo({ top: window.scrollY + y, behavior: still ? 'auto' : 'smooth' });
   };
-  const cur = SCENES[tab];
-  const Scene = cur.Scene;
 
   return (
-    <section id="how" ref={sectionRef} className={styles.section}>
+    <section id="how" ref={sectionRef} className={styles.section} style={{ '--hdr': `${hdr}px` } as React.CSSProperties}>
       <div className={styles.inner}>
         <div className={styles.head}>
           <span className={styles.label}>Как это работает</span>
           <h2 className={styles.title}>Всё для приглашения — <em>в одном сервисе</em></h2>
         </div>
-      </div>
 
-      <div ref={trackRef} className={styles.track} style={pinned ? { height: pinH + SCENES.length * seg } : undefined}>
-        <div ref={pinRef} className={`${styles.pin} ${pinned ? styles.pinOn : ''}`}
-          style={pinned ? { top: pinCentered() ? `max(${pinTop()}px, calc(50vh - ${pinH / 2}px))` : pinTop() } : undefined}>
-          <div className={styles.inner}>
-            <div className={styles.tabs} ref={tabsRef} role="tablist" aria-label="Возможности WeddingCraft">
-              {SCENES.map((sc, i) => (
-                <button
-                  key={sc.tab}
-                  role="tab"
-                  aria-selected={i === tab}
-                  className={`${styles.tab} ${i === tab ? styles.tabOn : ''}`}
-                  onClick={() => pick(i)}
-                >
-                  <span className={styles.tabNum}>0{i + 1}</span>
-                  <span className={styles.tabName}>{sc.tab}</span>
-                  <span className={styles.tabBar}>
-                    {i === tab && pinned && <i className={styles.tabBarScroll} style={{ transform: `scaleX(${bar})` }} />}
-                    {i === tab && !pinned && !still && (
-                      <i key={cycle} style={{ animationDuration: `${sc.ms}ms`, animationPlayState: inView ? 'running' : 'paused' }} />
-                    )}
-                  </span>
-                </button>
-              ))}
-            </div>
+        <div className={styles.tabsWrap} ref={tabsRef}>
+          <nav className={styles.tabs} aria-label="Возможности WeddingCraft">
+            {SCENES.map((sc, i) => (
+              <button
+                key={sc.tab}
+                type="button"
+                aria-current={i === tab ? 'step' : undefined}
+                className={`${styles.tab} ${i === tab ? styles.tabOn : ''}`}
+                onClick={() => go(i)}
+              >
+                <span className={styles.tabNum}>0{i + 1}</span>
+                <span className={styles.tabName}>{sc.tab}</span>
+                <span className={styles.tabBar}>{i === tab && <i style={{ transform: `scaleX(${bar})` }} />}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
 
-            <div className={styles.body}>
-              <div key={tab} className={`${styles.copy} ${still ? '' : styles.swapIn}`} role="tabpanel" aria-live="polite">
-                <p className={styles.copyText}><b>{cur.lead}</b> {cur.text}</p>
-                {cur.plan && <span className={styles.plan}>Тариф «{cur.plan}»</span>}
-                <Link href="/templates" className={styles.cta}>Попробовать бесплатно</Link>
-              </div>
+        <div className={styles.scroller}>
+          <div className={styles.blocks}>
+            {SCENES.map((sc, i) => (
+              <article key={sc.tab} ref={el => { blockRefs.current[i] = el; }} className={styles.block}>
+                <h3 className={styles.blockTitle}>{sc.head[0]} <em>{sc.head[1]}</em></h3>
+                <p className={styles.copyText}>{sc.text}</p>
+                {sc.plan && <span className={styles.plan}>Тариф «{sc.plan}»</span>}
+                <Link href={sc.cta[1]} className={styles.cta}>{sc.cta[0]}</Link>
+              </article>
+            ))}
+          </div>
 
-              <div className={styles.view} ref={viewRef} style={{ height: H * scale }} aria-hidden="true">
-                <div key={`${tab}-${cycle}`} className={`${styles.canvas} ${still ? '' : styles.sceneIn}`}
-                  style={{ width: W, height: H, left: Math.max(0, (viewW - W * scale) / 2), transform: `scale(${scale})` }}>
-                  <Scene play={inView} still={still} />
-                </div>
-              </div>
+          <div className={styles.stage} ref={stageRef} style={{ top: stageTop }} aria-hidden="true">
+            <div className={styles.view} ref={viewRef} style={{ height: H * scale }}>
+              {layers.map((l, j) => {
+                const Scene = SCENES[l.idx].Scene;
+                const on = j === layers.length - 1;
+                return (
+                  <div key={l.id} className={`${styles.canvas} ${still ? '' : on ? styles.sceneIn : styles.sceneOut}`}
+                    style={{ width: W, height: H, left: Math.max(0, (viewW - W * scale) / 2), transform: `scale(${scale})` }}>
+                    <Scene play={inView && on} still={still} />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
       </div>
     </section>
   );
-}
-
-/** На компьютере закреплённый блок — по центру экрана; на планшете и телефоне —
-    сразу под шапкой: там высота блока зависит от текста вкладки, и по центру он бы
-    подпрыгивал при смене вкладки. */
-function pinCentered(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(min-width: 1025px)').matches;
-}
-
-/** Отступ закреплённого блока сверху — под шапкой сайта. */
-function pinTop(): number {
-  return typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches ? 64 : 88;
 }
