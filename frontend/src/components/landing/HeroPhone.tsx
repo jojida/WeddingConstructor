@@ -3,8 +3,11 @@ import { useEffect, useRef } from 'react';
 import { preload } from 'react-dom';
 import styles from './HeroPhone.module.css';
 
-/* Первый экран: телефон, в котором само проигрывается приглашение, и
-   акварельные предметы вокруг — они медленно «плавают».
+/* Первый экран: ноутбук с редактором WeddingCraft (снимок настоящего
+   редактора с шаблоном «Вечер в саду») и телефон перед ним, в котором само
+   проигрывается то же приглашение, — «собираете на компьютере, гости
+   открывают на телефоне». Раньше вокруг телефона плавали акварельные
+   предметы — слишком похоже на Digital Yes, убраны 09.10.26.
 
    Скорость: до window.load в телефоне только заставка (26 КБ, первый кадр
    ролика) — она и есть кандидат в LCP. Видео (~1,4 МБ) подключаем после
@@ -12,19 +15,7 @@ import styles from './HeroPhone.module.css';
 
 const A = '/landing/hero';
 const POSTER = `${A}/invite-poster.webp`;
-
-/* Позиции и размеры — в % от сцены (сцена держит пропорцию 560×720),
-   поэтому раскладка одинаково работает на любой ширине. */
-const DECO: { src: string; x: number; y: number; w: number; dur: number; delay: number; rot: number; mobile?: boolean }[] = [
-  { src: 'deco-swans.webp',     x: 0,  y: 7,  w: 27, dur: 7.5, delay: 0.15, rot: -3, mobile: true },
-  { src: 'deco-bouquet.webp',   x: 70, y: 0,  w: 25, dur: 8.5, delay: 0.3,  rot: 4,  mobile: true },
-  { src: 'deco-letter.webp',    x: 1,  y: 41, w: 21, dur: 6.8, delay: 0.45, rot: -8 },
-  { src: 'deco-rings.webp',     x: 79, y: 36, w: 21, dur: 7.2, delay: 0.6,  rot: 6,  mobile: true },
-  { src: 'deco-seal.webp',      x: 22, y: 64, w: 13, dur: 6.4, delay: 0.75, rot: -10 },
-  { src: 'deco-doves.webp',     x: 0,  y: 76, w: 25, dur: 8.2, delay: 0.9,  rot: 3,  mobile: true },
-  { src: 'deco-key.webp',       x: 70, y: 63, w: 10, dur: 7.8, delay: 1.05, rot: 12 },
-  { src: 'deco-mansion.webp',   x: 70, y: 82, w: 31, dur: 9,   delay: 1.2,  rot: 0,  mobile: true },
-];
+const LAPTOP = `${A}/laptop-editor.webp`;   // 1200×750, снимок редактора (scratchpad shot-editor.cjs)
 
 export default function HeroPhone() {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -62,19 +53,23 @@ export default function HeroPhone() {
   return (
     <div className={styles.stage}>
       <div className={styles.glow} aria-hidden="true" />
-      {DECO.map((d, i) => (
-        <span
-          key={d.src}
-          className={`${styles.deco} ${d.mobile ? '' : styles.decoDesktop}`}
-          style={{
-            left: `${d.x}%`, top: `${d.y}%`, width: `${d.w}%`,
-            '--dur': `${d.dur}s`, '--delay': `${d.delay}s`, '--rot': `${d.rot}deg`, '--i': i,
-          } as React.CSSProperties}
-          aria-hidden="true"
-        >
-          <img src={`${A}/${d.src}`} alt="" decoding="async" draggable={false} />
-        </span>
-      ))}
+
+      <div className={styles.laptop}>
+        <div className={styles.lid}>
+          <span className={styles.camera} aria-hidden="true" />
+          <div className={styles.display}>
+            <img
+              src={LAPTOP}
+              width={1200}
+              height={750}
+              alt="Редактор WeddingCraft: приглашение «Вечер в саду» и настройки блоков"
+              decoding="async"
+              draggable={false}
+            />
+          </div>
+        </div>
+        <div className={styles.base} aria-hidden="true"><span /></div>
+      </div>
 
       <div className={styles.phone}>
         <div className={styles.island} aria-hidden="true" />
