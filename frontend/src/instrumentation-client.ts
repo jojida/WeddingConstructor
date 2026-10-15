@@ -1,7 +1,8 @@
 import { trackPageView } from '@/lib/metrika';
 
-// Never initialise third-party analytics on guest invitations, authentication,
-// payments, or the dashboard. Query strings and fragments are never transmitted.
+// Analytics never runs on guest invitations or the dashboard. Funnel pages
+// (editor, auth, payment) are counted by path only; of the query string only
+// marketing tags (utm_*, yclid) are kept — see analyticsPageUrl in lib/metrika.
 try { trackPageView(window.location.href); } catch { /* Analytics is optional. */ }
 
 export function onRouterTransitionStart(url: string): void {

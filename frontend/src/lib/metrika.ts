@@ -20,16 +20,47 @@ let muted: boolean | null = null;
 let active = false;
 let previousPage = '';
 
-/** Only public product pages belong in analytics; invitation URLs contain guest tokens. */
+/* Какие страницы попадают в Метрику. Публичные страницы — плюс страницы воронки
+   (редактор, вход, оплата): на них срабатывают все цели, без них Директ и
+   отчёты не видят ни одной конверсии. Сайты пар (/<slug>, ссылки гостей ?g=)
+   и кабинет по-прежнему не учитываются. Заголовки страниц воронки общие
+   («Редактор приглашения», «Оплата тарифа») — имён пар в них нет. */
+const ANALYTICS_PATHS = [
+  '/', '/templates', '/print', '/contacts', '/privacy', '/oferta',
+  '/editor', '/auth', '/payment', '/payment/success',
+];
+
+/* Из параметров адреса оставляем только рекламные метки: по yclid Метрика
+   связывает визит с кликом в Директе, по utm_* строит отчёты по кампаниям.
+   Личных данных в них нет. Всё остальное (id приглашения, токен оплаты,
+   ?g= гостя) в Метрику не уходит. */
+const MARKETING_PARAMS = /^(utm_[a-z]+|yclid|gclid|_openstat)$/;
+
+/** Адрес страницы для Метрики или null, если страницу учитывать нельзя. */
 export function analyticsPageUrl(value: string, base = 'https://weddingcraft.ru'): string | null {
   try {
     const url = new URL(value, base);
     if (!['weddingcraft.ru', 'www.weddingcraft.ru'].includes(url.hostname) || url.protocol !== 'https:') return null;
     if (url.searchParams.has('g')) return null;
     const path = url.pathname.replace(/\/$/, '') || '/';
-    if (!['/', '/templates', '/print', '/contacts', '/privacy', '/oferta'].includes(path) && !/^\/demo\/[a-z0-9-]+$/.test(path)) return null;
-    return url.origin + path;
+    if (!ANALYTICS_PATHS.includes(path) && !/^\/demo\/[a-z0-9-]+$/.test(path)) return null;
+    const keep = new URLSearchParams();
+    url.searchParams.forEach((v, k) => { if (MARKETING_PARAMS.test(k)) keep.append(k, v); });
+    const query = keep.toString();
+    return url.origin + path + (query ? `?${query}` : '');
   } catch { return null; }
+}
+
+/** Откуда пришли. Свой сайт — по тем же правилам, что и страницы; чужой —
+    только адрес сайта (так его и так передают браузеры): по нему Метрика
+    отличает поиск, соцсети и ссылки, а путь и параметры могут быть личными. */
+export function analyticsReferrer(value: string): string {
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    if (['weddingcraft.ru', 'www.weddingcraft.ru'].includes(url.hostname)) return analyticsPageUrl(value) || '';
+    return url.protocol === 'https:' || url.protocol === 'http:' ? `${url.origin}/` : '';
+  } catch { return ''; }
 }
 
 function startCounter(page: string): void {
@@ -50,7 +81,7 @@ function startCounter(page: string): void {
   window.ym(METRIKA_ID, 'init', {
     ssr: true, defer: true, webvisor: false, clickmap: false,
     trackLinks: false, accurateTrackBounce: false,
-    url: page, referrer: analyticsPageUrl(document.referrer) || '',
+    url: page, referrer: analyticsReferrer(document.referrer),
   });
   active = true;
 }
@@ -94,7 +125,7 @@ export function trackPageView(url: string): void {
     startCounter(page);
     // Router transitions start before the previous DOM disappears. Its title can
     // still contain a couple's names, so do not let the counter read it implicitly.
-    window.ym?.(METRIKA_ID, 'hit', page, { title: 'WeddingCraft', referer: previousPage || analyticsPageUrl(document.referrer) || '' });
+    window.ym?.(METRIKA_ID, 'hit', page, { title: 'WeddingCraft', referer: previousPage || analyticsReferrer(document.referrer) });
     previousPage = page;
   } catch { /* см. выше */ }
 }
