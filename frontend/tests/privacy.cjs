@@ -37,21 +37,30 @@ function browser(t, blocked = false) {
 }
 
 test('analytics excludes private routes, guest tokens, custom domains and local development', () => {
-  const { analyticsPageUrl } = fresh('../src/lib/metrika.ts');
+  const { analyticsPageUrl, analyticsReferrer } = fresh('../src/lib/metrika.ts');
   for (const url of [
-    '/couple?g=guest-secret', '/invite/couple?g=guest-secret', '/editor?id=private-id',
-    '/dashboard/private-id', '/payment/success?id=private-id&token=return-secret',
-    '/auth', '/print/editor?id=private-id', '/studio', '/?g=guest-secret',
+    '/couple?g=guest-secret', '/invite/couple?g=guest-secret', '/editor?g=guest-secret',
+    '/dashboard/private-id', '/print/editor?id=private-id', '/studio', '/?g=guest-secret',
     'https://couple.example/', 'http://localhost:3000/',
   ]) assert.equal(analyticsPageUrl(url), null, url);
   assert.equal(analyticsPageUrl('/templates?email=private@example.com#secret'), 'https://weddingcraft.ru/templates');
   assert.equal(analyticsPageUrl('/demo/calla?token=secret'), 'https://weddingcraft.ru/demo/calla');
+  // Воронка (цели Директа) учитывается только по пути: id приглашения и токены отрезаны
+  assert.equal(analyticsPageUrl('/editor?id=private-id&template=calla'), 'https://weddingcraft.ru/editor');
+  assert.equal(analyticsPageUrl('/auth'), 'https://weddingcraft.ru/auth');
+  assert.equal(analyticsPageUrl('/payment?id=private-id&plan=premium'), 'https://weddingcraft.ru/payment');
+  assert.equal(analyticsPageUrl('/payment/success?id=private-id&token=return-secret'), 'https://weddingcraft.ru/payment/success');
+  // Рекламные метки остаются (по yclid Метрика связывает визит с кликом), остальное — нет
+  assert.equal(analyticsPageUrl('/?utm_source=yandex&utm_campaign=715228507&yclid=999&email=private@example.com'),
+    'https://weddingcraft.ru/?utm_source=yandex&utm_campaign=715228507&yclid=999');
+  assert.equal(analyticsReferrer('https://yandex.ru/search/?text=private'), 'https://yandex.ru/');
+  assert.equal(analyticsReferrer('https://weddingcraft.ru/couple?g=guest-secret'), '');
 });
 
 test('private landing does not load analytics; leaving marketing stops it and strips sensitive referrers', t => {
   const { scripts } = browser(t);
   const { trackPageView, reachGoal } = fresh('../src/lib/metrika.ts');
-  window.location.href = 'https://weddingcraft.ru/payment/success?token=secret';
+  window.location.href = 'https://weddingcraft.ru/dashboard/private-id?token=secret';
   document.referrer = 'https://weddingcraft.ru/couple?g=guest-secret';
   trackPageView(window.location.href);
   assert.equal(scripts.length, 0);
@@ -67,6 +76,12 @@ test('private landing does not load analytics; leaving marketing stops it and st
   assert.equal(init.trackLinks, false);
   assert.equal(init.referrer, '');
   assert.equal(calls.find(call => call[1] === 'hit')[3].title, 'WeddingCraft');
+  // Страница оплаты — в воронке: просмотр без id и токена, цель доходит
+  window.location.href = 'https://weddingcraft.ru/payment/success?id=private-id&token=secret';
+  trackPageView(window.location.href);
+  assert.equal(calls.at(-1)[2], 'https://weddingcraft.ru/payment/success');
+  reachGoal('payment_success', { plan: 'premium' });
+  assert.deepEqual(calls.at(-1).slice(1), ['reachGoal', 'payment_success', { plan: 'premium' }]);
   window.location.href = 'https://weddingcraft.ru/dashboard/private-id';
   trackPageView(window.location.href);
   reachGoal('signup', { secret: 'do-not-send' });
