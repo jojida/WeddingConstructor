@@ -12,9 +12,10 @@ import { isSectionEnabled } from '@/lib/section-visibility';
 import { withSketchDemoPhotos } from '@/lib/sketch-demo-photos';
 import { withSketchLocation } from '@/lib/sketch-location';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, PLANS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
+import { ownPlace, quotePlace } from '@/lib/own-place';
 import dynamic from 'next/dynamic';
 import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import type { PhotoCutout } from './BackgroundRemovalEditor';
@@ -284,6 +285,23 @@ function EditorContent() {
   // Опубликованный сайт правится как обычно — разница только в том, что
   // изменения тут же видят гости, о чём предупреждает полоса над редактором.
   const isPublished = data.status === 'paid' || data.status === 'published';
+  // Бесплатный тариф прячет от гостей место, адрес и карту, а пара своё место
+  // указала (на первом шаге) — гости не видят, куда ехать. Говорим об этом
+  // словами самой пары: самый личный повод перейти на платный тариф.
+  // Пример из шаблона за место пары не считаем. Полосу можно скрыть на 3 дня.
+  const freePlace = data.plan === 'free' ? ownPlace(data) : null;
+  const hiddenPlace = freePlace ? freePlace.venue || freePlace.address : '';
+  const premiumPrice = (PLANS.find(p => p.id === 'premium')?.price ?? 0).toLocaleString('ru-RU');
+  const [placeNudgeOff, setPlaceNudgeOff] = useState(true);   // до чтения localStorage — скрыта (без мигания)
+  useEffect(() => {
+    if (!data.id) return;
+    const hiddenAt = Number(readStorage('localStorage', `wc_place_nudge:${data.id}`));
+    setPlaceNudgeOff(!!hiddenAt && Date.now() - hiddenAt < 3 * 24 * 3600_000);
+  }, [data.id]);
+  const hidePlaceNudge = () => {
+    setPlaceNudgeOff(true);
+    writeStorage('localStorage', `wc_place_nudge:${data.id}`, String(Date.now()));
+  };
   // Схема полей для шаблона (если есть — рендерим движок полей, иначе старый сайдбар)
   const sections = TEMPLATE_FIELDS[data.templateId];
 
@@ -721,6 +739,21 @@ function EditorContent() {
           </div>
         )}
 
+        {hiddenPlace && data.id && !placeNudgeOff && (
+          <div className={styles.placeNudge} role="note">
+            <span>
+              Вы указали {freePlace?.venue ? 'место' : 'адрес'} — {quotePlace(hiddenPlace)}, но гости его не видят:
+              на бесплатном тарифе место, адрес и карта скрыты.
+            </span>
+            <Link href={`/payment?id=${data.id}&plan=premium`} className={styles.placeNudgeBtn}
+              onClick={() => reachGoal(GOAL.upgradeClick, { from: 'editor_place' })}>
+              Показать гостям · {premiumPrice} ₽
+            </Link>
+            <button type="button" className={styles.placeNudgeClose} onClick={hidePlaceNudge}
+              aria-label="Скрыть напоминание" title="Скрыть на 3 дня">×</button>
+          </div>
+        )}
+
         <div className={styles.editorBody}>
 
           {/* ── CANVAS (LEFT) ─────────────────────────────────────────────── */}
@@ -786,7 +819,10 @@ function EditorContent() {
                         <span className={styles.sectionLabel}>
                           <span>{section.icon ? section.icon + ' ' : ''}{section.title}</span>
                           {section.required && !locked && <small>Обязательный блок</small>}
-                          {!enabled && <small>{locked ? (section.id === 'menu' ? 'Доступен в тарифе «Максимум»' : 'Доступен с тарифа «Премиум»') : 'Убран с сайта'}</small>}
+                          {!enabled && <small>{locked
+                            ? (section.id === 'menu' ? 'Доступен в тарифе «Максимум»'
+                              : section.id === 'venue' && hiddenPlace ? `Гости не видят ${quotePlace(hiddenPlace)}` : 'Доступен с тарифа «Премиум»')
+                            : 'Убран с сайта'}</small>}
                         </span>
                         <span className={styles.sectionChevron} aria-hidden="true">›</span>
                       </button>
@@ -797,7 +833,10 @@ function EditorContent() {
                         <span aria-hidden="true" />
                       </button>}
                     </div>
-                    {locked && <Link href={`/payment?id=${data.id}`} className={styles.sectionSetup}>Улучшить тариф →</Link>}
+                    {locked && <Link href={`/payment?id=${data.id}`} className={styles.sectionSetup}
+                      onClick={() => reachGoal(GOAL.upgradeClick, { from: 'editor_section', section: section.id })}>
+                      {section.id === 'venue' && hiddenPlace ? 'Показать место гостям →' : 'Улучшить тариф →'}
+                    </Link>}
                     {open && (
                       <div className={styles.sectionBody} id={`section-body-${section.title}`}>
                         {section.fields.length === 0 && (section.required

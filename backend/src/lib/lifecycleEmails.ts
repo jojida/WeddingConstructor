@@ -6,7 +6,8 @@
 // Письма:
 //   draft_24h  — черновик не опубликован сутки (и других опубликованных нет);
 //   free_1d    — через день после бесплатной публикации: анкета и ответы в Telegram;
-//   free_4d    — через 4 дня: карта, программа, дресс-код;
+//   free_4d    — через 4 дня: своё место пары, которое гости не видят (если
+//                указано; пример шаблона не считается), иначе карта, программа, дресс-код;
 //   date_90    — до свадьбы ~3 месяца: пора рассылать (любой опубликованный сайт);
 //   date_60    — до свадьбы ~2 месяца, бесплатный тариф: успеть собрать ответы.
 //
@@ -20,6 +21,7 @@ import prisma from './prisma';
 import { isEmailConfigured, sendEmail } from './email';
 import { escapeHtml, jwtSecret } from './security';
 import { isFreeAccount } from './freeAccounts';
+import { ownPlace, quotePlace } from './templatePlaces';
 
 const HOUR = 3600_000;
 const DAY = 24 * HOUR;
@@ -68,14 +70,19 @@ ${letter.paragraphs.map(p => `<p style="font-size:15px;line-height:1.65;margin:0
   return { text, html };
 }
 
-interface InviteRow { id: string; userId: string; slug: string; plan: string; groomName: string; brideName: string }
+interface InviteRow {
+  id: string; userId: string; slug: string; plan: string; groomName: string; brideName: string;
+  venue: string; venueAddress: string;
+}
 
 const couple = (i: InviteRow) => [i.groomName, i.brideName].filter(Boolean).join(' и ');
 const editorUrl = (i: InviteRow) => `${SITE}/editor?id=${encodeURIComponent(i.id)}&utm_source=email&utm_medium=lifecycle`;
-const upgradeUrl = (i: InviteRow, kind: Kind) =>
-  `${SITE}/payment?id=${encodeURIComponent(i.id)}&plan=premium&utm_source=email&utm_medium=lifecycle&utm_campaign=${kind}`;
+// utm_content отличает вариант письма (например, личный — с местом пары)
+const upgradeUrl = (i: InviteRow, kind: Kind, content?: string) =>
+  `${SITE}/payment?id=${encodeURIComponent(i.id)}&plan=premium&utm_source=email&utm_medium=lifecycle&utm_campaign=${kind}`
+  + (content ? `&utm_content=${content}` : '');
 
-function letterFor(kind: Kind, i: InviteRow): Letter {
+export function letterFor(kind: Kind, i: InviteRow): Letter {
   const site = `${SITE}/${i.slug}`;
   const names = couple(i);
   switch (kind) {
@@ -100,7 +107,19 @@ function letterFor(kind: Kind, i: InviteRow): Letter {
         ],
         cta: 'Подключить анкету', url: upgradeUrl(i, kind),
       };
-    case 'free_4d':
+    case 'free_4d': {
+      // Пара указала своё место, а на бесплатном тарифе гости его не видят —
+      // называем их место: это личнее и честнее общего «добавьте карту».
+      const place = ownPlace(i.venue, i.venueAddress);
+      if (place) return {
+        subject: 'Гости пока не видят, где пройдёт свадьба',
+        title: `Вы указали ${place.kind === 'venue' ? 'место' : 'адрес'} — ${quotePlace(place.text)}, но гости его не видят`,
+        paragraphs: [
+          'На бесплатном тарифе место, адрес и карта в приглашении скрыты — и вопрос «Где это?» гости зададут вам в личке.',
+          'С тарифом «Премиум» в приглашении появятся место с картой проезда, программа дня и дресс-код. Всё на этом же сайте, ссылка для гостей не изменится. 2 490 ₽ разово, без подписки.',
+        ],
+        cta: 'Показать место гостям', url: upgradeUrl(i, kind, 'place'),
+      };
       return {
         subject: 'Что гости спрашивают перед свадьбой',
         title: '«Где это? Во сколько? Что надеть?»',
@@ -110,6 +129,7 @@ function letterFor(kind: Kind, i: InviteRow): Letter {
         ],
         cta: 'Добавить карту и программу', url: upgradeUrl(i, kind),
       };
+    }
     case 'date_90':
       return i.plan === 'free' ? {
         subject: 'До свадьбы три месяца — пора приглашать гостей',
@@ -188,6 +208,7 @@ async function deliver(kind: Kind, i: InviteRow, user: { email: string; emailOpt
 
 const SELECT = {
   id: true, userId: true, slug: true, plan: true, groomName: true, brideName: true, weddingDate: true, status: true, createdAt: true,
+  venue: true, venueAddress: true,
   user: { select: { email: true, emailOptOut: true } },
 } as const;
 

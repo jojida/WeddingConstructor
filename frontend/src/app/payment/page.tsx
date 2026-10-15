@@ -6,8 +6,9 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { planPriceDue } from '@/lib/plans';
-import { PLANS, LEGAL, TEMPLATE_DEFAULTS } from '@/lib/constants';
+import { PLANS, LEGAL } from '@/lib/constants';
 import { reachGoal, GOAL } from '@/lib/metrika';
+import { ownPlace } from '@/lib/own-place';
 import styles from './page.module.css';
 
 function PaymentContent() {
@@ -40,13 +41,7 @@ function PaymentContent() {
            Спрашиваем их здесь же: в редакторе блок откроется только после оплаты,
            а с примером гости увидели бы чужой адрес. Своё значение подставляем,
            пример — нет. Форма не сбрасывается, если приглашение загрузится заново. */
-        const sample = TEMPLATE_DEFAULTS[res.data.templateId];
-        const own = (value: unknown, example?: string) => {
-          const text = typeof value === 'string' ? value.trim() : '';
-          return text && text !== example ? text : '';
-        };
-        const venue = own(res.data.venue, sample?.venue);
-        const address = own(res.data.venueAddress, sample?.venueAddress);
+        const { venue, address } = ownPlace(res.data);
         if (!venue || !address) setPlace(prev => prev || { venue, address });
         if (!searchParams.get('plan') && (res.data.status === 'paid' || res.data.status === 'published')) {
           setSelectedPlan(res.data.plan === 'premium' || res.data.plan === 'maximum' ? 'maximum' : 'premium');

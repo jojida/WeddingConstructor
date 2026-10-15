@@ -57,6 +57,28 @@
 /* ─── EDITOR BODY ───────────────────────────────────────────────────────────── */
 .editorBody { display: flex; flex: 1; overflow: hidden; }
 
+/* Бесплатный тариф: своё место пары указано, но гостям не показывается */
+.placeNudge {
+  position: relative; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 16px;
+  padding: 10px 48px 10px 20px;
+  background: #fbefe9; border-bottom: 1px solid #efd5ca; color: #6e4337;
+  font-size: 14px; line-height: 1.45; text-align: center; font-family: var(--font-inter);
+}
+.placeNudgeBtn {
+  flex: none; padding: 7px 16px; border-radius: 999px;
+  background: #364350; color: #fff; text-decoration: none;
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+}
+.placeNudgeBtn:hover { background: #26313c; }
+.placeNudgeBtn:focus-visible, .placeNudgeClose:focus-visible { outline: 2px solid #3084d5; outline-offset: 2px; }
+.placeNudgeClose {
+  position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+  width: 30px; height: 30px; border: 0; border-radius: 50%; padding: 0;
+  background: transparent; color: inherit; font-size: 20px; line-height: 1; cursor: pointer; opacity: .6;
+}
+.placeNudgeClose:hover { opacity: 1; background: rgba(0, 0, 0, .05); }
+
 /* ─── CANVAS ─────────────────────────────────────────────────────────────────── */
 .canvas {
   flex: 1; position: relative; overflow: hidden;
@@ -377,6 +399,7 @@
   .sidebarBranding { display: none; }
   .sidebarContent { flex: none; overflow: visible; padding-top: 0; }
   .sidebarFooter { padding-top: 20px; }
+  .placeNudge { font-size: 13px; padding: 10px 42px 12px 14px; }
 }
 .cutoutActions { display: flex; margin-top: 8px; }
 .cutoutActions button, .cutoutFooter button {
