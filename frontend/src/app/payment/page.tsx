@@ -22,6 +22,8 @@ function PaymentContent() {
   const [selectedPlan, setSelectedPlan] = useState(PLANS.some(p => p.id === searchParams.get('plan')) ? searchParams.get('plan')! : 'premium');
   const [loading, setLoading] = useState(false);
   const [invite, setInvite] = useState<any>(null);
+  const [place, setPlace] = useState<{ venue: string; address: string } | null>(null);
+  const [placeError, setPlaceError] = useState(false);
   const [promoInput, setPromoInput] = useState('');
   const [promo, setPromo] = useState<{ code: string; percent: number } | null>(null);
   const [promoChecking, setPromoChecking] = useState(false);
@@ -33,6 +35,19 @@ function PaymentContent() {
       .then(res => {
         if (cancelled) return;
         setInvite(res.data);
+        /* Бесплатный тариф прячет в редакторе блок «Место», поэтому при переходе
+           на платный место и адрес часто пустые или остались из примера шаблона.
+           Спрашиваем их здесь же: в редакторе блок откроется только после оплаты,
+           а с примером гости увидели бы чужой адрес. Своё значение подставляем,
+           пример — нет. Форма не сбрасывается, если приглашение загрузится заново. */
+        const sample = TEMPLATE_DEFAULTS[res.data.templateId];
+        const own = (value: unknown, example?: string) => {
+          const text = typeof value === 'string' ? value.trim() : '';
+          return text && text !== example ? text : '';
+        };
+        const venue = own(res.data.venue, sample?.venue);
+        const address = own(res.data.venueAddress, sample?.venueAddress);
+        if (!venue || !address) setPlace(prev => prev || { venue, address });
         if (!searchParams.get('plan') && (res.data.status === 'paid' || res.data.status === 'published')) {
           setSelectedPlan(res.data.plan === 'premium' || res.data.plan === 'maximum' ? 'maximum' : 'premium');
         }
@@ -67,26 +82,43 @@ function PaymentContent() {
   const due = isFree ? 0 : priceWithPromo(planPriceDue(selectedPlan, invite?.plan, published));
   const freePublication = selectedPlan === 'free' || isFree;
   const alreadyConnected = published && invite?.plan === selectedPlan && !isFree;
+  const askPlace = !!place && !freePublication && !alreadyConnected;
+  const placeMissing = !!place && (!place.venue.trim() || !place.address.trim());
 
   const handlePay = async () => {
     if (!inviteId) return;
-    if (!alreadyConnected && !isFree && selectedPlan !== 'free') {
-      const venue = (invite?.venue || '').trim();
-      const address = (invite?.venueAddress || '').trim();
-      if (!venue || !address) {
-        toast.error('Укажите место и адрес свадьбы в редакторе перед подключением платного тарифа');
-        return;
-      }
-      const defaults = TEMPLATE_DEFAULTS[invite.templateId];
-      if ((defaults?.venue && venue === defaults.venue) || (defaults?.venueAddress && address === defaults.venueAddress)) {
-        if (!window.confirm(`Место и адрес как в примере шаблона:\n«${venue}», ${address}\n\nВсё верно?`)) return;
-      }
-    }
+    // Цель — само нажатие: попытку видно, даже если до кассы не дошли.
     // Бесплатная публикация — не оплата: своя цель засчитывается на странице
     // успеха, когда сайт действительно опубликован.
-    if (selectedPlan !== 'free') reachGoal(GOAL.paymentStart, { plan: selectedPlan });
+    if (!freePublication && !alreadyConnected) reachGoal(GOAL.paymentStart, { plan: selectedPlan });
+    let placePatch: { venue: string; venueAddress: string } | null = null;
+    if (askPlace && place) {
+      const venue = place.venue.trim();
+      const venueAddress = place.address.trim();
+      if (!venue || !venueAddress) {
+        setPlaceError(true);
+        document.getElementById(venue ? 'pay-address' : 'pay-venue')?.focus();
+        return;
+      }
+      if (venue !== (invite?.venue || '').trim() || venueAddress !== (invite?.venueAddress || '').trim()) {
+        placePatch = { venue, venueAddress };
+      }
+    }
     setLoading(true);
     try {
+      if (placePatch) {
+        // Сохраняем до создания платежа: после оплаты сайт сразу открыт гостям.
+        // Метку карты (customData.mapPoint) не трогаем — для другого адреса
+        // карта её не берёт и ищет адрес сама (assets/venue-map.js).
+        try {
+          await api.put(`/api/invites/${inviteId}`, placePatch);
+        } catch (err: any) {
+          toast.error(err.response?.data?.error || 'Не удалось сохранить место. Попробуйте ещё раз.');
+          return;
+        }
+        const saved = placePatch;
+        setInvite((prev: any) => ({ ...prev, ...saved }));
+      }
       const res = await api.post('/api/payment/create', {
         inviteId,
         plan: selectedPlan,
@@ -175,6 +207,36 @@ function PaymentContent() {
             </div>
           ))}
         </div>
+
+        {askPlace && place && (
+          <div className={styles.place}>
+            <div className={styles.placeTitle}>Где пройдёт свадьба?</div>
+            <p className={styles.placeHint}>
+              С платным тарифом в приглашении появятся место, адрес и карта. Потом их можно поменять в редакторе.
+            </p>
+            <div className={styles.placeFields}>
+              <label className={styles.placeLabel} htmlFor="pay-venue">
+                Место
+                <input id="pay-venue" className="input-field" placeholder="Например, «Артурс Спа Отель»" maxLength={50}
+                  value={place.venue} aria-invalid={placeError && !place.venue.trim()}
+                  aria-describedby={placeError && placeMissing ? 'pay-place-error' : undefined}
+                  onChange={e => setPlace({ ...place, venue: e.target.value })} />
+              </label>
+              <label className={styles.placeLabel} htmlFor="pay-address">
+                Адрес
+                <input id="pay-address" className="input-field" placeholder="Город, улица, дом" maxLength={90}
+                  value={place.address} aria-invalid={placeError && !place.address.trim()}
+                  aria-describedby={placeError && placeMissing ? 'pay-place-error' : undefined}
+                  onChange={e => setPlace({ ...place, address: e.target.value })} />
+              </label>
+            </div>
+            {placeError && placeMissing && (
+              <p id="pay-place-error" role="alert" className={styles.placeError}>
+                Укажите место и адрес — по ним гости найдут, куда ехать
+              </p>
+            )}
+          </div>
+        )}
 
         <div style={{ display: freePublication || alreadyConnected ? 'none' : 'flex', gap: 8, justifyContent: 'center', alignItems: 'center', margin: '18px 0 4px', flexWrap: 'wrap' }}>
           <input

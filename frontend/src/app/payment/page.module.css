@@ -91,6 +91,24 @@
 .planFeatures { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .planFeature { font-size: 14px; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 8px; font-family: var(--font-inter); }
 
+/* Место и адрес перед оплатой — если их нет или там пример из шаблона */
+.place {
+  max-width: 640px; margin: 0 auto 28px; padding: 22px 24px;
+  background: rgba(247, 231, 206, 0.06);
+  border: 1px solid rgba(247, 231, 206, 0.15);
+  border-radius: 16px;
+}
+.placeTitle { font-family: var(--font-playfair); font-size: 20px; color: #fff; margin-bottom: 6px; }
+.placeHint { font-size: 13px; color: rgba(255,255,255,0.5); font-family: var(--font-inter); margin-bottom: 16px; }
+.placeFields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.placeLabel { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: rgba(255,255,255,0.7); font-family: var(--font-inter); }
+.place input[aria-invalid='true'] { border-color: #ef9a9a; }
+.placeError { margin-top: 10px; font-size: 13px; color: #ffb4ab; font-family: var(--font-inter); }
+@media (max-width: 560px) {
+  .place { padding: 18px 16px; }
+  .placeFields { grid-template-columns: 1fr; }
+}
+
 .payBtn { text-align: center; }
 .payNote { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.3); font-family: var(--font-inter); }
 
