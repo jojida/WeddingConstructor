@@ -1401,9 +1401,9 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       ],
     },
     {
-      title: 'Расписание', icon: '⏱',
+      title: 'Программа дня', icon: '⏱',
       fields: [
-        { id: 'schedule', type: 'schedule', label: 'Пункты расписания', scope: 'data', iconSet: 'floral' },
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', iconSet: 'floral' },
       ],
     },
     {

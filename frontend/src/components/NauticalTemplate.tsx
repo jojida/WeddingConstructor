@@ -320,7 +320,7 @@ export default function NauticalTemplate({ data, apiBase, fullPage = false, slug
         <Reveal active={fullPage} delay={0.05}>
           <div className={styles.scheduleSection}>
             <div className={styles.sectionTag}>Программа</div>
-            <div className={styles.sectionTitle}>Расписание дня</div>
+            <div className={styles.sectionTitle}>Программа дня</div>
             <div className={styles.sectionTitleDeco}>⚓</div>
 
             <div className={styles.scheduleCard}>
