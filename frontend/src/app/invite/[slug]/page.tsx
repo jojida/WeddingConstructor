@@ -3,6 +3,7 @@ import TemplatePreview from '@/components/TemplatePreview';
 import UnpublishedNotice from '@/components/UnpublishedNotice';
 import GuestSeat, { type GuestSeatView } from '@/components/GuestSeat';
 import { applyGuest, resolveGuest } from '@/lib/guestLink';
+import { inviteMetadata, unpublishedMetadata } from '@/lib/inviteMetadata';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -52,29 +53,7 @@ export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
   const invite = await getInvite(slug);
   if (!invite) return {};
-  if (invite.unpaid) {
-    return { title: 'Сайт ещё не опубликован', robots: { index: false, follow: false } };
-  }
-
-  const title = invite.groomName && invite.brideName
-    ? `Свадьба ${invite.groomName} & ${invite.brideName}`
-    : 'Свадебное приглашение';
-
-  // Загруженные фото живут на бэкенде (/uploads/…), ассеты шаблонов — в public
-  // фронтенда (резолвятся через metadataBase), внешние URL остаются как есть.
-  const ogImage = !invite.coverPhoto ? undefined
-    : invite.coverPhoto.startsWith('http') ? invite.coverPhoto
-    : invite.coverPhoto.startsWith('/uploads') ? `${API}${invite.coverPhoto}`
-    : invite.coverPhoto;
-
-  return {
-    title,
-    description: invite.inviteText || `Вас приглашают на свадьбу! ${invite.weddingDate ? new Date(invite.weddingDate).toLocaleDateString('ru-RU') : ''}`,
-    // Личные страницы пар не должны индексироваться поисковиками.
-    robots: { index: false, follow: false },
-    openGraph: {
-      title,
-      images: ogImage ? [ogImage] : [],
-    },
-  };
+  // Основной адрес сайта — корневой /<slug>: им и представляемся в превью
+  if (invite.unpaid) return unpublishedMetadata(`/${slug}`);
+  return inviteMetadata(invite, API, `/${slug}`);
 }

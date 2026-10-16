@@ -4,11 +4,16 @@
 import path from 'path';
 
 const fontkit = require('fontkit') as { openSync(file: string): FontFile };
+interface GlyphPath { transform(a: number, b: number, c: number, d: number, e: number, f: number): { toSVG(): string } }
 interface FontFile {
   unitsPerEm: number;
   ascent: number;
   hasGlyphForCodePoint(cp: number): boolean;
-  layout(text: string, features?: string[]): { advanceWidth: number };
+  layout(text: string, features?: string[]): {
+    advanceWidth: number;
+    glyphs: { path: GlyphPath }[];
+    positions: { xAdvance: number; xOffset: number; yOffset: number }[];
+  };
 }
 
 /** Цифры «по линейке» (lnum): у Cormorant по умолчанию старостильные — «1» как «ı», «3» ниже строки,
@@ -66,6 +71,24 @@ export function runs(text: string): Run[] {
     if (last && last.cyr === cyr) last.text += ch; else out.push({ text: ch, cyr });
   }
   return out;
+}
+
+/** Строка кривыми для SVG: путь от точки (0; базовая линия 0) и его ширина. spacing — разрядка
+    в пунктах. Шрифты на машине не нужны — так рисуется картинка превью ссылки (lib/ogImage.ts). */
+export function outline(text: string, family: Family, size: number, spacing = 0): { d: string; width: number } {
+  const parts: string[] = [];
+  let x = 0;
+  for (const run of runs(text)) {
+    const font = open(family, run.cyr);
+    const scale = size / font.unitsPerEm;
+    const laid = font.layout(run.text, FEATURES);
+    laid.glyphs.forEach((glyph, i) => {
+      const pos = laid.positions[i];
+      parts.push(glyph.path.transform(scale, 0, 0, -scale, x + pos.xOffset * scale, -pos.yOffset * scale).toSVG());
+      x += pos.xAdvance * scale + spacing;
+    });
+  }
+  return { d: parts.join(''), width: Math.max(0, x - spacing) };
 }
 
 // Ширина при кегле 1: подбор кегля и перенос меряют одни и те же куски строк десятки раз

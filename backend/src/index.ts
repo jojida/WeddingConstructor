@@ -20,6 +20,7 @@ import telegramRouter from './routes/telegram';
 import domainsRouter from './routes/domains';
 import emailRouter from './routes/email';
 import reviewsRouter from './routes/reviews';
+import ogRouter from './routes/og';
 import { initTelegram } from './lib/telegram';
 import { ensureSchema } from './lib/ensureSchema';
 import { startLifecycleEmails } from './lib/lifecycleEmails';
@@ -102,6 +103,7 @@ app.use('/api/telegram', telegramRouter);
 app.use('/api/domains', domainsRouter);
 app.use('/api/email', rateLimit(30, 60_000), emailRouter);
 app.use('/api/reviews', rateLimit(120, 60_000), reviewsRouter);
+app.use('/api/og', rateLimit(120, 60_000), ogRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {

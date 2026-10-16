@@ -3,6 +3,7 @@ import TemplatePreview from '@/components/TemplatePreview';
 import UnpublishedNotice from '@/components/UnpublishedNotice';
 import GuestSeat, { type GuestSeatView } from '@/components/GuestSeat';
 import { applyGuest, resolveGuest } from '@/lib/guestLink';
+import { inviteMetadata, unpublishedMetadata } from '@/lib/inviteMetadata';
 
 interface Props {
   params: Promise<{ host: string }>;
@@ -10,7 +11,16 @@ interface Props {
 }
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-export const metadata = { robots: { index: false, follow: false } };
+
+// Превью ссылки на свой домен пары: адрес — сам домен, остальное как у /<slug>. Без индексации.
+export async function generateMetadata({ params }: Props) {
+  const { host } = await params;
+  const invite = await getByDomain(host);
+  if (!invite) return { robots: { index: false, follow: false } };
+  let url = '/';
+  try { url = new URL(`https://${decodeURIComponent(host)}/`).toString(); } catch { /* странный host — без адреса */ }
+  return invite.unpaid ? unpublishedMetadata(url) : inviteMetadata(invite, API, url);
+}
 
 async function getByDomain(host: string) {
   try {
