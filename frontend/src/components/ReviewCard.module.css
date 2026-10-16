@@ -1,0 +1,51 @@
+/* Отзыв о сервисе внизу кабинета — в цветах кабинета */
+.card {
+  max-width: 640px; margin-top: 40px; padding: 22px 24px;
+  border: 1px solid rgba(206, 197, 186, 0.5); border-radius: 14px;
+  background: linear-gradient(135deg, #fff, #faf5ee);
+  color: #0e1d26; font-family: var(--font-inter, sans-serif); font-size: 14px; line-height: 1.5;
+}
+.title { margin: 0 0 6px; font-family: var(--font-playfair, Georgia), serif; font-size: 22px; font-weight: 600; }
+.hint { margin: 10px 0 0; font-size: 13px; color: #7d766c; }
+.link { color: #685d4a; text-decoration: underline; }
+.quote { margin: 10px 0 0; white-space: pre-line; overflow-wrap: anywhere; color: #3a3631; }
+
+.stars { display: flex; gap: 2px; margin-top: 10px; }
+.star {
+  width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; background: transparent;
+  color: #d9cfc2; font-size: 30px; line-height: 1; cursor: pointer; transition: color 0.12s, transform 0.12s;
+}
+.star:hover { transform: scale(1.08); }
+.starOn { color: #c9a96e; }
+.star:focus-visible, .primary:focus-visible, .secondary:focus-visible { outline: 2px solid #685d4a; outline-offset: 2px; }
+.starsStatic { display: inline-block; margin-top: 4px; color: #c9a96e; font-size: 20px; letter-spacing: 2px; }
+
+.form { display: flex; flex-direction: column; gap: 12px; margin-top: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #5b554c; }
+.input {
+  width: 100%; box-sizing: border-box; padding: 9px 12px; border: 1.5px solid rgba(206, 197, 186, 0.65);
+  border-radius: 10px; background: #fff; color: #0e1d26; font: inherit; font-size: 14px; outline: none; resize: vertical;
+}
+.input:focus { border-color: #685d4a; box-shadow: 0 0 0 3px rgba(104, 93, 74, 0.14); }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: #3a3631; cursor: pointer; }
+.check input { margin-top: 2px; width: 16px; height: 16px; accent-color: #364350; flex: 0 0 auto; }
+
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.primary, .secondary {
+  min-height: 38px; padding: 8px 20px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.primary { border: 1px solid #364350; background: #364350; color: #fff; }
+.primary:hover { background: #2b3841; }
+.primary:disabled { opacity: 0.6; cursor: wait; }
+.secondary { margin-top: 12px; border: 1px solid rgba(206, 197, 186, 0.8); background: #fff; color: #0e1d26; }
+.actions .secondary { margin-top: 0; }
+.secondary:hover { background: #f6f2ec; }
+
+@media (max-width: 599px) {
+  .card { padding: 18px 16px; }
+  .actions > button { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .star { transition: none; }
+  .star:hover { transform: none; }
+}

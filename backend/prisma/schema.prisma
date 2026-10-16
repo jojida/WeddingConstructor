@@ -122,6 +122,26 @@ model Invitation {
   seatTables    SeatTable[]
   persons       Person[]
   plannerNotices PlannerNotice[]
+  review        Review?
+}
+
+/// Отзыв пары о WeddingCraft (lib/reviews.ts): один на приглашение. На главную попадает,
+/// только если пара разрешила (publish) и владелец сервиса одобрил его в Telegram.
+model Review {
+  id           String     @id @default(uuid())
+  invitationId String     @unique
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  userId       String
+  rating       Int
+  text         String     @default("")
+  names        String     // подпись под отзывом: «Анна и Максим»
+  templateId   String     @default("")
+  publish      Boolean    @default(false)     // пара разрешила показать отзыв на сайте
+  status       String     @default("pending") // pending | published | hidden
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([status, updatedAt])
 }
 
 // One durable, immutable request per product. Rotate only after the gateway

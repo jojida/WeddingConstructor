@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
+import api from '@/lib/api';
 import { TEMPLATES, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
@@ -496,36 +497,53 @@ function CompareSection() {
 }
 
 // ─── Отзывы ──────────────────────────────────────────────────────────────────
-/* ⚠️ ЗАГЛУШКИ: заменить на реальные отзывы первых клиентов перед деплоем
-   (промо «−30% за отзыв»). Пустой массив — секция не показывается. */
-const REVIEWS: { names: string; template: string; text: string }[] = [
-  /* Сюда — только настоящие отзывы клиентов с их согласия. Пока массив пуст,
-     секция не показывается: выдуманные отзывы вводят покупателя в заблуждение. */
-];
+/* Только настоящие отзывы: пара пишет его в кабинете своего сайта, на главную он попадает с её
+   согласия и после проверки (backend/src/lib/reviews.ts). Пока одобренных нет — секции нет:
+   выдуманные отзывы вводят покупателя в заблуждение. */
+interface PublicReview { names: string; text: string; rating: number; templateId: string }
 
 function ReviewsSection() {
-  if (REVIEWS.length === 0) return null;
+  const [reviews, setReviews] = useState<PublicReview[]>([]);
+  useEffect(() => {
+    let live = true;
+    api.get<{ reviews: PublicReview[] }>('/api/reviews/public')
+      .then((res) => { if (live && Array.isArray(res.data?.reviews)) setReviews(res.data.reviews.slice(0, 6)); })
+      .catch(() => { /* нет отзывов — нет секции */ });
+    return () => { live = false; };
+  }, []);
+  // Ссылка «/#reviews» из кабинета: секции ещё не было, когда браузер искал якорь
+  useEffect(() => {
+    if (reviews.length && window.location.hash === '#reviews') document.getElementById('reviews')?.scrollIntoView();
+  }, [reviews.length]);
+  if (reviews.length === 0) return null;
   const card: React.CSSProperties = {
     background: '#fff', border: '1px solid rgba(206,197,186,0.5)', borderRadius: 18,
     padding: '26px 24px', flex: '1 1 280px', maxWidth: 360,
   };
   return (
+    // Без data-animate: секция появляется после загрузки, когда AnimationObserver уже
+    // разметил страницу, — помеченный блок так и остался бы прозрачным.
     <section id="reviews" className={styles.featuresSection}>
       <div className={styles.sectionInner}>
-        <div className={styles.howHeader} data-animate>
+        <div className={styles.howHeader}>
           <h2 className={styles.sectionTitle}>Пары о WeddingCraft</h2>
-          <p className={styles.howSubtitle}>Первые свадьбы уже прошли — вот что нам пишут</p>
+          <p className={styles.howSubtitle}>Что пишут нам пары после свадьбы</p>
         </div>
 
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }} data-animate>
-          {REVIEWS.map(r => (
-            <div key={r.names} style={card}>
-              <div style={{ color: '#c9a96e', fontSize: 15, letterSpacing: 2, marginBottom: 10 }}>★★★★★</div>
-              <p style={{ fontSize: 15, color: '#5b554c', lineHeight: 1.6, margin: '0 0 16px' }}>{r.text}</p>
-              <div style={{ fontWeight: 600, color: '#0e1d26', fontSize: 15 }}>{r.names}</div>
-              <div style={{ fontSize: 13, color: '#8a8378', marginTop: 2 }}>шаблон «{r.template}»</div>
-            </div>
-          ))}
+        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', justifyContent: 'center' }}>
+          {reviews.map((r, i) => {
+            const template = TEMPLATES.find(t => t.id === r.templateId)?.name;
+            return (
+              <div key={`${r.names}-${i}`} style={card}>
+                <div style={{ color: '#c9a96e', fontSize: 15, letterSpacing: 2, marginBottom: 10 }} aria-label={`Оценка ${r.rating} из 5`}>
+                  {'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}
+                </div>
+                <p style={{ fontSize: 15, color: '#5b554c', lineHeight: 1.6, margin: '0 0 16px', whiteSpace: 'pre-line', overflowWrap: 'anywhere' }}>{r.text}</p>
+                <div style={{ fontWeight: 600, color: '#0e1d26', fontSize: 15, overflowWrap: 'anywhere' }}>{r.names}</div>
+                {template && <div style={{ fontSize: 13, color: '#8a8378', marginTop: 2 }}>шаблон «{template}»</div>}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

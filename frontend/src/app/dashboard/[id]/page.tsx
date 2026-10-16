@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
+import ReviewCard from '@/components/ReviewCard';
 import { PLAN_TITLES, hasResponseStats, isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
 
 // Рассадка грузится, только когда открыта её вкладка: остальным владельцам этот код ни к чему
@@ -149,6 +150,9 @@ function ManageInviteSession() {
           : <PlannerUpsell invite={invite} />)}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
         {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}
+
+        {/* Отзыв о сервисе — у опубликованного сайта; сюда ведёт письмо после свадьбы (?review=1) */}
+        {(invite.status === 'paid' || invite.status === 'published') && <ReviewCard inviteId={invite.id} />}
       </div>
     </div>
   );

@@ -8,6 +8,27 @@
 import { telegramWebhookSecret } from './security';
 let cachedUsername = '';
 
+/** Вызов Bot API: null — бот не подключён или Telegram не ответил (ошибка уже в логе). */
+export async function telegramApi(method: string, body: Record<string, unknown>): Promise<any> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return null;
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+      method: 'POST',
+      signal: AbortSignal.timeout(10_000),
+      redirect: 'error',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const json: any = await res.json();
+    if (!json?.ok) console.error(`Telegram ${method} failed`);
+    return json;
+  } catch {
+    console.error(`Telegram ${method} failed`);
+    return null;
+  }
+}
+
 /** Имя бота для deep-link. Берётся из Telegram, env — запасной вариант. */
 export function botUsername(): string {
   return cachedUsername || process.env.TELEGRAM_BOT_USERNAME || '';
@@ -48,7 +69,8 @@ export async function initTelegram(): Promise<void> {
       signal: AbortSignal.timeout(10_000),
       redirect: 'error',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url, secret_token: telegramWebhookSecret(), allowed_updates: ['message'] }),
+      // callback_query — кнопки «Опубликовать / Скрыть» под отзывами в чате поддержки
+      body: JSON.stringify({ url, secret_token: telegramWebhookSecret(), allowed_updates: ['message', 'callback_query'] }),
     }).then(r => r.json());
     if (res?.ok) console.log(`🤖 Telegram: вебхук установлен на ${url}`);
     else console.error('Telegram setWebhook failed');

@@ -2,8 +2,10 @@ import { Router, Request, Response } from 'express';
 import prisma from '../lib/prisma';
 import { tgSend } from '../lib/notify';
 import { telegramWebhookSecret } from '../lib/security';
-import { isServiceOwnerAccount } from '../lib/freeAccounts';
 import { messageGate, supportRecipient, supportRoute } from '../lib/telegramSupport';
+import { telegramApi as tg } from '../lib/telegram';
+import { resetSupportChat, supportChatId } from '../lib/supportChat';
+import { handleReviewCallback } from '../lib/reviews';
 
 import { hasNotifications } from '../lib/plans';
 import { errName } from '../lib/planner/util';
@@ -23,26 +25,6 @@ const router = Router();
 const SITE = (process.env.FRONTEND_URL || 'https://weddingcraft.ru').replace(/\/$/, '');
 const utm = (path: string, content: string) =>
   `${SITE}${path}?utm_source=telegram&utm_medium=bot&utm_campaign=${content}`;
-
-async function tg(method: string, body: Record<string, unknown>): Promise<any> {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
-  if (!token) return null;
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-      method: 'POST',
-      signal: AbortSignal.timeout(10_000),
-      redirect: 'error',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const json: any = await res.json();
-    if (!json?.ok) console.error(`Telegram ${method} failed`);
-    return json;
-  } catch {
-    console.error(`Telegram ${method} failed`);
-    return null;
-  }
-}
 
 // ─── Меню ────────────────────────────────────────
 const BTN = {
@@ -133,22 +115,7 @@ async function handleMenu(chatId: number, text: string): Promise<boolean> {
 }
 
 // ─── Поддержка ───────────────────────────────────
-let supportCache: { id: string; at: number } | null = null;
-
-/** Чат владельца для обращений. Кэш на 10 минут, чтобы не ходить в БД на каждое сообщение. */
-async function supportChatId(): Promise<string> {
-  const fromEnv = (process.env.TELEGRAM_SUPPORT_CHAT_ID || '').trim();
-  if (fromEnv) return /^[1-9]\d{0,15}$/.test(fromEnv) && Number.isSafeInteger(Number(fromEnv)) ? fromEnv : '';
-  if (supportCache && Date.now() - supportCache.at < 10 * 60_000) return supportCache.id;
-  const invites = await prisma.invitation.findMany({
-    where: { notifyTelegramChatId: { not: '' } },
-    select: { notifyTelegramChatId: true, user: { select: { email: true } } },
-    orderBy: { updatedAt: 'desc' },
-  });
-  const own = invites.find(i => isServiceOwnerAccount(i.user.email));
-  supportCache = { id: own?.notifyTelegramChatId || '', at: Date.now() };
-  return supportCache.id;
-}
+// Чат владельца — lib/supportChat.ts (туда же приходят отзывы пар).
 
 // Защита от потока сообщений: не больше 20 обращений в час от одного человека,
 // и «спасибо, передали» — не чаще раза в 10 минут.
@@ -214,6 +181,11 @@ router.post('/webhook', async (req: Request, res: Response) => {
     return res.status(403).send('Forbidden');
   }
   try {
+    // Кнопка под отзывом в чате поддержки («Опубликовать» / «Скрыть»)
+    if (req.body?.callback_query) {
+      await handleReviewCallback(req.body.callback_query);
+      return res.status(200).send('OK');
+    }
     const msg = req.body?.message;
     const text: string = typeof msg?.text === 'string' ? msg.text : '';
     const chatId = msg?.chat?.id;
@@ -237,7 +209,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
           data: { notifyTelegramChatId: String(chatId), notifyChannel: 'telegram', telegramConnectToken: '', telegramConnectExpiresAt: null },
         });
         if (!connected.count) return res.status(200).send('OK');
-        supportCache = null;   // вдруг это владелец подключил свой чат
+        resetSupportChat();   // вдруг это владелец подключил свой чат
         await tg('sendMessage', { chat_id: chatId, text: '✅ Уведомления подключены! Ответы гостей будут приходить сюда.', reply_markup: KEYBOARD });
       } else {
         await tgSend(chatId, 'Ссылка устарела. Сгенерируйте новую в кабинете WeddingCraft.');

@@ -23,7 +23,7 @@ const COLUMNS: { table: string; column: string; ddl: string }[] = [
 
 /* Миграции, написанные идемпотентно (CREATE … IF NOT EXISTS): новые таблицы бэкенд
    создаёт сам при запуске. Комментарии вычищаем — операторы режутся по «;». */
-const IDEMPOTENT_MIGRATIONS = ['20260928160000_print_orders', '20261006120000_planner', '20261007150000_payment_attempts', '20261008210000_email_lifecycle'];
+const IDEMPOTENT_MIGRATIONS = ['20260928160000_print_orders', '20261006120000_planner', '20261007150000_payment_attempts', '20261008210000_email_lifecycle', '20261016120000_reviews'];
 
 async function runMigration(dir: string): Promise<void> {
   const file = path.join(__dirname, '../../prisma/migrations', dir, 'migration.sql');

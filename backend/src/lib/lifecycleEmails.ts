@@ -10,6 +10,8 @@
 //                указано; пример шаблона не считается), иначе карта, программа, дресс-код;
 //   date_90    — до свадьбы ~3 месяца: пора рассылать (любой опубликованный сайт);
 //   date_60    — до свадьбы ~2 месяца, бесплатный тариф: успеть собрать ответы.
+//   after_wedding — через 2–10 дней после свадьбы, если пара ещё не оставила отзыв:
+//                попросить отзыв (без скидок и бонусов — просто вопрос).
 //
 // Бесплатная публикация не хранит дату, поэтому отсчёт free_* ведётся от
 // служебной отметки «mark:free_seen» — её ставит первый проход, увидевший сайт.
@@ -29,7 +31,7 @@ const SITE = (process.env.FRONTEND_URL || 'https://weddingcraft.ru').replace(/\/
 const API = (process.env.BACKEND_URL || 'https://api.weddingcraft.ru').replace(/\/$/, '');
 const MAX_PER_RUN = 60;
 
-type Kind = 'draft_24h' | 'free_1d' | 'free_4d' | 'date_90' | 'date_60';
+type Kind = 'draft_24h' | 'free_1d' | 'free_4d' | 'date_90' | 'date_60' | 'after_wedding';
 
 // ─── Отписка ────────────────────────────────────────────────────────────
 export function unsubscribeToken(userId: string): string {
@@ -158,6 +160,18 @@ export function letterFor(kind: Kind, i: InviteRow): Letter {
         ],
         cta: 'Подключить анкету', url: upgradeUrl(i, kind),
       };
+    case 'after_wedding':
+      return {
+        subject: 'Как прошла свадьба?',
+        title: names ? `${names}, поздравляем!` : 'Поздравляем со свадьбой!',
+        paragraphs: [
+          'Надеемся, день прошёл именно так, как вы мечтали.',
+          'Расскажите, как вам WeddingCraft: что понравилось и чего не хватило. Это пара минут — а нам очень поможет сделать сервис лучше.',
+          'Показывать ли отзыв на нашем сайте, решаете вы.',
+        ],
+        cta: 'Оставить отзыв',
+        url: `${SITE}/dashboard/${encodeURIComponent(i.id)}?review=1&utm_source=email&utm_medium=lifecycle&utm_campaign=${kind}`,
+      };
   }
 }
 
@@ -250,6 +264,9 @@ export async function runLifecycleEmails(now = Date.now()): Promise<void> {
     if (left === null) continue;
     if (left >= 84 && left <= 90) await deliver('date_90', l, l.user, now);
     else if (left >= 54 && left <= 60 && l.plan === 'free') await deliver('date_60', l, l.user, now);
+    else if (left <= -2 && left >= -10 && !(await prisma.review.findUnique({ where: { invitationId: l.id }, select: { id: true } }))) {
+      await deliver('after_wedding', l, l.user, now);
+    }
   }
 }
 
