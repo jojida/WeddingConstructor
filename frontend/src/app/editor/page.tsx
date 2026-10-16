@@ -857,6 +857,8 @@ function EditorContent() {
                               onFrame={fr => setPhotoFrame(f.id, fr)}
                               photoCutout={data.customData?.photoCutouts?.[f.id]}
                               onPhotoCutout={(photo, value) => setPhotoCutout(f.id, photo, value)}
+                              customIcons={data.customData?.scheduleIcons}
+                              onCustomIcons={icons => setCustom('scheduleIcons', icons)}
                             />
                           </div>
                         ))}
@@ -1030,7 +1032,7 @@ function CharCounter({ value, max }: { value: string; max: number }) {
   );
 }
 
-function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uploadImage, uploadAudio, frame, slot, onFrame, photoCutout, onPhotoCutout }: {
+function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uploadImage, uploadAudio, frame, slot, onFrame, photoCutout, onPhotoCutout, customIcons, onCustomIcons }: {
   field: TemplateField;
   templateId?: string;
   value: any;
@@ -1043,6 +1045,8 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
   onFrame: (f: PhotoFrame | null) => void;
   photoCutout?: PhotoCutout;
   onPhotoCutout?: (photo: PhotoCutout | null, value: string) => void;
+  customIcons?: string[];
+  onCustomIcons?: (icons: string[]) => void;
 }) {
   // Лимиты символов, чтобы длинный текст не ломал вёрстку шаблона.
   // Явный field.maxLength имеет приоритет; ссылки (URL) без лимита.
@@ -1100,7 +1104,8 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
         </Field>
       );
     case 'schedule':
-      return <ScheduleEditor value={value || []} onChange={onChange} iconSet={field.iconSet} withDesc={field.withDesc} noIcon={field.noIcon} />;
+      return <ScheduleEditor value={value || []} onChange={onChange} iconSet={field.iconSet} withDesc={field.withDesc} noIcon={field.noIcon}
+        apiBase={apiBase} uploadImage={uploadImage} customIcons={customIcons} onCustomIcons={onCustomIcons} />;
     case 'drinks':
       return <DrinksEditor value={value || []} onChange={onChange} />;
     case 'toggle': {
@@ -1453,11 +1458,84 @@ function ColorListEditor({ value, onChange }: { value: string[]; onChange: (v: s
   );
 }
 
-function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon }: {
+/** Своя иконка программы: уменьшить до 256 px, а если у картинки светлый непрозрачный фон по
+    краям (иконка «на белом»), сделать его прозрачным — иначе на цветной подложке шаблона будет
+    белый квадрат. Убирается только фон, связанный с краями: белые детали внутри рисунка остаются. */
+async function prepareIcon(file: File): Promise<File> {
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) return file;
+  const scale = Math.min(1, 256 / Math.max(bitmap.width, bitmap.height));
+  const w = Math.max(1, Math.round(bitmap.width * scale)), h = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, w, h);
+  const img = ctx.getImageData(0, 0, w, h);
+  const d = img.data;
+  const light = (p: number) => d[p * 4 + 3] > 0 && d[p * 4] > 215 && d[p * 4 + 1] > 215 && d[p * 4 + 2] > 215;
+  const corners = [0, w - 1, (h - 1) * w, h * w - 1];
+  if (corners.every(p => d[p * 4 + 3] > 250 && light(p))) {
+    const seen = new Uint8Array(w * h);
+    const stack: number[] = [];
+    const push = (x: number, y: number) => {
+      if (x < 0 || y < 0 || x >= w || y >= h) return;
+      const p = y * w + x;
+      if (seen[p]) return;
+      seen[p] = 1;
+      if (light(p)) stack.push(p);
+    };
+    for (let x = 0; x < w; x++) { push(x, 0); push(x, h - 1); }
+    for (let y = 0; y < h; y++) { push(0, y); push(w - 1, y); }
+    while (stack.length) {
+      const p = stack.pop() as number;
+      d[p * 4 + 3] = 0;
+      const x = p % w, y = (p - x) / w;
+      push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1);
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+  return blob ? new File([blob], 'icon.png', { type: 'image/png' }) : file;
+}
+
+const CUSTOM_ICONS_MAX = 12;
+
+function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon, apiBase, uploadImage, customIcons, onCustomIcons }: {
   value: ScheduleItem[]; onChange: (v: ScheduleItem[]) => void; iconSet?: string; withDesc?: boolean; noIcon?: boolean;
+  apiBase?: string; uploadImage?: (f: File) => Promise<string | null>;
+  customIcons?: string[]; onCustomIcons?: (icons: string[]) => void;
 }) {
   const items = Array.isArray(value) ? value : [];
-  const icons = (iconSet && ICON_SETS[iconSet]) || [];
+  const builtIn = (iconSet && ICON_SETS[iconSet]) || [];
+  // Свои иконки пары — в той же галерее, после иконок шаблона (хранятся в customData.scheduleIcons)
+  const own = builtIn.length > 0 && Array.isArray(customIcons) ? customIcons.filter(ic => typeof ic === 'string' && ic) : [];
+  const icons = [...builtIn, ...own.filter(ic => !builtIn.includes(ic))];
+  const canUpload = builtIn.length > 0 && !!uploadImage && !!onCustomIcons;
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploadFor, setUploadFor] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const src = (ic: string) => ic.startsWith('/') && !ic.startsWith('/invite/') ? `${apiBase || ''}${ic}` : ic;
+  // Пока файл загружается, пару могут поправить другие пункты — после загрузки берём свежие данные
+  const latest = useRef({ items, own, onChange, onCustomIcons });
+  useEffect(() => { latest.current = { items, own, onChange, onCustomIcons }; });
+  const upload = async (file: File, i: number) => {
+    setUploading(true);
+    try {
+      const url = await uploadImage!(await prepareIcon(file));
+      if (!url) return;
+      const now = latest.current;
+      now.onCustomIcons?.([...now.own.filter(ic => ic !== url), url].slice(-CUSTOM_ICONS_MAX));
+      if (now.items[i]) now.onChange(now.items.map((it, j) => (j === i ? { ...it, icon: url } : it)));
+    } finally {
+      setUploading(false);
+    }
+  };
+  // Убрать свою иконку из галереи: пункты с ней получают первую иконку шаблона
+  const forget = (ic: string) => {
+    onCustomIcons!(own.filter(x => x !== ic));
+    if (items.some(it => it.icon === ic)) onChange(items.map(it => (it.icon === ic ? { ...it, icon: builtIn[0] || '' } : it)));
+  };
   // Программа не может остаться пустой: последний пункт удалить нельзя.
   const lastOne = items.length <= 1;
   const update = (i: number, patch: Partial<ScheduleItem>) =>
@@ -1470,17 +1548,41 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon }: {
   const add = () => onChange([...items, { time: '', title: '', icon: icons[0] || '', ...(withDesc ? { desc: '' } : {}) }]);
   return (
     <div style={{ marginBottom: 4 }}>
+      {canUpload && (
+        <input ref={fileRef} type="file" accept="image/png,image/webp,image/jpeg" style={{ display: 'none' }}
+          onChange={async e => {
+            const f = e.target.files?.[0];
+            if (f && uploadFor !== null) await upload(f, uploadFor);
+            if (fileRef.current) fileRef.current.value = '';
+          }} />
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {items.map((item, i) => (
           <div key={i} style={{ padding: 9, background: '#fafaf7', border: '1px solid rgba(206,197,186,0.4)', borderRadius: 10 }}>
             {icons.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 7 }}>
-                {icons.map(ic => (
-                  <button key={ic} type="button" onClick={() => update(i, { icon: ic })}
-                    style={{ width: 34, height: 34, padding: 3, borderRadius: 8, cursor: 'pointer', background: item.icon === ic ? '#efe3d2' : '#fff', border: item.icon === ic ? '2px solid #b08f4f' : '1px solid rgba(206,197,186,0.6)' }}>
-                    <img src={ic} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                {icons.map(ic => {
+                  const mine = own.includes(ic);
+                  return (
+                    <span key={ic} style={{ position: 'relative', display: 'inline-flex' }}>
+                      <button type="button" onClick={() => update(i, { icon: ic })} aria-label={mine ? 'Своя иконка' : 'Иконка шаблона'} aria-pressed={item.icon === ic}
+                        style={{ width: 34, height: 34, padding: 3, borderRadius: 8, cursor: 'pointer', background: item.icon === ic ? '#efe3d2' : '#fff', border: item.icon === ic ? '2px solid #b08f4f' : '1px solid rgba(206,197,186,0.6)' }}>
+                        <img src={src(ic)} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      </button>
+                      {mine && (
+                        <button type="button" onClick={() => forget(ic)} title="Убрать из галереи" aria-label="Убрать свою иконку из галереи"
+                          style={{ position: 'absolute', top: -5, right: -5, width: 15, height: 15, padding: 0, border: 'none', borderRadius: '50%', background: '#b8a99a', color: '#fff', fontSize: 10, lineHeight: '15px', cursor: 'pointer' }}>×</button>
+                      )}
+                    </span>
+                  );
+                })}
+                {canUpload && own.length < CUSTOM_ICONS_MAX && (
+                  <button type="button" disabled={uploading} onClick={() => { setUploadFor(i); fileRef.current?.click(); }}
+                    title="Загрузить свою иконку: PNG с прозрачным фоном или картинку на белом — фон уберём" aria-label="Загрузить свою иконку"
+                    style={{ width: 34, height: 34, padding: 0, borderRadius: 8, cursor: uploading ? 'wait' : 'pointer', background: '#fff', border: '1.5px dashed rgba(176,143,79,0.7)', color: '#b08f4f', fontSize: 18, lineHeight: 1 }}>
+                    {uploading && uploadFor === i ? '…' : '+'}
                   </button>
-                ))}
+                )}
               </div>
             )}
             {/* Название — отдельной строкой во всю ширину: в одной строке со временем и
