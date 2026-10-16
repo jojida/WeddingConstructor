@@ -3,7 +3,7 @@ import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize } from 'lucide-react';
+import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize, Plus, X, ArrowUp, ArrowDown } from 'lucide-react';
 import api from '@/lib/api';
 import { readStorage, writeStorage } from '@/lib/browser-storage';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
@@ -1019,6 +1019,8 @@ function EditorContent() {
 // ─── Движок полей по схеме шаблона ─────────────────────────────────────────────
 const iconBtn = (disabled: boolean): React.CSSProperties => ({
   width: 26, height: 26, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 6,
+  // Значок — векторный и по центру: текстовые «×» и «↑» у шрифта сидят ниже середины
+  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
   background: '#fff', cursor: disabled ? 'default' : 'pointer', fontSize: 14, lineHeight: 1,
   color: disabled ? '#ccc' : '#685d4a', padding: 0,
 });
@@ -1444,7 +1446,7 @@ function ColorListEditor({ value, onChange }: { value: string[]; onChange: (v: s
           <div key={c + i} title={c} className={`${styles.swatch} ${styles.swatchActive}`}
             style={{ background: c, position: 'relative' }}
             onClick={() => onChange(colors.filter((_, j) => j !== i))}>
-            <div style={{ position: 'absolute', top: -5, right: -5, background: '#e74c3c', color: 'white', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, cursor: 'pointer' }}>×</div>
+            <div style={{ position: 'absolute', top: -5, right: -5, background: '#e74c3c', color: 'white', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={9} strokeWidth={3} aria-hidden /></div>
           </div>
         ))}
       </div>
@@ -1571,7 +1573,7 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon, apiBase, u
                       </button>
                       {mine && (
                         <button type="button" onClick={() => forget(ic)} title="Убрать из галереи" aria-label="Убрать свою иконку из галереи"
-                          style={{ position: 'absolute', top: -5, right: -5, width: 15, height: 15, padding: 0, border: 'none', borderRadius: '50%', background: '#b8a99a', color: '#fff', fontSize: 10, lineHeight: '15px', cursor: 'pointer' }}>×</button>
+                          style={{ position: 'absolute', top: -5, right: -5, width: 15, height: 15, padding: 0, border: 'none', borderRadius: '50%', background: '#b8a99a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}><X size={10} strokeWidth={3} aria-hidden /></button>
                       )}
                     </span>
                   );
@@ -1579,8 +1581,8 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon, apiBase, u
                 {canUpload && own.length < CUSTOM_ICONS_MAX && (
                   <button type="button" disabled={uploading} onClick={() => { setUploadFor(i); fileRef.current?.click(); }}
                     title="Загрузить свою иконку: PNG с прозрачным фоном или картинку на белом — фон уберём" aria-label="Загрузить свою иконку"
-                    style={{ width: 34, height: 34, padding: 0, borderRadius: 8, cursor: uploading ? 'wait' : 'pointer', background: '#fff', border: '1.5px dashed rgba(176,143,79,0.7)', color: '#b08f4f', fontSize: 18, lineHeight: 1 }}>
-                    {uploading && uploadFor === i ? '…' : '+'}
+                    style={{ width: 34, height: 34, padding: 0, borderRadius: 8, cursor: uploading ? 'wait' : 'pointer', background: '#fff', border: '1.5px dashed rgba(176,143,79,0.7)', color: '#b08f4f', fontSize: 16, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {uploading && uploadFor === i ? '…' : <Plus size={18} strokeWidth={2} aria-hidden />}
                   </button>
                 )}
               </div>
@@ -1593,11 +1595,11 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon, apiBase, u
                 <input className="input-field" style={{ padding: '6px 2px', fontSize: 16, textAlign: 'center' }} placeholder="✦" value={item.icon} onChange={e => update(i, { icon: e.target.value })} title="Эмодзи (необязательно)" />
               )}
               <div style={{ display: 'flex', gap: 2, justifySelf: 'end' }}>
-                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} style={iconBtn(i === 0)}>↑</button>
-                <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} style={iconBtn(i === items.length - 1)}>↓</button>
-                <button type="button" onClick={() => remove(i)} disabled={lastOne}
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} style={iconBtn(i === 0)} aria-label="Выше"><ArrowUp size={14} strokeWidth={2} aria-hidden /></button>
+                <button type="button" onClick={() => move(i, 1)} disabled={i === items.length - 1} style={iconBtn(i === items.length - 1)} aria-label="Ниже"><ArrowDown size={14} strokeWidth={2} aria-hidden /></button>
+                <button type="button" onClick={() => remove(i)} disabled={lastOne} aria-label="Удалить пункт"
                   title={lastOne ? 'Программа не может быть пустой — сначала добавьте другой пункт' : 'Удалить пункт'}
-                  style={{ ...iconBtn(lastOne), color: lastOne ? '#ccc' : '#e74c3c' }}>×</button>
+                  style={{ ...iconBtn(lastOne), color: lastOne ? '#ccc' : '#e74c3c' }}><X size={15} strokeWidth={2.2} aria-hidden /></button>
               </div>
             </div>
             <input className="input-field" style={{ marginTop: 6, padding: '7px 10px', fontSize: 13 }} placeholder="Событие, например «Сбор гостей»"
@@ -1631,7 +1633,7 @@ function DrinksEditor({ value, onChange }: {
         {items.map((it, i) => (
           <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 6, alignItems: 'center' }}>
             <input className="input-field" style={{ padding: '7px 8px', fontSize: 13 }} placeholder="Напиток" value={it.label} onChange={e => update(i, e.target.value)} />
-            <button type="button" onClick={() => remove(i)} style={{ ...iconBtn(false), color: '#e74c3c' }}>×</button>
+            <button type="button" onClick={() => remove(i)} aria-label="Удалить напиток" style={{ ...iconBtn(false), color: '#e74c3c' }}><X size={15} strokeWidth={2.2} aria-hidden /></button>
           </div>
         ))}
       </div>
