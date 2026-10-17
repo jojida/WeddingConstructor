@@ -27,6 +27,11 @@ function distance(a: string, b: string): number {
   return d[a.length][b.length];
 }
 
+/* Mail.ru (17.10.26) отклоняет часть наших писем с кодом как спам
+   («550 spam message rejected») — подсказываем другую почту, если код не пришёл. */
+const MAILRU = new Set(['mail.ru', 'bk.ru', 'inbox.ru', 'list.ru', 'internet.ru', 'mail.ua']);
+export const isMailRuAddress = (email: string): boolean => MAILRU.has(email.trim().toLowerCase().split('@')[1] || '');
+
 /** Исправленный адрес, если в домене похоже на опечатку, иначе null. */
 export function emailTypoFix(email: string): string | null {
   const m = /^([^@\s]+)@([^@\s]+)$/.exec(email.trim().toLowerCase());

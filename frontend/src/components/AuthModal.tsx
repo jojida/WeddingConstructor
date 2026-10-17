@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import { emailTypoFix } from '@/lib/email-typo';
+import { emailTypoFix, isMailRuAddress } from '@/lib/email-typo';
 import { useAuthStore } from '@/store/auth';
 import styles from './AuthModal.module.css';
 
@@ -153,6 +153,12 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
             >
               {loading ? 'Проверка...' : '✦ Войти'}
             </button>
+            {resendIn === 0 && isMailRuAddress(email) && (
+              <p className={styles.typo} role="note">
+                Письма на Mail.ru сейчас иногда не доходят. Если кода нет и в «Спаме», укажите почту Gmail или Яндекс —
+                нажмите «Изменить email».
+              </p>
+            )}
             <button
               type="button"
               className={styles.linkBtn}

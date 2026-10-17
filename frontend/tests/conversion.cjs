@@ -9,7 +9,7 @@ require.extensions['.ts'] = (module, filename) => {
   }).outputText, filename);
 };
 
-const { emailTypoFix } = require('../src/lib/email-typo.ts');
+const { emailTypoFix, isMailRuAddress } = require('../src/lib/email-typo.ts');
 const { freeLosses } = require('../src/lib/free-losses.ts');
 
 test('подсказка при опечатке в домене почты', () => {
@@ -21,6 +21,11 @@ test('подсказка при опечатке в домене почты', ()
   // Настоящие адреса не трогаем, в том числе похожие на популярные
   for (const ok of ['anna@gmail.com', 'anna@mail.ru', 'anna@mail.com', 'anna@live.ru', 'anna@ukr.net',
     'anna@company.ru', 'anna@weddingcraft.ru', 'не почта', 'anna@', '']) assert.equal(emailTypoFix(ok), null, ok);
+});
+
+test('адреса Mail.ru распознаются для подсказки «укажите другую почту»', () => {
+  for (const email of ['anna@mail.ru', ' Anna@BK.ru ', 'anna@inbox.ru', 'anna@list.ru']) assert.equal(isMailRuAddress(email), true, email);
+  for (const email of ['anna@gmail.com', 'anna@yandex.ru', 'mail.ru', '']) assert.equal(isMailRuAddress(email), false, email);
 });
 
 test('на бесплатном тарифе — что гости не увидят, словами пары', () => {

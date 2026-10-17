@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
-import { emailTypoFix } from '@/lib/email-typo';
+import { emailTypoFix, isMailRuAddress } from '@/lib/email-typo';
 import { useAuthStore } from '@/store/auth';
 import styles from './page.module.css';
 
@@ -129,6 +129,12 @@ export default function AuthPage() {
             <button type="submit" className="btn-primary" disabled={loading || code.length < 6} style={{ width: '100%', marginTop: 8 }}>
               {loading ? 'Проверка…' : 'Войти'}
             </button>
+            {resendIn === 0 && isMailRuAddress(email) && (
+              <p className={styles.typo} role="note" style={{ marginTop: 12 }}>
+                Письма на Mail.ru сейчас иногда не доходят. Если кода нет и в «Спаме», укажите почту Gmail или Яндекс —
+                нажмите «Изменить email».
+              </p>
+            )}
             <button
               type="button"
               onClick={() => sendCode()}
