@@ -26,7 +26,7 @@ router.post('/send-code', rateLimit(10, 15 * 60_000), rateLimit(3, 10 * 60_000, 
     });
     if (isEmailConfigured()) {
       await sendEmail({ to: email, subject: 'Код для входа — WeddingCraft',
-        text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.` });
+        text: `Ваш код подтверждения: ${code}\nОн действителен 10 минут.`, critical: true });
     } else if (dev) {
       console.log(`[DEV AUTH CODE] ${email}: ${code}`);
     }
