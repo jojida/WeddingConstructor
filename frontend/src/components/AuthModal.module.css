@@ -85,6 +85,20 @@
   font-family: var(--font-inter);
 }
 
+/* «Возможно, вы имели в виду …@gmail.com?» */
+.typo { margin: 4px 0 0; font-size: 13px; line-height: 1.45; color: #8a5a2b; font-family: var(--font-inter); }
+.typoFix {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-weight: 600; color: inherit; text-decoration: underline;
+}
+
+/* «Отправить код ещё раз», «Изменить email» */
+.linkBtn {
+  width: 100%; padding: 6px 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-inter); font-size: 13px; color: var(--on-surface-variant); text-decoration: underline;
+}
+.linkBtn:disabled { cursor: default; text-decoration: none; opacity: .6; }
+
 .privacy {
   margin-top: 14px; text-align: center;
   font-size: 11px; color: var(--outline); line-height: 1.5;

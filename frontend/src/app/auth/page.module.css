@@ -100,3 +100,10 @@
   font-size: 14px; text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* «Возможно, вы имели в виду …@gmail.com?» */
+.typo { margin: 4px 0 0; font-size: 13px; line-height: 1.45; color: #8a5a2b; font-family: var(--font-inter); }
+.typoFix {
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-weight: 600; color: inherit; text-decoration: underline;
+}

@@ -93,6 +93,16 @@
   font-family: var(--font-inter); font-size: 15px; line-height: 1.6;
   color: var(--on-surface-variant); margin: 0 auto 28px; max-width: 480px;
 }
+/* «На бесплатном тарифе гости не видят: …» — словами пары */
+.upgradeLosses {
+  max-width: 480px; margin: 6px auto 18px; padding: 16px 18px; text-align: left;
+  background: #fdf3ef; border: 1px solid #f1d9cf; border-radius: 16px;
+  font-family: var(--font-inter); color: #6e4337;
+}
+.upgradeLossesTitle { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+.upgradeLosses ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.upgradeLosses li { position: relative; padding-left: 22px; font-size: 14px; line-height: 1.45; }
+.upgradeLosses li::before { content: '✕'; position: absolute; left: 1px; top: 0; font-size: 12px; line-height: 1.75; color: #c0675a; }
 .upgradeGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; text-align: left; }
 .upgradeCard {
   position: relative; display: flex; flex-direction: column;

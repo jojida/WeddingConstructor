@@ -132,17 +132,20 @@ async function paymentStatus(inviteId: string) {
   let invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
   if (!invite) return null;
   let paymentStatus: string | undefined;
+  // Сколько списано на самом деле (с промокодом и доплатой) — доход цели «Оплатил»
+  let amount: number | undefined;
   if (invite.paymentId && !['dev_test', 'free_account'].includes(invite.paymentId) && kassaAuth().configured) {
     try {
       const payment = await kassaRequest('GET', `/payments/${invite.paymentId}`);
       const attempt = await prisma.paymentAttempt.findUnique({ where: { invitationId: invite.id } });
       if (matchesInvitationPayment(payment, invite, attempt)) {
         paymentStatus = payment.status;
+        if (payment.status === 'succeeded' && payment.amount?.currency === 'RUB') amount = Number(payment.amount.value) || undefined;
         if (await confirmInvitationPayment(payment)) invite = (await prisma.invitation.findUnique({ where: { id: invite.id } }))!;
       }
     } catch { paymentStatus = 'unavailable'; }
   }
-  return { paid: isPaid(invite.status), status: invite.status, plan: invite.plan, slug: invite.slug, paidAt: invite.paidAt, paymentStatus };
+  return { paid: isPaid(invite.status), status: invite.status, plan: invite.plan, slug: invite.slug, paidAt: invite.paidAt, paymentStatus, amount };
 }
 
 // A return token grants only billing status for one invitation, not account access.

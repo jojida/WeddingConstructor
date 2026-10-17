@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { emailTypoFix } from '@/lib/email-typo';
 import { useAuthStore } from '@/store/auth';
 import styles from './AuthModal.module.css';
 
@@ -15,7 +16,12 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendIn, setResendIn] = useState(0); // секунд до повторной отправки
   const { setAuth } = useAuthStore();
+  /* Почти каждый третий, запросивший код, так и не входил, а неверный код вводили
+     единицы — письмо не доходит или лежит в «Спаме». Поэтому: подсказка про спам,
+     повторная отправка, подсказка при опечатке в адресе и цифровая клавиатура. */
+  const typoFix = emailTypoFix(email);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -23,12 +29,20 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const handleSendCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn(s => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
+  const handleSendCode = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setLoading(true);
     try {
       await api.post('/api/auth/send-code', { email });
       setStep('code');
+      setCode('');
+      setResendIn(60);
       toast.success('Код отправлен!');
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Ошибка отправки кода');
@@ -37,11 +51,10 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
     }
   };
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verify = async (value: string) => {
     setLoading(true);
     try {
-      const res = await api.post('/api/auth/verify-code', { email, code });
+      const res = await api.post('/api/auth/verify-code', { email, code: value });
       setAuth(res.data.user, res.data.token);
       toast.success('Добро пожаловать!');
       onSuccess();
@@ -50,6 +63,15 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerifyCode = (e: React.FormEvent) => { e.preventDefault(); void verify(code); };
+
+  // Код вставили из письма или набрали шестую цифру — входим сразу, без лишнего нажатия
+  const onCodeChange = (raw: string) => {
+    const value = raw.replace(/\D/g, '').slice(0, 6);
+    setCode(value);
+    if (value.length === 6 && !loading) void verify(value);
   };
 
   return (
@@ -67,7 +89,7 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
           <p className={styles.subtitle}>
             {step === 'email'
               ? 'Пришлём код на вашу почту, чтобы сохранить приглашение.'
-              : `Код отправлен на ${email}`}
+              : `Код отправлен на ${email}. Письмо приходит за минуту — если его нет во «Входящих», загляните в «Спам».`}
           </p>
         </div>
 
@@ -84,7 +106,15 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
                 onChange={e => setEmail(e.target.value)}
                 required
                 autoFocus
+                autoComplete="email"
+                aria-describedby={typoFix ? 'modal-email-typo' : undefined}
               />
+              {typoFix && (
+                <p id="modal-email-typo" className={styles.typo}>
+                  Возможно, вы имели в виду{' '}
+                  <button type="button" className={styles.typoFix} onClick={() => setEmail(typoFix)}>{typoFix}</button>?
+                </p>
+              )}
             </div>
             <button
               id="modal-submit-email"
@@ -104,12 +134,13 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
                 id="modal-code"
                 className="input-field"
                 type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
                 placeholder="123456"
                 value={code}
-                onChange={e => setCode(e.target.value)}
+                onChange={e => onCodeChange(e.target.value)}
                 required
                 autoFocus
-                maxLength={6}
                 style={{ textAlign: 'center', fontSize: '20px', letterSpacing: '4px' }}
               />
             </div>
@@ -124,12 +155,16 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
             </button>
             <button
               type="button"
-              onClick={() => setStep('email')}
-              style={{
-                width: '100%', marginTop: '12px', background: 'none', border: 'none',
-                color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
+              className={styles.linkBtn}
+              onClick={() => handleSendCode()}
+              disabled={loading || resendIn > 0}
+            >
+              {resendIn > 0 ? `Отправить код ещё раз — через ${resendIn} с` : 'Отправить код ещё раз'}
+            </button>
+            <button
+              type="button"
+              className={styles.linkBtn}
+              onClick={() => { setStep('email'); setCode(''); }}
             >
               Изменить email
             </button>

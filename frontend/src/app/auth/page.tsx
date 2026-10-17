@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { emailTypoFix } from '@/lib/email-typo';
 import { useAuthStore } from '@/store/auth';
 import styles from './page.module.css';
 
@@ -40,11 +41,21 @@ export default function AuthPage() {
     }
   };
 
-  const verifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const typoFix = emailTypoFix(email);
+
+  // Код вставили из письма или набрали шестую цифру — входим сразу
+  const onCodeChange = (raw: string) => {
+    const value = raw.replace(/\D/g, '').slice(0, 6);
+    setCode(value);
+    if (value.length === 6 && !loading) void verify(value);
+  };
+
+  const verifyCode = (e: React.FormEvent) => { e.preventDefault(); void verify(code); };
+
+  const verify = async (value: string) => {
     setLoading(true);
     try {
-      const res = await api.post('/api/auth/verify-code', { email, code });
+      const res = await api.post('/api/auth/verify-code', { email, code: value });
       setAuth(res.data.user, res.data.token);
       toast.success('Добро пожаловать!');
       router.push('/dashboard');
@@ -67,7 +78,7 @@ export default function AuthPage() {
         <p className={styles.subtitle}>
           {step === 'email'
             ? 'Пришлём код на вашу почту. Новый аккаунт создастся автоматически.'
-            : `Код отправлен на ${email}. Если письма нет, проверьте «Спам».`}
+            : `Код отправлен на ${email}. Письмо приходит за минуту — если его нет во «Входящих», загляните в «Спам».`}
         </p>
 
         {step === 'email' ? (
@@ -83,7 +94,15 @@ export default function AuthPage() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 autoFocus
+                autoComplete="email"
+                aria-describedby={typoFix ? 'auth-email-typo' : undefined}
               />
+              {typoFix && (
+                <p id="auth-email-typo" className={styles.typo}>
+                  Возможно, вы имели в виду{' '}
+                  <button type="button" className={styles.typoFix} onClick={() => setEmail(typoFix)}>{typoFix}</button>?
+                </p>
+              )}
             </div>
             <button type="submit" className="btn-primary" disabled={loading || !email} style={{ width: '100%', marginTop: 8 }}>
               {loading ? 'Отправка…' : 'Получить код'}
@@ -98,12 +117,12 @@ export default function AuthPage() {
                 className="input-field"
                 type="text"
                 inputMode="numeric"
+                autoComplete="one-time-code"
                 placeholder="123456"
                 value={code}
-                onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
+                onChange={e => onCodeChange(e.target.value)}
                 required
                 autoFocus
-                maxLength={6}
                 style={{ textAlign: 'center', fontSize: 20, letterSpacing: 4 }}
               />
             </div>

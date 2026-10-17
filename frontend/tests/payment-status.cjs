@@ -9,7 +9,7 @@ const source = ts.transpileModule(fs.readFileSync(path.join(__dirname, '../src/a
   compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, target: ts.ScriptTarget.ES2020, esModuleInterop: true },
 }).outputText;
 
-function harness(query, response) {
+function harness(query, response, shared = { storage: new Map(), goals: [] }) {
   const effects = [], state = [], timers = new Map(), requests = [];
   const context = {
     exports: {}, AbortController, Date, URLSearchParams,
@@ -31,7 +31,16 @@ function harness(query, response) {
       } }, __esModule: true };
       if (name === '@/store/auth') return { useAuthStore: selector => selector({ user: null }) };
       if (name === '@/lib/constants') return { isAdvancedPlan: () => false, LEGAL: {} };
-      if (name === '@/lib/metrika') return { reachGoal() {}, GOAL: {} };
+      if (name === '@/lib/metrika') return {
+        reachGoal: (goal, params) => shared.goals.push([goal, params]),
+        GOAL: { freePublish: 'free_publish', paymentSuccess: 'payment_success', upgradeClick: 'upgrade_click' },
+      };
+      if (name === '@/lib/browser-storage') return {
+        readStorage: (kind, key) => shared.storage.get(key) ?? null,
+        writeStorage: (kind, key, value) => shared.storage.set(key, value),
+      };
+      if (name === '@/lib/free-losses') return { freeLosses: () => [] };
+      if (name === '@/lib/own-place') return { ownPlace: () => ({ venue: '', address: '' }), quotePlace: text => text };
       throw new Error(`Unexpected import ${name}`);
     },
   };
@@ -85,4 +94,21 @@ test('expired payment capability stops polling and asks the owner to log in', as
   assert.equal(h.state[2], 'auth-required');
   assert.equal(h.timers.size, 0);
   h.dispose();
+});
+
+test('payment goal carries the charged amount and is sent once per invitation and plan', async () => {
+  const shared = { storage: new Map(), goals: [] };
+  const paid = async () => ({ data: { paid: true, plan: 'premium', slug: 'couple', amount: 2490 } });
+  const visit = async (query, response) => { const h = harness(query, response, shared); await flush(); h.dispose(); };
+  await visit('id=invite&plan=premium&token=capability', paid);
+  // Объекты созданы в контексте vm — сравниваем через JSON, а не по прототипу
+  assert.equal(JSON.stringify(shared.goals), JSON.stringify([['payment_success', { plan: 'premium', order_price: 2490, currency: 'RUB' }]]));
+  // Перезагрузка страницы успеха не удваивает оплату и доход
+  await visit('id=invite&plan=premium&token=capability', paid);
+  assert.equal(shared.goals.length, 1);
+  // Бесплатная публикация — своя цель и без дохода
+  await visit('id=other&plan=free', async () => ({ data: { paid: true, plan: 'free', slug: 'other' } }));
+  assert.equal(shared.goals.length, 2);
+  assert.equal(shared.goals[1][0], 'free_publish');
+  assert.equal(shared.goals[1][1], undefined);
 });

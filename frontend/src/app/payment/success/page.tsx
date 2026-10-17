@@ -4,9 +4,12 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { readStorage, writeStorage } from '@/lib/browser-storage';
 import { useAuthStore } from '@/store/auth';
 import { isAdvancedPlan, LEGAL, PLANS } from '@/lib/constants';
+import { freeLosses } from '@/lib/free-losses';
 import { reachGoal, GOAL } from '@/lib/metrika';
+import { ownPlace, quotePlace } from '@/lib/own-place';
 import styles from './page.module.css';
 
 /* ЮKassa возвращает покупателя на return_url ЛЮБЫМ исходом — и после успешной
@@ -33,14 +36,37 @@ const UPGRADE_HIGHLIGHTS: Record<string, string[]> = {
 };
 
 /** Предложение после бесплатной публикации: сайт уже работает, платный тариф
-    включает остальное на этой же ссылке. */
+    включает остальное на этой же ссылке. Говорит словами пары, что гости сейчас
+    не видят (место «…», программа, анкета), — после публикации пары в редактор
+    не возвращаются, это последний момент, когда предложение увидят. */
 function UpgradeOffer({ inviteId }: { inviteId: string }) {
   const plans = PLANS.filter(p => UPGRADE_HIGHLIGHTS[p.id]);
+  const [losses, setLosses] = useState<string[]>([]);
+  const [venue, setVenue] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    api.get(`/api/invites/${encodeURIComponent(inviteId)}`)
+      .then(res => {
+        if (cancelled) return;
+        setLosses(freeLosses(res.data));
+        setVenue(ownPlace(res.data).venue);
+      })
+      .catch(() => { /* без входа — общий текст предложения */ });
+    return () => { cancelled = true; };
+  }, [inviteId]);
   return (
     <section className={styles.upgrade} aria-labelledby="upgrade-title">
       <h2 id="upgrade-title" className={styles.upgradeTitle}>
-        Выберите тариф и <em>разблокируйте все функции</em>
+        {venue
+          ? <>Гости пока не видят <em>{quotePlace(venue)}</em></>
+          : <>Выберите тариф и <em>разблокируйте все функции</em></>}
       </h2>
+      {losses.length > 0 && (
+        <div className={styles.upgradeLosses}>
+          <div className={styles.upgradeLossesTitle}>На бесплатном тарифе гости не видят:</div>
+          <ul>{losses.map(item => <li key={item}>{item}</li>)}</ul>
+        </div>
+      )}
       <p className={styles.upgradeText}>
         Всё появится на этом же сайте — ссылка для гостей не изменится.
         Разовая оплата, без подписки.
@@ -126,9 +152,19 @@ function SuccessContent() {
         if (st.data.paymentStatus) setPaymentStatus(st.data.paymentStatus);
         if (st.data.paid && (!targetPlan || st.data.plan === targetPlan)) {
           stop();
-          // Бесплатный тариф тоже приходит сюда как «paid» — в оплаты его не пишем.
-          if (st.data.plan === 'free') reachGoal(GOAL.freePublish);
-          else reachGoal(GOAL.paymentSuccess, { plan: st.data.plan });
+          // Цель — один раз на приглашение и тариф: перезагрузка страницы не должна
+          // удваивать оплаты и доход. Бесплатный тариф тоже приходит сюда как «paid» —
+          // в оплаты его не пишем. Сумма из кассы (с промокодом и доплатой) — доход
+          // цели: по нему Директ считает окупаемость.
+          const goalKey = `wc_goal_sent:${inviteId}:${st.data.plan}`;
+          if (!readStorage('localStorage', goalKey)) {
+            writeStorage('localStorage', goalKey, '1');
+            if (st.data.plan === 'free') reachGoal(GOAL.freePublish);
+            else reachGoal(GOAL.paymentSuccess, {
+              plan: st.data.plan,
+              ...(st.data.amount > 0 ? { order_price: st.data.amount, currency: 'RUB' } : {}),
+            });
+          }
           setInvite({ id: inviteId, slug: st.data.slug, plan: st.data.plan });
           setState('paid');
           return;
