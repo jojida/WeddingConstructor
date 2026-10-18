@@ -20,6 +20,17 @@ const nextConfig: NextConfig = {
       headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
     }];
   },
+  /* www.weddingcraft.ru открывал сайт как отдельный адрес, и поисковики индексировали
+     дубли (www.weddingcraft.ru/oferta, /privacy…). 301 — на основной адрес с тем же
+     путём и параметрами: так Яндекс склеивает зеркала, а вес ссылок не делится. */
+  async redirects() {
+    return [{
+      source: '/:path*',
+      has: [{ type: 'host', value: 'www.weddingcraft.ru' }],
+      destination: 'https://weddingcraft.ru/:path*',
+      statusCode: 301,
+    }];
+  },
   /* В разработке Next пропускает к себе только localhost. Для работы со
      студии с телефона или второго компьютера разрешаем адреса локальной
      сети — на продакшн-сборку это не влияет. */
