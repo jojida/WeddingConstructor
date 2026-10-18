@@ -78,7 +78,7 @@ export default function TemplatesPage() {
             {TEMPLATES.length} дизайнов для вашего дня. Откройте пример и найдите свой стиль.
           </p>
           <p className={styles.subtitle} style={{ marginTop: 6, fontSize: 14, opacity: 0.85 }}>
-            Редактор без регистрации. Начать можно бесплатно.
+            Редактор без регистрации: сделать и посмотреть — бесплатно, оплата при публикации.
           </p>
           <div className={styles.names}>
             <div className={styles.namesTitle} id="catalog-names-title">Посмотрите шаблоны со своими именами</div>

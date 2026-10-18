@@ -91,29 +91,6 @@
 .planFeatures { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .planFeature { font-size: 14px; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 8px; font-family: var(--font-inter); }
 
-/* «На бесплатном тарифе гости не увидят: …» — при выборе бесплатного тарифа */
-.losses {
-  max-width: 640px; margin: 0 auto 28px; padding: 22px 24px;
-  background: rgba(255, 202, 202, 0.06);
-  border: 1px solid rgba(255, 202, 202, 0.22);
-  border-radius: 16px;
-}
-.lossesTitle { font-family: var(--font-playfair); font-size: 20px; color: #fff; margin-bottom: 12px; }
-.lossesList { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 0 0 18px; padding: 0; }
-.lossesList li {
-  position: relative; padding-left: 26px;
-  font-size: 15px; line-height: 1.45; color: rgba(255,255,255,0.8); font-family: var(--font-inter);
-}
-.lossesList li::before { content: '✕'; position: absolute; left: 2px; top: 0; color: #ffb4ab; font-size: 13px; line-height: 1.7; }
-.lossesBtn {
-  display: block; width: 100%; padding: 13px 18px; border: 0; border-radius: 999px; cursor: pointer;
-  background: linear-gradient(135deg, var(--primary-fixed-dim), var(--primary)); color: #fff;
-  font-family: var(--font-inter); font-size: 15px; font-weight: 600; line-height: 1.3;
-}
-.lossesBtn:hover { filter: brightness(1.06); }
-.lossesBtn:focus-visible { outline: 2px solid var(--primary-fixed-dim); outline-offset: 3px; }
-.lossesNote { margin-top: 10px; text-align: center; font-size: 12px; color: rgba(255,255,255,0.4); font-family: var(--font-inter); }
-
 /* Место и адрес перед оплатой — если их нет или там пример из шаблона */
 .place {
   max-width: 640px; margin: 0 auto 28px; padding: 22px 24px;
@@ -128,7 +105,6 @@
 .place input[aria-invalid='true'] { border-color: #ef9a9a; }
 .placeError { margin-top: 10px; font-size: 13px; color: #ffb4ab; font-family: var(--font-inter); }
 @media (max-width: 560px) {
-  .losses { padding: 18px 16px; }
   .place { padding: 18px 16px; }
   .placeFields { grid-template-columns: 1fr; }
 }

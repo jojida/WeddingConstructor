@@ -9,7 +9,6 @@ import { planPriceDue } from '@/lib/plans';
 import { PLANS, LEGAL } from '@/lib/constants';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import { ownPlace } from '@/lib/own-place';
-import { freeLosses } from '@/lib/free-losses';
 import styles from './page.module.css';
 
 function PaymentContent() {
@@ -80,19 +79,6 @@ function PaymentContent() {
   const alreadyConnected = published && invite?.plan === selectedPlan && !isFree;
   const askPlace = !!place && !freePublication && !alreadyConnected;
   const placeMissing = !!place && (!place.venue.trim() || !place.address.trim());
-  /* Выбор тарифа — единственный момент продажи: сайт делают минут за 15 и после
-     публикации в редактор не возвращаются. В черновике пара видела всё, поэтому
-     при «Бесплатном» прямо называем, что из её приглашения гости не увидят. */
-  const losses = invite && selectedPlan === 'free' && !isFree && !alreadyConnected ? freeLosses(invite) : [];
-  const premium = PLANS.find(p => p.id === 'premium');
-
-  // Выбор «Бесплатного» — шаг воронки: по умолчанию выбран «Премиум», так что
-  // это осознанный выбор. В паре с upgrade_click (from=payment_free_losses) видно,
-  // меняют ли решение после списка «что гости не увидят».
-  const choosePlan = (id: string) => {
-    if (id === 'free' && selectedPlan !== 'free') reachGoal(GOAL.planFree);
-    setSelectedPlan(id);
-  };
 
   const handlePay = async () => {
     if (!inviteId) return;
@@ -168,7 +154,7 @@ function PaymentContent() {
           <p className={styles.subtitle}>
             {isFree
               ? 'Тестовый аккаунт: публикация без оплаты'
-              : 'Публикуйте бесплатно или выберите тариф с дополнительными возможностями'}
+              : 'Разовая оплата, без подписки — сайт работает бессрочно, правки бесплатны'}
           </p>
         </div>
 
@@ -192,8 +178,8 @@ function PaymentContent() {
               role="radio" aria-checked={selectedPlan === plan.id} aria-label={`Тариф «${plan.name}», ${plan.price} рублей`}
               aria-disabled={published && !isFree && plan.price < currentPrice}
               tabIndex={published && !isFree && plan.price < currentPrice ? -1 : 0}
-              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !(published && !isFree && plan.price < currentPrice)) { e.preventDefault(); choosePlan(plan.id); } }}
-              onClick={() => { if (!(published && !isFree && plan.price < currentPrice)) choosePlan(plan.id); }}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !(published && !isFree && plan.price < currentPrice)) { e.preventDefault(); setSelectedPlan(plan.id); } }}
+              onClick={() => { if (!(published && !isFree && plan.price < currentPrice)) setSelectedPlan(plan.id); }}
             >
               {plan.badge && <div className={styles.popularBadge}>{plan.badge || 'Популярный'}</div>}
               <div className={styles.planHeader}>
@@ -217,19 +203,6 @@ function PaymentContent() {
           ))}
         </div>
 
-        {losses.length > 0 && premium && (
-          <div className={styles.losses} role="note" aria-labelledby="free-losses-title">
-            <div id="free-losses-title" className={styles.lossesTitle}>На бесплатном тарифе гости не увидят:</div>
-            <ul className={styles.lossesList}>
-              {losses.map(item => <li key={item}>{item}</li>)}
-            </ul>
-            <button type="button" className={styles.lossesBtn}
-              onClick={() => { setSelectedPlan(premium.id); reachGoal(GOAL.upgradeClick, { from: 'payment_free_losses' }); }}>
-              Показать всё гостям — «{premium.name}» за {premium.price.toLocaleString('ru-RU')} ₽
-            </button>
-            <p className={styles.lossesNote}>Разовая оплата, без подписки. Бесплатно опубликовать тоже можно — кнопка ниже.</p>
-          </div>
-        )}
 
         {askPlace && place && (
           <div className={styles.place}>

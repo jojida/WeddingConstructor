@@ -35,10 +35,11 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
     if (isPaid(invite.status) && invite.plan === plan) return res.json({ alreadyPaid: true, redirectUrl });
     const currentRank = Object.prototype.hasOwnProperty.call(PLANS, invite.plan) ? PLANS[invite.plan as keyof typeof PLANS].rank : 1;
     if (isPaid(invite.status) && PLANS[target].rank < currentRank) return res.status(400).json({ error: 'Выберите тариф выше текущего' });
+    // С 18.10.26 бесплатный тариф не подключается — публикация только платная.
+    // Уже опубликованный бесплатно сайт сюда не доходит (выше — alreadyPaid)
+    // и переходит на платный тариф обычной оплатой.
     if (plan === 'free') {
-      const result = await prisma.invitation.updateMany({ where: { id: inviteId, plan: invite.plan, status: invite.status }, data: { status: 'published', plan, paidAt: null } });
-      if (!result.count) throw new PaymentConflict('Тариф изменился. Обновите страницу.');
-      return res.json({ free: true, plan, redirectUrl, message: 'Сайт опубликован бесплатно' });
+      return res.status(400).json({ error: 'Бесплатный тариф больше не подключается. Выберите «Премиум» или «Максимум».' });
     }
     if (!kassaAuth().configured) {
       if (process.env.NODE_ENV === 'development' && process.env.ALLOW_TEST_PAYMENTS === 'true') {
