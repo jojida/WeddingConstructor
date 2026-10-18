@@ -209,6 +209,9 @@ const HANDMADE_TEMPLATES = [
     preview: '/invite/assets/window.jpg',
     defaultCover: '/invite/assets/window.jpg',
     defaultGallery: [] as string[],
+    // Имена с карточки-превью (раньше были вписаны прямо в неё)
+    sampleBride: 'Катерина',
+    sampleGroom: 'Максим',
   },
   {
     id: 'garden-arch',

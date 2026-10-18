@@ -16,6 +16,7 @@ import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLE
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import { ownPlace, quotePlace } from '@/lib/own-place';
+import { readPreviewNames } from '@/lib/preview-names';
 import dynamic from 'next/dynamic';
 import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import type { PhotoCutout } from './BackgroundRemovalEditor';
@@ -115,6 +116,15 @@ function SetupStep({ templateId, onComplete, initialData }: {
   const [venue,       setVenue]       = useState(initialData?.venue || '');
   const [venueAddress,setVenueAddress]= useState(initialData?.venueAddress || '');
   const [mapLink,     setMapLink]     = useState(initialData?.mapLink || '');
+  // Имена, вписанные в каталоге шаблонов (lib/preview-names.ts), — сразу в анкету:
+  // человек уже видел их в приглашении, второй раз набирать незачем.
+  useEffect(() => {
+    if (groomName || brideName) return;
+    const saved = readPreviewNames();
+    if (saved.groom.trim()) setGroomName(saved.groom.trim());
+    if (saved.bride.trim()) setBrideName(saved.bride.trim());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Ошибки показываем у самих полей: тост в углу по одной ошибке за раз
   // заставлял угадывать, какое поле не так.
   const [errors, setErrors] = useState<Partial<Record<SetupKey, string>>>({});

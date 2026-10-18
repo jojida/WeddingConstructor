@@ -1,10 +1,13 @@
 'use client';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PreviewScale from '@/components/PreviewScale';
 import { LEGAL, TEMPLATES, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
+import { reachGoal, GOAL } from '@/lib/metrika';
+import { NAME_MAX, NO_NAMES, readPreviewNames, withPreviewNames, writePreviewNames, type PreviewNames } from '@/lib/preview-names';
 import styles from './page.module.css';
 
 const SAMPLE_DATA = {
@@ -32,6 +35,37 @@ const SAMPLE_DATA = {
 };
 
 export default function TemplatesPage() {
+  /* Свои имена во всех превью (lib/preview-names.ts): поля меняются сразу,
+     превью — через 0,3 с, иначе двенадцать приглашений перерисовывались бы на
+     каждую букву. Из localStorage — после монтирования, чтобы не разойтись
+     с серверной разметкой. */
+  const [names, setNames] = useState<PreviewNames>(NO_NAMES);
+  const [shown, setShown] = useState<PreviewNames>(NO_NAMES);
+  const typedRef = useRef(false);
+  const goalSentRef = useRef(false);
+  useEffect(() => {
+    const saved = readPreviewNames();
+    setNames(saved);
+    setShown(saved);
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShown(names);
+      if (!typedRef.current) return;
+      writePreviewNames(names);
+      // Цель — один раз за визит страницы, когда вписаны оба имени
+      if (!goalSentRef.current && names.groom.trim() && names.bride.trim()) {
+        goalSentRef.current = true;
+        reachGoal(GOAL.catalogNames);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [names]);
+  const setName = (key: keyof PreviewNames, value: string) => {
+    typedRef.current = true;
+    setNames(prev => ({ ...prev, [key]: value }));
+  };
+
   return (
     <div className={styles.page}>
       <Navbar />
@@ -46,6 +80,15 @@ export default function TemplatesPage() {
           <p className={styles.subtitle} style={{ marginTop: 6, fontSize: 14, opacity: 0.85 }}>
             Редактор без регистрации. Начать можно бесплатно.
           </p>
+          <div className={styles.names}>
+            <div className={styles.namesTitle} id="catalog-names-title">Посмотрите шаблоны со своими именами</div>
+            <div className={styles.namesFields} role="group" aria-labelledby="catalog-names-title">
+              <input className="input-field" aria-label="Имя жениха" placeholder="Имя жениха" autoComplete="off"
+                maxLength={NAME_MAX} value={names.groom} onChange={e => setName('groom', e.target.value)} />
+              <input className="input-field" aria-label="Имя невесты" placeholder="Имя невесты" autoComplete="off"
+                maxLength={NAME_MAX} value={names.bride} onChange={e => setName('bride', e.target.value)} />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -60,7 +103,7 @@ export default function TemplatesPage() {
               <PreviewScale className={styles.previewScale}>
                 <LazyMount initialVisible={i < 4}>
                   <TemplatePreview
-                    data={{
+                    data={withPreviewNames({
                       ...SAMPLE_DATA,
                       brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
                       groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
@@ -68,7 +111,7 @@ export default function TemplatesPage() {
                       weddingDate: templateSampleDate(tpl),
                       coverPhoto: tpl.defaultCover,
                       galleryPhotos: tpl.defaultGallery
-                    }}
+                    }, shown)}
                     apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
                   />
                 </LazyMount>

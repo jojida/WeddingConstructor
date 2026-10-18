@@ -199,7 +199,7 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
             fontSize: '18px', color: '#354366',
             letterSpacing: '.04em', margin: 0, lineHeight: 1.02,
           }}>
-            Катерина
+            {data?.brideName || 'Катерина'}
           </p>
           <p style={{
             fontFamily: "'Gogol', 'Marck Script', cursive, Georgia, serif",
@@ -212,7 +212,7 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
             fontSize: '18px', color: '#354366',
             letterSpacing: '.04em', margin: 0, lineHeight: 1.02,
           }}>
-            Максим
+            {data?.groomName || 'Максим'}
           </p>
           {/* Small wavy flourish */}
           <svg width="60" height="12" viewBox="0 0 60 12" fill="none" style={{ marginTop: 3 }}>

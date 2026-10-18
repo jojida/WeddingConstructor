@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import TemplatePreview from '@/components/TemplatePreview';
+import DemoPreview from './DemoPreview';
 import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint, templateMusic } from '@/lib/constants';
 import { PLANS } from '@/lib/plans';
 import DemoActions from './DemoActions';
@@ -143,7 +143,7 @@ export default async function DemoPage({ params }: Props) {
       {/* Единая ширина превью для всех шаблонов (как у «Скетч» / «Цветущая арка»).
           На десктопе — центрированная колонка, на телефоне — на всю ширину экрана. */}
       <div style={{ width: '100%', maxWidth: 500, isolation: 'isolate', zIndex: 0, boxShadow: '0 10px 50px rgba(60,48,32,0.18)' }}>
-      <TemplatePreview
+      <DemoPreview
         data={{
           ...SAMPLE_DATA,
           brideName: (template as any).sampleBride || SAMPLE_DATA.brideName,
@@ -166,7 +166,6 @@ export default async function DemoPage({ params }: Props) {
           },
         }}
         apiBase={apiBase}
-        fullPage
       />
       </div>
 
