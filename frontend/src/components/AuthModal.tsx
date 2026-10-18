@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { emailTypoFix, isMailRuAddress } from '@/lib/email-typo';
+import { reachGoal, GOAL } from '@/lib/metrika';
 import { useAuthStore } from '@/store/auth';
 import styles from './AuthModal.module.css';
 
@@ -40,6 +41,7 @@ export default function AuthModal({ onSuccess, onClose }: Props) {
     setLoading(true);
     try {
       await api.post('/api/auth/send-code', { email });
+      reachGoal(GOAL.codeSent);
       setStep('code');
       setCode('');
       setResendIn(60);

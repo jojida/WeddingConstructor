@@ -86,6 +86,14 @@ function PaymentContent() {
   const losses = invite && selectedPlan === 'free' && !isFree && !alreadyConnected ? freeLosses(invite) : [];
   const premium = PLANS.find(p => p.id === 'premium');
 
+  // Выбор «Бесплатного» — шаг воронки: по умолчанию выбран «Премиум», так что
+  // это осознанный выбор. В паре с upgrade_click (from=payment_free_losses) видно,
+  // меняют ли решение после списка «что гости не увидят».
+  const choosePlan = (id: string) => {
+    if (id === 'free' && selectedPlan !== 'free') reachGoal(GOAL.planFree);
+    setSelectedPlan(id);
+  };
+
   const handlePay = async () => {
     if (!inviteId) return;
     // Цель — само нажатие: попытку видно, даже если до кассы не дошли.
@@ -184,8 +192,8 @@ function PaymentContent() {
               role="radio" aria-checked={selectedPlan === plan.id} aria-label={`Тариф «${plan.name}», ${plan.price} рублей`}
               aria-disabled={published && !isFree && plan.price < currentPrice}
               tabIndex={published && !isFree && plan.price < currentPrice ? -1 : 0}
-              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !(published && !isFree && plan.price < currentPrice)) { e.preventDefault(); setSelectedPlan(plan.id); } }}
-              onClick={() => { if (!(published && !isFree && plan.price < currentPrice)) setSelectedPlan(plan.id); }}
+              onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && !(published && !isFree && plan.price < currentPrice)) { e.preventDefault(); choosePlan(plan.id); } }}
+              onClick={() => { if (!(published && !isFree && plan.price < currentPrice)) choosePlan(plan.id); }}
             >
               {plan.badge && <div className={styles.popularBadge}>{plan.badge || 'Популярный'}</div>}
               <div className={styles.planHeader}>

@@ -133,7 +133,11 @@ export function trackPageView(url: string): void {
 /** Цели воронки. Держим списком, чтобы не разъезжались с настройками Метрики. */
 export const GOAL = {
   editorOpen:     'editor_open',      // открыл редактор — выбрал шаблон
+  editorSetup:    'editor_setup',     // заполнил имена и дату (первый шаг редактора)
+  editorDone:     'editor_done',      // нажал «Готово» в редакторе (дальше вход или оплата)
+  codeSent:       'code_sent',        // запросил код входа (сервер принял почту)
   signup:         'signup',           // вошёл по коду (регистрация или вход)
+  planFree:       'plan_free',        // на странице оплаты сам выбрал «Бесплатный»
   freePublish:    'free_publish',     // опубликовал сайт на бесплатном тарифе
   upgradeClick:   'upgrade_click',    // нажал «улучшить тариф» (параметр from — где)
   paymentStart:   'payment_start',    // нажал «Оплатить» (только платные тарифы)

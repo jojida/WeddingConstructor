@@ -339,6 +339,16 @@ function EditorContent() {
     reachGoal(GOAL.editorOpen);
   }, []);
 
+  // Следующие шаги воронки внутри редактора — тоже по разу за визит страницы:
+  // из открывших редактор почту вводит лишь каждый четвёртый, и без этих шагов
+  // не видно, где уходят — на анкете с именами, в самом редакторе или на окне входа.
+  const funnelSentRef = useRef<Set<string>>(new Set());
+  const funnelGoal = (goal: string) => {
+    if (funnelSentRef.current.has(goal)) return;
+    funnelSentRef.current.add(goal);
+    reachGoal(goal);
+  };
+
   // Рамки фото в превью: пропорции и исходное положение (шлёт photo-frame.js
   // шаблона) — по ним рисуется окно кадрирования у каждого поля с фото.
   const [photoSlots, setPhotoSlots] = useState<Record<string, PhotoSlot>>({});
@@ -622,6 +632,7 @@ function EditorContent() {
   const handleShare = async () => {
     if (isPublished) { router.push('/dashboard'); return; }
     if (!data.brideName && !data.groomName) { toast.error('Введите имена'); return; }
+    funnelGoal(GOAL.editorDone);
     // Тариф выбирается на следующем шаге; для бесплатной публикации место не требуется.
     if (!user) { setShowAuthModal(true); return; }
     if (await saveToServer()) router.push(`/payment?id=${data.id}`);
@@ -658,6 +669,7 @@ function EditorContent() {
   };
 
   const handleSetupComplete = (setupData: Partial<InviteData>) => {
+    funnelGoal(GOAL.editorSetup);
     pendingSetupRef.current = setupData;
     setData(prev => ({ ...prev, ...setupData }));
     setStep('editor');
