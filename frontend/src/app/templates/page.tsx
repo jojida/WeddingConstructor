@@ -37,14 +37,31 @@ const SAMPLE_DATA = {
 export default function TemplatesPage() {
   /* Свои имена во всех превью (lib/preview-names.ts): поля меняются сразу,
      превью — через 0,3 с, иначе двенадцать приглашений перерисовывались бы на
-     каждую букву. Из localStorage — после монтирования, чтобы не разойтись
-     с серверной разметкой. */
+     каждую букву.
+     Поля неуправляемые (defaultValue): страница приходит с сервера, и на медленном
+     интернете человек начинает печатать раньше, чем она оживёт. Управляемое поле
+     React при оживлении сбрасывал, и имена пропадали (проверено на проде 18.10.26).
+     Поэтому после монтирования берём то, что уже вписано, а если пусто —
+     имена из прошлого визита (localStorage). */
   const [names, setNames] = useState<PreviewNames>(NO_NAMES);
   const [shown, setShown] = useState<PreviewNames>(NO_NAMES);
+  const groomRef = useRef<HTMLInputElement>(null);
+  const brideRef = useRef<HTMLInputElement>(null);
   const typedRef = useRef(false);
   const goalSentRef = useRef(false);
+  const initRef = useRef(false);   // в разработке StrictMode запускает эффект дважды
   useEffect(() => {
+    if (initRef.current) return;
+    initRef.current = true;
+    const typed = { groom: groomRef.current?.value || '', bride: brideRef.current?.value || '' };
+    if (typed.groom || typed.bride) {
+      typedRef.current = true;
+      setNames(typed);
+      return;
+    }
     const saved = readPreviewNames();
+    if (groomRef.current) groomRef.current.value = saved.groom;
+    if (brideRef.current) brideRef.current.value = saved.bride;
     setNames(saved);
     setShown(saved);
   }, []);
@@ -83,10 +100,10 @@ export default function TemplatesPage() {
           <div className={styles.names}>
             <div className={styles.namesTitle} id="catalog-names-title">Посмотрите шаблоны со своими именами</div>
             <div className={styles.namesFields} role="group" aria-labelledby="catalog-names-title">
-              <input className="input-field" aria-label="Имя жениха" placeholder="Имя жениха" autoComplete="off"
-                maxLength={NAME_MAX} value={names.groom} onChange={e => setName('groom', e.target.value)} />
-              <input className="input-field" aria-label="Имя невесты" placeholder="Имя невесты" autoComplete="off"
-                maxLength={NAME_MAX} value={names.bride} onChange={e => setName('bride', e.target.value)} />
+              <input ref={groomRef} className="input-field" aria-label="Имя жениха" placeholder="Имя жениха" autoComplete="off"
+                maxLength={NAME_MAX} defaultValue="" onChange={e => setName('groom', e.target.value)} />
+              <input ref={brideRef} className="input-field" aria-label="Имя невесты" placeholder="Имя невесты" autoComplete="off"
+                maxLength={NAME_MAX} defaultValue="" onChange={e => setName('bride', e.target.value)} />
             </div>
           </div>
         </div>
