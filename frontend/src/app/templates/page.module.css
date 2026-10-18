@@ -220,8 +220,18 @@
   .grid { grid-template-columns: repeat(2, 1fr); padding: 16px 20px 60px; gap: 24px; }
 }
 @media (max-width: 600px) {
-  /* Одна колонка, но не шире 420px: иначе на планшете в портрете карточка
-     растягивается на всю ширину и превью становится непомерно высоким. */
-  .grid { grid-template-columns: minmax(0, 420px); justify-content: center; }
-  .hero { padding: 120px 20px 48px; }
+  /* Две колонки: в одну каждый шаблон занимал почти экран, каталог — семь экранов,
+     и до восьмого шаблона доходили немногие (16–18.10.26: из 129 открывших список
+     демо смотрели 27, редактор — 39). Теперь на экране четыре шаблона, весь
+     каталог — за три экрана. Превью то же, PreviewScale ужимает его под ширину. */
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 12px; padding: 4px 14px 48px; }
+  .hero { padding: 92px 16px 20px; }
+  .title { font-size: 26px; margin-bottom: 8px; }
+  .subtitle { font-size: 15px; line-height: 1.5; margin-bottom: 4px; }
+  .cardImageWrapper { border-radius: 14px; }
+  .cardInfo { margin-top: 10px; }
+  .cardTitle { font-size: 16px; }
+  .cardTags { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cardActions { flex-direction: column; gap: 8px; margin-top: 10px; }
+  .actionBtnOutline, .actionBtnPrimary { padding: 9px 0; font-size: 11px; }
 }

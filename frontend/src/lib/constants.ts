@@ -240,10 +240,24 @@ const HANDMADE_TEMPLATES = [
    Второй список генерируется студией при экспорте, руками его не правят.
    Одноимённый шаблон студии замещает рукописный: так открытый в студии
    оригинал остаётся одной карточкой, а не двоится. */
+/* Порядок в каталоге и на главной — по спросу, а не по дате добавления: какие
+   шаблоны пары выбирают (приглашения 10–18.10.26: «Нежность» 10, «Айвори» 7,
+   «Каллы» 6…). На телефоне до восьмого шаблона было пять-шесть экранов, а первым
+   стоял зимний «Витраж», который выбрали один раз. «Витраж» — ближе к зиме
+   поднять. Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
+const CATALOG_ORDER = [
+  'tenderness', 'ivory', 'calla', 'forest', 'garden-evening', 'sketch',
+  'vadimdarya', 'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral',
+];
+const catalogRank = (id: string) => {
+  const i = CATALOG_ORDER.indexOf(id);
+  return i < 0 ? CATALOG_ORDER.length : i;
+};
+
 export const TEMPLATES = [
   ...HANDMADE_TEMPLATES.filter((t) => !STUDIO_TEMPLATES.some((s) => s.id === t.id)),
   ...STUDIO_TEMPLATES,
-];
+].sort((a, b) => catalogRank(a.id) - catalogRank(b.id));
 
 export const _TEMPLATES_LEGACY = [
   {

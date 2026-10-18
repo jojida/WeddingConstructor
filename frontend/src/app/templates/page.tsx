@@ -58,7 +58,7 @@ export default function TemplatesPage() {
           >
             <div className={styles.cardImageWrapper}>
               <PreviewScale className={styles.previewScale}>
-                <LazyMount initialVisible={i < 3}>
+                <LazyMount initialVisible={i < 4}>
                   <TemplatePreview
                     data={{
                       ...SAMPLE_DATA,
