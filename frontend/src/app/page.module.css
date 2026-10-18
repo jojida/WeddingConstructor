@@ -322,6 +322,29 @@
 .arrowIcon { transition: transform 0.2s; }
 .seeAllBtn:hover .arrowIcon { transform: translateX(4px); }
 
+/* Поля «свои имена» между заголовком раздела и карточками: отступ заголовка (64px)
+   делим пополам, чтобы поля читались как часть раздела, а не отдельный блок */
+.homeNames {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  margin: -32px 0 32px;
+}
+.homeNamesTitle {
+  font-family: var(--font-inter);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+.homeNamesFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 220px));
+  gap: 10px;
+}
+/* 16px — меньше iOS Safari увеличивает страницу при фокусе на поле */
+.homeNamesFields input { text-align: center; font-size: 16px; }
+
 .templatesScroll {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -722,6 +745,10 @@
   .featuresGrid { grid-template-columns: 1fr; }
   .templatesScroll { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .templateScrollItem { height: 300px; }
+  .homeNames { margin: -24px 0 20px; gap: 8px; }
+  .homeNamesTitle { font-size: 14px; }
+  .homeNamesFields { grid-template-columns: 1fr 1fr; width: 100%; }
+  .homeNamesFields input { padding: 10px 12px; }
   /* На узкой карточке длинные названия («Средиземноморье») упирались в край
      и обрезались: подпись не была ограничена справа. */
   .mosaicInfo { left: 12px; right: 12px; bottom: 14px; }

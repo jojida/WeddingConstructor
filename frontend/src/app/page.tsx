@@ -10,6 +10,8 @@ import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
 import PreviewScale from '@/components/PreviewScale';
 import HeroPhone from '@/components/landing/HeroPhone';
 import FeatureDemo from '@/components/landing/FeatureDemo';
+import { NAME_MAX, withPreviewNames } from '@/lib/preview-names';
+import { usePreviewNames } from '@/lib/use-preview-names';
 import styles from './page.module.css';
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -161,6 +163,9 @@ const SAMPLE_DATA = {
 };
 
 function TemplatesSection() {
+  // Свои имена во всех превью — те же поля и хранение, что в каталоге (lib/use-preview-names.ts)
+  const { groomRef, brideRef, shown, setName } = usePreviewNames('home');
+
   return (
     <section id="examples" className={styles.templatesSection}>
       <div className={styles.sectionInner}>
@@ -174,6 +179,16 @@ function TemplatesSection() {
           </Link>
         </div>
 
+        <div className={styles.homeNames} data-animate data-delay="100">
+          <div className={styles.homeNamesTitle} id="home-names-title">Посмотрите шаблоны со своими именами</div>
+          <div className={styles.homeNamesFields} role="group" aria-labelledby="home-names-title">
+            <input ref={groomRef} className="input-field" aria-label="Имя жениха" placeholder="Имя жениха" autoComplete="off"
+              maxLength={NAME_MAX} defaultValue="" onChange={e => setName('groom', e.target.value)} />
+            <input ref={brideRef} className="input-field" aria-label="Имя невесты" placeholder="Имя невесты" autoComplete="off"
+              maxLength={NAME_MAX} defaultValue="" onChange={e => setName('bride', e.target.value)} />
+          </div>
+        </div>
+
         <div className={styles.templatesScroll} data-animate data-delay="150">
           {TEMPLATES.map((tpl) => (
             <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}>
@@ -181,7 +196,7 @@ function TemplatesSection() {
                 <PreviewScale className={styles.previewScale}>
                   <LazyMount>
                     <TemplatePreview
-                      data={{
+                      data={withPreviewNames({
                         ...SAMPLE_DATA,
                         brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
                         groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
@@ -189,7 +204,7 @@ function TemplatesSection() {
                         weddingDate: templateSampleDate(tpl),
                         coverPhoto: tpl.defaultCover,
                         galleryPhotos: tpl.defaultGallery
-                      }}
+                      }, shown)}
                       apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
                     />
                   </LazyMount>
