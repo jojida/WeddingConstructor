@@ -1,7 +1,7 @@
 export const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 const strings = ['groomName', 'brideName', 'weddingDate', 'weddingTime', 'venue', 'venueAddress', 'mapLink', 'story', 'inviteText', 'dressCode', 'dressCodePhoto', 'coverPhoto', 'coverVideo', 'colorScheme', 'musicUrl', 'templateId', 'title'];
 const unsafeKeys = new Set(['__proto__', 'constructor', 'prototype']);
-const runtimeKeys = new Set(['apiBase', 'guestToken', 'guestName', 'guestPlanner', 'wcMenu', 'plan', 'slug', 'enabledSections', 'editing']);
+const runtimeKeys = new Set(['apiBase', 'guestToken', 'guestName', 'guestPlanner', 'wcMenu', 'wcRemind', 'plan', 'slug', 'enabledSections', 'editing']);
 const urlFields = ['mapLink', 'dressCodePhoto', 'coverPhoto', 'coverVideo', 'musicUrl'];
 
 /** Only normal HTTP(S) URLs or asset paths may be persisted as navigation/media. */

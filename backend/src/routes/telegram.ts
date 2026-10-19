@@ -6,6 +6,7 @@ import { messageGate, supportRecipient, supportRoute } from '../lib/telegramSupp
 import { telegramApi as tg } from '../lib/telegram';
 import { resetSupportChat, supportChatId } from '../lib/supportChat';
 import { handleReviewCallback } from '../lib/reviews';
+import { handleReminderCallback, handleReminderStart } from '../lib/reminders';
 
 import { hasNotifications } from '../lib/plans';
 import { errName } from '../lib/planner/util';
@@ -13,7 +14,8 @@ import { errName } from '../lib/planner/util';
 const router = Router();
 
 /* Бот один на весь сервис и делает три вещи:
-   1. /start <token> — подключает паре уведомления об ответах гостей;
+   1. /start <token> — подключает паре уведомления об ответах гостей
+      (/start r_<token> — гостю напоминание о свадьбе, lib/reminders.ts);
    2. меню (/start без токена, /help, кнопки) — шаблоны, тарифы, вопросы;
    3. поддержка — любое другое сообщение уходит владельцу в личку, а его
       ответ реплаем возвращается человеку от имени бота.
@@ -60,7 +62,7 @@ const TEXT = {
     'анкета для гостей, карта, программа дня и дресс-код, ' +
     'статистика ответов, уведомления в Telegram и на почту, список гостей и персональные ссылки.\n\n' +
     '• Максимум — 3 990 ₽: всё из «Премиум» + рассадка гостей по столам, меню и выбор блюд, ' +
-    'печатные материалы.\n\n' +
+    'печатные материалы, напоминание гостям за неделю до свадьбы.\n\n' +
     'Оплата разовая, без подписки. Сайт и правки — без срока действия.',
   faq:
     '❔ Как гости получат приглашение?\n' +
@@ -182,9 +184,14 @@ router.post('/webhook', async (req: Request, res: Response) => {
     return res.status(403).send('Forbidden');
   }
   try {
-    // Кнопка под отзывом в чате поддержки («Опубликовать» / «Скрыть»)
-    if (req.body?.callback_query) {
-      await handleReviewCallback(req.body.callback_query);
+    // Кнопки: «Буду / Не смогу» под напоминанием гостю, «Опубликовать / Скрыть» под отзывом
+    const cb = req.body?.callback_query;
+    if (cb) {
+      if (typeof cb.data === 'string' && cb.data.startsWith('rm:')) {
+        if (Number.isSafeInteger(cb.from?.id) && allowUpdate(cb.from.id).ok) await handleReminderCallback(cb);
+      } else {
+        await handleReviewCallback(cb);
+      }
       return res.status(200).send('OK');
     }
     const msg = req.body?.message;
@@ -197,6 +204,12 @@ router.post('/webhook', async (req: Request, res: Response) => {
     void ensureCommands();
 
     const token = /^\/start(?:@\w+)?\s+(\S+)/.exec(text)?.[1] || '';
+    // Гость из анкеты: «Напомнить в Telegram» (r_<токен напоминания>)
+    const remind = /^r_([A-Za-z0-9]{10,24})$/.exec(token);
+    if (remind) {
+      await handleReminderStart(chatId, remind[1]);
+      return res.status(200).send('OK');
+    }
     if (token) {
       if (!/^[a-zA-Z0-9_-]{20,64}$/.test(token)) { await sendMenu(chatId); return res.status(200).send('OK'); }
       const invite = await prisma.invitation.findFirst({ where: { telegramConnectToken: token, telegramConnectExpiresAt: { gt: new Date() } } });

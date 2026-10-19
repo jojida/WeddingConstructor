@@ -99,6 +99,8 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
           rsvpCustomQ: dataRef.current.customData?.rsvpCustomQ,
           // Выбор блюд и пищевые ограничения у каждого гостя (кладёт сервер, если пара включила)
           wcMenu: dataRef.current.customData?.wcMenu,
+          // Напоминание перед свадьбой — галочка в анкете (тоже кладёт сервер)
+          wcRemind: dataRef.current.customData?.wcRemind,
         },
       },
       window.location.origin

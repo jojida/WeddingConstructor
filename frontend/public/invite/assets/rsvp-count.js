@@ -4,6 +4,8 @@
      rsvpMaybe: true      — третий вариант ответа «Пока не знаю»;
      rsvpChildren: true   — отдельно взрослые и дети;
      rsvpQuestions: [id]  — готовые вопросы (QUESTIONS ниже), rsvpCustomQ — свой.
+   Из кабинета пары (сервер кладёт в данные страницы): wcMenu — блюда у каждого гостя,
+   wcRemind — галочка «Напомнить о свадьбе» с телефоном и Telegram.
    Настройки модуль берёт сам из postMessage('wc:data'), как и шаблон, —
    в applyData шаблона ничего вызывать не нужно.
 
@@ -25,7 +27,7 @@
    Подключение: <script src="../assets/rsvp-count.js"> ДО script.js шаблона —
    радио «Пока не знаю» должно появиться раньше, чем шаблон оживит свои
    переключатели. Тело запроса анкеты дополняется WCRsvp.payload(form)
-   (attendance, guestsCount, childrenCount, answers, wishes). Форму, которую
+   (attendance, guestsCount, childrenCount, answers, wishes, people, remind). Форму, которую
    строит скрипт (студийный рантайм), после вставки — WCRsvpCount.init(). */
 (function () {
   'use strict';
@@ -55,7 +57,8 @@
   // По умолчанию анкета как раньше: пара включает новое в редакторе.
   // menu — выбор блюда и пищевые ограничения у каждого гостя (кабинет «Меню»): сервер кладёт
   // в данные страницы wcMenu = { askMenu, askDiet, options: [{ id, label, note }] }
-  var CFG = { maybe: false, children: false, questions: [], customQ: '', menu: null };
+  // remind — напоминание перед свадьбой (кабинет «Напоминания»): wcRemind = { days, sms, tg }
+  var CFG = { maybe: false, children: false, questions: [], customQ: '', menu: null, remind: null };
 
   // Обычные классы в начале <head>: сильнее сброса шаблона, слабее его правил
   var CSS =
@@ -78,6 +81,8 @@
     ':where([data-wc-q] textarea){font:inherit;color:inherit;box-sizing:border-box;width:100%;resize:vertical}' +
     '.wc-people-note{font-size:.85em;opacity:.8;line-height:1.4;margin:.2em 0 .6em}' +
     '.wc-people-note a{color:inherit;text-decoration:underline}' +
+    '.wc-remind{display:flex;flex-direction:column;gap:.4em;margin-top:.4em}' +
+    '.wc-remind__tg{font-weight:600}' +
     '[data-rsvp-count][hidden],.wc-off{display:none!important}';
 
   function injectCss() {
@@ -349,10 +354,135 @@
     });
     form.__wcqMeta = list;
 
-    // Перед кнопкой отправки, на верхнем уровне формы
+    // Перед напоминанием (если есть) или кнопкой отправки, на верхнем уровне формы
+    var anchor = form.querySelector('[data-wc-remind]') || submitAnchor(form);
+    form.insertBefore(box, anchor || null);
+  }
+
+  function submitAnchor(form) {
     var anchor = form.querySelector('button[type="submit"], input[type="submit"], button:not([type])');
     while (anchor && anchor.parentNode !== form) anchor = anchor.parentNode;
-    form.insertBefore(box, anchor || null);
+    return anchor;
+  }
+
+  /* ─── Напоминание перед свадьбой ──────────────────────────────────────── */
+  // Пара включает в кабинете («Максимум»), сервер кладёт в данные страницы
+  // wcRemind = { days, sms, tg } (backend lib/reminders.ts). Галочка «Напомнить мне»
+  // открывает телефон (если SMS сейчас отправляются) и ссылку на бот в Telegram.
+  // Токен придумываем здесь: по нему бот найдёт этот ответ (t.me/<bot>?start=r_<token>),
+  // он же будет в ссылке подтверждения из SMS.
+
+  function normalizeRemind(r) {
+    if (!r || typeof r !== 'object') return null;
+    var tg = typeof r.tg === 'string' && /^[A-Za-z0-9_]{5,32}$/.test(r.tg) ? r.tg : '';
+    var sms = r.sms === true;
+    var days = r.days === 3 || r.days === 1 ? r.days : 7;
+    return tg || sms ? { days: days, tg: tg, sms: sms } : null;
+  }
+
+  function remindToken(form) {
+    if (form.__wcrToken) return form.__wcrToken;
+    var abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var bytes = new Uint8Array(10), out = '';
+    window.crypto.getRandomValues(bytes);
+    for (var i = 0; i < bytes.length; i++) out += abc.charAt(bytes[i] % abc.length);
+    form.__wcrToken = out;
+    return out;
+  }
+
+  // Как на сервере: российский мобильный, «8 912…», «+7 (912)…», «912…»
+  function remindPhone(raw) {
+    if (/[^\d\s()+.-]/.test(raw)) return '';
+    var d = raw.replace(/\D/g, '');
+    if (d.length === 10 && d.charAt(0) === '9') d = '7' + d;
+    if (d.length === 11 && d.charAt(0) === '8') d = '7' + d.slice(1);
+    return /^79\d{9}$/.test(d) ? d : '';
+  }
+
+  function beforeWords(n) { return n === 7 ? 'за неделю' : n === 1 ? 'за день' : 'за ' + n + ' дня'; }
+
+  function buildRemind(form) {
+    var box = form.querySelector('[data-wc-remind]');
+    var sig = CFG.remind ? JSON.stringify(CFG.remind) : '';
+    if (form.__wcrSig === sig && (box || !sig)) return;
+    if (box) box.remove();
+    form.__wcrSig = sig;
+    if (!CFG.remind) return;
+    var r = CFG.remind;
+
+    // Галочка — по образцу чекбокса напитка, а если его нет — радио «Да, буду»
+    var check = form.querySelector('input[type="checkbox"][name="drink"]') || form.querySelector(attendSelector('yes'));
+    var proto = check && check.closest('label');
+    if (!proto) return;
+    var g = groupShell(form, 'Напомнить о свадьбе?');
+    g.setAttribute('data-wc-remind', '');
+    g.setAttribute('data-wc-coming', '');
+    g.appendChild(optionClone(proto, 'checkbox', 'wcRemind', '1', 'Да, напомните мне ' + beforeWords(r.days)));
+
+    var more = document.createElement('div');
+    more.className = 'wc-remind wc-off';
+    if (r.sms) {
+      var phone = fieldClone(form, 'wcRemindPhone', 'Телефон: +7 912 345-67-89');
+      phone.type = 'tel';
+      phone.inputMode = 'tel';
+      phone.autocomplete = 'tel';
+      phone.maxLength = 24;
+      phone.setAttribute('aria-label', 'Телефон для напоминания');
+      phone.addEventListener('input', function () {
+        var v = phone.value.trim();
+        phone.setCustomValidity(v && !remindPhone(v) ? 'Проверьте номер, например +7 912 345-67-89' : '');
+      });
+      more.appendChild(phone);
+    }
+    if (r.tg) {
+      var line = document.createElement('p');
+      line.className = 'wc-people-note';
+      var a = document.createElement('a');
+      a.className = 'wc-remind__tg';
+      a.href = 'https://t.me/' + r.tg + '?start=r_' + remindToken(form);
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.textContent = r.sms ? 'Или получить в Telegram →' : 'Получить в Telegram →';
+      var hint = document.createTextNode(' Ответить на напоминание можно будет одной кнопкой.');
+      a.addEventListener('click', function () {
+        form.__wcrTg = true;
+        hint.nodeValue = ' Нажмите в Telegram «Старт», затем вернитесь и отправьте анкету.';
+      });
+      line.appendChild(a);
+      line.appendChild(hint);
+      more.appendChild(line);
+    }
+    var note = document.createElement('p');
+    note.className = 'wc-people-note';
+    note.appendChild(document.createTextNode(r.sms
+      ? 'Номер нужен только для напоминания: его увидят молодожёны, рекламы не будет. '
+      : 'Только напоминание о свадьбе, без рекламы. '));
+    var link = document.createElement('a');
+    link.href = '/privacy';
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'Подробнее';
+    note.appendChild(link);
+    more.appendChild(note);
+    g.appendChild(more);
+
+    g.addEventListener('change', function (e) {
+      var t = e.target;
+      if (!t || t.name !== 'wcRemind') return;
+      syncIndicator(t);
+      more.classList.toggle('wc-off', !t.checked);
+    });
+    form.insertBefore(g, submitAnchor(form) || null);
+  }
+
+  function readRemind(form) {
+    var g = form.querySelector('[data-wc-remind]');
+    var on = g && g.querySelector('input[name="wcRemind"]');
+    if (!on) return undefined;
+    var field = g.querySelector('input[name="wcRemindPhone"]');
+    var phone = field ? remindPhone(field.value.trim()) : '';
+    // Галочка без телефона и без Telegram — напоминать некуда
+    return on.checked && (phone || form.__wcrTg) ? { token: remindToken(form), phone: phone } : false;
   }
 
   function readAnswer(group) {
@@ -531,6 +661,7 @@
     applyChildren(form);
     buildQuestions(form);
     buildPeople(form);
+    buildRemind(form);
     refresh(form);
   }
 
@@ -572,6 +703,7 @@
     }
     if ('rsvpCustomQ' in d) CFG.customQ = typeof d.rsvpCustomQ === 'string' ? d.rsvpCustomQ.trim().slice(0, 200) : '';
     if ('wcMenu' in d) CFG.menu = normalizeMenu(d.wcMenu);
+    if ('wcRemind' in d) CFG.remind = normalizeRemind(d.wcRemind);
     forms().forEach(function (f) { if (f.__wcCount) apply(f); });
     // Имя гостя шаблон подставляет в этом же сообщении, но позже нас — подхватываем после
     setTimeout(function () { forms().forEach(function (f) { if (f.__wcCount) syncFirstName(f); }); }, 0);
@@ -612,6 +744,11 @@
     if (CFG.menu && !declined(form)) {
       syncPeople(form);
       if (form.querySelector('[data-wc-person]')) out.people = readPeople(form);
+    }
+    // Напомнить перед свадьбой: { token, phone } или false — гость снял галочку
+    if (CFG.remind && !declined(form)) {
+      var remind = readRemind(form);
+      if (remind !== undefined) out.remind = remind;
     }
     return out;
   }

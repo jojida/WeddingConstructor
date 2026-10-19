@@ -9,6 +9,7 @@ import { normalizeEmail } from '../lib/security';
 import { normalizeDomain, findPublicDomain } from '../lib/domains';
 import { rateLimit } from '../middleware/rateLimit';
 import { publicMenu } from '../lib/planner/public';
+import { publicReminders } from '../lib/reminders';
 import { errName } from '../lib/planner/util';
 
 const router = Router();
@@ -29,7 +30,7 @@ const RESERVED_SLUGS = new Set([
   'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment', 'print',
   'templates', 'admin', 'login', 'register', 'signup', 'about', 'pricing', 'help',
   'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads', 'studio', 'privacy', 'oferta', 'contacts',
-  'blog',
+  'blog', 'c',
 ]);
 
 // Приватные поля приглашения — не отдавать в публичных ответах (by-slug/by-domain).
@@ -62,9 +63,11 @@ function publicInvite(invite: any) {
 /* Анкета гостя узнаёт, спрашивать ли блюдо и пищевые ограничения (wcMenu), из customData —
    как и остальные настройки шаблона. Хранится это не в customData (её целиком перезаписывает
    редактор), а в таблицах планировщика; сюда кладётся только для гостевой страницы. */
-async function withPlannerMenu(invite: { id: string; plan: string; userId: string }, pub: ReturnType<typeof publicInvite>) {
-  const menu = await publicMenu(invite);
-  return menu ? { ...pub, customData: { ...pub.customData, wcMenu: menu } } : pub;
+async function withPlannerMenu(invite: { id: string; plan: string; userId: string; weddingDate: string }, pub: ReturnType<typeof publicInvite>) {
+  // Так же анкета узнаёт, предлагать ли гостю напоминание перед свадьбой (wcRemind)
+  const [menu, remind] = await Promise.all([publicMenu(invite), publicReminders(invite)]);
+  if (!menu && !remind) return pub;
+  return { ...pub, customData: { ...pub.customData, ...(menu ? { wcMenu: menu } : {}), ...(remind ? { wcRemind: remind } : {}) } };
 }
 
 function generateSlug(groomName: string, brideName: string): string {

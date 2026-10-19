@@ -24,6 +24,8 @@ import ogRouter from './routes/og';
 import { initTelegram } from './lib/telegram';
 import { ensureSchema } from './lib/ensureSchema';
 import { startLifecycleEmails } from './lib/lifecycleEmails';
+import { startReminders } from './lib/reminders';
+import remindersRouter from './routes/reminders';
 import { jwtSecret } from './lib/security';
 import { rateLimit } from './middleware/rateLimit';
 
@@ -103,6 +105,7 @@ app.use('/api/telegram', telegramRouter);
 app.use('/api/domains', domainsRouter);
 app.use('/api/email', rateLimit(30, 60_000), emailRouter);
 app.use('/api/reviews', rateLimit(120, 60_000), reviewsRouter);
+app.use('/api/reminders', rateLimit(120, 60_000), remindersRouter);
 app.use('/api/og', rateLimit(120, 60_000), ogRouter);
 
 // Health check
@@ -126,6 +129,8 @@ if (require.main === module) {
       initTelegram();
       // Серия писем после регистрации (напоминания и подсказки) — только на проде.
       startLifecycleEmails();
+      // Напоминание гостям перед свадьбой (Telegram, SMS) — тоже только на проде.
+      startReminders();
     }))
     .catch(async () => {
       console.error('Проверка схемы БД не удалась. API не запущен.');

@@ -13,7 +13,7 @@ export const PLANS = [
   },
   {
     id: 'maximum', name: 'Максимум', price: 3990, period: 'разовая оплата за один сайт',
-    features: ['Всё из тарифа «Премиум»', 'Рассадка гостей по столам', 'Меню и выбор блюд гостями', 'Печатные материалы для рассадки и меню'],
+    features: ['Всё из тарифа «Премиум»', 'Рассадка гостей по столам', 'Меню и выбор блюд гостями', 'Печатные материалы для рассадки и меню', 'Напоминание гостям за неделю до свадьбы'],
     color: '#685d4a', popular: false, badge: 'Всё включено',
   },
 ];
@@ -45,6 +45,8 @@ export const hasMusic = (plan?: string | null): boolean => plan === 'free' || ha
 export const isAdvancedPlan = (plan?: string | null): boolean => full(plan);
 export const hasCustomDomain = (plan?: string | null): boolean => plan === 'free' || full(plan);
 export const hasPlanner = (plan?: string | null): boolean => plan === 'maximum' || plan === 'pro';
+/** Напоминание гостям перед свадьбой (Telegram, SMS) — только «Максимум». */
+export const hasGuestReminders = (plan?: string | null): boolean => plan === 'maximum' || plan === 'pro';
 /** Анимация открытия. Обёртки шаблонов передают запрет в iframe параметром intro=0 —
     так гость бесплатного сайта не увидит ни кадра заставки, пока идут данные. */
 export const hasIntro = (plan?: string | null): boolean => plan !== 'free';

@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
 import ReviewCard from '@/components/ReviewCard';
+import RemindersTab from '@/components/RemindersTab';
 import { PLAN_TITLES, hasResponseStats, isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
 
 // Рассадка грузится, только когда открыта её вкладка: остальным владельцам этот код ни к чему
@@ -35,6 +36,8 @@ interface RsvpData {
   responses: {
     id: string; guestName: string; attending: boolean; attendance?: Attendance; guestsCount?: number; childrenCount?: number;
     drinkChoice: string; wishes: string; answers?: RsvpAnswer[]; createdAt: string;
+    // Гость попросил напомнить о свадьбе (вкладка «Напоминания»)
+    reminder?: { channel: 'telegram' | 'sms' | 'waiting'; phone: string; answer: '' | 'yes' | 'no' } | null;
   }[];
   // attendingGuests — людей (сколько придёт по всем «да»), attending — ответов
   stats: {
@@ -45,7 +48,7 @@ interface RsvpData {
   drinkLabels: Record<string, string>;
 }
 
-type Tab = 'responses' | 'guests' | 'seating' | 'menu' | 'print' | 'notify' | 'domain';
+type Tab = 'responses' | 'guests' | 'seating' | 'menu' | 'print' | 'remind' | 'notify' | 'domain';
 
 const PRIMARY = '#685d4a';
 const BORDER = '1px solid rgba(206,197,186,0.5)';
@@ -97,6 +100,7 @@ function ManageInviteSession() {
     { key: 'seating',   label: '🪑 Рассадка', show: !!user?.planner },
     { key: 'menu',      label: '🍽 Меню', show: !!user?.planner },
     { key: 'print',     label: '🖨 Печать', show: !!user?.planner },
+    { key: 'remind',    label: '⏰ Напоминания', show: true },
     { key: 'notify',    label: '🔔 Уведомления', show: true },
     { key: 'domain',    label: '🌐 Домен', show: true },
   ];
@@ -148,6 +152,7 @@ function ManageInviteSession() {
         {(tab === 'seating' || tab === 'menu' || tab === 'print') && (hasPlanner(invite.plan)
           ? <PlannerSection inviteId={invite.id} slug={invite.slug} view={tab} />
           : <PlannerUpsell invite={invite} />)}
+        {tab === 'remind'    && <RemindersTab invite={invite} onOpenNotify={() => setTab('notify')} />}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
         {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}
 
@@ -222,6 +227,13 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
                 </div>
               ))}
               {r.wishes && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4, fontStyle: 'italic' }}>«{r.wishes}»</div>}
+              {r.reminder && r.reminder.channel !== 'waiting' && (
+                <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>
+                  ⏰ {r.reminder.channel === 'telegram' ? 'Напомним в Telegram' : `Напомним по SMS · ${r.reminder.phone}`}
+                  {r.reminder.answer === 'yes' && <span style={{ color: '#2e8b57' }}> · ответ на напоминание: «Буду»</span>}
+                  {r.reminder.answer === 'no' && <span style={{ color: '#b85c5c' }}> · ответ на напоминание: «Не смогу»</span>}
+                </div>
+              )}
             </div>
           );
         })}

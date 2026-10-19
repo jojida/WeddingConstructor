@@ -123,6 +123,56 @@ model Invitation {
   persons       Person[]
   plannerNotices PlannerNotice[]
   review        Review?
+
+  // Напоминание гостям перед свадьбой (lib/reminders.ts)
+  reminderSettings ReminderSettings?
+  guestReminders GuestReminder[]
+}
+
+/// Напоминание гостям перед свадьбой: включает пара в кабинете («Максимум»).
+model ReminderSettings {
+  invitationId String     @id
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  enabled      Boolean    @default(false)
+  days         String     @default("7")    // за сколько дней: "7" | "3" | "7,1"
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+/// Гость попросил напомнить о свадьбе (галочка в анкете). Токен придумывает анкета: он же
+/// в ссылке подтверждения /c/<token> и в t.me/<bot>?start=r_<token>. Telegram гость может
+/// подключить раньше, чем отправит анкету, — тогда строка ждёт ответа без приглашения.
+model GuestReminder {
+  id             String         @id @default(uuid())
+  token          String         @unique
+  invitationId   String?
+  invitation     Invitation?    @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+  responseId     String?        @unique
+  response       GuestResponse? @relation(fields: [responseId], references: [id], onDelete: SetNull)
+  phone          String         @default("")   // 79XXXXXXXXX
+  telegramChatId String         @default("")
+  answer         String         @default("")   // ответ на напоминание: '' | yes | no
+  answeredAt     DateTime?
+  createdAt      DateTime       @default(now())
+  sends          ReminderSend[]
+
+  @@index([invitationId])
+}
+
+/// Отправленное напоминание: одно на гостя и срок (d7, d3, d1) — уникальный ключ не даёт
+/// двум проходам отправить его дважды.
+model ReminderSend {
+  id           String        @id @default(uuid())
+  reminderId   String
+  reminder     GuestReminder @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+  invitationId String
+  kind         String        // d7 | d3 | d1
+  channel      String        // telegram | sms | none
+  status       String        // pending | sent | dry | failed | limit
+  createdAt    DateTime      @default(now())
+
+  @@unique([reminderId, kind])
+  @@index([invitationId, channel])
 }
 
 /// Отзыв пары о WeddingCraft (lib/reviews.ts): один на приглашение. На главную попадает,
@@ -197,6 +247,7 @@ model GuestResponse {
   answers       String   @default("[]")
   createdAt     DateTime @default(now())
   persons       Person[]
+  reminder      GuestReminder?
 
   @@index([guestId])
 }

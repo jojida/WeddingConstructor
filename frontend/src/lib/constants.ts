@@ -419,7 +419,7 @@ export const _TEMPLATES_LEGACY = [
   },
 ];
 
-export { PLANS, PLAN_TITLES, hasRsvp, hasResponseStats, hasNotifications, hasMusic, isAdvancedPlan, hasCustomDomain, hasPlanner } from './plans';
+export { PLANS, PLAN_TITLES, hasRsvp, hasResponseStats, hasNotifications, hasMusic, isAdvancedPlan, hasCustomDomain, hasPlanner, hasGuestReminders } from './plans';
 
 /** «гость» в нужной форме: 1 гость, 2 гостя, 5 гостей, 21 гость. */
 export function guestsWord(n: number): string {

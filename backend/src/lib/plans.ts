@@ -15,6 +15,8 @@ export const hasMusic = (plan?: string | null): boolean => plan === 'free' || ha
 export const isAdvanced = (plan?: string | null): boolean => full(plan);
 export const hasCustomDomain = (plan?: string | null): boolean => plan === 'free' || full(plan);
 export const hasPlanner = (plan?: string | null): boolean => plan === 'maximum' || plan === 'pro';
+/** Напоминание гостям перед свадьбой (Telegram, SMS) — только «Максимум». */
+export const hasGuestReminders = (plan?: string | null): boolean => plan === 'maximum' || plan === 'pro';
 
 export const FREE_LOCKED_SECTIONS = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
 export function planSections(plan?: string | null, enabledSections: Record<string, boolean> = {}) {

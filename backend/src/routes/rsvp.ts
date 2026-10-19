@@ -11,6 +11,7 @@ import { inviteDrinkLabels } from '../lib/drinks';
 import { rateLimit } from '../middleware/rateLimit';
 import { Attendance, attendanceOf, cleanAnswers, isAttendance, parseAnswers, summarizeAnswers } from '../lib/rsvpDetails';
 import { record } from '../lib/inviteValidation';
+import { formatPhone, parseRemind, saveReminder } from '../lib/reminders';
 
 const router = Router();
 
@@ -76,6 +77,10 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
 
     const response = await prisma.$transaction(async tx => {
       // A personal link represents one answer, including after resubmission.
+      // Просьба напомнить (телефон, Telegram) переезжает на новый ответ — saveReminder решит, оставить ли её.
+      const prevReminder = guest
+        ? await tx.guestReminder.findFirst({ where: { invitationId: invite.id, response: { is: { guestId: guest.id } } }, select: { id: true } })
+        : null;
       if (guest) await tx.guestResponse.deleteMany({ where: { invitationId: invite.id, guestId: guest.id } });
       const saved = await tx.guestResponse.create({
       data: {
@@ -92,8 +97,17 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
       },
       });
       if (guest) await tx.guest.update({ where: { id: guest.id }, data: { responseId: saved.id } });
+      if (prevReminder) await tx.guestReminder.update({ where: { id: prevReminder.id }, data: { responseId: saved.id } });
       return saved;
     });
+
+    // Напоминание перед свадьбой («Максимум»): как и рассадка, сбой не стоит гостю ответа
+    let remindNote = '';
+    try {
+      remindNote = await saveReminder(invite, response, status, parseRemind(req.body.remind));
+    } catch (e) {
+      console.error('Не удалось сохранить напоминание:', errName(e));
+    }
 
     // Меню и рассадка: люди группы подтягиваются из ответа, а отказ снимает со стола.
     // Сбой здесь не должен стоить гостю его ответа — он уже сохранён.
@@ -116,7 +130,7 @@ router.post('/:slug', rateLimit(30, 10 * 60_000), async (req: Request, res: Resp
       wishes: wishes || '',
       guestsCount: people,
       childrenCount: children,
-      answers: finalAnswers,
+      answers: remindNote ? [...finalAnswers, { id: 'remind', q: 'Напомнить о свадьбе', a: remindNote, t: 'text' as const }] : finalAnswers,
     });
 
     return res.json({ success: true, id: response.id });
@@ -140,9 +154,18 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
   const rows = await prisma.guestResponse.findMany({
     where: { invitationId },
     orderBy: { createdAt: 'desc' },
+    include: { reminder: { select: { phone: true, telegramChatId: true, answer: true, answeredAt: true } } },
   });
-  // Статус и ответы на вопросы — в готовом виде, кабинету не нужно разбирать JSON
-  const responses = rows.map(r => ({ ...r, attendance: attendanceOf(r), answers: parseAnswers(r.answers) }));
+  // Статус и ответы на вопросы — в готовом виде, кабинету не нужно разбирать JSON.
+  // Напоминание — без chat id: паре нужен канал, телефон и ответ гостя.
+  const responses = rows.map(({ reminder, ...r }) => ({
+    ...r, attendance: attendanceOf(r), answers: parseAnswers(r.answers),
+    reminder: reminder ? {
+      channel: reminder.telegramChatId ? 'telegram' : reminder.phone ? 'sms' : 'waiting',
+      phone: reminder.phone ? formatPhone(reminder.phone) : '',
+      answer: reminder.answer, answeredAt: reminder.answeredAt,
+    } : null,
+  }));
   const coming = responses.filter(r => r.attendance === 'yes');
   const maybe = responses.filter(r => r.attendance === 'maybe');
 
