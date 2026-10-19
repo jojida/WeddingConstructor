@@ -376,6 +376,8 @@ function Footer() {
               <li><Link href="/templates" className={styles.footerLink}>Шаблоны приглашений</Link></li>
               <li><Link href="/print" className={styles.footerLink}>Печатные приглашения · 290 ₽</Link></li>
               <li><a href="#rsvp" className={styles.footerLink}>Управление</a></li>
+              <li><Link href="/blog/tekst-priglasheniya-na-svadbu" className={styles.footerLink}>Тексты приглашений</Link></li>
+              <li><Link href="/blog" className={styles.footerLink}>Статьи</Link></li>
             </ul>
           </div>
           <div>

@@ -26,7 +26,7 @@ let previousPage = '';
    и кабинет по-прежнему не учитываются. Заголовки страниц воронки общие
    («Редактор приглашения», «Оплата тарифа») — имён пар в них нет. */
 const ANALYTICS_PATHS = [
-  '/', '/templates', '/print', '/contacts', '/privacy', '/oferta',
+  '/', '/templates', '/print', '/contacts', '/privacy', '/oferta', '/blog',
   '/editor', '/auth', '/payment', '/payment/success',
 ];
 
@@ -43,7 +43,7 @@ export function analyticsPageUrl(value: string, base = 'https://weddingcraft.ru'
     if (!['weddingcraft.ru', 'www.weddingcraft.ru'].includes(url.hostname) || url.protocol !== 'https:') return null;
     if (url.searchParams.has('g')) return null;
     const path = url.pathname.replace(/\/$/, '') || '/';
-    if (!ANALYTICS_PATHS.includes(path) && !/^\/demo\/[a-z0-9-]+$/.test(path)) return null;
+    if (!ANALYTICS_PATHS.includes(path) && !/^\/(demo|blog)\/[a-z0-9-]+$/.test(path)) return null;
     const keep = new URLSearchParams();
     url.searchParams.forEach((v, k) => { if (MARKETING_PARAMS.test(k)) keep.append(k, v); });
     const query = keep.toString();

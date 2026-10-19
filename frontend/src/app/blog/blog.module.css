@@ -1,0 +1,191 @@
+/* Раздел «Статьи»: список /blog и страница статьи /blog/<slug> */
+.page {
+  min-height: 100vh;
+  background: var(--background);
+  padding: 108px 20px 96px; /* шапка Navbar фиксированная, 68px */
+  color: var(--on-surface);
+  font-family: var(--font-inter);
+}
+
+.container { max-width: 720px; margin: 0 auto; }
+.wide { max-width: 1000px; margin: 0 auto; }
+
+.crumbs {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  font-size: 13px; color: var(--outline);
+  margin-bottom: 20px;
+}
+.crumbs a { color: var(--primary); text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+
+.title {
+  font-family: var(--font-playfair);
+  font-weight: 400;
+  font-size: clamp(30px, 5vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+}
+
+.lead {
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--on-surface-variant);
+  margin: 0 0 12px;
+}
+
+.meta { font-size: 13px; color: var(--outline); margin: 0 0 28px; }
+
+/* ── Оглавление ── */
+.toc {
+  background: var(--surface-container-low);
+  border-radius: 16px;
+  padding: 18px 22px;
+  margin: 0 0 36px;
+}
+.tocTitle {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--secondary); margin-bottom: 10px;
+}
+/* Номера внутри пункта: в колонках маркер снаружи обрезается */
+.toc ol { margin: 0; padding: 0; list-style: decimal inside; columns: 2; column-gap: 28px; }
+.toc li { font-size: 15px; line-height: 1.45; margin-bottom: 6px; break-inside: avoid; }
+.toc li::marker { color: var(--outline); }
+.toc a { color: var(--on-surface); text-decoration: none; }
+.toc a:hover { color: var(--primary); text-decoration: underline; }
+
+/* ── Текст статьи ── */
+.body { font-size: 17px; line-height: 1.75; color: var(--on-surface-variant); }
+.body h2 {
+  font-family: var(--font-playfair);
+  font-weight: 400;
+  font-size: clamp(24px, 3.6vw, 30px);
+  line-height: 1.25;
+  color: var(--on-surface);
+  margin: 44px 0 14px;
+  scroll-margin-top: 88px;
+}
+.body p { margin: 0 0 16px; }
+/* Маркеры списков задаём явно: общий сброс стилей сайта их убирает */
+.body ul, .body ol { margin: 0 0 18px; padding-left: 24px; }
+.body ul { list-style: disc; }
+.body ol { list-style: decimal; }
+.body li { margin-bottom: 8px; padding-left: 2px; }
+.body li::marker { color: var(--primary-fixed-dim); }
+.body ol > li::marker { color: var(--primary); font-weight: 600; }
+.body strong { color: var(--on-surface); font-weight: 600; }
+.body a:not(.ctaBtn) { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+
+.tip {
+  border-left: 3px solid var(--primary-fixed-dim);
+  background: #fff;
+  border-radius: 0 12px 12px 0;
+  padding: 14px 18px;
+  margin: 0 0 20px;
+  font-size: 16px;
+}
+
+/* Готовый текст с кнопкой «Скопировать» */
+.example {
+  position: relative;
+  background: #fff;
+  border: 1px solid rgba(206, 197, 186, 0.7);
+  border-radius: 14px;
+  padding: 18px 20px 14px;
+  margin: 0 0 14px;
+}
+.exampleLabel {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--secondary); margin-bottom: 6px;
+}
+.exampleText {
+  font-family: var(--font-playfair);
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--on-surface);
+  white-space: pre-line;
+  margin: 0 0 10px;
+}
+.copy {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  border-radius: 50px;
+  padding: 6px 14px;
+  font-family: var(--font-inter);
+  font-size: 13px;
+  color: var(--primary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.copy:hover { background: var(--surface-container-low); }
+.copied { background: var(--primary); border-color: var(--primary); color: #fff; }
+.copied:hover { background: var(--primary); }
+
+/* Призыв сделать приглашение */
+.cta {
+  background: var(--inverse-surface);
+  color: var(--inverse-on-surface);
+  border-radius: 20px;
+  padding: 28px 28px 26px;
+  margin: 36px 0;
+}
+.ctaTitle {
+  font-family: var(--font-playfair);
+  font-size: 26px;
+  line-height: 1.25;
+  color: #fff;
+  margin: 0 0 10px;
+}
+.ctaText { font-size: 16px; line-height: 1.6; margin: 0 0 18px; opacity: 0.92; }
+.ctaRow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.ctaBtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 28px;
+  border-radius: 50px;
+  background: #fff;
+  color: var(--on-surface);
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: transform 0.2s;
+}
+.ctaBtn:hover { transform: translateY(-2px); }
+.ctaNote { font-size: 13px; opacity: 0.75; }
+
+/* ── Похожие статьи и список /blog ── */
+.relatedTitle {
+  font-family: var(--font-playfair);
+  font-weight: 400;
+  font-size: 26px;
+  margin: 56px 0 16px;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 14px;
+}
+.card {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 20px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(206, 197, 186, 0.6);
+  background: #fff;
+  text-decoration: none;
+  color: var(--on-surface);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 18px 40px -16px rgba(14, 29, 38, 0.18); }
+.cardTitle { font-family: var(--font-playfair); font-size: 21px; line-height: 1.3; }
+.cardText { font-size: 14px; line-height: 1.55; color: var(--on-surface-variant); }
+.cardMore { font-size: 13px; font-weight: 600; color: var(--primary); margin-top: auto; }
+
+@media (max-width: 640px) {
+  .page { padding: 92px 16px 72px; }
+  .lead { font-size: 17px; }
+  .body { font-size: 16px; }
+  .toc ol { columns: 1; }
+  .exampleText { font-size: 17px; }
+  .cta { padding: 24px 20px; border-radius: 16px; }
+  .ctaTitle { font-size: 23px; }
+}

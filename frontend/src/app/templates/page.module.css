@@ -203,6 +203,7 @@
   color: var(--on-surface-variant);
   margin-bottom: 14px;
 }
+.seoText a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
 
 /* ─── CTA ───────────────────────────────────────────────────────────────────── */
 .cta {

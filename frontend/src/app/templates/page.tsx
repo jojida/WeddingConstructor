@@ -114,6 +114,10 @@ export default function TemplatesPage() {
         <p>
           Нажмите «Посмотреть», чтобы открыть пример. Понравился стиль — выбирайте и добавляйте свои тексты и фото.
         </p>
+        <p>
+          Не знаете, что написать? Возьмите готовый вариант из статьи{' '}
+          <Link href="/blog/tekst-priglasheniya-na-svadbu">«Текст приглашения на свадьбу: 30 примеров»</Link>.
+        </p>
       </section>
 
       <div className={styles.cta}>

@@ -45,6 +45,9 @@ test('analytics excludes private routes, guest tokens, custom domains and local 
   ]) assert.equal(analyticsPageUrl(url), null, url);
   assert.equal(analyticsPageUrl('/templates?email=private@example.com#secret'), 'https://weddingcraft.ru/templates');
   assert.equal(analyticsPageUrl('/demo/calla?token=secret'), 'https://weddingcraft.ru/demo/calla');
+  assert.equal(analyticsPageUrl('/blog'), 'https://weddingcraft.ru/blog');
+  assert.equal(analyticsPageUrl('/blog/tekst-priglasheniya-na-svadbu?g=x'), null);
+  assert.equal(analyticsPageUrl('/blog/tekst-priglasheniya-na-svadbu#s2'), 'https://weddingcraft.ru/blog/tekst-priglasheniya-na-svadbu');
   // Воронка (цели Директа) учитывается только по пути: id приглашения и токены отрезаны
   assert.equal(analyticsPageUrl('/editor?id=private-id&template=calla'), 'https://weddingcraft.ru/editor');
   assert.equal(analyticsPageUrl('/auth'), 'https://weddingcraft.ru/auth');
