@@ -111,9 +111,12 @@ function Hero() {
             <em className={styles.heroItalic}>готов за один вечер</em>
           </h1>
 
+          {/* «Приглашение на свадьбу онлайн» — главный запрос (он же в title): в видимом
+              тексте фраза стоит 3 раза — здесь, в заголовке «Как это работает» и в FAQ.
+              Больше не добавлять: Яндекс понижает тексты, написанные для роботов. */}
           <p className={styles.heroSubtitle}>
-            Ваши фото и музыка в одной красивой ссылке для всех гостей.
-            Сделайте приглашение и посмотрите его бесплатно — платите только за публикацию.
+            Сделайте приглашение на свадьбу онлайн: ваши фото и музыка в одной красивой ссылке для всех гостей.
+            Посмотреть можно бесплатно — платите только за публикацию.
           </p>
 
           <div className={styles.heroCtas}>
@@ -592,10 +595,12 @@ function AboutSection() {
 }
 
 // ─── FAQ ─────────────────────────────────────────────────────────────────────
-const FAQ_ITEMS = [
+// a — обычный текст: он же уходит в разметку FAQPage; ссылка на статью — отдельным полем
+const FAQ_ITEMS: { q: string; a: string; more?: { href: string; text: string } }[] = [
   {
     q: 'Как сделать электронное приглашение на свадьбу?',
-    a: 'Выберите шаблон, добавьте ваши данные и фото. Результат сразу виден в редакторе.',
+    a: 'Приглашение на свадьбу онлайн делается прямо в браузере: выберите шаблон, впишите имена и дату, добавьте место, программу и фото — результат сразу виден в редакторе.',
+    more: { href: '/blog/kak-sdelat-elektronnoe-priglashenie-na-svadbu', text: 'Пошаговая инструкция' },
   },
   {
     q: 'Как гости получат приглашение?',
@@ -646,7 +651,10 @@ function FaqSection() {
               <summary style={{ cursor: 'pointer', fontWeight: 600, fontSize: 16, color: '#0e1d26', listStyle: 'none' }}>
                 {item.q}
               </summary>
-              <p style={{ fontSize: 15, color: '#5b554c', lineHeight: 1.6, margin: '12px 0 0' }}>{item.a}</p>
+              <p style={{ fontSize: 15, color: '#5b554c', lineHeight: 1.6, margin: '12px 0 0' }}>
+                {item.a}
+                {item.more && <>{' '}<Link href={item.more.href} style={{ color: 'var(--primary)', textDecoration: 'underline', textUnderlineOffset: 3 }}>{item.more.text} →</Link></>}
+              </p>
             </details>
           ))}
         </div>

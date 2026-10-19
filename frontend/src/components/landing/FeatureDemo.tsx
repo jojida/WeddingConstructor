@@ -498,7 +498,7 @@ export default function FeatureDemo() {
       <div className={styles.inner}>
         <div className={styles.head}>
           <span className={styles.label}>Как это работает</span>
-          <h2 className={styles.title}>Всё для приглашения — <em>в одном сервисе</em></h2>
+          <h2 className={styles.title}>Приглашение на свадьбу онлайн — <em>всё в одном сервисе</em></h2>
         </div>
 
         <div className={styles.tabsWrap} ref={tabsRef}>
