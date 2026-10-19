@@ -26,6 +26,8 @@ import { ensureSchema } from './lib/ensureSchema';
 import { startLifecycleEmails } from './lib/lifecycleEmails';
 import { startReminders } from './lib/reminders';
 import remindersRouter from './routes/reminders';
+import maxRouter from './routes/max';
+import { initMax } from './lib/maxBot';
 import { jwtSecret } from './lib/security';
 import { rateLimit } from './middleware/rateLimit';
 
@@ -106,6 +108,7 @@ app.use('/api/domains', domainsRouter);
 app.use('/api/email', rateLimit(30, 60_000), emailRouter);
 app.use('/api/reviews', rateLimit(120, 60_000), reviewsRouter);
 app.use('/api/reminders', rateLimit(120, 60_000), remindersRouter);
+app.use('/api/max', maxRouter);
 app.use('/api/og', rateLimit(120, 60_000), ogRouter);
 
 // Health check
@@ -127,6 +130,8 @@ if (require.main === module) {
       // Бот сервиса настраивается сам, если задан TELEGRAM_BOT_TOKEN:
       // имя берётся через getMe, вебхук ставится на BACKEND_URL.
       initTelegram();
+      // Бот MAX (напоминания гостям) — так же сам, если задан MAX_BOT_TOKEN.
+      void initMax();
       // Серия писем после регистрации (напоминания и подсказки) — только на проде.
       startLifecycleEmails();
       // Напоминание гостям перед свадьбой (Telegram, SMS) — тоже только на проде.

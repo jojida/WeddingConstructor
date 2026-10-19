@@ -23,6 +23,8 @@ const COLUMNS: { table: string; column: string; ddl: string }[] = [
   // идемпотентная 20261019120000_guest_reminders выше — колонки дописываются после неё.
   { table: 'GuestReminder', column: 'guestId', ddl: '"guestId" TEXT' },
   { table: 'ReminderSettings', column: 'noReply', ddl: '"noReply" BOOLEAN NOT NULL DEFAULT false' },
+  // Напоминание в MAX (миграция 20261019200000_reminders_max)
+  { table: 'GuestReminder', column: 'maxUserId', ddl: `"maxUserId" TEXT NOT NULL DEFAULT ''` },
 ];
 
 /* Миграции, написанные идемпотентно (CREATE … IF NOT EXISTS): новые таблицы бэкенд

@@ -154,14 +154,14 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
   const rows = await prisma.guestResponse.findMany({
     where: { invitationId },
     orderBy: { createdAt: 'desc' },
-    include: { reminder: { select: { phone: true, telegramChatId: true, answer: true, answeredAt: true } } },
+    include: { reminder: { select: { phone: true, telegramChatId: true, maxUserId: true, answer: true, answeredAt: true } } },
   });
   // Статус и ответы на вопросы — в готовом виде, кабинету не нужно разбирать JSON.
   // Напоминание — без chat id: паре нужен канал, телефон и ответ гостя.
   const responses = rows.map(({ reminder, ...r }) => ({
     ...r, attendance: attendanceOf(r), answers: parseAnswers(r.answers),
     reminder: reminder ? {
-      channel: reminder.telegramChatId ? 'telegram' : reminder.phone ? 'sms' : 'waiting',
+      channel: reminder.telegramChatId ? 'telegram' : reminder.maxUserId ? 'max' : reminder.phone ? 'sms' : 'waiting',
       phone: reminder.phone ? formatPhone(reminder.phone) : '',
       answer: reminder.answer, answeredAt: reminder.answeredAt,
     } : null,

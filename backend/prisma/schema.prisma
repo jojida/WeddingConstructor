@@ -155,6 +155,7 @@ model GuestReminder {
   guestId        String?                       // Guest.id — телефон внесла пара; удаляется вместе с гостем (routes/guests.ts)
   phone          String         @default("")   // 79XXXXXXXXX
   telegramChatId String         @default("")
+  maxUserId      String         @default("")   // user_id гостя в MAX (lib/maxBot.ts)
   answer         String         @default("")   // ответ на напоминание: '' | yes | no
   answeredAt     DateTime?
   createdAt      DateTime       @default(now())

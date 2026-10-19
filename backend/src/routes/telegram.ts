@@ -207,7 +207,7 @@ router.post('/webhook', async (req: Request, res: Response) => {
     // Гость из анкеты: «Напомнить в Telegram» (r_<токен напоминания>)
     const remind = /^r_([A-Za-z0-9]{10,24})$/.exec(token);
     if (remind) {
-      await handleReminderStart(chatId, remind[1]);
+      await handleReminderStart({ channel: 'telegram', id: String(chatId) }, remind[1]);
       return res.status(200).send('OK');
     }
     if (token) {

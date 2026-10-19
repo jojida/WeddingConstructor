@@ -39,7 +39,7 @@ interface RsvpData {
     id: string; guestName: string; attending: boolean; attendance?: Attendance; guestsCount?: number; childrenCount?: number;
     drinkChoice: string; wishes: string; answers?: RsvpAnswer[]; createdAt: string;
     // Гость попросил напомнить о свадьбе (вкладка «Напоминания»)
-    reminder?: { channel: 'telegram' | 'sms' | 'waiting'; phone: string; answer: '' | 'yes' | 'no' } | null;
+    reminder?: { channel: 'telegram' | 'max' | 'sms' | 'waiting'; phone: string; answer: '' | 'yes' | 'no' } | null;
   }[];
   // attendingGuests — людей (сколько придёт по всем «да»), attending — ответов
   stats: {
@@ -231,7 +231,7 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
               {r.wishes && <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4, fontStyle: 'italic' }}>«{r.wishes}»</div>}
               {r.reminder && r.reminder.channel !== 'waiting' && (
                 <div style={{ fontSize: 13, color: '#7d766c', marginTop: 4 }}>
-                  ⏰ {r.reminder.channel === 'telegram' ? 'Напомним в Telegram' : `Напомним по SMS · ${r.reminder.phone}`}
+                  ⏰ {r.reminder.channel === 'telegram' ? 'Напомним в Telegram' : r.reminder.channel === 'max' ? 'Напомним в MAX' : `Напомним по SMS · ${r.reminder.phone}`}
                   {r.reminder.answer === 'yes' && <span style={{ color: '#2e8b57' }}> · ответ на напоминание: «Буду»</span>}
                   {r.reminder.answer === 'no' && <span style={{ color: '#b85c5c' }}> · ответ на напоминание: «Не смогу»</span>}
                 </div>

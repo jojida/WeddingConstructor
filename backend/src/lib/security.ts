@@ -21,5 +21,10 @@ export function telegramWebhookSecret(): string {
   return process.env.TELEGRAM_WEBHOOK_SECRET || crypto.createHmac('sha256', jwtSecret())
     .update('telegram-webhook').digest('hex');
 }
+/** Секрет вебхука MAX (заголовок X-Max-Bot-Api-Secret): 5–256 знаков из A-Z, a-z, 0-9, «_», «-». */
+export function maxWebhookSecret(): string {
+  return process.env.MAX_WEBHOOK_SECRET || crypto.createHmac('sha256', jwtSecret())
+    .update('max-webhook').digest('hex');
+}
 export const escapeHtml = (value: string): string => value.replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));

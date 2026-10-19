@@ -2,14 +2,15 @@
 //
 // Пара включает его в кабинете. Тогда в анкете у тех, кто ответил «Буду» или «Пока не
 // знаю», появляется галочка «Напомнить мне»: гость подключает Telegram
-// (t.me/<bot>?start=r_<token>) или оставляет телефон. За 7 дней (пара может выбрать 3 или
-// 7 и 1) приходит напоминание: в Telegram — с кнопками «Буду / Не смогу», по SMS — со
-// ссылкой /c/<token> на страничку подтверждения. Ответ меняет анкету гостя (отказ снимает
-// со стола, как отказ в самой анкете) и приходит паре уведомлением.
+// (t.me/<bot>?start=r_<token>) или MAX (max.ru/<bot>?start=r_<token>, lib/maxBot.ts) либо
+// оставляет телефон. За 7 дней (пара может выбрать 3 или 7 и 1) приходит напоминание: в
+// мессенджере — с кнопками «Буду / Не смогу», по SMS — со ссылкой /c/<token> на страничку
+// подтверждения. Ответ меняет анкету гостя (отказ снимает со стола, как отказ в самой
+// анкете) и приходит паре уведомлением.
 //
-// Telegram бесплатный и идёт первым; SMS — если Telegram нет или бот заблокирован, и не
-// больше smsLimit() на свадьбу. Шлём с 10 до 15 по Москве: в это время день и в
-// Калининграде, и во Владивостоке.
+// Мессенджеры бесплатные и идут первыми (Telegram, затем MAX); SMS — если их нет или бот
+// заблокирован, и не больше smsLimit() на свадьбу. Шлём с 10 до 15 по Москве: в это время
+// день и в Калининграде, и во Владивостоке.
 //
 // Отдельный флажок — напомнить тем, кто не ответил на анкету: гостю с персональной ссылкой,
 // которому пара вписала телефон во вкладке «Гости», в первый срок уходит SMS «ждут вашего
@@ -18,6 +19,7 @@
 import crypto from 'crypto';
 import prisma from './prisma';
 import { botUsername, telegramApi } from './telegram';
+import { Btn, maxApi, maxBotName, maxSend } from './maxBot';
 import { sendSms, smsAvailable, smsParts } from './sms';
 import { hasGuestReminders, isPaid } from './plans';
 import { Attendance, attendanceOf } from './rsvpDetails';
@@ -184,8 +186,9 @@ export function noReplySms(inv: InviteText, by: string, guestToken: string): str
   return list.find((t) => smsParts(t) === 1) || list.find((t) => smsParts(t) <= 2) || list[list.length - 1];
 }
 
-type Button = { text: string; url?: string; callback_data?: string };
+type Button = Btn;
 
+/** Напоминание в мессенджер — тот же текст и кнопки и в Telegram, и в MAX (maxKeyboard). */
 export function telegramMessage(inv: InviteText, kind: number, status: Attendance, token: string, guestName: string, guestToken?: string | null): { text: string; buttons: Button[][] } {
   const names = coupleOf(inv) || 'Молодожёны';
   const time = timeOf(inv.weddingTime);
@@ -210,7 +213,7 @@ export function telegramMessage(inv: InviteText, kind: number, status: Attendanc
 }
 
 // ─── Для страницы сайта ─────────────────────────────────────────────────
-export interface PublicReminders { days: number; sms: boolean; tg: string }
+export interface PublicReminders { days: number; sms: boolean; tg: string; max: string }
 
 /** Что анкета предлагает гостю (wcRemind в данных страницы). null — галочки нет. Не бросает. */
 export async function publicReminders(invite: { id: string; plan: string; weddingDate: string }): Promise<PublicReminders | null> {
@@ -222,9 +225,10 @@ export async function publicReminders(invite: { id: string; plan: string; weddin
     const kind = nextKind(invite.weddingDate, daysOf(s.days), Date.now());
     if (!kind) return null;
     const tg = process.env.TELEGRAM_BOT_TOKEN ? botUsername() : '';
+    const max = maxBotName();
     const sms = smsAvailable() && (await smsSpent(invite.id)) < smsLimit();
-    if (!tg && !sms) return null;
-    return { days: kind, sms, tg };
+    if (!tg && !max && !sms) return null;
+    return { days: kind, sms, tg, max };
   } catch {
     return null;
   }
@@ -249,9 +253,9 @@ async function remindersOpen(invite: { id: string; plan: string }): Promise<{ da
   return s?.enabled ? { days: daysOf(s.days) } : null;
 }
 
-/** Строка для уведомления паре: «в Telegram», «по SMS, +7 …». */
-const channelNote = (r: { telegramChatId: string; phone: string }): string =>
-  r.telegramChatId ? 'в Telegram' : r.phone ? `по SMS, ${formatPhone(r.phone)}` : '';
+/** Строка для уведомления паре: «в Telegram», «в MAX», «по SMS, +7 …». */
+const channelNote = (r: { telegramChatId: string; maxUserId: string; phone: string }): string =>
+  r.telegramChatId ? 'в Telegram' : r.maxUserId ? 'в MAX' : r.phone ? `по SMS, ${formatPhone(r.phone)}` : '';
 
 /**
  * Сохранить просьбу напомнить после того, как ответ анкеты записан. Прежнее напоминание
@@ -282,9 +286,11 @@ export async function saveReminder(
   const phone = input.phone && smsAvailable() ? input.phone : '';
   const byToken = await prisma.guestReminder.findUnique({ where: { token: input.token } });
   if (byToken && byToken.invitationId && byToken.invitationId !== invite.id) return '';   // токен другого сайта
-  const wasWaiting = !!byToken && !byToken.responseId && !!byToken.telegramChatId;       // Telegram подключили до анкеты
+  // Мессенджер подключили до анкеты — скажем там, что анкета дошла
+  const waiting = byToken && !byToken.responseId ? byToken : null;
   const chat = byToken?.telegramChatId || prev?.telegramChatId || '';
-  const data = { invitationId: invite.id, responseId: response.id, phone, telegramChatId: chat, answer: '', answeredAt: null };
+  const maxUserId = byToken?.maxUserId || prev?.maxUserId || '';
+  const data = { invitationId: invite.id, responseId: response.id, phone, telegramChatId: chat, maxUserId, answer: '', answeredAt: null };
 
   let row;
   if (byToken && byToken.id !== prev?.id) {
@@ -297,9 +303,9 @@ export async function saveReminder(
     row = await prisma.guestReminder.create({ data: { token: input.token, ...data } });
   }
 
-  if (wasWaiting && row.telegramChatId) {
-    void telegramApi('sendMessage', { chat_id: row.telegramChatId, text: `✅ Анкета получена! ${remindPromise(invite, open.days)}` });
-  }
+  const got = `✅ Анкета получена! ${remindPromise(invite, open.days)}`;
+  if (waiting?.telegramChatId) void telegramApi('sendMessage', { chat_id: waiting.telegramChatId, text: got });
+  if (waiting?.maxUserId) void maxSend(waiting.maxUserId, got);
   return channelNote(row);
 }
 
@@ -311,34 +317,41 @@ function remindPromise(inv: { groomName: string; brideName: string; weddingDate:
   return `Напомним о свадьбе ${when}.${names ? ` ${names} ждут вас!` : ''}`;
 }
 
-// ─── Telegram ───────────────────────────────────────────────────────────
-/** /start r_<token>: гость подключил Telegram из анкеты — до или после отправки. */
-export async function handleReminderStart(chatId: number, token: string): Promise<void> {
-  const chat = String(chatId);
+// ─── Мессенджеры: подключение из анкеты ─────────────────────────────────
+/** Чат гостя: в Telegram — chat_id, в MAX — user_id (личный диалог адресуется по нему). */
+export type BotChat = { channel: 'telegram' | 'max'; id: string };
+
+const botSay = (c: BotChat, text: string) =>
+  c.channel === 'telegram' ? telegramApi('sendMessage', { chat_id: Number(c.id), text }) : maxSend(c.id, text);
+
+/** start r_<token>: гость подключил Telegram или MAX из анкеты — до или после отправки. */
+export async function handleReminderStart(c: BotChat, token: string): Promise<void> {
+  const link = c.channel === 'telegram' ? { telegramChatId: c.id } : { maxUserId: c.id };
   let row = await prisma.guestReminder.findUnique({ where: { token }, include: { invitation: true } });
   if (!row) {
     try {
-      row = await prisma.guestReminder.create({ data: { token, telegramChatId: chat }, include: { invitation: true } });
+      row = await prisma.guestReminder.create({ data: { token, ...link }, include: { invitation: true } });
     } catch {
       row = await prisma.guestReminder.findUnique({ where: { token }, include: { invitation: true } });
     }
-  } else if (row.telegramChatId !== chat) {
-    row = await prisma.guestReminder.update({ where: { id: row.id }, data: { telegramChatId: chat }, include: { invitation: true } });
+  } else if ((c.channel === 'telegram' ? row.telegramChatId : row.maxUserId) !== c.id) {
+    row = await prisma.guestReminder.update({ where: { id: row.id }, data: link, include: { invitation: true } });
   }
   const inv = row?.invitation;
   if (row?.responseId && inv) {
     const open = await remindersOpen(inv);
-    await telegramApi('sendMessage', {
-      chat_id: chatId,
-      text: `✅ Готово! ${remindPromise(inv, open?.days || [7])} Ответить можно будет прямо здесь.`,
-    });
+    await botSay(c, `✅ Готово! ${remindPromise(inv, open?.days || [7])} Ответить можно будет прямо здесь.`);
   } else {
-    await telegramApi('sendMessage', {
-      chat_id: chatId,
-      text: '✅ Telegram подключён. Вернитесь на сайт приглашения и отправьте анкету — мы напомним о свадьбе заранее.',
-    });
+    const name = c.channel === 'telegram' ? 'Telegram' : 'MAX';
+    await botSay(c, `✅ ${name} подключён. Вернитесь на сайт приглашения и отправьте анкету — мы напомним о свадьбе заранее.`);
   }
 }
+
+/** Гость остановил бота MAX — туда больше не пишем (останется SMS, если есть телефон). */
+export const forgetMaxUser = (userId: string) =>
+  prisma.guestReminder.updateMany({ where: { maxUserId: userId }, data: { maxUserId: '' } });
+
+// ─── Telegram: кнопки ───────────────────────────────────────────────────
 
 /** Кнопки под напоминанием: rm:y — буду, rm:n — «не смогу» (спросим ещё раз), rm:N — точно не смогу. */
 export async function handleReminderCallback(cb: any): Promise<void> {
@@ -383,6 +396,58 @@ export async function handleReminderCallback(cb: any): Promise<void> {
     await answer('Передали молодожёнам');
     await close('❌ Вы ответили: не смогу. Мы передали молодожёнам.');
   }
+}
+
+// ─── MAX: кнопки ────────────────────────────────────────────────────────
+type MaxButton = { type?: string; text?: string; url?: string; payload?: string };
+
+/** Ряды кнопок-ссылок из исходного сообщения (вложение inline_keyboard). */
+function maxLinkRows(attachments: unknown): MaxButton[][] {
+  const kb = (Array.isArray(attachments) ? attachments : []).find((a) => a?.type === 'inline_keyboard');
+  const rows: unknown = kb?.payload?.buttons;
+  return (Array.isArray(rows) ? rows : [])
+    .map((r: unknown) => (Array.isArray(r) ? r.filter((b: MaxButton) => b?.type === 'link' && typeof b.url === 'string') : []))
+    .filter((r: MaxButton[]) => r.length);
+}
+
+const maxRows = (rows: MaxButton[][]) => (rows.length ? [{ type: 'inline_keyboard', payload: { buttons: rows } }] : []);
+
+/** Нажатие кнопки под напоминанием в MAX (событие message_callback): те же rm:y / rm:n / rm:N,
+    ответ — POST /answers: новый текст сообщения и всплывающая подсказка. */
+export async function handleMaxReminderCallback(update: any): Promise<void> {
+  const cb = update?.callback;
+  const callbackId = typeof cb?.callback_id === 'string' ? cb.callback_id : '';
+  if (!callbackId) return;
+  const reply = (body: Record<string, unknown>) => maxApi('POST', '/answers', { query: { callback_id: callbackId }, body });
+  const m = /^rm:([ynN]):([A-Za-z0-9]{10,24})$/.exec(typeof cb.payload === 'string' ? cb.payload : '');
+  const row = m ? await prisma.guestReminder.findUnique({ where: { token: m[2] } }) : null;
+  if (!m || !row || !row.maxUserId || String(cb?.user?.user_id) !== row.maxUserId) {
+    await reply({ notification: 'Ответ не принят' });
+    return;
+  }
+  const [, action, token] = m;
+  const body = update?.message?.body || {};
+  const text = typeof body.text === 'string' ? body.text : '';
+  // Ссылка «Открыть приглашение» остаётся, кнопки ответа уходят
+  const links = maxLinkRows(body.attachments);
+
+  if (action === 'n') {
+    await reply({
+      message: { text, attachments: maxRows([[{ type: 'callback', text: 'Да, не смогу', payload: `rm:N:${token}` }, { type: 'callback', text: 'Нет, я приду', payload: `rm:y:${token}` }], ...links]) },
+      notification: 'Точно не сможете прийти?',
+    });
+    return;
+  }
+  const res = await answerReminder(token, action === 'y' ? 'yes' : 'no');
+  if (!res.ok) {
+    await reply({ notification: res.error === 'past' ? 'Свадьба уже прошла' : 'Ответ больше не принимается' });
+    return;
+  }
+  const note = action === 'y' ? '✅ Вы ответили: буду. Ждём вас!' : '❌ Вы ответили: не смогу. Мы передали молодожёнам.';
+  await reply({
+    message: { text: `${text}\n\n${note}`.slice(0, 4000), attachments: maxRows(links) },
+    notification: action === 'y' ? 'Спасибо!' : 'Передали молодожёнам',
+  });
 }
 
 // ─── Ответ гостя ────────────────────────────────────────────────────────
@@ -456,7 +521,7 @@ export async function reminderOverview(invite: InviteText & { id: string; plan: 
   const days = s?.days && isDaysOption(s.days) ? s.days : '7';
   const rows = await prisma.guestReminder.findMany({
     where: { invitationId: invite.id, responseId: { not: null } },
-    select: { phone: true, telegramChatId: true, answer: true, response: { select: { attendance: true, attending: true } } },
+    select: { phone: true, telegramChatId: true, maxUserId: true, answer: true, response: { select: { attendance: true, attending: true } } },
   });
   const live = rows.filter((r) => r.response && attendanceOf(r.response) !== 'no');
   const sends = await prisma.reminderSend.groupBy({ by: ['kind', 'channel', 'status'], where: { invitationId: invite.id }, _count: { _all: true } });
@@ -475,13 +540,15 @@ export async function reminderOverview(invite: InviteText & { id: string; plan: 
     noReply: !!s?.noReply,
     weddingDate: date,
     daysLeft: left,
-    channels: { telegram: !!(process.env.TELEGRAM_BOT_TOKEN && botUsername()), sms: smsAvailable() },
+    channels: { telegram: !!(process.env.TELEGRAM_BOT_TOKEN && botUsername()), max: !!maxBotName(), sms: smsAvailable() },
     sms: { limit: smsLimit(), spent: sends.filter((x) => x.channel === 'sms' && SMS_SPENT.includes(x.status)).reduce((n, x) => n + x._count._all, 0) },
+    // Каждый гость считается по каналу, которым ему напомнят: Telegram, иначе MAX, иначе SMS
     stats: {
       total: live.length,
       telegram: live.filter((r) => r.telegramChatId).length,
-      sms: live.filter((r) => !r.telegramChatId && r.phone).length,
-      waiting: live.filter((r) => !r.telegramChatId && !r.phone).length,
+      max: live.filter((r) => !r.telegramChatId && r.maxUserId).length,
+      sms: live.filter((r) => !r.telegramChatId && !r.maxUserId && r.phone).length,
+      waiting: live.filter((r) => !r.telegramChatId && !r.maxUserId && !r.phone).length,
       confirmed: rows.filter((r) => r.answer === 'yes').length,
       declined: rows.filter((r) => r.answer === 'no').length,
     },
@@ -544,20 +611,28 @@ interface SendInvite extends InviteText {
 }
 
 async function deliverOne(
-  inv: SendInvite, r: { id: string; token: string; phone: string; telegramChatId: string },
+  inv: SendInvite, r: { id: string; token: string; phone: string; telegramChatId: string; maxUserId: string },
   resp: { guestName: string; guestId: string | null }, status: Attendance, kind: number,
 ): Promise<{ channel: string; status: string }> {
-  if (r.telegramChatId) {
+  if (r.telegramChatId || r.maxUserId) {
     const guest = resp.guestId ? await prisma.guest.findUnique({ where: { id: resp.guestId }, select: { token: true } }) : null;
     const msg = telegramMessage(inv, kind, status, r.token, resp.guestName, guest?.token);
-    const res = await telegramApi('sendMessage', {
-      chat_id: r.telegramChatId, text: msg.text,
-      reply_markup: { inline_keyboard: msg.buttons },
-      link_preview_options: { is_disabled: true },
-    });
-    if (res?.ok) return { channel: 'telegram', status: 'sent' };
-    // 403 — гость остановил бота: в Telegram больше не пишем, остаётся SMS
-    if (res?.error_code === 403) await prisma.guestReminder.update({ where: { id: r.id }, data: { telegramChatId: '' } }).catch(() => {});
+    if (r.telegramChatId) {
+      const res = await telegramApi('sendMessage', {
+        chat_id: r.telegramChatId, text: msg.text,
+        reply_markup: { inline_keyboard: msg.buttons },
+        link_preview_options: { is_disabled: true },
+      });
+      if (res?.ok) return { channel: 'telegram', status: 'sent' };
+      // 403 — гость остановил бота: в Telegram больше не пишем, остаются MAX и SMS
+      if (res?.error_code === 403) await prisma.guestReminder.update({ where: { id: r.id }, data: { telegramChatId: '' } }).catch(() => {});
+    }
+    if (r.maxUserId) {
+      const res = await maxSend(r.maxUserId, msg.text, msg.buttons);
+      if (res?.ok) return { channel: 'max', status: 'sent' };
+      // 403 — гость остановил бота или запретил ему писать
+      if (res?.status === 403) await prisma.guestReminder.update({ where: { id: r.id }, data: { maxUserId: '' } }).catch(() => {});
+    }
   }
   if (r.phone) {
     if (!smsAvailable()) return { channel: 'sms', status: 'failed' };
@@ -565,7 +640,7 @@ async function deliverOne(
     const res = await sendSms(r.phone, smsText(inv, kind, status, r.token));
     return { channel: 'sms', status: res.ok ? (res.dry ? 'dry' : 'sent') : 'failed' };
   }
-  return { channel: r.telegramChatId ? 'telegram' : 'none', status: 'failed' };
+  return { channel: r.telegramChatId ? 'telegram' : r.maxUserId ? 'max' : 'none', status: 'failed' };
 }
 
 async function sendFor(inv: SendInvite, kind: number): Promise<void> {
@@ -575,10 +650,10 @@ async function sendFor(inv: SendInvite, kind: number): Promise<void> {
     include: { response: { select: { guestName: true, attendance: true, attending: true, createdAt: true, guestId: true } } },
     orderBy: { createdAt: 'asc' },
   });
-  const tally = { telegram: 0, sms: 0, failed: 0 };
+  const tally = { telegram: 0, max: 0, sms: 0, failed: 0 };
   for (const r of rows) {
     const resp = r.response;
-    if (!resp || (!r.telegramChatId && !r.phone)) continue;
+    if (!resp || (!r.telegramChatId && !r.maxUserId && !r.phone)) continue;
     const status = attendanceOf(resp);
     if (status === 'no' || (status === 'maybe' && kind === 1)) continue;
     if (resp.createdAt.getTime() >= point) continue;
@@ -589,13 +664,14 @@ async function sendFor(inv: SendInvite, kind: number): Promise<void> {
     } catch { continue; }
     const result = await deliverOne(inv, r, resp, status, kind);
     await prisma.reminderSend.update({ where: { id: mark.id }, data: result });
-    if (result.status === 'sent' || result.status === 'dry') tally[result.channel === 'sms' ? 'sms' : 'telegram'] += 1;
+    if (result.status === 'sent' || result.status === 'dry') tally[result.channel === 'sms' ? 'sms' : result.channel === 'max' ? 'max' : 'telegram'] += 1;
     else tally.failed += 1;
-    await sleep(60);   // Telegram и SMS Aero не любят очередь в десятки сообщений за секунду
+    await sleep(60);   // Telegram, MAX и SMS Aero не любят очередь в десятки сообщений за секунду
   }
-  const sent = tally.telegram + tally.sms;
+  const sent = tally.telegram + tally.max + tally.sms;
   if (sent) {
-    const parts = [tally.telegram && `в Telegram — ${tally.telegram}`, tally.sms && `по SMS — ${tally.sms}`].filter(Boolean).join(', ');
+    const parts = [tally.telegram && `в Telegram — ${tally.telegram}`, tally.max && `в MAX — ${tally.max}`, tally.sms && `по SMS — ${tally.sms}`]
+      .filter(Boolean).join(', ');
     void notifyOwnerText(inv, 'Гостям отправлено напоминание', [
       `🔔 Напоминание о свадьбе отправлено ${sent} ${plural(sent, 'гостю', 'гостям', 'гостям')} (${parts}).`,
       ...(tally.failed ? [`Не доставлено: ${tally.failed}.`] : []),

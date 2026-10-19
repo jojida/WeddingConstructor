@@ -155,7 +155,7 @@ test('напоминания гостям', async (t) => {
     assert.equal(r.json.enabled, true);
     assert.deepEqual(r.json.schedule, [{ kind: 7, date: addDays(wedding, -7), sent: 0 }]);
     assert.match(r.json.preview.sms, /^Денис и Мария ждут вас/);
-    assert.deepEqual((await call('/api/invites/by-slug/denis-maria')).json.customData.wcRemind, { days: 7, sms: true, tg: 'WeddingCraftBot' });
+    assert.deepEqual((await call('/api/invites/by-slug/denis-maria')).json.customData.wcRemind, { days: 7, sms: true, tg: 'WeddingCraftBot', max: '' });
     assert.equal((await call('/api/invites/by-slug/premium-site')).json.customData.wcRemind, undefined);
   });
 
@@ -296,7 +296,7 @@ test('напоминания гостям', async (t) => {
 
   await t.test('сводка в кабинете и ответы с напоминанием', async () => {
     const o = (await call(`/api/reminders/${inv.id}`, 'GET', undefined, tok)).json;
-    assert.deepEqual(o.stats, { total: 2, telegram: 1, sms: 1, waiting: 0, confirmed: 2, declined: 1 });
+    assert.deepEqual(o.stats, { total: 2, telegram: 1, max: 0, sms: 1, waiting: 0, confirmed: 2, declined: 1 });
     assert.deepEqual(o.schedule, [{ kind: 7, date: addDays(wedding, -7), sent: 3 }]);
     assert.deepEqual(o.sms, { limit: 150, spent: 1 });
     const list = (await call(`/api/rsvp/${inv.id}`, 'GET', undefined, tok)).json.responses;

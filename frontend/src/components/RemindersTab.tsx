@@ -7,7 +7,7 @@ import { hasGuestReminders } from '@/lib/constants';
 
 /* Вкладка кабинета «Напоминания» («Максимум»): пара включает галочку «Напомнить мне» в
    анкете и выбирает срок. Гостям, попросившим напомнить, за неделю (3 дня, неделю и
-   накануне) приходит сообщение в Telegram или SMS — с ответом «Буду / Не смогу».
+   накануне) приходит сообщение в Telegram, MAX или SMS — с ответом «Буду / Не смогу».
    Отдельный флажок noReply — SMS «ждут вашего ответа» гостям с персональной ссылкой, которые
    не ответили на анкету (телефон пара вписывает во вкладке «Гости»).
    Сервер — backend/src/lib/reminders.ts, API /api/reminders/:inviteId. */
@@ -22,9 +22,9 @@ interface Overview {
   noReply?: boolean;
   weddingDate: string;
   daysLeft: number | null;
-  channels: { telegram: boolean; sms: boolean };
+  channels: { telegram: boolean; max?: boolean; sms: boolean };
   sms: { limit: number; spent: number };
-  stats: { total: number; telegram: number; sms: number; waiting: number; confirmed: number; declined: number };
+  stats: { total: number; telegram: number; max?: number; sms: number; waiting: number; confirmed: number; declined: number };
   schedule: { kind: number; date: string; sent: number }[];
   // Не ответившие гости с персональной ссылкой: сколько их, у скольких есть телефон, скольким ушло SMS
   unanswered?: { kind: number; date: string; guests: number; withPhone: number; sent: number };
@@ -62,7 +62,7 @@ export default function RemindersTab({ invite, onOpenNotify, onOpenGuests }: Pro
       <div style={{ fontSize: 36, marginBottom: 8 }}>⏰</div>
       <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Напоминание гостям — в тарифе «Максимум»</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 480, margin: '0 auto 16px' }}>
-        За неделю до свадьбы гости получат напоминание в Telegram или по SMS и подтвердят участие одной кнопкой.
+        За неделю до свадьбы гости получат напоминание в Telegram, MAX или по SMS и подтвердят участие одной кнопкой.
         Обзванивать всех перед заказом в ресторане не придётся.
       </p>
       <Link href={`/payment?id=${invite.id}&plan=maximum`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
@@ -107,7 +107,9 @@ function RemindersSettings({ invite, onOpenNotify, onOpenGuests }: Props) {
 
   const s = data.stats;
   const past = data.daysLeft !== null && data.daysLeft < 0;
-  const noChannel = !data.channels.telegram && !data.channels.sms;
+  // Мессенджеры, в которые можно получить напоминание: Telegram и MAX — бесплатно и с кнопками
+  const bots = [data.channels.telegram && 'Telegram', data.channels.max && 'MAX'].filter((b): b is string => !!b);
+  const noChannel = !bots.length && !data.channels.sms;
   const un = data.unanswered;
   // Флажок «не ответившим» — только когда SMS работают (или его уже включили)
   const showNoReply = !!un && (data.channels.sms || !!data.noReply);
@@ -127,7 +129,7 @@ function RemindersSettings({ invite, onOpenNotify, onOpenGuests }: Props) {
           <span style={{ fontWeight: 600, color: '#0e1d26' }}>Предлагать гостям напоминание</span>
           <span style={{ display: 'block', fontSize: 13, color: '#7d766c', marginTop: 2 }}>
             В анкете появится галочка «Напомнить мне»
-            {data.channels.sms && data.channels.telegram ? ' — с телефоном или Telegram' : data.channels.sms ? ' и поле для телефона' : ' с кнопкой Telegram'}.
+            {data.channels.sms && bots.length ? ` — с телефоном или ${bots.join(' или ')}` : data.channels.sms ? ' и поле для телефона' : ` с кнопкой ${bots.join(' или ')}`}.
           </span>
         </span>
       </label>
@@ -207,7 +209,8 @@ function RemindersSettings({ invite, onOpenNotify, onOpenGuests }: Props) {
       {(data.enabled || s.total > 0) && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10, marginTop: 18 }}>
           <Tile n={s.total} label="Попросили напомнить" />
-          <Tile n={s.telegram} label="в Telegram" />
+          {(data.channels.telegram || s.telegram > 0) && <Tile n={s.telegram} label="в Telegram" />}
+          {(data.channels.max || (s.max ?? 0) > 0) && <Tile n={s.max ?? 0} label="в MAX" />}
           {(data.channels.sms || s.sms > 0) && <Tile n={s.sms} label="по SMS" />}
           <Tile n={s.confirmed} label="Подтвердили" color="#2e8b57" />
           <Tile n={s.declined} label="Ответили «Не смогу»" color="#b85c5c" />
@@ -216,11 +219,11 @@ function RemindersSettings({ invite, onOpenNotify, onOpenGuests }: Props) {
 
       {data.enabled && (
         <div style={{ marginTop: 12, fontSize: 13, color: '#7d766c', lineHeight: 1.6 }}>
-          {data.channels.sms && data.channels.telegram
-            ? <>Telegram — в первую очередь, SMS — тем, у кого его нет. SMS на эту свадьбу: {data.sms.spent} из {data.sms.limit}.</>
+          {data.channels.sms && bots.length
+            ? <>{bots.join(' и ')} — в первую очередь, SMS — тем, у кого {bots.length > 1 ? 'их' : 'его'} нет. SMS на эту свадьбу: {data.sms.spent} из {data.sms.limit}.</>
             : data.channels.sms
               ? <>Напоминания приходят по SMS. SMS на эту свадьбу: {data.sms.spent} из {data.sms.limit}.</>
-              : <>Сейчас напоминания приходят в Telegram; номер телефона анкета пока не спрашивает.</>}
+              : <>Сейчас напоминания приходят в {bots.join(' или ')}; номер телефона анкета пока не спрашивает.</>}
           {' '}Кто попросил напомнить, видно во вкладке «Ответы».
         </div>
       )}
@@ -238,9 +241,9 @@ function RemindersSettings({ invite, onOpenNotify, onOpenGuests }: Props) {
         <div style={{ marginTop: 26 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#7d766c', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 10 }}>Что получит гость</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 14, alignItems: 'start' }}>
-            {data.channels.telegram && (
+            {bots.length > 0 && (
               <div>
-                <div style={{ fontSize: 12, color: '#9a948a', marginBottom: 6 }}>Telegram</div>
+                <div style={{ fontSize: 12, color: '#9a948a', marginBottom: 6 }}>{bots.join(' и ')}</div>
                 <div style={{ background: '#fff', border: BORDER, borderRadius: '14px 14px 14px 4px', padding: '12px 14px', fontSize: 13.5, lineHeight: 1.5, color: '#2b2925', whiteSpace: 'pre-line' }}>
                   {data.preview.telegram}
                 </div>

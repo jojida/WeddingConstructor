@@ -82,7 +82,7 @@
     '.wc-people-note{font-size:.85em;opacity:.8;line-height:1.4;margin:.2em 0 .6em}' +
     '.wc-people-note a{color:inherit;text-decoration:underline}' +
     '.wc-remind{display:flex;flex-direction:column;gap:.4em;margin-top:.4em}' +
-    '.wc-remind__tg{font-weight:600}' +
+    '.wc-remind__bot{font-weight:600}' +
     '[data-rsvp-count][hidden],.wc-off{display:none!important}';
 
   function injectCss() {
@@ -367,17 +367,18 @@
 
   /* ─── Напоминание перед свадьбой ──────────────────────────────────────── */
   // Пара включает в кабинете («Максимум»), сервер кладёт в данные страницы
-  // wcRemind = { days, sms, tg } (backend lib/reminders.ts). Галочка «Напомнить мне»
-  // открывает телефон (если SMS сейчас отправляются) и ссылку на бот в Telegram.
-  // Токен придумываем здесь: по нему бот найдёт этот ответ (t.me/<bot>?start=r_<token>),
-  // он же будет в ссылке подтверждения из SMS.
+  // wcRemind = { days, sms, tg, max } (backend lib/reminders.ts). Галочка «Напомнить мне»
+  // открывает телефон (если SMS сейчас отправляются) и ссылки на бот в Telegram и MAX.
+  // Токен придумываем здесь: по нему бот найдёт этот ответ (t.me/<bot>?start=r_<token>,
+  // max.ru/<bot>?start=r_<token>), он же будет в ссылке подтверждения из SMS.
 
   function normalizeRemind(r) {
     if (!r || typeof r !== 'object') return null;
     var tg = typeof r.tg === 'string' && /^[A-Za-z0-9_]{5,32}$/.test(r.tg) ? r.tg : '';
+    var max = typeof r.max === 'string' && /^[A-Za-z0-9_.-]{2,64}$/.test(r.max) ? r.max : '';
     var sms = r.sms === true;
     var days = r.days === 3 || r.days === 1 ? r.days : 7;
-    return tg || sms ? { days: days, tg: tg, sms: sms } : null;
+    return tg || max || sms ? { days: days, tg: tg, max: max, sms: sms } : null;
   }
 
   function remindToken(form) {
@@ -434,21 +435,31 @@
       });
       more.appendChild(phone);
     }
-    if (r.tg) {
+    // Мессенджеры бесплатные, и ответить там можно кнопкой — поэтому они рядом с телефоном
+    var bots = [];
+    if (r.tg) bots.push({ name: 'Telegram', href: 'https://t.me/' + r.tg + '?start=r_' + remindToken(form),
+      after: ' Нажмите в Telegram «Старт», затем вернитесь и отправьте анкету.' });
+    if (r.max) bots.push({ name: 'MAX', href: 'https://max.ru/' + r.max + '?start=r_' + remindToken(form),
+      after: ' Запустите бота в MAX, затем вернитесь и отправьте анкету.' });
+    if (bots.length) {
       var line = document.createElement('p');
       line.className = 'wc-people-note';
-      var a = document.createElement('a');
-      a.className = 'wc-remind__tg';
-      a.href = 'https://t.me/' + r.tg + '?start=r_' + remindToken(form);
-      a.target = '_blank';
-      a.rel = 'noopener';
-      a.textContent = r.sms ? 'Или получить в Telegram →' : 'Получить в Telegram →';
+      line.appendChild(document.createTextNode(r.sms ? 'Или в мессенджере: ' : 'Получить в мессенджере: '));
       var hint = document.createTextNode(' Ответить на напоминание можно будет одной кнопкой.');
-      a.addEventListener('click', function () {
-        form.__wcrTg = true;
-        hint.nodeValue = ' Нажмите в Telegram «Старт», затем вернитесь и отправьте анкету.';
+      bots.forEach(function (b, i) {
+        if (i) line.appendChild(document.createTextNode(' · '));
+        var a = document.createElement('a');
+        a.className = 'wc-remind__bot';
+        a.href = b.href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = b.name + ' →';
+        a.addEventListener('click', function () {
+          form.__wcrBot = true;
+          hint.nodeValue = b.after;
+        });
+        line.appendChild(a);
       });
-      line.appendChild(a);
       line.appendChild(hint);
       more.appendChild(line);
     }
@@ -481,8 +492,8 @@
     if (!on) return undefined;
     var field = g.querySelector('input[name="wcRemindPhone"]');
     var phone = field ? remindPhone(field.value.trim()) : '';
-    // Галочка без телефона и без Telegram — напоминать некуда
-    return on.checked && (phone || form.__wcrTg) ? { token: remindToken(form), phone: phone } : false;
+    // Галочка без телефона и без мессенджера — напоминать некуда
+    return on.checked && (phone || form.__wcrBot) ? { token: remindToken(form), phone: phone } : false;
   }
 
   function readAnswer(group) {
