@@ -175,7 +175,7 @@ function TemplatesSection() {
         <div className={styles.sectionHeader} data-animate>
           <div>
             <span className={styles.sectionLabel}>Избранные стили</span>
-            <h2 className={styles.sectionTitle}>Шаблоны свадебных приглашений</h2>
+            <h2 className={styles.sectionTitle}>Шаблоны сайтов-приглашений на свадьбу</h2>
           </div>
           <Link href="/templates" className={styles.seeAllBtn}>
             Смотреть все <span className={styles.arrowIcon}>→</span>
