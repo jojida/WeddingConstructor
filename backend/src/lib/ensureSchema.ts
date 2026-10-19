@@ -19,6 +19,10 @@ const COLUMNS: { table: string; column: string; ddl: string }[] = [
   { table: 'GuestResponse', column: 'childrenCount', ddl: '"childrenCount" INTEGER NOT NULL DEFAULT 0' },
   { table: 'GuestResponse', column: 'answers', ddl: `"answers" TEXT NOT NULL DEFAULT '[]'` },
   { table: 'User', column: 'emailOptOut', ddl: '"emailOptOut" BOOLEAN NOT NULL DEFAULT false' },
+  // Напоминание не ответившим (миграция 20261019180000_reminders_no_reply). Таблицы создаёт
+  // идемпотентная 20261019120000_guest_reminders выше — колонки дописываются после неё.
+  { table: 'GuestReminder', column: 'guestId', ddl: '"guestId" TEXT' },
+  { table: 'ReminderSettings', column: 'noReply', ddl: '"noReply" BOOLEAN NOT NULL DEFAULT false' },
 ];
 
 /* Миграции, написанные идемпотентно (CREATE … IF NOT EXISTS): новые таблицы бэкенд

@@ -67,10 +67,12 @@ router.put('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response)
   const invite = await ownInvite(req);
   if (!invite) return res.status(404).json({ error: 'Не найдено' });
   if (!hasGuestReminders(invite.plan)) return res.status(403).json({ error: 'Напоминания гостям — в тарифе «Максимум»' });
-  const { enabled, days } = req.body as Record<string, unknown>;
-  if (typeof enabled !== 'boolean' || !isDaysOption(days)) return res.status(400).json({ error: 'Некорректные настройки' });
+  const { enabled, days, noReply } = req.body as Record<string, unknown>;
+  if (typeof enabled !== 'boolean' || !isDaysOption(days) || (noReply !== undefined && typeof noReply !== 'boolean')) {
+    return res.status(400).json({ error: 'Некорректные настройки' });
+  }
   try {
-    await saveReminderSettings(invite.id, enabled, days);
+    await saveReminderSettings(invite.id, enabled, days, noReply);
     return res.json(await reminderOverview(invite));
   } catch (e) {
     console.error('Напоминания: настройки не сохранены:', errName(e));

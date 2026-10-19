@@ -29,6 +29,8 @@ type Attendance = 'yes' | 'no' | 'maybe';
 interface RsvpAnswer { id: string; q: string; a: string; t: 'one' | 'many' | 'text' }
 interface Guest {
   id: string; token: string; salutation: string; names: string;
+  // Телефон для SMS «ждут вашего ответа» («Максимум», вкладка «Напоминания»), «+7 912 345-67-89»
+  phone?: string;
   greeting: string; responded: boolean; attending: boolean | null; attendance?: Attendance | null;
   guestsCount?: number | null; childrenCount?: number; drinkChoice: string; wishes: string; answers?: RsvpAnswer[];
 }
@@ -152,7 +154,7 @@ function ManageInviteSession() {
         {(tab === 'seating' || tab === 'menu' || tab === 'print') && (hasPlanner(invite.plan)
           ? <PlannerSection inviteId={invite.id} slug={invite.slug} view={tab} />
           : <PlannerUpsell invite={invite} />)}
-        {tab === 'remind'    && <RemindersTab invite={invite} onOpenNotify={() => setTab('notify')} />}
+        {tab === 'remind'    && <RemindersTab invite={invite} onOpenNotify={() => setTab('notify')} onOpenGuests={() => setTab('guests')} />}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
         {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}
 
@@ -247,12 +249,15 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
   const [guests, setGuests] = useState<Guest[]>([]);
   const [salutation, setSalutation] = useState<string>('дорогие');
   const [names, setNames] = useState('');
+  const [phone, setPhone] = useState('');
+  // Поле «Телефон» — у «Максимума», когда SMS работают (решает сервер)
+  const [phones, setPhones] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const drinkLabels = inviteDrinkLabels(invite.customData);
 
   const load = useCallback(() => {
-    api.get(`/api/guests/${invite.id}`).then(res => setGuests(res.data.guests)).catch(() => {});
+    api.get(`/api/guests/${invite.id}`).then(res => { setGuests(res.data.guests); setPhones(!!res.data.phones); }).catch(() => {});
   }, [invite.id]);
   useEffect(() => { if (advanced) load(); }, [advanced, load]);
 
@@ -273,8 +278,9 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
     if (!names.trim()) { toast.error('Введите имя гостя'); return; }
     setBusy(true);
     try {
-      await api.post(`/api/guests/${invite.id}`, { salutation, names: names.trim() });
+      await api.post(`/api/guests/${invite.id}`, { salutation, names: names.trim(), ...(phones && phone.trim() ? { phone: phone.trim() } : {}) });
       setNames('');
+      setPhone('');
       load();
       toast.success('Гость добавлен');
     } catch (e: any) { toast.error(e.response?.data?.error || 'Ошибка'); }
@@ -307,8 +313,17 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
           </select>
           <input className="input-field" style={{ flex: 1, minWidth: 180 }} placeholder={salutation === 'семья' ? 'Кореловых' : 'Денис и Мария'}
             value={names} onChange={e => setNames(e.target.value)} onKeyDown={e => e.key === 'Enter' && addGuest()} />
+          {phones && (
+            <input className="input-field" type="tel" inputMode="tel" autoComplete="off" style={{ width: 190 }} placeholder="Телефон (необязательно)"
+              value={phone} onChange={e => setPhone(e.target.value)} onKeyDown={e => e.key === 'Enter' && addGuest()} />
+          )}
           <button className="btn-primary" onClick={addGuest} disabled={busy} style={{ padding: '10px 20px', fontSize: 14 }}>Добавить</button>
         </div>
+        {phones && (
+          <div style={{ fontSize: 12, color: '#9a948a', marginTop: 8 }}>
+            Телефон нужен, чтобы напомнить по SMS, если гость не ответит на анкету, — включается во вкладке «Напоминания».
+          </div>
+        )}
         {names.trim() && (
           <div style={{ fontSize: 13, color: '#9a7b3f', marginTop: 10 }}>
             Обращение на сайте: <b>«{previewGreeting(salutation, names)}»</b>
@@ -343,6 +358,9 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
                     <span style={{ color: '#9a948a' }}>{x.q}</span> — {x.a}
                   </div>
                 ))}
+                {(phones || g.phone) && (
+                  <GuestPhone guest={g} onSaved={p => setGuests(prev => prev.map(x => (x.id === g.id ? { ...x, phone: p } : x)))} />
+                )}
               </div>
               <button onClick={() => copyLink(g.token)} className="btn-outline" style={{ padding: '7px 12px', fontSize: 12 }}>🔗 Ссылка</button>
               <button onClick={() => removeGuest(g.id)} title="Удалить" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b85c5c', fontSize: 18 }}>🗑</button>
@@ -350,6 +368,43 @@ function GuestsTab({ invite, advanced, origin }: { invite: Invite; advanced: boo
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+// Телефон гостя под его именем: показать, вписать, исправить или стереть
+function GuestPhone({ guest, onSaved }: { guest: Guest; onSaved: (phone: string) => void }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(guest.phone || '');
+  const [busy, setBusy] = useState(false);
+
+  const save = async () => {
+    setBusy(true);
+    try {
+      const res = await api.put(`/api/guests/${guest.id}`, { phone: value.trim() });
+      onSaved(res.data.phone || '');
+      setEditing(false);
+      toast.success(value.trim() ? 'Телефон сохранён' : 'Телефон удалён');
+    } catch (e: any) { toast.error(e.response?.data?.error || 'Не удалось сохранить'); }
+    finally { setBusy(false); }
+  };
+
+  const link = { background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: PRIMARY, fontSize: 12 } as const;
+  if (!editing) return (
+    <div style={{ fontSize: 12, marginTop: 4, color: '#7d766c' }}>
+      {guest.phone
+        ? <>📱 {guest.phone} <button onClick={() => { setValue(guest.phone || ''); setEditing(true); }} style={link}>изменить</button></>
+        : <button onClick={() => { setValue(''); setEditing(true); }} style={link}>+ телефон для напоминания</button>}
+    </div>
+  );
+  return (
+    <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', marginTop: 6 }}>
+      <input className="input-field" type="tel" inputMode="tel" autoComplete="off" autoFocus placeholder="+7 912 345-67-89"
+        value={value} onChange={e => setValue(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') setEditing(false); }}
+        style={{ width: 190, padding: '6px 10px', fontSize: 13 }} />
+      <button className="btn-primary" onClick={save} disabled={busy} style={{ padding: '6px 12px', fontSize: 12 }}>Сохранить</button>
+      <button onClick={() => setEditing(false)} style={{ ...link, color: '#9a948a' }}>Отмена</button>
     </div>
   );
 }

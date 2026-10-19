@@ -94,6 +94,23 @@ test('чистые функции', () => {
   assert.deepEqual(tg.buttons[0].map((b) => b.callback_data), ['rm:y:Ab3dE7xK2q', 'rm:n:Ab3dE7xK2q']);
   assert.equal(tg.buttons[1][0].url, 'https://weddingcraft.ru/denis-maria');
   for (const row of tg.buttons) for (const b of row) if (b.callback_data) assert.ok(Buffer.byteLength(b.callback_data) <= 64);
+
+  // Не ответившим — один раз, в первый срок, и пока есть время ответить
+  assert.equal(R.noReplyKind([7], 8), null);
+  assert.equal(R.noReplyKind([7], 7), 7);
+  assert.equal(R.noReplyKind([7], 2), 7, 'включили поздно — всё равно разошлём');
+  assert.equal(R.noReplyKind([7], 1), null, 'накануне ответить уже некогда');
+  assert.equal(R.noReplyKind([7, 1], 3), 7);
+  assert.equal(R.noReplyKind([7, 1], 1), null, '«7,1» — только за неделю');
+  assert.equal(R.noReplyKind([3], 3), 3);
+  assert.equal(R.answerBy('2027-06-12', at('2027-06-05', 11)), '2027-06-08');
+  assert.equal(R.answerBy('2027-06-12', at('2027-06-10', 11)), '2027-06-11', 'не позже, чем накануне');
+  const ask = R.noReplySms(inv, '2027-06-08', 'Ab3dE7xK2qLm9PzR4tWy8u');
+  assert.equal(ask, 'Денис и Мария ждут вашего ответа до 08.06: weddingcraft.ru/denis-maria?g=Ab3dE7xK2qLm9PzR4tWy8u');
+  assert.ok([...ask].length <= 134, 'не больше двух частей');
+  const longAsk = R.noReplySms({ ...inv, groomName: 'А'.repeat(40), brideName: 'Б'.repeat(40) }, '2027-06-08', 'Ab3dE7xK2qLm9PzR4tWy8u');
+  assert.equal(longAsk, 'Пожалуйста, ответьте на свадебное приглашение до 08.06: weddingcraft.ru/denis-maria?g=Ab3dE7xK2qLm9PzR4tWy8u');
+  assert.doesNotMatch(ask + longAsk, /weddingcraft(?!\.ru\/)|скидк|тариф|акци/i, 'без рекламы');
 });
 
 test('напоминания гостям', async (t) => {
@@ -319,5 +336,107 @@ test('напоминания гостям', async (t) => {
     await prisma.guestReminder.create({ data: { token: token('stale'), telegramChatId: '6000', createdAt: new Date(Date.now() - 4 * DAY) } });
     await R.runReminders(Date.now());
     assert.equal(await reminderOf(token('stale')), null);
+  });
+
+  await t.test('не ответившим: телефон во вкладке «Гости» → SMS со ссылкой на личное приглашение', async () => {
+    const wedding2 = addDays(mskToday, 20);
+    const day = addDays(wedding2, -7);
+    const inv2 = await prisma.invitation.create({ data: {
+      userId: owner.id, slug: 'oleg-olga', templateId: 'calla', status: 'published', plan: 'maximum',
+      groomName: 'Олег', brideName: 'Ольга', weddingDate: wedding2, weddingTime: '16:00',
+      notifyChannel: 'telegram', notifyTelegramChatId: '9100',
+    } });
+    const addGuest = async (body) => (await call(`/api/guests/${inv2.id}`, 'POST', body, tok)).json;
+    const sendsOf2 = () => prisma.reminderSend.findMany({ where: { invitationId: inv2.id }, include: { reminder: true } });
+
+    // Телефон: российский мобильный, только «Максимум», только владелец
+    assert.equal((await call(`/api/guests/${inv2.id}`, 'POST', { names: 'Кривой', phone: '+7 495 123-45-67' }, tok)).status, 400);
+    assert.equal((await call(`/api/guests/${premium.id}`, 'POST', { names: 'Гость', phone: '9120001122' }, tok)).status, 403);
+    const petr = await addGuest({ names: 'Пётр', phone: '8 912 000-11-22' });
+    assert.equal(petr.phone, '+7 912 000-11-22');
+    const sveta = await addGuest({ names: 'Света' });
+    assert.equal(sveta.phone, '');
+    assert.equal((await call(`/api/guests/${sveta.id}`, 'PUT', { phone: '9120003344' }, other)).status, 404);
+    assert.equal((await call(`/api/guests/${sveta.id}`, 'PUT', { phone: 'позвоните' }, tok)).status, 400);
+    const put = await call(`/api/guests/${sveta.id}`, 'PUT', { phone: '+7 (912) 000-33-44' }, tok);
+    assert.equal(put.status, 200);
+    assert.equal(put.json.phone, '+7 912 000-33-44');
+    assert.equal(put.json.names, 'Света', 'имя не тронуто');
+    const timur = await addGuest({ names: 'Тимур', phone: '9120005566' });
+    await addGuest({ names: 'Без телефона' });
+    const list = (await call(`/api/guests/${inv2.id}`, 'GET', undefined, tok)).json;
+    assert.equal(list.phones, true);
+    assert.deepEqual(list.guests.map((g) => [g.names, g.phone]), [['Пётр', '+7 912 000-11-22'], ['Света', '+7 912 000-33-44'], ['Тимур', '+7 912 000-55-66'], ['Без телефона', '']]);
+    assert.equal((await call(`/api/guests/${premium.id}`, 'GET', undefined, tok)).json.phones, false, '«Премиум» — без поля');
+
+    // Тимур ответил по своей ссылке — ему не пишем
+    assert.equal((await call('/api/rsvp/oleg-olga', 'POST', { attendance: 'yes', guestsCount: 1, guestToken: timur.token })).status, 200);
+
+    // Флажок есть, а напоминания выключены — тишина; без поля noReply флажок не сбрасывается
+    assert.equal((await call(`/api/reminders/${inv2.id}`, 'PUT', { enabled: true, days: '7', noReply: 'yes' }, tok)).status, 400);
+    assert.equal((await call(`/api/reminders/${inv2.id}`, 'PUT', { enabled: false, days: '7', noReply: true }, tok)).json.noReply, true);
+    await R.runReminders(at(day, 11));
+    assert.equal((await sendsOf2()).length, 0, 'напоминания выключены');
+    const on = (await call(`/api/reminders/${inv2.id}`, 'PUT', { enabled: true, days: '7,1' }, tok)).json;
+    assert.equal(on.noReply, true);
+    assert.deepEqual(on.unanswered, { kind: 7, date: day, guests: 3, withPhone: 2, sent: 0 });
+    assert.match(on.preview.noReply, /^Олег и Ольга ждут вашего ответа до \d\d\.\d\d: weddingcraft\.ru\/oleg-olga\?g=/);
+
+    // Добавлен уже в срок напоминания — приглашение ему только что отправили, не пишем
+    const late = await addGuest({ names: 'Поздний', phone: '9120007788' });
+    await prisma.guest.update({ where: { id: late.id }, data: { createdAt: new Date(at(day, 9)) } });
+
+    await R.runReminders(at(addDays(wedding2, -8), 11));
+    assert.equal((await sendsOf2()).length, 0, 'за 8 дней — рано');
+
+    calls.length = 0;
+    const logs = [];
+    const log = console.log;
+    console.log = (...a) => { logs.push(a.join(' ')); };
+    try { await R.runReminders(at(day, 11)); } finally { console.log = log; }
+    const sends = await sendsOf2();
+    assert.deepEqual(sends.map((s) => [s.reminder.guestId, s.kind, s.channel, s.status]).sort(),
+      [[petr.id, 'n7', 'sms', 'dry'], [sveta.id, 'n7', 'sms', 'dry']].sort());
+    const by = addDays(day, 3);
+    const sms = logs.filter((l) => l.includes('[SMS, пробный режим]'));
+    assert.equal(sms.length, 2);
+    assert.ok(sms.some((l) => l.endsWith(`: Олег и Ольга ждут вашего ответа до ${by.slice(8, 10)}.${by.slice(5, 7)}: weddingcraft.ru/oleg-olga?g=${petr.token}`)), sms.join('\n'));
+    const summary = await waitFor((c) => c.method === 'sendMessage' && c.body.chat_id === '9100', 'сводка паре');
+    assert.match(summary.body.text, /SMS со ссылкой на приглашение отправлено 2 гостям, которые ещё не ответили на анкету/);
+
+    // Повторный проход и «накануне» — больше ничего
+    await R.runReminders(at(day, 13));
+    await R.runReminders(at(addDays(wedding2, -1), 11));
+    assert.equal((await sendsOf2()).length, 2);
+    const o = (await call(`/api/reminders/${inv2.id}`, 'GET', undefined, tok)).json;
+    assert.equal(o.unanswered.sent, 2);
+    assert.equal(o.sms.spent, 2, 'лимит SMS общий с обычными напоминаниями');
+
+    // Стёртый и вписанный заново номер то же SMS второй раз не получает
+    assert.equal((await call(`/api/guests/${sveta.id}`, 'PUT', { phone: '' }, tok)).json.phone, '');
+    assert.equal((await prisma.guestReminder.findFirst({ where: { guestId: sveta.id } })).phone, '', 'номер стёрт');
+    await call(`/api/guests/${sveta.id}`, 'PUT', { phone: '9120009900' }, tok);
+    await R.runReminders(at(addDays(day, 1), 11));
+    assert.equal((await sendsOf2()).length, 2);
+
+    // Света ответила и сама попросила напомнить — это её отдельная строка, телефон от пары на месте
+    assert.equal((await call('/api/rsvp/oleg-olga', 'POST', { attendance: 'yes', guestsCount: 1, guestToken: sveta.token, remind: { token: token('sveta') } })).status, 200);
+    assert.equal((await reminderOf(token('sveta'))).response.guestId, sveta.id);
+    assert.equal((await prisma.guestReminder.findFirst({ where: { guestId: sveta.id } })).phone, '79120009900');
+
+    // Лимит SMS исчерпан — отметка «limit», SMS не уходит
+    const lim = await addGuest({ names: 'Лимит', phone: '9120001010' });
+    await prisma.guest.update({ where: { id: lim.id }, data: { createdAt: new Date(at(addDays(day, -1), 12)) } });
+    process.env.REMINDER_SMS_LIMIT = '2';
+    await R.runReminders(at(addDays(day, 1), 12));
+    delete process.env.REMINDER_SMS_LIMIT;
+    assert.equal((await prisma.reminderSend.findFirst({ where: { reminder: { guestId: lim.id } } })).status, 'limit');
+
+    // Телефон от пары не «брошенная» строка — через трое суток не стирается; удалили гостя — удалён
+    await prisma.guestReminder.updateMany({ where: { guestId: petr.id }, data: { createdAt: new Date(Date.now() - 5 * DAY) } });
+    await R.runReminders(Date.now());
+    assert.ok(await prisma.guestReminder.findFirst({ where: { guestId: petr.id } }));
+    assert.equal((await call(`/api/guests/${petr.id}`, 'DELETE', undefined, tok)).status, 200);
+    assert.equal(await prisma.guestReminder.count({ where: { guestId: petr.id } }), 0);
   });
 });

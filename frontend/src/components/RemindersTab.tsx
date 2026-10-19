@@ -8,6 +8,8 @@ import { hasGuestReminders } from '@/lib/constants';
 /* Вкладка кабинета «Напоминания» («Максимум»): пара включает галочку «Напомнить мне» в
    анкете и выбирает срок. Гостям, попросившим напомнить, за неделю (3 дня, неделю и
    накануне) приходит сообщение в Telegram или SMS — с ответом «Буду / Не смогу».
+   Отдельный флажок noReply — SMS «ждут вашего ответа» гостям с персональной ссылкой, которые
+   не ответили на анкету (телефон пара вписывает во вкладке «Гости»).
    Сервер — backend/src/lib/reminders.ts, API /api/reminders/:inviteId. */
 
 const PRIMARY = '#685d4a';
@@ -17,15 +19,19 @@ type Days = '7' | '3' | '7,1';
 interface Overview {
   enabled: boolean;
   days: Days;
+  noReply?: boolean;
   weddingDate: string;
   daysLeft: number | null;
   channels: { telegram: boolean; sms: boolean };
   sms: { limit: number; spent: number };
   stats: { total: number; telegram: number; sms: number; waiting: number; confirmed: number; declined: number };
   schedule: { kind: number; date: string; sent: number }[];
-  preview: { telegram: string; sms: string } | null;
+  // Не ответившие гости с персональной ссылкой: сколько их, у скольких есть телефон, скольким ушло SMS
+  unanswered?: { kind: number; date: string; guests: number; withPhone: number; sent: number };
+  preview: { telegram: string; sms: string; noReply?: string } | null;
 }
 interface InviteLike { id: string; plan: string; notifyChannel: string }
+type Settings = { enabled: boolean; days: Days; noReply: boolean };
 
 const DAY_OPTIONS: { v: Days; t: string; d: string }[] = [
   { v: '7', t: 'За неделю', d: 'Успеете назвать ресторану точное число гостей' },
@@ -43,8 +49,14 @@ const guestsWord = (n: number) => {
   const m10 = n % 10, m100 = n % 100;
   return `${n} ${m10 === 1 && m100 !== 11 ? 'гостю' : 'гостям'}`;
 };
+const guestsNom = (n: number) => {
+  const m10 = n % 10, m100 = n % 100;
+  return `${n} ${m10 === 1 && m100 !== 11 ? 'гость' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'гостя' : 'гостей'}`;
+};
 
-export default function RemindersTab({ invite, onOpenNotify }: { invite: InviteLike; onOpenNotify: () => void }) {
+type Props = { invite: InviteLike; onOpenNotify: () => void; onOpenGuests: () => void };
+
+export default function RemindersTab({ invite, onOpenNotify, onOpenGuests }: Props) {
   if (!hasGuestReminders(invite.plan)) return (
     <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: 28, textAlign: 'center' }}>
       <div style={{ fontSize: 36, marginBottom: 8 }}>⏰</div>
@@ -58,10 +70,10 @@ export default function RemindersTab({ invite, onOpenNotify }: { invite: InviteL
       </Link>
     </div>
   );
-  return <RemindersSettings invite={invite} onOpenNotify={onOpenNotify} />;
+  return <RemindersSettings invite={invite} onOpenNotify={onOpenNotify} onOpenGuests={onOpenGuests} />;
 }
 
-function RemindersSettings({ invite, onOpenNotify }: { invite: InviteLike; onOpenNotify: () => void }) {
+function RemindersSettings({ invite, onOpenNotify, onOpenGuests }: Props) {
   const [data, setData] = useState<Overview | null>(null);
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -72,9 +84,10 @@ function RemindersSettings({ invite, onOpenNotify }: { invite: InviteLike; onOpe
       .catch(() => setFailed(true));
   }, [invite.id]);
 
-  const save = async (next: { enabled: boolean; days: Days }) => {
+  const save = async (patch: Partial<Settings>) => {
     if (!data) return;
     const prev = data;
+    const next: Settings = { enabled: data.enabled, days: data.days, noReply: !!data.noReply, ...patch };
     setData({ ...data, ...next });
     setSaving(true);
     try {
@@ -95,6 +108,10 @@ function RemindersSettings({ invite, onOpenNotify }: { invite: InviteLike; onOpe
   const s = data.stats;
   const past = data.daysLeft !== null && data.daysLeft < 0;
   const noChannel = !data.channels.telegram && !data.channels.sms;
+  const un = data.unanswered;
+  // Флажок «не ответившим» — только когда SMS работают (или его уже включили)
+  const showNoReply = !!un && (data.channels.sms || !!data.noReply);
+  const noReplyOn = data.enabled && !!data.noReply && !!un;
 
   return (
     <div style={{ maxWidth: 640 }}>
@@ -105,7 +122,7 @@ function RemindersSettings({ invite, onOpenNotify }: { invite: InviteLike; onOpe
       </p>
 
       <label style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: 16, border: data.enabled ? `2px solid ${PRIMARY}` : BORDER, borderRadius: 12, background: '#fff', cursor: 'pointer' }}>
-        <input type="checkbox" checked={data.enabled} disabled={saving} onChange={(e) => save({ enabled: e.target.checked, days: data.days })} style={{ marginTop: 3, width: 18, height: 18, accentColor: PRIMARY }} />
+        <input type="checkbox" checked={data.enabled} disabled={saving} onChange={(e) => save({ enabled: e.target.checked })} style={{ marginTop: 3, width: 18, height: 18, accentColor: PRIMARY }} />
         <span>
           <span style={{ fontWeight: 600, color: '#0e1d26' }}>Предлагать гостям напоминание</span>
           <span style={{ display: 'block', fontSize: 13, color: '#7d766c', marginTop: 2 }}>
@@ -129,6 +146,23 @@ function RemindersSettings({ invite, onOpenNotify }: { invite: InviteLike; onOpe
           ))}
         </div>
       </div>
+
+      {showNoReply && un && (
+        <label style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: 16, marginTop: 18, border: noReplyOn ? `2px solid ${PRIMARY}` : BORDER, borderRadius: 12, background: '#fff', cursor: data.enabled ? 'pointer' : 'default', opacity: data.enabled ? 1 : 0.55 }}>
+          <input type="checkbox" checked={!!data.noReply} disabled={!data.enabled || saving} onChange={(e) => save({ noReply: e.target.checked })} style={{ marginTop: 3, width: 18, height: 18, accentColor: PRIMARY }} />
+          <span>
+            <span style={{ fontWeight: 600, color: '#0e1d26' }}>Напомнить тем, кто не ответил на анкету</span>
+            <span style={{ display: 'block', fontSize: 13, color: '#7d766c', marginTop: 2, lineHeight: 1.5 }}>
+              Гостям с персональной ссылкой, которые так и не ответили, {before(un.kind)} придёт SMS со ссылкой на их приглашение.
+              Телефоны впишите во вкладке{' '}
+              <button type="button" onClick={(e) => { e.preventDefault(); onOpenGuests(); }} style={{ border: 'none', background: 'none', padding: 0, color: PRIMARY, fontWeight: 600, cursor: 'pointer', fontSize: 13, textDecoration: 'underline' }}>
+                «Гости»
+              </button>
+              {un.guests > 0 && <> — сейчас не ответили {guestsNom(un.guests)}, телефон есть у {un.withPhone}</>}.
+            </span>
+          </span>
+        </label>
+      )}
 
       {data.enabled && (
         <div style={{ marginTop: 18, padding: 14, background: '#f7f3ec', borderRadius: 10, fontSize: 14, color: '#5b554c', lineHeight: 1.6 }}>
@@ -155,6 +189,17 @@ function RemindersSettings({ invite, onOpenNotify }: { invite: InviteLike; onOpe
                 </div>
               );
             })
+          )}
+          {noReplyOn && un && data.weddingDate && !past && !noChannel && (
+            <div>
+              {un.sent > 0
+                ? `✓ SMS тем, кто не ответил, отправлено ${guestsWord(un.sent)}.`
+                : (data.daysLeft ?? 0) > un.kind
+                  ? `SMS тем, кто не ответил, уйдёт ${dayMonth(un.date)}, с 10 до 15 по Москве.`
+                  : (data.daysLeft ?? 0) >= 2
+                    ? 'SMS тем, кто не ответил, уйдёт в ближайшее время, с 10 до 15 по Москве.'
+                    : 'Срок SMS тем, кто не ответил, прошёл.'}
+            </div>
           )}
         </div>
       )}
@@ -213,6 +258,15 @@ function RemindersSettings({ invite, onOpenNotify }: { invite: InviteLike; onOpe
                   {data.preview.sms}
                 </div>
                 <div style={{ fontSize: 12, color: '#9a948a', marginTop: 6 }}>По ссылке гость подтвердит участие и число гостей.</div>
+              </div>
+            )}
+            {noReplyOn && data.channels.sms && data.preview.noReply && (
+              <div>
+                <div style={{ fontSize: 12, color: '#9a948a', marginBottom: 6 }}>SMS тем, кто не ответил</div>
+                <div style={{ background: '#e9f3e6', borderRadius: '14px 14px 14px 4px', padding: '12px 14px', fontSize: 13.5, lineHeight: 1.5, color: '#2b2925', overflowWrap: 'anywhere' }}>
+                  {data.preview.noReply}
+                </div>
+                <div style={{ fontSize: 12, color: '#9a948a', marginTop: 6 }}>Ссылка ведёт на личное приглашение гостя — с анкетой.</div>
               </div>
             )}
           </div>

@@ -2,12 +2,14 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
-import { isAdvanced, isSalutation, computeGreeting, isPaid } from '../lib/plans';
+import { isAdvanced, isSalutation, computeGreeting, isPaid, hasGuestReminders } from '../lib/plans';
 import { attendanceOf, parseAnswers } from '../lib/rsvpDetails';
 import { guestView, type GuestView } from '../lib/planner/guestView';
 import { errName } from '../lib/planner/util';
 import { record } from '../lib/inviteValidation';
 import { rateLimit } from '../middleware/rateLimit';
+import { forgetGuestPhone, formatPhone, guestPhones, normalizePhone, setGuestPhone } from '../lib/reminders';
+import { smsAvailable } from '../lib/sms';
 
 const router = Router();
 
@@ -15,6 +17,17 @@ function genToken(): string {
   // короткий URL-безопасный токен для персональной ссылки ?g=
   return crypto.randomBytes(16).toString('base64url');
 }
+
+/** Поле phone: нет — не трогаем, '' или null — стереть, иначе российский мобильный. */
+function parsePhone(raw: unknown): { phone?: string } | null {
+  if (raw === undefined) return {};
+  if (raw === null || (typeof raw === 'string' && !raw.trim())) return { phone: '' };
+  const phone = normalizePhone(raw);
+  return phone ? { phone } : null;
+}
+const PHONE_ERROR = 'Телефон: российский мобильный, например +7 912 345-67-89';
+// Телефон гостя нужен только для SMS «ждут вашего ответа» — напоминаний «Максимума»
+const PHONE_PLAN_ERROR = 'Телефон гостя — для напоминаний в тарифе «Максимум»';
 
 async function loadOwnedInvite(inviteId: string, userId?: string) {
   const invite = await prisma.invitation.findUnique({ where: { id: inviteId } });
@@ -70,15 +83,18 @@ router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response)
     orderBy: { createdAt: 'asc' },
   });
   const byGuest = new Map(responses.map((r) => [r.guestId as string, r]));
+  const phones = hasGuestReminders(invite.plan) ? await guestPhones(invite.id) : new Map<string, string>();
 
   const result = guests.map((g) => {
     const r = byGuest.get(g.id);
+    const phone = phones.get(g.id);
     return {
       id: g.id,
       token: g.token,
       salutation: g.salutation,
       names: g.names,
       greeting: computeGreeting(g.salutation, g.names),
+      phone: phone ? formatPhone(phone) : '',
       responded: !!r,
       attending: r ? r.attending : null,
       attendance: r ? attendanceOf(r) : null,
@@ -89,7 +105,8 @@ router.get('/:inviteId', authMiddleware, async (req: AuthRequest, res: Response)
       answers: r ? parseAnswers(r.answers) : [],
     };
   });
-  return res.json({ advanced: isAdvanced(invite.plan), guests: result });
+  // phones — показывать ли поле «Телефон»: без SMS (на проде до ключей SMS Aero) оно ни к чему
+  return res.json({ advanced: isAdvanced(invite.plan), phones: hasGuestReminders(invite.plan) && smsAvailable(), guests: result });
 });
 
 // ── Добавить гостя (владелец, только продвинутый тариф) ──────────────────────
@@ -105,11 +122,15 @@ router.post('/:inviteId', authMiddleware, rateLimit(120, 60_000, req => (req as 
   const names = String(req.body.names || '').trim();
   if (!names || names.length > 200) return res.status(400).json({ error: 'Имя гостя: от 1 до 200 символов' });
   if (!isSalutation(salutation)) return res.status(400).json({ error: 'Неверное обращение' });
+  const phone = parsePhone(req.body.phone);
+  if (!phone) return res.status(400).json({ error: PHONE_ERROR });
+  if (phone.phone && !hasGuestReminders(invite.plan)) return res.status(403).json({ error: PHONE_PLAN_ERROR });
 
   const guest = await prisma.guest.create({
     data: { invitationId: invite.id, token: genToken(), salutation, names },
   });
-  return res.json({ ...guest, greeting: computeGreeting(guest.salutation, guest.names), responded: false });
+  if (phone.phone) await setGuestPhone(invite.id, guest.id, phone.phone);
+  return res.json({ ...guest, greeting: computeGreeting(guest.salutation, guest.names), phone: phone.phone ? formatPhone(phone.phone) : '', responded: false });
 });
 
 // ── Редактировать гостя ──────────────────────────────────────────────────────
@@ -125,12 +146,17 @@ router.put('/:guestId', authMiddleware, async (req: AuthRequest, res: Response) 
   const names = req.body.names != null ? String(req.body.names).trim() : guest.names;
   if (!isSalutation(salutation)) return res.status(400).json({ error: 'Неверное обращение' });
   if (!names || names.length > 200) return res.status(400).json({ error: 'Имя гостя: от 1 до 200 символов' });
+  const phone = parsePhone(req.body.phone);
+  if (!phone) return res.status(400).json({ error: PHONE_ERROR });
+  if (phone.phone && !hasGuestReminders(invite.plan)) return res.status(403).json({ error: PHONE_PLAN_ERROR });
 
   const updated = await prisma.guest.update({
     where: { id: guest.id },
     data: { salutation, names },
   });
-  return res.json({ ...updated, greeting: computeGreeting(updated.salutation, updated.names) });
+  if (phone.phone !== undefined) await setGuestPhone(invite.id, guest.id, phone.phone);
+  const saved = hasGuestReminders(invite.plan) ? (await guestPhones(invite.id)).get(guest.id) : undefined;
+  return res.json({ ...updated, greeting: computeGreeting(updated.salutation, updated.names), phone: saved ? formatPhone(saved) : '' });
 });
 
 // ── Удалить гостя ────────────────────────────────────────────────────────────
@@ -140,7 +166,7 @@ router.delete('/:guestId', authMiddleware, async (req: AuthRequest, res: Respons
   const invite = await loadOwnedInvite(guest.invitationId, req.userId);
   if (!invite) return res.status(404).json({ error: 'Гость не найден' });
 
-  await prisma.guest.delete({ where: { id: guest.id } });
+  await prisma.$transaction([forgetGuestPhone(guest.id), prisma.guest.delete({ where: { id: guest.id } })]);
   return res.json({ success: true });
 });
 

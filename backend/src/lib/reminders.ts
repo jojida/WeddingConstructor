@@ -10,7 +10,12 @@
 // Telegram бесплатный и идёт первым; SMS — если Telegram нет или бот заблокирован, и не
 // больше smsLimit() на свадьбу. Шлём с 10 до 15 по Москве: в это время день и в
 // Калининграде, и во Владивостоке.
+//
+// Отдельный флажок — напомнить тем, кто не ответил на анкету: гостю с персональной ссылкой,
+// которому пара вписала телефон во вкладке «Гости», в первый срок уходит SMS «ждут вашего
+// ответа» со ссылкой на его приглашение. Только SMS: первым написать в Telegram бот не может.
 
+import crypto from 'crypto';
 import prisma from './prisma';
 import { botUsername, telegramApi } from './telegram';
 import { sendSms, smsAvailable, smsParts } from './sms';
@@ -59,6 +64,9 @@ export function normalizePhone(raw: unknown): string | null {
 export const formatPhone = (p: string): string =>
   /^7\d{10}$/.test(p) ? `+7 ${p.slice(1, 4)} ${p.slice(4, 7)}-${p.slice(7, 9)}-${p.slice(9)}` : p;
 
+const ALNUM = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const newToken = (): string => Array.from(crypto.randomBytes(16), (b) => ALNUM[b % ALNUM.length]).join('');
+
 // ─── Даты ───────────────────────────────────────────────────────────────
 const moscow = (now: number) => {
   const d = new Date(now + MSK);
@@ -92,6 +100,19 @@ const kindMoment = (weddingDate: string, n: number): number => Date.parse(`${wed
 /** Дата отправки: «2026-06-05». */
 export const sendDate = (weddingDate: string, n: number): string =>
   new Date(Date.parse(`${weddingDate}T00:00:00Z`) - n * DAY).toISOString().slice(0, 10);
+
+/** Напоминание тем, кто не ответил, — одно, в первый срок («7,1» — только за неделю), и не
+    позже чем за 2 дня: должно остаться время ответить. */
+export function noReplyKind(days: number[], left: number): number | null {
+  const first = Math.max(...days);
+  return dueKind(days, left) === first && left >= 2 ? first : null;
+}
+
+/** «Ответить до»: через 3 дня после напоминания, но не позже чем накануне свадьбы. */
+export function answerBy(weddingDate: string, now: number): string {
+  const today = Date.parse(`${moscow(now).date}T00:00:00Z`);
+  return new Date(Math.min(today + 3 * DAY, Date.parse(`${weddingDate}T00:00:00Z`) - DAY)).toISOString().slice(0, 10);
+}
 
 /** Какое напоминание получит гость, который отвечает сейчас: ближайший срок, который ещё
     впереди. Те, что уже наступили, достаются только ответившим раньше. */
@@ -149,6 +170,18 @@ export function smsText(inv: InviteText, kind: number, status: Attendance, token
         `Свадьба ${date}: вы придёте? ${url}`];
   const list = variants.filter((v): v is string => !!v);
   return list.find((t) => smsParts(t) === 1) || list[list.length - 1];
+}
+
+/** Тому, кто не ответил: «Денис и Мария ждут вашего ответа до 08.06: weddingcraft.ru/…?g=…».
+    Персональная ссылка сама занимает знаков 50, поэтому в одну SMS не влезает почти никогда —
+    тогда две части, но с именами: без них непонятно, от кого сообщение. */
+export function noReplySms(inv: InviteText, by: string, guestToken: string): string {
+  const url = siteUrl(inv.slug, guestToken).replace(/^https?:\/\//, '');
+  const names = coupleOf(inv);
+  const date = shortDate(by);
+  const list = [names && `${names} ждут вашего ответа до ${date}: ${url}`, `Пожалуйста, ответьте на свадебное приглашение до ${date}: ${url}`]
+    .filter((v): v is string => !!v);
+  return list.find((t) => smsParts(t) === 1) || list.find((t) => smsParts(t) <= 2) || list[list.length - 1];
 }
 
 type Button = { text: string; url?: string; callback_data?: string };
@@ -429,9 +462,17 @@ export async function reminderOverview(invite: InviteText & { id: string; plan: 
   const sends = await prisma.reminderSend.groupBy({ by: ['kind', 'channel', 'status'], where: { invitationId: invite.id }, _count: { _all: true } });
   const date = validDate(invite.weddingDate) ? invite.weddingDate : '';
   const left = date ? daysLeft(date, Date.now()) : null;
+  // Гости с персональной ссылкой, которые ещё не ответили, и у кого из них пара вписала телефон
+  const guests = await prisma.guest.findMany({ where: { invitationId: invite.id }, select: { id: true } });
+  const answered = new Set((await prisma.guestResponse.findMany({ where: { invitationId: invite.id, guestId: { not: null } }, select: { guestId: true } })).map((r) => r.guestId));
+  const phones = await guestPhones(invite.id);
+  const silent = guests.filter((g) => !answered.has(g.id));
+  const first = daysOf(days)[0];
+  const sendAt = date ? Math.max(Date.now(), kindMoment(date, first) + 12 * HOUR) : 0;
   return {
     enabled: !!s?.enabled,
     days,
+    noReply: !!s?.noReply,
     weddingDate: date,
     daysLeft: left,
     channels: { telegram: !!(process.env.TELEGRAM_BOT_TOKEN && botUsername()), sms: smsAvailable() },
@@ -449,20 +490,50 @@ export async function reminderOverview(invite: InviteText & { id: string; plan: 
       date: date ? sendDate(date, n) : '',
       sent: sends.filter((x) => x.kind === `d${n}` && ['sent', 'dry'].includes(x.status)).reduce((k, x) => k + x._count._all, 0),
     })),
+    unanswered: {
+      kind: first,
+      date: date ? sendDate(date, first) : '',
+      guests: silent.length,
+      withPhone: silent.filter((g) => phones.has(g.id)).length,
+      sent: sends.filter((x) => x.kind.startsWith('n') && SMS_SPENT.includes(x.status)).reduce((k, x) => k + x._count._all, 0),
+    },
     preview: date ? {
-      telegram: telegramMessage(invite, daysOf(days)[0], 'yes', 'XXXXXXXXXX', 'Анна').text,
-      sms: smsText(invite, daysOf(days)[0], 'yes', 'Ab3dE7xK2q'),
+      telegram: telegramMessage(invite, first, 'yes', 'XXXXXXXXXX', 'Анна').text,
+      sms: smsText(invite, first, 'yes', 'Ab3dE7xK2q'),
+      noReply: noReplySms(invite, answerBy(date, sendAt), 'Ab3dE7xK2qLm9PzR4tWy8u'),
     } : null,
   };
 }
 
-export async function saveReminderSettings(invitationId: string, enabled: boolean, days: DaysOption): Promise<void> {
+/** noReply не передан (старая страница кабинета) — флажок остаётся как был. */
+export async function saveReminderSettings(invitationId: string, enabled: boolean, days: DaysOption, noReply?: boolean): Promise<void> {
   await prisma.reminderSettings.upsert({
     where: { invitationId },
-    create: { invitationId, enabled, days },
-    update: { enabled, days },
+    create: { invitationId, enabled, days, noReply: noReply ?? false },
+    update: { enabled, days, ...(noReply === undefined ? {} : { noReply }) },
   });
 }
+
+// ─── Телефон гостя из вкладки «Гости» ──────────────────────────────────
+/** Телефоны, которые пара вписала гостям: guestId → 79XXXXXXXXX. */
+export async function guestPhones(invitationId: string): Promise<Map<string, string>> {
+  const rows = await prisma.guestReminder.findMany({
+    where: { invitationId, guestId: { not: null }, phone: { not: '' } },
+    select: { guestId: true, phone: true },
+  });
+  return new Map(rows.map((r) => [r.guestId as string, r.phone]));
+}
+
+/** Записать телефон гостя ('' — стереть). Стёртый номер оставляет строку с отметками об
+    отправке: иначе новый номер получил бы то же напоминание ещё раз. */
+export async function setGuestPhone(invitationId: string, guestId: string, phone: string): Promise<void> {
+  const row = await prisma.guestReminder.findFirst({ where: { invitationId, guestId } });
+  if (row) await prisma.guestReminder.update({ where: { id: row.id }, data: { phone } });
+  else if (phone) await prisma.guestReminder.create({ data: { token: newToken(), invitationId, guestId, phone } });
+}
+
+/** Гостя удалили — его телефон больше не храним. */
+export const forgetGuestPhone = (guestId: string) => prisma.guestReminder.deleteMany({ where: { guestId } });
 
 // ─── Рассылка по расписанию ─────────────────────────────────────────────
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -534,9 +605,58 @@ async function sendFor(inv: SendInvite, kind: number): Promise<void> {
   }
 }
 
+/** «Ждут вашего ответа» — гостям с персональной ссылкой, которые не ответили на анкету, по
+    телефону, который вписала пара. */
+async function sendNoReply(inv: SendInvite, kind: number, now: number): Promise<void> {
+  // Без SMS не отмечаем: если отправка заработает, пока срок не прошёл, — разошлём
+  if (!smsAvailable()) return;
+  const sendKind = `n${kind}`;
+  const point = kindMoment(inv.weddingDate, kind);
+  const rows = await prisma.guestReminder.findMany({
+    where: { invitationId: inv.id, guestId: { not: null }, phone: { not: '' }, sends: { none: { kind: sendKind } } },
+    orderBy: { createdAt: 'asc' },
+  });
+  if (!rows.length) return;
+  const guests = new Map((await prisma.guest.findMany({
+    where: { invitationId: inv.id, id: { in: rows.map((r) => r.guestId as string) } },
+    select: { id: true, token: true, createdAt: true },
+  })).map((g) => [g.id, g]));
+  const by = answerBy(inv.weddingDate, now);
+  const tally = { sent: 0, failed: 0 };
+  for (const r of rows) {
+    const g = guests.get(r.guestId as string);
+    // Добавлен в список уже в срок напоминания — приглашение ему только что отправили
+    if (!g || g.createdAt.getTime() >= point) continue;
+    // Ответ мог прийти, пока идёт рассылка
+    if (await prisma.guestResponse.count({ where: { invitationId: inv.id, guestId: g.id } })) continue;
+    let mark;
+    try {
+      mark = await prisma.reminderSend.create({ data: { reminderId: r.id, invitationId: inv.id, kind: sendKind, channel: 'sms', status: 'pending' } });
+    } catch { continue; }
+    let status = 'limit';
+    if ((await smsSpent(inv.id)) < smsLimit()) {
+      const res = await sendSms(r.phone, noReplySms(inv, by, g.token));
+      status = res.ok ? (res.dry ? 'dry' : 'sent') : 'failed';
+    }
+    await prisma.reminderSend.update({ where: { id: mark.id }, data: { status } });
+    if (status === 'sent' || status === 'dry') tally.sent += 1;
+    else tally.failed += 1;
+    await sleep(60);
+  }
+  if (tally.sent) {
+    void notifyOwnerText(inv, 'Напоминание тем, кто не ответил', [
+      `📨 SMS со ссылкой на приглашение отправлено ${tally.sent} ${plural(tally.sent, 'гостю', 'гостям', 'гостям')}, ${tally.sent === 1 ? 'который ещё не ответил' : 'которые ещё не ответили'} на анкету.`,
+      ...(tally.failed ? [`Не доставлено: ${tally.failed}.`] : []),
+      'Ответы появятся во вкладке «Ответы», как обычно.',
+    ]);
+    console.log(`📨 Напоминание не ответившим ${beforeWords(kind)}: отправлено ${tally.sent}, не доставлено ${tally.failed}`);
+  }
+}
+
 export async function runReminders(now = Date.now()): Promise<void> {
   // Telegram подключили, а анкету так и не отправили — через трое суток забываем
-  await prisma.guestReminder.deleteMany({ where: { responseId: null, createdAt: { lt: new Date(now - 3 * DAY) } } });
+  // (телефон, который пара вписала гостю, — другое дело: он живёт, пока жив гость)
+  await prisma.guestReminder.deleteMany({ where: { responseId: null, guestId: null, createdAt: { lt: new Date(now - 3 * DAY) } } });
   const { hour } = moscow(now);
   if (hour < 10 || hour >= 15) return;
   const list = await prisma.reminderSettings.findMany({
@@ -550,8 +670,12 @@ export async function runReminders(now = Date.now()): Promise<void> {
     const inv = s.invitation;
     if (!isPaid(inv.status) || !hasGuestReminders(inv.plan)) continue;
     const left = daysLeft(inv.weddingDate, now);
-    const kind = left === null ? null : dueKind(daysOf(s.days), left);
+    const days = daysOf(s.days);
+    const kind = left === null ? null : dueKind(days, left);
     if (kind) await sendFor(inv, kind);
+    // После тех, кто сам попросил напомнить: лимит SMS у них общий
+    const silent = s.noReply && left !== null ? noReplyKind(days, left) : null;
+    if (silent) await sendNoReply(inv, silent, now);
   }
 }
 
