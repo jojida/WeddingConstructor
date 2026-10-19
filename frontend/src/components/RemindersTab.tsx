@@ -62,7 +62,7 @@ export default function RemindersTab({ invite, onOpenNotify, onOpenGuests }: Pro
       <div style={{ fontSize: 36, marginBottom: 8 }}>⏰</div>
       <h3 style={{ margin: '0 0 8px', color: '#0e1d26', fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 22 }}>Напоминание гостям — в тарифе «Максимум»</h3>
       <p style={{ color: '#7d766c', fontSize: 14, maxWidth: 480, margin: '0 auto 16px' }}>
-        За неделю до свадьбы гости получат напоминание в Telegram, MAX или по SMS и подтвердят участие одной кнопкой.
+        За неделю до свадьбы гости получат напоминание в Telegram и подтвердят участие одной кнопкой.
         Обзванивать всех перед заказом в ресторане не придётся.
       </p>
       <Link href={`/payment?id=${invite.id}&plan=maximum`} className="btn-primary" style={{ textDecoration: 'none', padding: '11px 26px', fontSize: 14 }}>
@@ -223,7 +223,7 @@ function RemindersSettings({ invite, onOpenNotify, onOpenGuests }: Props) {
             ? <>{bots.join(' и ')} — в первую очередь, SMS — тем, у кого {bots.length > 1 ? 'их' : 'его'} нет. SMS на эту свадьбу: {data.sms.spent} из {data.sms.limit}.</>
             : data.channels.sms
               ? <>Напоминания приходят по SMS. SMS на эту свадьбу: {data.sms.spent} из {data.sms.limit}.</>
-              : <>Сейчас напоминания приходят в {bots.join(' или ')}; номер телефона анкета пока не спрашивает.</>}
+              : <>Напоминания приходят в {bots.join(' или ')}: гость подключает бота прямо из анкеты.</>}
           {' '}Кто попросил напомнить, видно во вкладке «Ответы».
         </div>
       )}
