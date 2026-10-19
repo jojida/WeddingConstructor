@@ -20,18 +20,22 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import AuthProvider from "@/components/AuthProvider";
 import AnimationObserver from "@/components/AnimationObserver";
-import { SITE_URL } from "@/lib/constants";
+import { SITE_URL, TEMPLATES } from "@/lib/constants";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Сайт-приглашение на свадьбу с анкетой для гостей — WeddingCraft",
+    // Начало заголовка — главный запрос («приглашение/приглашения на свадьбу»):
+    // поисковики сильнее учитывают первые слова, а в выдаче их видно без обрезки
+    default: "Приглашение на свадьбу онлайн — электронные приглашения | WeddingCraft",
     template: "%s — WeddingCraft",
   },
   description:
-    "Создайте электронное свадебное приглашение за 5 минут: изящные шаблоны, анкета для гостей, " +
-    "уведомления об ответах гостей в Telegram и на Email, персональные ссылки и привязка своего домена.",
+    `Электронное приглашение на свадьбу за один вечер: ${TEMPLATES.length} шаблонов, ваши имена, фото и музыка, ` +
+    "анкета для гостей с ответами в Telegram. Посмотрите бесплатно — оплата только при публикации.",
   keywords: [
+    "приглашение на свадьбу",
+    "приглашения на свадьбу онлайн",
     "сайт-приглашение на свадьбу",
     "электронное приглашение на свадьбу",
     "свадебное приглашение онлайн",
@@ -46,16 +50,16 @@ export const metadata: Metadata = {
     siteName: "WeddingCraft",
     locale: "ru_RU",
     url: "/",
-    title: "Сайт-приглашение на свадьбу с анкетой для гостей — WeddingCraft",
+    title: "Приглашение на свадьбу онлайн — WeddingCraft",
     description:
-      "Электронные свадебные приглашения: изящные шаблоны, анкета для гостей, уведомления в Telegram, " +
-      "персональные ссылки для гостей и привязка своего домена.",
+      "Электронное приглашение на свадьбу: изящные шаблоны, ваши фото и музыка, анкета для гостей " +
+      "с ответами в Telegram. Посмотрите бесплатно — оплата только при публикации.",
     images: [{ url: "/invite/calla/assets/couple-photo.jpg", width: 1200, height: 630, alt: "Пример свадебного сайта-приглашения WeddingCraft" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Сайт-приглашение на свадьбу с анкетой для гостей — WeddingCraft",
-    description: "Электронные свадебные приглашения: шаблоны, анкета для гостей, уведомления в Telegram.",
+    title: "Приглашение на свадьбу онлайн — WeddingCraft",
+    description: "Электронное приглашение на свадьбу: шаблоны, анкета для гостей, ответы в Telegram.",
     images: ["/invite/calla/assets/couple-photo.jpg"],
   },
   // Подтверждение прав в Google Search Console и Pinterest (бизнес-аккаунт) — теги должны
