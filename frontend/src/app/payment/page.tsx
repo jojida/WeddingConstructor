@@ -1,5 +1,5 @@
 ﻿'use client';
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -9,6 +9,7 @@ import { planPriceDue } from '@/lib/plans';
 import { PLANS, LEGAL } from '@/lib/constants';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import { ownPlace } from '@/lib/own-place';
+import { forgetPromo, savedPromo } from '@/lib/promo-link';
 import styles from './page.module.css';
 
 function PaymentContent() {
@@ -50,6 +51,24 @@ function PaymentContent() {
       .catch(() => { if (!cancelled) toast.error('Приглашение не найдено'); });
     return () => { cancelled = true; };
   }, [inviteId, searchParams, user]);
+
+  /* Код из партнёрской ссылки ?promo= (lib/promo-link.ts) подставляем и проверяем
+     сами, без всплывающих сообщений: о скидке скажет строка под полем промокода.
+     Код, которого больше нет на сервере, забываем, чтобы не предлагать его снова. */
+  const autoPromoRef = useRef(false);
+  useEffect(() => {
+    if (!user || isFree || autoPromoRef.current) return;
+    autoPromoRef.current = true;
+    const code = savedPromo();
+    if (!code) return;
+    setPromoInput(code);
+    api.get(`/api/payment/promo/${encodeURIComponent(code)}`)
+      .then(res => setPromo(res.data))
+      .catch(err => {
+        if (err.response?.status === 404) forgetPromo();
+        setPromoInput(prev => (prev === code ? '' : prev));
+      });
+  }, [user, isFree]);
 
   const applyPromo = async () => {
     const code = promoInput.trim();

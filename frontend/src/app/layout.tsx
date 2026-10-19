@@ -20,6 +20,7 @@ import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import AuthProvider from "@/components/AuthProvider";
 import AnimationObserver from "@/components/AnimationObserver";
+import PromoFromUrl from "@/components/PromoFromUrl";
 import { SITE_URL, TEMPLATES } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -88,6 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </AuthProvider>
         <AnimationObserver />
+        <PromoFromUrl />
         <Toaster
           position="top-right"
           toastOptions={{
