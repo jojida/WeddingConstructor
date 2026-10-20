@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
 import api from '@/lib/api';
-import { TEMPLATES, SITE_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
+import { TEMPLATES, SITE_URL, VK_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
@@ -404,9 +404,11 @@ function Footer() {
         </div>
 
         <div className={styles.footerBottom}>
-          {/* Соцсети появятся после создания аккаунтов (VK/Telegram) — мёртвые
-              ссылки «#» убраны, чтобы не подрывать доверие. */}
+          {/* Только существующие аккаунты: мёртвые ссылки «#» подрывают доверие */}
           <div className={styles.footerSocials}>
+            <a href={VK_URL} className={`${styles.footerSocial} ${styles.footerSocialText}`} target="_blank" rel="noopener noreferrer" aria-label="WeddingCraft ВКонтакте">
+              VK
+            </a>
             <a href="mailto:support@weddingcraft.ru" className={styles.footerSocial} aria-label="Написать в поддержку">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 18, height: 18 }}>
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
@@ -675,6 +677,7 @@ function JsonLd() {
         url: SITE_URL,
         logo: `${SITE_URL}/brand/avatar.png`,
         email: LEGAL.contactEmail,
+        sameAs: [VK_URL],
       },
       {
         '@type': 'WebSite',

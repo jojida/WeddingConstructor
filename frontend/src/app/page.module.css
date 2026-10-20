@@ -706,6 +706,11 @@
 .footerSocials { display: flex; gap: 24px; }
 .footerSocial { color: var(--on-surface-variant); text-decoration: none; transition: color 0.2s; }
 .footerSocial:hover { color: var(--primary); }
+/* Значок соцсети буквами — того же размера, что иконка почты (18px) */
+.footerSocialText {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 18px; font-family: var(--font-inter); font-size: 13px; font-weight: 700; letter-spacing: 0.04em;
+}
 .footerCopy {
   font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase;
   color: var(--on-surface-variant); font-family: var(--font-inter);

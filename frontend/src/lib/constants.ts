@@ -5,6 +5,9 @@ import { SKETCH_DEMO_VENUE, SKETCH_LOCATION_TEXT } from './sketch-location';
 
 export const SITE_URL = 'https://weddingcraft.ru';
 
+/** Сообщество ВКонтакте (клипы, посты). В подвале главной и в sameAs разметки Organization. */
+export const VK_URL = 'https://vk.ru/weddingcraft_invite';
+
 /* ── Реквизиты исполнителя для оферты и политики конфиденциальности ──────────
    Единственное место с реквизитами — страницы /oferta и /privacy читают отсюда.
    При смене статуса (самозанятый → ИП) обновить sellerStatus и добавить ОГРНИП. */
