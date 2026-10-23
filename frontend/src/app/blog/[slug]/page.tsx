@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { Fragment } from 'react';
 import Navbar from '@/components/Navbar';
 import { SITE_URL } from '@/lib/constants';
-import { PLANS } from '@/lib/plans';
 import { ARTICLES, findArticle, sectionId, type Article, type ArticleBlock } from '@/lib/articles';
 import CopyButton from '../CopyButton';
 import styles from '../blog.module.css';
@@ -64,8 +63,6 @@ function Inline({ text }: { text: string }) {
   );
 }
 
-const minPrice = Math.min(...PLANS.map(p => p.price));
-
 function Cta({ title, text }: { title?: string; text?: string }) {
   return (
     <div className={styles.cta}>
@@ -75,7 +72,7 @@ function Cta({ title, text }: { title?: string; text?: string }) {
       </p>
       <div className={styles.ctaRow}>
         <Link href="/templates" className={styles.ctaBtn}>Выбрать шаблон</Link>
-        <span className={styles.ctaNote}>Без регистрации · публикация от {minPrice.toLocaleString('ru-RU')} ₽, разово</span>
+        <span className={styles.ctaNote}>Без регистрации · есть бесплатный тариф</span>
       </div>
     </div>
   );

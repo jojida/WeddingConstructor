@@ -94,8 +94,8 @@ function DemoAbout({ template }: { template: Tpl }) {
           Замените имена, дату, тексты, фото и музыку. Лишние разделы можно скрыть.
         </p>
         <p style={p}>
-          Редактор без регистрации: сделайте приглашение и посмотрите его бесплатно.
-          {minPrice > 0 && <> Публикация — от {minPrice.toLocaleString('ru-RU')} ₽, разовая оплата без подписки.</>}
+          Редактор без регистрации, публикация от 0 ₽.
+          {minPrice > 0 && <> Платные тарифы — от {minPrice.toLocaleString('ru-RU')} ₽, без подписки.</>}
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '24px 0 8px' }}>

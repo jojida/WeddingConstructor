@@ -97,8 +97,6 @@ test('payments fail closed, keep durable attempts and verify gateway facts', asy
 
   await t.test('free return token is narrowly scoped, expiring and cannot authenticate APIs', async () => {
     const inv = await invite(); const another = await invite();
-    // Сайт, опубликованный бесплатно до 18.10.26: повторный запрос отдаёт ссылку возврата
-    await prisma.invitation.update({ where: { id: inv.id }, data: { status: 'published' } });
     const created = await create(inv, 'free'); assert.equal(created.status, 200);
     const capability = new URL(created.body.redirectUrl).searchParams.get('token');
     assert.ok(capability);

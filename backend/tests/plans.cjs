@@ -38,8 +38,7 @@ after(async () => {
 });
 
 test('тарифы: состав и цены фронтенда совпадают с сервером', () => {
-  // Бесплатный тариф с 18.10.26 не продаётся — в списке на сайте только платные
-  assert.deepEqual(frontend.PLANS.map(p => [p.id, p.price]), [['premium', 2490], ['maximum', 3990]]);
+  assert.deepEqual(frontend.PLANS.map(p => [p.id, p.price]), [['free', 0], ['premium', 2490], ['maximum', 3990]]);
   for (const p of frontend.PLANS) {
     assert.equal(p.price * 100, backend.PLANS[p.id].price);
     for (const feature of ['hasRsvp', 'hasResponseStats', 'hasNotifications', 'hasMusic', 'hasCustomDomain', 'hasPlanner']) {
@@ -69,16 +68,11 @@ test('публикация, ограничения и улучшение тар�
   };
   const inv = (await call('/api/invites', 'POST', { templateId: 'calla' })).json;
 
-  await t.test('бесплатный тариф больше не подключается новому приглашению', async () => {
-    const refused = await call('/api/payment/create', 'POST', { inviteId: inv.id, plan: 'free' });
-    assert.equal(refused.status, 400);
-    assert.match(refused.json.error, /Премиум/);
-    const raw = await prisma.invitation.findUnique({ where: { id: inv.id } });
-    assert.equal(raw.status, 'draft');
-  });
-
-  await t.test('сайт, опубликованный бесплатно раньше: работает, платные функции закрыты даже при прямом запросе', async () => {
-    await prisma.invitation.update({ where: { id: inv.id }, data: { status: 'published', plan: 'free' } });
+  await t.test('бесплатная публикация без кассы, запрет платных функций даже при прямом запросе', async () => {
+    const published = await call('/api/payment/create', 'POST', { inviteId: inv.id, plan: 'free' });
+    assert.equal(published.status, 200);
+    assert.equal(published.json.free, true);
+    assert.match(published.json.redirectUrl, /plan=free/);
     const again = await call('/api/payment/create', 'POST', { inviteId: inv.id, plan: 'free' });
     assert.equal(again.status, 200);
     assert.equal(again.json.alreadyPaid, true);
