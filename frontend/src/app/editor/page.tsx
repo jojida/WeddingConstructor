@@ -264,6 +264,14 @@ function SetupField({ label, htmlFor, required, note, hint, error, children }: {
 }
 
 // ─── Main Editor ──────────────────────────────────────────────────────────────
+/* «Готово» до входа: после кода из письма ведём дальше сами, к выбору тарифа.
+   Раньше окно входа просто закрывалось, человек оставался в редакторе и должен был
+   догадаться нажать «Готово» ещё раз — из 10 вошедших 20–23.10.26 до кассы не дошёл никто.
+   Отметка живёт вне компонента: при входе EditorContent пересоздаётся (key с id аккаунта
+   в EditorForSelection). 10 минут — чтобы дождаться письма с кодом; закрыли окно — сброс. */
+const SHARE_AFTER_AUTH_MS = 10 * 60_000;
+let shareAfterAuthUntil = 0;
+
 function EditorContent() {
   const searchParams  = useSearchParams();
   const router        = useRouter();
@@ -643,10 +651,18 @@ function EditorContent() {
     if (isPublished) { router.push('/dashboard'); return; }
     if (!data.brideName && !data.groomName) { toast.error('Введите имена'); return; }
     funnelGoal(GOAL.editorDone);
-    // Тариф выбирается на следующем шаге; для бесплатной публикации место не требуется.
-    if (!user) { setShowAuthModal(true); return; }
+    // Тариф выбирается на следующем шаге
+    if (!user) { shareAfterAuthUntil = Date.now() + SHARE_AFTER_AUTH_MS; setShowAuthModal(true); return; }
     if (await saveToServer()) router.push(`/payment?id=${data.id}`);
   };
+  // После входа из «Готово» — дальше, к выбору тарифа. Черновик гостя попадает
+  // на сервер уже после входа (createDraft), поэтому ждём data.id
+  useEffect(() => {
+    if (Date.now() > shareAfterAuthUntil || !user || !data.id) return;
+    shareAfterAuthUntil = 0;
+    void (async () => { if (await saveToServer()) router.push(`/payment?id=${data.id}`); })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, data.id]);
 
   const upload = async (file: File, field: 'coverPhoto' | 'dressCodePhoto') => {
     // allow anonymous upload for coverPhoto, but dressCodePhoto might still require user, let's just make both public for ease
@@ -1032,7 +1048,7 @@ function EditorContent() {
       </div>
 
       {showAuthModal && (
-        <AuthModal onSuccess={() => { setShowAuthModal(false); }} onClose={() => setShowAuthModal(false)} />
+        <AuthModal onSuccess={() => { setShowAuthModal(false); }} onClose={() => { shareAfterAuthUntil = 0; setShowAuthModal(false); }} />
       )}
     </>
   );
