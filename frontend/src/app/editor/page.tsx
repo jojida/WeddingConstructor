@@ -5,7 +5,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize, Plus, X, ArrowUp, ArrowDown } from 'lucide-react';
 import api from '@/lib/api';
-import { readStorage, writeStorage } from '@/lib/browser-storage';
+import { readAuthToken, readStorage, writeStorage } from '@/lib/browser-storage';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
 import { isPlanSectionLocked } from '@/lib/plans';
 import { isSectionEnabled } from '@/lib/section-visibility';
@@ -629,16 +629,76 @@ function EditorContent() {
     } finally { setUploading(false); }
   };
 
+  // Автосохранение (ниже): последние данные и то, что сейчас лежит на сервере
+  const dataRef = useRef(data);
+  useEffect(() => { dataRef.current = data; }, [data]);
+  const savedJsonRef = useRef<string | null>(null);
+  const autosavingRef = useRef(false);
+  const [autoSaveState, setAutoSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
   const saveToServer = async (): Promise<boolean> => {
     if (!data.id) { toast.error('Черновик ещё не создан. Обновите страницу и проверьте соединение.'); return false; }
     setSaving(true);
     try {
-      const res = await api.put(`/api/invites/${data.id}`, data);
+      const sent = data;
+      const res = await api.put(`/api/invites/${sent.id}`, sent);
+      savedJsonRef.current = JSON.stringify(sent);
       setData(prev => ({ ...prev, slug: res.data.slug }));
       return true;
     } catch { toast.error('Ошибка сохранения'); return false; }
     finally { setSaving(false); }
   };
+
+  /* Автосохранение черновика: через 2,5 с после правки, без всплывающих сообщений.
+     Раньше после входа правки записывались только кнопками «Сохранить» и «Готово» —
+     закрыл вкладку, и они пропали. Опубликованный сайт так не сохраняем: там правки
+     сразу видят гости, поэтому только вручную. Гость без входа хранит черновик в
+     браузере (GUEST_DRAFT_KEY), как раньше. data.id появляется только вместе с
+     данными с сервера (загрузка или createDraft), так что пустой EMPTY не уйдёт. */
+  const canAutosave = !!user && !!data.id && !isPublished && step === 'editor';
+  // Новый черновик (загрузили или создали) — точка отсчёта, его не пересохраняем
+  useEffect(() => { savedJsonRef.current = data.id ? JSON.stringify(dataRef.current) : null; }, [data.id]);
+  const autosaveNow = useCallback(async () => {
+    if (autosavingRef.current) return;   // идущее сохранение само доберёт свежие правки
+    autosavingRef.current = true;
+    try {
+      // Пока шёл запрос, могли напечатать ещё — досохраняем (не больше трёх раз подряд)
+      for (let i = 0; i < 3; i++) {
+        const current = dataRef.current;
+        const body = JSON.stringify(current);
+        if (!current.id || body === savedJsonRef.current) break;
+        setAutoSaveState('saving');
+        await api.put(`/api/invites/${current.id}`, current);
+        savedJsonRef.current = body;
+        setAutoSaveState('saved');
+      }
+    } catch { setAutoSaveState('error'); }
+    finally { autosavingRef.current = false; }
+  }, []);
+  useEffect(() => {
+    if (!canAutosave || JSON.stringify(data) === savedJsonRef.current) return;
+    const timer = setTimeout(() => { void autosaveNow(); }, 2500);
+    return () => clearTimeout(timer);
+  }, [data, canAutosave, autosaveNow]);
+  // Закрывают вкладку раньше, чем прошли 2,5 с, — отправляем последнее с keepalive
+  useEffect(() => {
+    if (!canAutosave) return;
+    const flush = () => {
+      const current = dataRef.current;
+      const body = JSON.stringify(current);
+      const token = readAuthToken();
+      // keepalive ограничен 64 КБ на запрос; фото — ссылки, обычный черновик меньше
+      if (!current.id || !token || body === savedJsonRef.current || body.length > 60_000) return;
+      fetch(`${apiBase}/api/invites/${current.id}`, {
+        method: 'PUT', keepalive: true, body,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      }).then(res => { if (res.ok) savedJsonRef.current = body; }).catch(() => { /* вкладка уже закрыта */ });
+    };
+    const onVisibility = () => { if (document.visibilityState === 'hidden') flush(); };
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => { window.removeEventListener('pagehide', flush); document.removeEventListener('visibilitychange', onVisibility); };
+  }, [canAutosave, apiBase]);
 
   const handleSave = async () => {
     if (!user) { setShowAuthModal(true); return; }
@@ -753,6 +813,11 @@ function EditorContent() {
               <span className={styles.phoneHidden}>Имена и дата</span>
               <span className={styles.phoneOnly}>Имена</span>
             </button>
+            {canAutosave && autoSaveState !== 'idle' && (
+              <span className={`${styles.autoSaveNote} ${autoSaveState === 'error' ? styles.autoSaveError : ''} ${styles.phoneHidden}`} aria-live="polite">
+                {autoSaveState === 'saving' ? 'Сохраняю…' : autoSaveState === 'saved' ? 'Черновик сохранён' : 'Не сохранилось — нажмите «Сохранить»'}
+              </span>
+            )}
             <button className={styles.topBarIconBtn} onClick={handleSave} disabled={saving} title="Сохранить">
               <Save size={18} />
             </button>
