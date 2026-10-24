@@ -1,22 +1,11 @@
 /* ============================================================
    Дарья & Вадим — свадебное приглашение «Каллы»
-   Шрифты: Anastasia Script + Buongiorno (оригиналы).
-   Если файлы оригиналов положить в assets/fonts/, они подхватятся
-   автоматически; иначе используются кириллические заменители.
+   Шрифты макета — Anastasia Script + Buongiorno, но их файлов в проекте
+   нет: показываются кириллические заменители (Marck Script, Cormorant
+   Garamond). Подключения @font-face к несуществующим assets/fonts/ убраны —
+   каждый сайт на «Каллах» делал 4 запроса с ответом 404. Появятся файлы
+   оригиналов — вернуть @font-face для них.
    ============================================================ */
-
-@font-face {
-  font-family: "Anastasia Script";
-  src: url("assets/fonts/AnastasiaScript.woff2") format("woff2"),
-       url("assets/fonts/AnastasiaScript.woff") format("woff");
-  font-display: swap;
-}
-@font-face {
-  font-family: "Buongiorno";
-  src: url("assets/fonts/Buongiorno.woff2") format("woff2"),
-       url("assets/fonts/Buongiorno.woff") format("woff");
-  font-display: swap;
-}
 
 :root {
   --paper:        #d7d3cb;

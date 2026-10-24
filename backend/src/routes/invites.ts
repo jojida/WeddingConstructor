@@ -11,6 +11,7 @@ import { rateLimit } from '../middleware/rateLimit';
 import { publicMenu } from '../lib/planner/public';
 import { publicReminders } from '../lib/reminders';
 import { errName } from '../lib/planner/util';
+import { RESERVED_SLUGS, SLUG_RE, generateSlug } from '../lib/slug';
 
 const router = Router();
 
@@ -23,15 +24,6 @@ const parseArr = (s: any): any[] => {
 const parseObj = (s: any): Record<string, any> => {
   try { const v = JSON.parse(s || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch { return {}; }
 };
-
-// Слова, которые нельзя использовать как slug, чтобы не конфликтовать
-// с маршрутами фронтенда (weddingcraft.ru/<slug>).
-const RESERVED_SLUGS = new Set([
-  'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment', 'print',
-  'templates', 'admin', 'login', 'register', 'signup', 'about', 'pricing', 'help',
-  'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads', 'studio', 'privacy', 'oferta', 'contacts',
-  'blog', 'c',
-]);
 
 // Приватные поля приглашения — не отдавать в публичных ответах (by-slug/by-domain).
 function stripPrivate(invite: any) {
@@ -68,26 +60,6 @@ async function withPlannerMenu(invite: { id: string; plan: string; userId: strin
   const [menu, remind] = await Promise.all([publicMenu(invite), publicReminders(invite)]);
   if (!menu && !remind) return pub;
   return { ...pub, customData: { ...pub.customData, ...(menu ? { wcMenu: menu } : {}), ...(remind ? { wcRemind: remind } : {}) } };
-}
-
-function generateSlug(groomName: string, brideName: string): string {
-  const clean = (s: string) =>
-    s.toLowerCase()
-      .replace(/[аА]/g, 'a').replace(/[бБ]/g, 'b').replace(/[вВ]/g, 'v')
-      .replace(/[гГ]/g, 'g').replace(/[дД]/g, 'd').replace(/[еЕёЁ]/g, 'e')
-      .replace(/[жЖ]/g, 'zh').replace(/[зЗ]/g, 'z').replace(/[иИ]/g, 'i')
-      .replace(/[йЙ]/g, 'j').replace(/[кК]/g, 'k').replace(/[лЛ]/g, 'l')
-      .replace(/[мМ]/g, 'm').replace(/[нН]/g, 'n').replace(/[оО]/g, 'o')
-      .replace(/[пП]/g, 'p').replace(/[рР]/g, 'r').replace(/[сС]/g, 's')
-      .replace(/[тТ]/g, 't').replace(/[уУ]/g, 'u').replace(/[фФ]/g, 'f')
-      .replace(/[хХ]/g, 'h').replace(/[цЦ]/g, 'ts').replace(/[чЧ]/g, 'ch')
-      .replace(/[шШ]/g, 'sh').replace(/[щЩ]/g, 'sch').replace(/[ъЪьЬ]/g, '')
-      .replace(/[ыЫ]/g, 'y').replace(/[эЭ]/g, 'eh').replace(/[юЮ]/g, 'yu')
-      .replace(/[яЯ]/g, 'ya').replace(/[^a-z0-9]/g, '');
-  const g = clean(groomName) || 'groom';
-  const b = clean(brideName) || 'bride';
-  // 96 random bits avoid collisions and make unshared default links hard to guess.
-  return `${g}-i-${b}-${crypto.randomBytes(12).toString('hex')}`;
 }
 
 // GET /api/invites — список приглашений текущего пользователя
@@ -245,7 +217,7 @@ router.patch('/:id/slug', authMiddleware, async (req: AuthRequest, res: Response
   if (!invite || invite.userId !== req.userId) return res.status(404).json({ error: 'Не найдено' });
 
   const raw = String(req.body.slug || '').trim().toLowerCase();
-  if (!/^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/.test(raw)) {
+  if (!SLUG_RE.test(raw)) {
     return res.status(400).json({ error: 'Адрес: 3–40 символов, латиница, цифры и дефис (не с дефиса)' });
   }
   if (RESERVED_SLUGS.has(raw)) return res.status(400).json({ error: 'Этот адрес зарезервирован, выберите другой' });

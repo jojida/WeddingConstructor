@@ -173,6 +173,21 @@ test('payments fail closed, keep durable attempts and verify gateway facts', asy
     assert.equal(saved.paymentId, maximum.id); assert.equal(saved.plan, 'maximum');
   });
 
+  await t.test('paid first publication replaces the placeholder address once, upgrades keep it', async () => {
+    const placeholder = `groom-i-bride-${require('node:crypto').randomBytes(12).toString('hex')}`;
+    const inv = await prisma.invitation.create({ data: { userId: owner.id, slug: placeholder, templateId: 'calla', plan: 'free', groomName: 'Пётр', brideName: 'Юлия' } });
+    await create(inv);
+    const premium = await currentPayment(inv); premium.status = 'succeeded'; premium.paid = true;
+    assert.equal(await confirmInvitationPayment(premium), true);
+    const published = (await prisma.invitation.findUnique({ where: { id: inv.id } })).slug;
+    assert.match(published, /^petr-i-yuliya-[0-9a-f]{6}$/);
+    assert.equal(await confirmInvitationPayment(premium), true, 'repeated webhook stays idempotent');
+    await create(inv, 'maximum');
+    const maximum = await currentPayment(inv); maximum.status = 'succeeded'; maximum.paid = true;
+    assert.equal(await confirmInvitationPayment(maximum), true);
+    assert.equal((await prisma.invitation.findUnique({ where: { id: inv.id } })).slug, published);
+  });
+
   await t.test('rejects underpayment, wrong currency, product, plan, invitation, key, id and unsettled status', async () => {
     const inv = await invite(); assert.equal((await create(inv)).status, 200);
     const payment = await currentPayment(inv);

@@ -9,6 +9,7 @@ import { jwtSecret } from '../lib/security';
 import { kassaAuth, kassaRequest, paymentIdValid, paymentRedirect } from '../lib/paymentGateway';
 import { PaymentConflict, reservePaymentAttempt, requestAttemptPayment } from '../lib/paymentAttempt';
 import { confirmInvitationPayment, matchesInvitationPayment, promoPercent } from '../lib/invitePayment';
+import { readableSlugAfterPublish } from '../lib/slug';
 
 export { kassaAuth, kassaRequest } from '../lib/paymentGateway';
 const router = Router();
@@ -30,6 +31,7 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
     const buyer = await prisma.user.findUnique({ where: { id: req.userId! } });
     if (isFreeAccount(buyer?.email)) {
       await prisma.invitation.update({ where: { id: inviteId }, data: { status: plan === 'free' ? 'published' : 'paid', plan, paidAt: plan === 'free' ? null : invite.paidAt ?? new Date(), paymentId: 'free_account' } });
+      if (!isPaid(invite.status)) await readableSlugAfterPublish(inviteId);
       return res.json({ free: true, plan, redirectUrl, message: 'Сайт опубликован для тестового аккаунта' });
     }
     if (isPaid(invite.status) && invite.plan === plan) return res.json({ alreadyPaid: true, redirectUrl });
@@ -38,11 +40,13 @@ router.post('/create', authMiddleware, async (req: AuthRequest, res: Response) =
     if (plan === 'free') {
       const result = await prisma.invitation.updateMany({ where: { id: inviteId, plan: invite.plan, status: invite.status }, data: { status: 'published', plan, paidAt: null } });
       if (!result.count) throw new PaymentConflict('Тариф изменился. Обновите страницу.');
+      await readableSlugAfterPublish(inviteId);
       return res.json({ free: true, plan, redirectUrl, message: 'Сайт опубликован бесплатно' });
     }
     if (!kassaAuth().configured) {
       if (process.env.NODE_ENV === 'development' && process.env.ALLOW_TEST_PAYMENTS === 'true') {
         await prisma.invitation.update({ where: { id: inviteId }, data: { status: 'paid', plan, paidAt: new Date(), paymentId: 'dev_test' } });
+        if (!isPaid(invite.status)) await readableSlugAfterPublish(inviteId);
         return res.json({ devMode: true, redirectUrl });
       }
       return res.status(503).json({ error: 'Оплата временно недоступна. Напишите нам — поможем опубликовать сайт.' });

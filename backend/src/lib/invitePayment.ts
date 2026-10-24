@@ -2,6 +2,7 @@ import { Invitation, PaymentAttempt } from '@prisma/client';
 import prisma from './prisma';
 import { PLANS, isPaid, planPriceDue } from './plans';
 import { paymentAmountMatches } from './paymentGateway';
+import { readableSlugAfterPublish } from './slug';
 
 export function promoPercent(code: unknown): number | null {
   if (typeof code !== 'string' || !code.trim() || code.length > 64) return null;
@@ -44,7 +45,8 @@ export function matchesInvitationPayment(payment: any, invite: Invitation, attem
 /** Called only with an object independently retrieved from the gateway API. */
 export async function confirmInvitationPayment(payment: any): Promise<boolean> {
   if (payment?.status !== 'succeeded' || payment.paid !== true || typeof payment.metadata?.inviteId !== 'string') return false;
-  return prisma.$transaction(async tx => {
+  let firstPublish = false;
+  const confirmed = await prisma.$transaction(async tx => {
     const invite = await tx.invitation.findUnique({ where: { id: payment.metadata.inviteId } });
     if (!invite) return false;
     const attempt = await tx.paymentAttempt.findUnique({ where: { invitationId: invite.id } });
@@ -58,6 +60,9 @@ export async function confirmInvitationPayment(payment: any): Promise<boolean> {
       data: { status: 'paid', plan: target, paidAt: new Date(), paymentId: payment.id },
     });
     if (updated.count && attempt) await tx.paymentAttempt.update({ where: { id: attempt.id }, data: { paymentId: payment.id } });
+    firstPublish = updated.count === 1 && !isPaid(invite.status);
     return updated.count === 1;
   });
+  if (firstPublish) await readableSlugAfterPublish(payment.metadata.inviteId);
+  return confirmed;
 }

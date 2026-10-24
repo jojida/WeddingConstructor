@@ -135,8 +135,31 @@ test('публикация, ограничения и улучшение тар�
     assert.equal(confirmed.plan, 'maximum');
     assert.equal((await call(`/api/planner/${inv.id}`)).status, 200);
     assert.equal((await call('/api/payment/webhook', 'POST', { event: 'payment.succeeded', object: { id: payment.id } }, false)).status, 200);
-    assert.equal((await prisma.invitation.findUnique({ where: { id: inv.id } })).plan, 'maximum');
+    const upgraded = await prisma.invitation.findUnique({ where: { id: inv.id } });
+    assert.equal(upgraded.plan, 'maximum');
+    assert.equal(upgraded.slug, inv.slug, 'доплата не меняет адрес уже опубликованного сайта');
     global.fetch = realFetch;
+  });
+
+  await t.test('при первой публикации адрес-заглушка становится адресом из имён', async () => {
+    const draft = (await call('/api/invites', 'POST', { templateId: 'calla' })).json;
+    assert.match(draft.slug, /^groom-i-bride-[0-9a-f]{24}$/);
+    await call(`/api/invites/${draft.id}`, 'PUT', { groomName: 'Иван', brideName: 'Мария' });
+    assert.equal((await call('/api/payment/create', 'POST', { inviteId: draft.id, plan: 'free' })).status, 200);
+    const published = await prisma.invitation.findUnique({ where: { id: draft.id } });
+    assert.match(published.slug, /^ivan-i-mariya-[0-9a-f]{6}$/);
+    assert.equal((await call(`/api/payment/public-status/${draft.id}`)).json.slug, published.slug);
+    assert.equal((await call(`/api/invites/by-slug/${published.slug}`, 'GET', undefined, false)).status, 200);
+
+    // Без имён и со своим адресом — не трогаем
+    const noNames = (await call('/api/invites', 'POST', { templateId: 'calla' })).json;
+    await call('/api/payment/create', 'POST', { inviteId: noNames.id, plan: 'free' });
+    assert.equal((await prisma.invitation.findUnique({ where: { id: noNames.id } })).slug, noNames.slug);
+    const custom = (await call('/api/invites', 'POST', { templateId: 'calla' })).json;
+    await call(`/api/invites/${custom.id}`, 'PUT', { groomName: 'Олег', brideName: 'Вера' });
+    await call(`/api/invites/${custom.id}/slug`, 'PATCH', { slug: 'oleg-i-vera' });
+    await call('/api/payment/create', 'POST', { inviteId: custom.id, plan: 'free' });
+    assert.equal((await prisma.invitation.findUnique({ where: { id: custom.id } })).slug, 'oleg-i-vera');
   });
 
   await t.test('тестовый аккаунт может переключить все три тарифа без кассы', async () => {
