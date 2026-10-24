@@ -367,6 +367,14 @@ function EditorContent() {
     reachGoal(goal);
   };
 
+  // Анкета «Расскажите о вашей свадьбе» на экране. «Открыл редактор» засчитывается и тем,
+  // кто её не видит (готовое приглашение из кабинета, возврат к черновику), — без этой
+  // ступени уход с анкеты не отличить от ухода из самого редактора.
+  useEffect(() => {
+    if (draftChecked && step === 'setup') funnelGoal(GOAL.editorForm);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftChecked, step]);
+
   // Рамки фото в превью: пропорции и исходное положение (шлёт photo-frame.js
   // шаблона) — по ним рисуется окно кадрирования у каждого поля с фото.
   const [photoSlots, setPhotoSlots] = useState<Record<string, PhotoSlot>>({});
