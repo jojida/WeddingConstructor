@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
 import api from '@/lib/api';
-import { TEMPLATES, SITE_URL, VK_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
+import { TEMPLATES, SITE_URL, VK_URL, YANDEX_REVIEWS_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import LazyMount from '@/components/LazyMount';
 import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
@@ -677,7 +677,7 @@ function JsonLd() {
         url: SITE_URL,
         logo: `${SITE_URL}/brand/avatar.png`,
         email: LEGAL.contactEmail,
-        sameAs: [VK_URL],
+        sameAs: [VK_URL, YANDEX_REVIEWS_URL],
       },
       {
         '@type': 'WebSite',

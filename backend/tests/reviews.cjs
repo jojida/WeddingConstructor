@@ -40,7 +40,7 @@ global.fetch = async (url, options) => {
 
 const prisma = require('../dist/lib/prisma').default;
 const { telegramWebhookSecret } = require('../dist/lib/security');
-const { letterFor, runLifecycleEmails } = require('../dist/lib/lifecycleEmails');
+const { letterFor, render, runLifecycleEmails } = require('../dist/lib/lifecycleEmails');
 const app = express();
 app.use(express.json());
 app.use('/api/reviews', require('../dist/routes/reviews').default);
@@ -200,7 +200,11 @@ test('отзывы пар', async (t) => {
     const letter = letterFor('after_wedding', { ...fresh, groomName: 'Иван', brideName: 'Мария', venue: '', venueAddress: '' });
     assert.equal(letter.subject, 'Как прошла свадьба?');
     assert.equal(letter.title, 'Иван и Мария, поздравляем!');
-    assert.match(letter.url, new RegExp(`/dashboard/${fresh.id}\\?review=1&utm_source=email`));
+    assert.equal(letter.url, 'https://yandex.ru/profile/162112565078', 'главная кнопка — отзыв в Яндексе');
+    assert.match(letter.secondary.url, new RegExp(`/dashboard/${fresh.id}\\?review=1&utm_source=email`));
     assert.ok(!/скидк|бонус|₽/.test(letter.paragraphs.join(' ')), 'просьба об отзыве — без рекламы');
+    const { text, html } = render(letter, fresh.userId);
+    assert.ok(text.includes(`${letter.secondary.label}: ${letter.secondary.url}`), 'в текстовой версии обе ссылки');
+    assert.ok(html.includes(`/dashboard/${fresh.id}?review=1&amp;utm_source=email`), 'в HTML ссылка на кабинет под кнопкой');
   });
 });

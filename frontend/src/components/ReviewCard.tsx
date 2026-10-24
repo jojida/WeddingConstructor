@@ -3,11 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import api from '@/lib/api';
+import { YANDEX_REVIEWS_URL } from '@/lib/constants';
 import styles from './ReviewCard.module.css';
 
 /* «Как вам WeddingCraft?» — внизу кабинета опубликованного сайта. Сюда же ведёт письмо после
    свадьбы (?review=1). На главную отзыв попадает, только если пара разрешила и мы его проверили
-   (backend/src/lib/reviews.ts); оценки 1–3 не публикуются — их читаем, чтобы исправить. */
+   (backend/src/lib/reviews.ts); оценки 1–3 не публикуются — их читаем, чтобы исправить.
+   Ссылка на отзыв в Яндексе — при любой оценке: звать туда только довольных нечестно. */
 
 interface OwnReview { rating: number; text: string; names: string; publish: boolean; status: 'pending' | 'published' | 'hidden' }
 interface ReviewState { review: OwnReview | null; canReview: boolean; names: string }
@@ -108,7 +110,11 @@ export default function ReviewCard({ inviteId }: { inviteId: string }) {
           {note}{' '}
           {saved.status === 'published' && saved.publish && <Link href="/#reviews" className={styles.link}>Посмотреть</Link>}
         </p>
-        <button type="button" className={styles.secondary} onClick={() => setEditing(true)}>Изменить отзыв</button>
+        <p className={styles.hint}>Если не сложно, оставьте отзыв и на Яндексе — там его увидят пары, которые выбирают приглашение.</p>
+        <div className={`${styles.actions} ${styles.savedActions}`}>
+          <a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={styles.primary}>Отзыв на Яндексе</a>
+          <button type="button" className={styles.secondary} onClick={() => setEditing(true)}>Изменить отзыв</button>
+        </div>
       </section>
     );
   }
@@ -143,6 +149,9 @@ export default function ReviewCard({ inviteId }: { inviteId: string }) {
           </div>
         </div>
       )}
+      <p className={styles.hint}>
+        Отзыв можно оставить и <a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={styles.link}>на Яндексе</a> — там его увидят пары, которые выбирают приглашение.
+      </p>
     </section>
   );
 }

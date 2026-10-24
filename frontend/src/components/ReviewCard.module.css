@@ -40,10 +40,13 @@
 .secondary { margin-top: 12px; border: 1px solid rgba(206, 197, 186, 0.8); background: #fff; color: #0e1d26; }
 .actions .secondary { margin-top: 0; }
 .secondary:hover { background: #f6f2ec; }
+a.primary { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none; }
+.savedActions { margin-top: 12px; }
 
 @media (max-width: 599px) {
   .card { padding: 18px 16px; }
-  .actions > button { flex: 1; }
+  /* Не влезают в строку — встают друг под другом во всю ширину, текст не переносится */
+  .actions > button, .actions > a { flex: 1 1 auto; white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) {
   .star { transition: none; }

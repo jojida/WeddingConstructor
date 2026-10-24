@@ -29,6 +29,8 @@ const HOUR = 3600_000;
 const DAY = 24 * HOUR;
 const SITE = (process.env.FRONTEND_URL || 'https://weddingcraft.ru').replace(/\/$/, '');
 const API = (process.env.BACKEND_URL || 'https://api.weddingcraft.ru').replace(/\/$/, '');
+// Карточка «онлайн-компании» в Яндекс Бизнесе — отзывы пар (та же ссылка в frontend/src/lib/constants.ts)
+const YANDEX_REVIEWS = 'https://yandex.ru/profile/162112565078';
 const MAX_PER_RUN = 60;
 
 type Kind = 'draft_24h' | 'free_1d' | 'free_4d' | 'date_90' | 'date_60' | 'after_wedding';
@@ -46,14 +48,19 @@ const unsubscribeUrl = (userId: string) =>
   `${API}/api/email/unsubscribe?u=${encodeURIComponent(userId)}&t=${unsubscribeToken(userId)}`;
 
 // ─── Шаблон письма ──────────────────────────────────────────────────────
-interface Letter { subject: string; title: string; paragraphs: string[]; cta: string; url: string }
+interface Letter {
+  subject: string; title: string; paragraphs: string[]; cta: string; url: string;
+  /** Вторая ссылка — текстом под кнопкой */
+  secondary?: { label: string; url: string };
+}
 
-function render(letter: Letter, userId: string): { text: string; html: string } {
+export function render(letter: Letter, userId: string): { text: string; html: string } {
   const unsub = unsubscribeUrl(userId);
   const text = [
     letter.title, '',
     ...letter.paragraphs.flatMap(p => [p, '']),
     `${letter.cta}: ${letter.url}`, '',
+    ...(letter.secondary ? [`${letter.secondary.label}: ${letter.secondary.url}`, ''] : []),
     '—',
     'Вы получили письмо, потому что создали приглашение на weddingcraft.ru.',
     `Отписаться: ${unsub}`,
@@ -64,7 +71,7 @@ function render(letter: Letter, userId: string): { text: string; html: string } 
 <h1 style="font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;line-height:1.3;color:#2b2925;margin:0 0 16px">${escapeHtml(letter.title)}</h1>
 ${letter.paragraphs.map(p => `<p style="font-size:15px;line-height:1.65;margin:0 0 14px">${escapeHtml(p)}</p>`).join('\n')}
 <p style="margin:24px 0 6px"><a href="${escapeHtml(letter.url)}" style="display:inline-block;background:#364350;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 26px;border-radius:999px">${escapeHtml(letter.cta)}</a></p>
-</div>
+${letter.secondary ? `<p style="margin:14px 0 0;font-size:14px;line-height:1.6"><a href="${escapeHtml(letter.secondary.url)}" style="color:#685d4a">${escapeHtml(letter.secondary.label)}</a></p>\n` : ''}</div>
 <p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.6;color:#9a9285;text-align:center">
 Вы получили письмо, потому что создали приглашение на weddingcraft.ru.<br>
 <a href="${escapeHtml(unsub)}" style="color:#9a9285">Отписаться от таких писем</a> — уведомления об ответах гостей продолжат приходить.
@@ -166,11 +173,13 @@ export function letterFor(kind: Kind, i: InviteRow): Letter {
         title: names ? `${names}, поздравляем!` : 'Поздравляем со свадьбой!',
         paragraphs: [
           'Надеемся, день прошёл именно так, как вы мечтали.',
-          'Расскажите, как вам WeddingCraft: что понравилось и чего не хватило. Это пара минут — а нам очень поможет сделать сервис лучше.',
-          'Показывать ли отзыв на нашем сайте, решаете вы.',
+          'Расскажите, как вам WeddingCraft: что понравилось и чего не хватило. Это пара минут, а парам, которые сейчас выбирают приглашение, ваш отзыв очень поможет.',
         ],
-        cta: 'Оставить отзыв',
-        url: `${SITE}/dashboard/${encodeURIComponent(i.id)}?review=1&utm_source=email&utm_medium=lifecycle&utm_campaign=${kind}`,
+        cta: 'Оставить отзыв на Яндексе', url: YANDEX_REVIEWS,
+        secondary: {
+          label: 'Или напишите только нам — в кабинете WeddingCraft',
+          url: `${SITE}/dashboard/${encodeURIComponent(i.id)}?review=1&utm_source=email&utm_medium=lifecycle&utm_campaign=${kind}`,
+        },
       };
   }
 }

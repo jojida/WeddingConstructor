@@ -8,6 +8,10 @@ export const SITE_URL = 'https://weddingcraft.ru';
 /** Сообщество ВКонтакте (клипы, посты). В подвале главной и в sameAs разметки Organization. */
 export const VK_URL = 'https://vk.ru/weddingcraft_invite';
 
+/** Карточка «онлайн-компании» в Яндекс Бизнесе: пары оставляют там отзывы (кабинет и письмо
+    после свадьбы — та же ссылка в backend/src/lib/lifecycleEmails.ts). В Картах и Поиске её нет. */
+export const YANDEX_REVIEWS_URL = 'https://yandex.ru/profile/162112565078';
+
 /* ── Реквизиты исполнителя для оферты и политики конфиденциальности ──────────
    Единственное место с реквизитами — страницы /oferta и /privacy читают отсюда.
    При смене статуса (самозанятый → ИП) обновить sellerStatus и добавить ОГРНИП. */
