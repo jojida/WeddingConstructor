@@ -350,11 +350,18 @@ function EditorContent() {
   // Вход в редактор — вторая ступень воронки после галереи шаблонов.
   // Реф защищает от двойного вызова: в разработке StrictMode прогоняет
   // эффекты дважды, и цель улетала бы два раза за один визит.
+  // Параметр template — название шаблона: по каждому видно «смотрели демо → начали
+  // делать». Уже созданное приглашение (?id=) — отдельно: это не выбор в каталоге,
+  // а шаблон в адресе тогда не указан.
   const goalSentRef = useRef(false);
   useEffect(() => {
     if (goalSentRef.current) return;
     goalSentRef.current = true;
-    reachGoal(GOAL.editorOpen);
+    reachGoal(GOAL.editorOpen, {
+      template: idFromUrl ? 'уже созданное приглашение'
+        : TEMPLATES.find(t => t.id === templateIdFromUrl)?.name || templateIdFromUrl,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Следующие шаги воронки внутри редактора — тоже по разу за визит страницы:

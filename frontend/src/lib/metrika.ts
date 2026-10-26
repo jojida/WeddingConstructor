@@ -133,7 +133,7 @@ export function trackPageView(url: string): void {
 /** Цели воронки. Держим списком, чтобы не разъезжались с настройками Метрики. */
 export const GOAL = {
   catalogNames:   'catalog_names',    // вписал свои имена над превью шаблонов (from: templates | home)
-  editorOpen:     'editor_open',      // открыл редактор — выбрал шаблон
+  editorOpen:     'editor_open',      // открыл редактор — выбрал шаблон (параметр template — название шаблона)
   editorForm:     'editor_form',      // увидел анкету «Расскажите о вашей свадьбе» (первый экран нового приглашения)
   editorSetup:    'editor_setup',     // заполнил имена и дату (первый шаг редактора)
   editorDone:     'editor_done',      // нажал «Готово» в редакторе (дальше вход или оплата)
