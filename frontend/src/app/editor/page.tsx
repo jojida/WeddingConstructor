@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
+import { useEffect, useLayoutEffect, useState, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -323,29 +323,72 @@ function EditorContent() {
   // Схема полей для шаблона (если есть — рендерим движок полей, иначе старый сайдбар)
   const sections = TEMPLATE_FIELDS[data.templateId];
 
-  // Разделы — аккордеон: открыт один (сначала первый), остальные свёрнуты.
-  // Раньше все поля шли одной простынёй на несколько экранов.
-  const [openTitle, setOpenTitle] = useState<string | null | undefined>(undefined);
-  const openNow = openTitle === undefined ? sections?.[0]?.title : openTitle;
+  // Разделы: список и один открытый (сначала первый). Раньше все поля шли
+  // одной простынёй на несколько экранов, потом — узким аккордеоном.
+  const [openTitle, setOpenTitle] = useState<string>();
+  const shownSection = sections?.find(s => s.title === openTitle) ?? sections?.[0];
+  const detailRef = useRef<HTMLElement>(null);
 
   // Превью листается к блоку, который сейчас правят (раздел открыли или
   // перешли в поле) — scrollPreviewTo
   const previewRef = useRef<HTMLDivElement>(null);
   const revealInPreview = (ids: string[]) => scrollPreviewTo(previewRef.current?.querySelector('iframe'), ids);
-  const toggleSection = (s: TemplateSection, head: HTMLElement) => {
-    const open = openNow !== s.title;
-    setOpenTitle(open ? s.title : null);
-    if (!open) return;
+  const selectSection = (s: TemplateSection) => {
+    setOpenTitle(s.title);
     revealInPreview([`section:${s.id}`, ...(s.previewFields || []), ...s.fields.map(f => f.id)]);
-    // Раздел выше свернулся — шапка открытого уехала бы вверх; возвращаем её к началу панели
-    setTimeout(() => head.scrollIntoView({ block: 'start', behavior: 'smooth' }), 30);
+    // Новый раздел — с начала: в широкой панели карточка листается сама, в
+    // узкой (и на телефоне) листается панель или страница — если шапка
+    // раздела ушла вверх или лежит ниже экрана, возвращаем к ней
+    requestAnimationFrame(() => {
+      const el = detailRef.current;
+      if (!el) return;
+      el.scrollTop = 0;
+      const top = el.getBoundingClientRect().top;
+      if (top < 120 || top > window.innerHeight * 0.6) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
   };
 
   const setSectionEnabled = (section: TemplateSection, enabled: boolean) => {
     if (!section.id || section.required) return;
     setData(prev => ({ ...prev, enabledSections: { ...prev.enabledSections, [section.id!]: enabled } }));
-    if (!enabled && openNow === section.title) setOpenTitle(null);
   };
+
+  const sectionState = (section: TemplateSection) => {
+    const locked = isPlanSectionLocked(data.plan, section.id);
+    const enabled = !locked && isSectionEnabled(section, data.enabledSections, data.customData?.showMap);
+    const note = locked
+      ? (section.id === 'menu' ? 'Доступен в тарифе «Максимум»'
+        : section.id === 'venue' && hiddenPlace ? `Гости не видят ${quotePlace(hiddenPlace)}` : 'Доступен с тарифа «Премиум»')
+      : !enabled ? 'Убран с сайта' : section.required ? 'Обязательный блок' : '';
+    return { locked, enabled, note };
+  };
+
+  const sectionSwitch = (section: TemplateSection, s: ReturnType<typeof sectionState>, className: string) =>
+    section.id && <button type="button" role="switch" aria-checked={s.enabled}
+      aria-label={`${section.title}: показывать на сайте`} disabled={section.required || s.locked}
+      title={s.locked ? 'Улучшите тариф, чтобы включить блок' : section.required ? 'Этот блок всегда остаётся на сайте' : s.enabled ? 'Убрать блок с сайта' : 'Вернуть блок на сайт'}
+      className={`${styles.sectionSwitch} ${className}`} onClick={() => setSectionEnabled(section, !s.enabled)}>
+      <span aria-hidden="true" />
+    </button>;
+
+  // Телефон в превью — 360×720 по умолчанию; на невысоком экране он
+  // обрезался снизу. Теперь масштаб подбирается под место (чуть крупнее на
+  // больших экранах). На телефоне размер задаёт CSS — null.
+  const stageRef = useRef<HTMLElement>(null);
+  const [phoneScale, setPhoneScale] = useState<number | null>(1);
+  useLayoutEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const fit = () => {
+      if (window.matchMedia('(max-width: 768px)').matches) { setPhoneScale(null); return; }
+      const k = Math.min((el.clientHeight - 48) / 720, (el.clientWidth - 48) / 360, 1.15);
+      setPhoneScale(Math.max(0.45, Math.floor(k * 100) / 100));
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [step, draftChecked]);
 
   // Вход в редактор — вторая ступень воронки после галереи шаблонов.
   // Реф защищает от двойного вызова: в разработке StrictMode прогоняет
@@ -788,6 +831,13 @@ function EditorContent() {
     return <SetupStep templateId={templateIdFromUrl} onComplete={handleSetupComplete} initialData={data} />;
   }
 
+  // Открытый раздел: состояние, его поля и соседи для кнопок «назад / далее»
+  const st = shownSection && sectionState(shownSection);
+  const ids = shownSection?.fields.map(f => f.id) ?? [];
+  const at = sections && shownSection ? sections.indexOf(shownSection) : -1;
+  const prev = sections?.[at - 1];
+  const next = sections?.[at + 1];
+
   const coupleLabel = (data.groomName || data.brideName)
     ? `${data.groomName}${data.groomName && data.brideName ? ' & ' : ''}${data.brideName}`
     : 'Новое приглашение';
@@ -836,7 +886,7 @@ function EditorContent() {
             <button className={styles.topBarIconBtn} onClick={handleSave} disabled={saving} title="Сохранить">
               <Save size={18} />
             </button>
-            <button className={styles.topBarBtnOutline} onClick={() => setShowPreview(true)}>
+            <button className={styles.topBarBtnSoft} onClick={() => setShowPreview(true)}>
               Предпросмотр
             </button>
             <Link href="/dashboard" className={`${styles.topBarBtnOutline} ${styles.phoneHidden}`}>
@@ -875,27 +925,27 @@ function EditorContent() {
         <div className={styles.editorBody}>
 
           {/* ── CANVAS (LEFT) ─────────────────────────────────────────────── */}
-          <main className={styles.canvas}>
+          <main className={styles.canvas} ref={stageRef}>
             {/* Была панель зума без обработчиков — нажатия ничего не делали.
                 Оставили одну рабочую кнопку: полноэкранный предпросмотр. */}
             <div className={styles.canvasControls}>
-              <div className={styles.zoomGroup}>
-                <button className={styles.zoomBtn} onClick={() => setShowPreview(true)}
-                  title="Открыть во весь экран" aria-label="Открыть во весь экран">
-                  <Maximize size={16} />
-                </button>
-              </div>
+              <button className={styles.zoomBtn} onClick={() => setShowPreview(true)}
+                title="Открыть во весь экран">
+                <Maximize size={15} aria-hidden />
+                <span>Во весь экран</span>
+              </button>
             </div>
             {/* На телефоне превью не ловит касания (иначе свайп листал бы
                 приглашение вместо страницы), зато тап по нему открывает
                 полноэкранный просмотр. На большом экране всё как было. */}
             <div
               className={styles.phoneContainer}
+              style={phoneScale ? { width: 360 * phoneScale, height: 720 * phoneScale } : undefined}
               onClick={() => {
                 if (window.matchMedia('(max-width: 768px)').matches) setShowPreview(true);
               }}
             >
-              <div className={styles.phoneMockup}>
+              <div className={styles.phoneMockup} style={phoneScale ? { transform: `scale(${phoneScale})` } : undefined}>
                 <div className={styles.phoneScreen}>
                   <div className={styles.phoneContent} ref={previewRef}>
                     <TemplatePreview data={data} apiBase={apiBase} editing />
@@ -906,85 +956,120 @@ function EditorContent() {
           </main>
 
           {/* ── RIGHT SIDEBAR ─────────────────────────────────────────────── */}
+          {/* Панель — половина экрана, как у конфигураторов: слева список
+              разделов с переключателями, справа крупная карточка открытого
+              раздела. Узкая панель (планшет, телефон) — список становится
+              лентой вкладок над карточкой (контейнерный запрос в CSS). */}
           <aside className={styles.rightSidebar}>
             <div className={styles.sidebarBranding}>
-              <div className={styles.sidebarTitle}>Редактор</div>
-              <div className={styles.sidebarSubtitle}>{template.name}</div>
+              <div>
+                <div className={styles.sidebarTitle}>Редактор</div>
+                <div className={styles.sidebarSubtitle}>{template.name}</div>
+              </div>
+              {sections?.some(s => s.id) && <p className={styles.sectionsHint}>
+                Уберите ненужные блоки переключателем — их можно вернуть в любой момент.
+              </p>}
             </div>
 
             <div className={styles.sidebarContent}>
 
-              {sections?.some(s => s.id) && <p className={styles.sectionsHint}>
-                Уберите ненужные блоки переключателем. Их можно вернуть в любой момент.
-              </p>}
-
-              {sections ? sections.map(section => {
-                const locked = isPlanSectionLocked(data.plan, section.id);
-                const enabled = !locked && isSectionEnabled(section, data.enabledSections, data.customData?.showMap);
-                const open = enabled && openNow === section.title;
-                const ids = section.fields.map(f => f.id);
-                return (
-                  <div className={`${styles.fields} ${styles.section} ${!enabled ? styles.sectionOff : ''}`} key={section.title}
-                    // Перешли в поле — превью к его блоку (а если у поля блока нет — к разделу)
-                    onFocusCapture={e => {
-                      const id = (e.target as HTMLElement).closest('[data-field]')?.getAttribute('data-field');
-                      if (id) revealInPreview([id, ...ids.filter(x => x !== id)]);
-                    }}>
-                    <div className={styles.sectionRow}>
-                      <button type="button" className={styles.sectionHead} aria-expanded={open}
-                        aria-controls={`section-body-${section.title}`} disabled={!enabled}
-                        onClick={e => toggleSection(section, e.currentTarget)}>
-                        <span className={styles.sectionLabel}>
-                          <span>{section.icon ? section.icon + ' ' : ''}{section.title}</span>
-                          {section.required && !locked && <small>Обязательный блок</small>}
-                          {!enabled && <small>{locked
-                            ? (section.id === 'menu' ? 'Доступен в тарифе «Максимум»'
-                              : section.id === 'venue' && hiddenPlace ? `Гости не видят ${quotePlace(hiddenPlace)}` : 'Доступен с тарифа «Премиум»')
-                            : 'Убран с сайта'}</small>}
-                        </span>
-                        <span className={styles.sectionChevron} aria-hidden="true">›</span>
-                      </button>
-                      {section.id && <button type="button" role="switch" aria-checked={enabled}
-                        aria-label={`${section.title}: показывать на сайте`} disabled={section.required || locked}
-                        title={locked ? 'Улучшите тариф, чтобы включить блок' : section.required ? 'Этот блок всегда остаётся на сайте' : enabled ? 'Убрать блок с сайта' : 'Вернуть блок на сайт'}
-                        className={styles.sectionSwitch} onClick={() => setSectionEnabled(section, !enabled)}>
-                        <span aria-hidden="true" />
-                      </button>}
-                    </div>
-                    {locked && <Link href={`/payment?id=${data.id}`} className={styles.sectionSetup}
-                      onClick={() => reachGoal(GOAL.upgradeClick, { from: 'editor_section', section: section.id })}>
-                      {section.id === 'venue' && hiddenPlace ? 'Показать место гостям →' : 'Улучшить тариф →'}
-                    </Link>}
-                    {open && (
-                      <div className={styles.sectionBody} id={`section-body-${section.title}`}>
-                        {section.fields.length === 0 && (section.required
-                          ? <button type="button" className={styles.sectionSetup} onClick={() => setStep('setup')}>Изменить имена и дату</button>
-                          : <p className={styles.sectionsHint}>Этот блок можно убрать и вернуть переключателем.</p>)}
-                        {section.fields.map(f => (
-                          <div key={f.id} data-field={f.id}>
-                            <SchemaFieldRenderer
-                              field={f}
-                              value={f.scope === 'data' ? (data as any)[f.id] : (data.customData || {})[f.id]}
-                              onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
-                              apiBase={apiBase}
-                              templateId={data.templateId}
-                              uploadImage={uploadImage}
-                              uploadAudio={uploadAudio}
-                              frame={(data.customData?.photoFrames || {})[f.id] ?? null}
-                              slot={photoSlots[f.id]}
-                              onFrame={fr => setPhotoFrame(f.id, fr)}
-                              photoCutout={data.customData?.photoCutouts?.[f.id]}
-                              onPhotoCutout={(photo, value) => setPhotoCutout(f.id, photo, value)}
-                              customIcons={data.customData?.scheduleIcons}
-                              onCustomIcons={icons => setCustom('scheduleIcons', icons)}
-                            />
+              {sections && shownSection && st ? (
+                  <div className={styles.panelGrid}>
+                    <nav className={styles.sectionNav} aria-label="Разделы приглашения">
+                      {sections.map(section => {
+                        const s = sectionState(section);
+                        const current = section === shownSection;
+                        return (
+                          <div key={section.title}
+                            className={`${styles.navItem} ${current ? styles.navItemActive : ''} ${!s.enabled ? styles.navItemOff : ''}`}>
+                            <button type="button" className={styles.navBtn} aria-current={current ? 'true' : undefined}
+                              onClick={() => selectSection(section)}>
+                              <span className={styles.navIcon} aria-hidden="true">{section.icon || '✦'}</span>
+                              <span className={styles.navText}>
+                                <span>{section.title}</span>
+                                {s.note && <small>{s.note}</small>}
+                              </span>
+                            </button>
+                            {sectionSwitch(section, s, styles.navSwitch)}
                           </div>
-                        ))}
-                      </div>
-                    )}
+                        );
+                      })}
+                    </nav>
+
+                    <section className={styles.detail} ref={detailRef} aria-labelledby="editor-section-title"
+                      // Перешли в поле — превью к его блоку (а если у поля блока нет — к разделу)
+                      onFocusCapture={e => {
+                        const id = (e.target as HTMLElement).closest('[data-field]')?.getAttribute('data-field');
+                        if (id) revealInPreview([id, ...ids.filter(x => x !== id)]);
+                      }}>
+                      <header className={styles.detailHead}>
+                        <span className={styles.detailIcon} aria-hidden="true">{shownSection.icon || '✦'}</span>
+                        <div className={styles.detailHeading}>
+                          <h2 id="editor-section-title" className={styles.detailTitle}>{shownSection.title}</h2>
+                          <p className={styles.detailNote}>{st.note || (shownSection.id ? 'Показывается на сайте' : 'Раздел приглашения')}</p>
+                        </div>
+                        {sectionSwitch(shownSection, st, styles.detailSwitch)}
+                      </header>
+
+                      {st.locked ? (
+                        <div className={styles.detailEmpty}>
+                          <p>{shownSection.id === 'venue' && hiddenPlace
+                            ? 'На бесплатном тарифе гости не видят место, адрес и карту.'
+                            : 'Этот блок появится на сайте после перехода на платный тариф.'}</p>
+                          <Link href={`/payment?id=${data.id}`} className={styles.detailCta}
+                            onClick={() => reachGoal(GOAL.upgradeClick, { from: 'editor_section', section: shownSection.id })}>
+                            {shownSection.id === 'venue' && hiddenPlace ? 'Показать место гостям →' : 'Улучшить тариф →'}
+                          </Link>
+                        </div>
+                      ) : !st.enabled ? (
+                        <div className={styles.detailEmpty}>
+                          <p>Блок убран с сайта — гости его не увидят.</p>
+                          <button type="button" className={styles.detailCta} onClick={() => setSectionEnabled(shownSection, true)}>
+                            Вернуть на сайт
+                          </button>
+                        </div>
+                      ) : (
+                        <div className={styles.sectionBody}>
+                          {shownSection.fields.length === 0 && (shownSection.required
+                            ? <>
+                                <p className={styles.sectionsHint}>Здесь ваши имена и дата свадьбы — их задают на первом шаге.</p>
+                                <button type="button" className={styles.sectionSetup} onClick={() => setStep('setup')}>Изменить имена и дату</button>
+                              </>
+                            : <p className={styles.sectionsHint}>Настраивать здесь нечего — блок можно убрать и вернуть переключателем.</p>)}
+                          {shownSection.fields.map(f => (
+                            <div key={f.id} data-field={f.id}>
+                              <SchemaFieldRenderer
+                                field={f}
+                                value={f.scope === 'data' ? (data as any)[f.id] : (data.customData || {})[f.id]}
+                                onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
+                                apiBase={apiBase}
+                                templateId={data.templateId}
+                                uploadImage={uploadImage}
+                                uploadAudio={uploadAudio}
+                                frame={(data.customData?.photoFrames || {})[f.id] ?? null}
+                                slot={photoSlots[f.id]}
+                                onFrame={fr => setPhotoFrame(f.id, fr)}
+                                photoCutout={data.customData?.photoCutouts?.[f.id]}
+                                onPhotoCutout={(photo, value) => setPhotoCutout(f.id, photo, value)}
+                                customIcons={data.customData?.scheduleIcons}
+                                onCustomIcons={icons => setCustom('scheduleIcons', icons)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <footer className={styles.detailNav}>
+                        {prev
+                          ? <button type="button" className={styles.detailBack} onClick={() => selectSection(prev)}>← {prev.title}</button>
+                          : <span />}
+                        {next
+                          ? <button type="button" className={styles.detailNext} onClick={() => selectSection(next)}>Далее: {next.title} →</button>
+                          : <button type="button" className={styles.detailNext} onClick={handleShare}>Завершить дизайн ✓</button>}
+                      </footer>
+                    </section>
                   </div>
-                );
-              }) : (<>
+              ) : (<>
 
               <div className={styles.fields}>
                 <div className={styles.panelTitle}>Локация</div>
@@ -1117,12 +1202,12 @@ function EditorContent() {
               </>)}
             </div>
 
-            {/* ── SIDEBAR FOOTER ──────────────────────────────────────────── */}
-            <div className={styles.sidebarFooter}>
+            {/* У разделов по схеме «Завершить» — в конце последнего раздела */}
+            {!sections && <div className={styles.sidebarFooter}>
               <button className={styles.finishBtn} onClick={handleShare}>
                 ЗАВЕРШИТЬ ДИЗАЙН ✓
               </button>
-            </div>
+            </div>}
           </aside>
         </div>
       </div>
@@ -1233,10 +1318,9 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
       // defaultOff — наоборот: новая возможность сама не включается у готовых сайтов.
       const on = field.defaultOff ? value === true : value !== false;
       return (
-        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, cursor: 'pointer', fontSize: 13, color: '#4b463d', fontFamily: 'var(--font-inter)' }}>
-          <input type="checkbox" checked={on} onChange={e => onChange(e.target.checked)}
-            style={{ width: 16, height: 16, margin: 0, accentColor: '#685d4a', cursor: 'pointer' }} />
-          {field.label}
+        <label className={styles.toggleRow}>
+          <span>{field.label}</span>
+          <input type="checkbox" role="switch" checked={on} onChange={e => onChange(e.target.checked)} className={styles.toggleInput} />
         </label>
       );
     }
@@ -1246,20 +1330,14 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
       const cur = opts.some(o => o.value === value) ? value : opts[0]?.value;
       return (
         <Field label={field.label}>
-          <div role="radiogroup" aria-label={field.label} style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          {/* Плитки, как образцы цвета в конфигураторах */}
+          <div role="radiogroup" aria-label={field.label} className={styles.choiceGrid}>
             {opts.map(o => {
               const on = o.value === cur;
               return (
                 <button key={o.value} type="button" role="radio" aria-checked={on} title={o.label} onClick={() => onChange(o.value)}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, padding: 0, border: 'none', background: 'none',
-                    cursor: 'pointer', fontFamily: 'var(--font-inter)', fontSize: 11, color: on ? '#4b463d' : '#8a8273', minWidth: 46,
-                  }}>
-                  <span style={{
-                    width: 34, height: 34, borderRadius: '50%', background: o.color || '#ccc',
-                    boxShadow: on ? '0 0 0 2px #fff, 0 0 0 4px #685d4a' : 'inset 0 0 0 1px rgba(0,0,0,0.14)',
-                    transition: 'box-shadow .15s ease',
-                  }} />
+                  className={styles.choiceTile}>
+                  <span className={styles.choiceSwatch} style={{ background: o.color || '#ccc' }} />
                   {o.label}
                 </button>
               );
@@ -1765,10 +1843,8 @@ function DrinksEditor({ value, onChange }: {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7d766c', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-inter)' }}>
-        {label}
-      </label>
+    <div className={styles.field}>
+      <label className={styles.fieldLabel}>{label}</label>
       {children}
     </div>
   );
