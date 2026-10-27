@@ -149,6 +149,14 @@ async function paymentStatus(inviteId: string) {
       }
     } catch { paymentStatus = 'unavailable'; }
   }
+  // Касса не ответила, а оплату уже подтвердил вебхук: сумма — из попытки оплаты, ровно её и
+  // выставили (с промокодом и доплатой). Иначе цель «Оплатил» уходит в Метрику без дохода.
+  if (amount === undefined && isPaid(invite.status) && invite.plan !== 'free' && invite.paymentId
+    && !['dev_test', 'free_account'].includes(invite.paymentId)) {
+    const attempt = await prisma.paymentAttempt.findUnique({ where: { invitationId: invite.id }, select: { paymentId: true, plan: true, amountKopecks: true } });
+    if (attempt && attempt.plan === invite.plan && attempt.amountKopecks > 0
+      && (!attempt.paymentId || attempt.paymentId === invite.paymentId)) amount = attempt.amountKopecks / 100;
+  }
   return { paid: isPaid(invite.status), status: invite.status, plan: invite.plan, slug: invite.slug, paidAt: invite.paidAt, paymentStatus, amount };
 }
 

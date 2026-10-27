@@ -137,6 +137,27 @@ test('payments fail closed, keep durable attempts and verify gateway facts', asy
     assert.equal(await confirmInvitationPayment(payment), true, 'stored discounted amount survives promo removal');
   });
 
+  await t.test('status keeps the charged amount for the revenue goal when the gateway is unreachable', async () => {
+    const inv = await invite();
+    process.env.PROMO_CODES = 'SAVE:10';
+    assert.equal((await create(inv, 'premium', 'SAVE')).status, 200);
+    process.env.PROMO_CODES = '';
+    const payment = await currentPayment(inv); payment.status = 'succeeded'; payment.paid = true;
+    assert.equal(await confirmInvitationPayment(payment), true);
+    assert.equal((await call(`/api/payment/status/${inv.id}`)).body.amount, 2241);
+    const gateway = global.fetch;
+    global.fetch = async () => { throw new Error('Simulated gateway outage'); };
+    try {
+      const st = (await call(`/api/payment/status/${inv.id}`)).body;
+      assert.equal(st.paid, true); assert.equal(st.paymentStatus, 'unavailable');
+      assert.equal(st.amount, 2241, 'discounted amount from the stored attempt');
+    } finally { global.fetch = gateway; }
+    const draft = await invite(); await create(draft);
+    global.fetch = async () => { throw new Error('Simulated gateway outage'); };
+    try { assert.equal((await call(`/api/payment/status/${draft.id}`)).body.amount, undefined, 'unpaid attempt is not revenue'); }
+    finally { global.fetch = gateway; }
+  });
+
   await t.test('uncertain creation older than idempotency window cannot double charge', async () => {
     const inv = await invite(); dropNextResponse = true;
     assert.equal((await create(inv)).status, 502);
