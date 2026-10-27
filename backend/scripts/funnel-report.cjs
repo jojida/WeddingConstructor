@@ -35,7 +35,7 @@ const median = xs => { if (!xs.length) return '—'; const s = [...xs].sort((a, 
   const invites = (await prisma.invitation.findMany({
     where: { userId: { in: [...userIds] } },
     select: { id: true, userId: true, status: true, plan: true, templateId: true, weddingDate: true, venue: true, venueAddress: true,
-      paymentId: true, createdAt: true, updatedAt: true },
+      paymentId: true, paidAt: true, createdAt: true, updatedAt: true },
   }));
   const published = invites.filter(i => i.status === 'published' || i.status === 'paid');
   const free = published.filter(i => i.plan === 'free');
@@ -72,5 +72,20 @@ const median = xs => { if (!xs.length) return '—'; const s = [...xs].sort((a, 
   const month = i => (/^\d{4}-\d{2}/.test(i.weddingDate) ? i.weddingDate.slice(0, 7) : 'без даты');
   line('8. Месяц свадьбы (все приглашения)', JSON.stringify(Object.fromEntries(Object.entries(count(invites, month)).sort())));
   line('   шаблоны', JSON.stringify(count(invites, i => i.templateId)));
+
+  // ── По дням регистрации: так сравниваются периоды (с бесплатным тарифом и без, правки воронки) ──
+  const byDay = new Map();
+  for (const u of users) {
+    const d = day(u.createdAt);
+    if (!byDay.has(d)) byDay.set(d, { in: 0, invite: 0, pub: 0, paid: 0 });
+    const r = byDay.get(d);
+    r.in++;
+    if (usersWithInvite.has(u.id)) r.invite++;
+    if (usersPublished.has(u.id)) r.pub++;
+    if (paid.some(i => i.userId === u.id)) r.paid++;
+  }
+  console.log('9. По дням регистрации: вошли / с приглашением / опубликовали / оплатили');
+  for (const [d, r] of [...byDay].sort()) console.log(`   ${d}   ${r.in} / ${r.invite} / ${r.pub} / ${r.paid}`);
+  line('   оплаты (день оплаты по Москве, тариф)', JSON.stringify(paid.map(i => `${i.paidAt ? day(i.paidAt) : '?'} ${i.plan}`)));
   console.log('');
 })().catch(e => { console.error('Ошибка отчёта:', e.message); process.exitCode = 1; }).finally(() => prisma.$disconnect());
