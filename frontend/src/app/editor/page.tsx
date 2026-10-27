@@ -3,7 +3,11 @@ import { useEffect, useLayoutEffect, useState, useRef, useCallback, Suspense } f
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize, Plus, X, ArrowUp, ArrowDown } from 'lucide-react';
+import {
+  Save, ArrowLeft, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize, Plus, X, ArrowUp, ArrowDown,
+  Mail, DoorOpen, ImageIcon, PenLine, CalendarDays, MapPin, MapIcon, Camera, UtensilsCrossed, Clock,
+  Hourglass, Shirt, Heart, ClipboardList, Gem, Music, Users, Landmark, Phone,
+} from 'lucide-react';
 import api from '@/lib/api';
 import { readAuthToken, readStorage, writeStorage } from '@/lib/browser-storage';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
@@ -99,6 +103,23 @@ const PRESET_SCHEDULE = [
   { time: '21:00', title: 'Танцы',        icon: '💃' },
   { time: '23:00', title: 'Финал',        icon: '✨' },
 ];
+
+// ─── Значки разделов ──────────────────────────────────────────────────────────
+/* В схемах шаблонов значок раздела — эмодзи (TemplateSection.icon). В списке
+   разделов эмодзи разного стиля выглядели набором «из коробки», поэтому здесь
+   они превращаются в тонкие линейные значки одного вида и цвета текста.
+   Незнакомый эмодзи (новый шаблон) — значок-звёздочка, а не пустое место. */
+const SECTION_ICONS: Record<string, typeof Mail> = {
+  '✉': Mail, '🚪': DoorOpen, '🖼': ImageIcon, '✍': PenLine, '📅': CalendarDays,
+  '📍': MapPin, '🗺': MapIcon, '📸': Camera, '📷': Camera, '✨': Sparkles,
+  '🍽': UtensilsCrossed, '⏱': Clock, '⏳': Hourglass, '👗': Shirt, '💌': Heart,
+  '📝': ClipboardList, '💍': Gem, '🎵': Music, '💑': Users, '🏛': Landmark, '📞': Phone,
+};
+
+function SectionIcon({ icon, size }: { icon?: string; size: number }) {
+  const Icon = SECTION_ICONS[(icon || '').replace(/\uFE0F/g, '')] || Sparkles;
+  return <Icon size={size} strokeWidth={1.6} aria-hidden />;
+}
 
 // ─── Setup Step ───────────────────────────────────────────────────────────────
 type SetupKey = 'groomName' | 'brideName' | 'weddingDate' | 'weddingTime';
@@ -323,11 +344,30 @@ function EditorContent() {
   // Схема полей для шаблона (если есть — рендерим движок полей, иначе старый сайдбар)
   const sections = TEMPLATE_FIELDS[data.templateId];
 
-  // Разделы: список и один открытый (сначала первый). Раньше все поля шли
+  // Разделы: список и один открытый (сначала «Обложка»). Раньше все поля шли
   // одной простынёй на несколько экранов, потом — узким аккордеоном.
+  // Не первый по порядку раздел: у части шаблонов первым идёт «Конверт» —
+  // анимация открытия, которой на бесплатном тарифе у гостей нет.
   const [openTitle, setOpenTitle] = useState<string>();
-  const shownSection = sections?.find(s => s.title === openTitle) ?? sections?.[0];
+  const shownSection = sections?.find(s => s.title === openTitle)
+    ?? sections?.find(s => s.id === 'cover') ?? sections?.[0];
   const detailRef = useRef<HTMLElement>(null);
+
+  // Телефон: превью занимает весь первый экран, а поля лежат под ним — их не
+  // находили. Пока лента разделов не видна, внизу висит кнопка «Изменить тексты
+  // и фото». Лента липкая: долистали до неё — кнопка уходит и не мешает.
+  const [navInView, setNavInView] = useState(true);
+  const navObserverRef = useRef<IntersectionObserver | null>(null);
+  const navRef = useCallback((el: HTMLElement | null) => {
+    navObserverRef.current?.disconnect();
+    navObserverRef.current = null;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    // Нижняя четверть экрана не в счёт: лента выглядывает у самого края на
+    // несколько пикселей — её там не замечают, кнопка должна остаться
+    const io = new IntersectionObserver(([entry]) => setNavInView(entry.isIntersecting), { rootMargin: '0px 0px -25% 0px' });
+    io.observe(el);
+    navObserverRef.current = io;
+  }, []);
 
   // Превью листается к блоку, который сейчас правят (раздел открыли или
   // перешли в поле) — scrollPreviewTo
@@ -889,9 +929,13 @@ function EditorContent() {
             <button className={styles.topBarBtnSoft} onClick={() => setShowPreview(true)}>
               Предпросмотр
             </button>
-            <Link href="/dashboard" className={`${styles.topBarBtnOutline} ${styles.phoneHidden}`}>
-              Личный кабинет
-            </Link>
+            {/* Гостю без входа кабинет показывать незачем: ссылка вела бы на вход
+                и уводила из редактора мимо «Завершить дизайн». */}
+            {user && (
+              <Link href="/dashboard" className={`${styles.topBarBtnOutline} ${styles.phoneHidden}`}>
+                Личный кабинет
+              </Link>
+            )}
             <button className={styles.topBarBtnPrimary} onClick={handleShare}>
               <span className={styles.phoneHidden}>Завершить дизайн</span>
               <span className={styles.phoneOnly}>Готово</span>
@@ -955,6 +999,13 @@ function EditorContent() {
             </div>
           </main>
 
+          {sections && !navInView && (
+            <button type="button" className={styles.toFields}
+              onClick={() => detailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+              Изменить тексты и фото <ArrowDown size={16} aria-hidden />
+            </button>
+          )}
+
           {/* ── RIGHT SIDEBAR ─────────────────────────────────────────────── */}
           {/* Панель — половина экрана, как у конфигураторов: слева список
               разделов с переключателями, справа крупная карточка открытого
@@ -975,7 +1026,7 @@ function EditorContent() {
 
               {sections && shownSection && st ? (
                   <div className={styles.panelGrid}>
-                    <nav className={styles.sectionNav} aria-label="Разделы приглашения">
+                    <nav className={styles.sectionNav} aria-label="Разделы приглашения" ref={navRef}>
                       {sections.map(section => {
                         const s = sectionState(section);
                         const current = section === shownSection;
@@ -984,7 +1035,7 @@ function EditorContent() {
                             className={`${styles.navItem} ${current ? styles.navItemActive : ''} ${!s.enabled ? styles.navItemOff : ''}`}>
                             <button type="button" className={styles.navBtn} aria-current={current ? 'true' : undefined}
                               onClick={() => selectSection(section)}>
-                              <span className={styles.navIcon} aria-hidden="true">{section.icon || '✦'}</span>
+                              <span className={styles.navIcon} aria-hidden="true"><SectionIcon icon={section.icon} size={18} /></span>
                               <span className={styles.navText}>
                                 <span>{section.title}</span>
                                 {s.note && <small>{s.note}</small>}
@@ -1003,7 +1054,7 @@ function EditorContent() {
                         if (id) revealInPreview([id, ...ids.filter(x => x !== id)]);
                       }}>
                       <header className={styles.detailHead}>
-                        <span className={styles.detailIcon} aria-hidden="true">{shownSection.icon || '✦'}</span>
+                        <span className={styles.detailIcon} aria-hidden="true"><SectionIcon icon={shownSection.icon} size={22} /></span>
                         <div className={styles.detailHeading}>
                           <h2 id="editor-section-title" className={styles.detailTitle}>{shownSection.title}</h2>
                           <p className={styles.detailNote}>{st.note || (shownSection.id ? 'Показывается на сайте' : 'Раздел приглашения')}</p>
