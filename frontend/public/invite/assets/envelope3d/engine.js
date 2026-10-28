@@ -564,7 +564,11 @@ export function drawHint(svg, L, opts = {}) {
 
 // ---------------------------------------------------------------- public
 export async function mountEnvelope(stage, opts = {}) {
-  const canvas = stage.querySelector('canvas');
+  // destroy() releases this canvas's WebGL context permanently. Each preview
+  // needs its own canvas, also when an older async mount is still finishing.
+  const previousCanvas = stage.querySelector('canvas');
+  const canvas = previousCanvas.cloneNode(false);
+  previousCanvas.replaceWith(canvas);
   const gl = canvas.getContext('webgl2', { antialias: true, alpha: false, premultipliedAlpha: true });
   if (!gl) throw new Error('WebGL2 недоступен');
   const base = opts.base || '';

@@ -267,6 +267,7 @@
     var version = mountVersion;
     var mountedWith = null;
     return import(BASE + 'engine.js').then(function (m) {
+      if (EDITING && version !== mountVersion) return null;
       mountedWith = { l: letters().join(''), n: namesLine(), d: dateLine(), w: D.wax };
       return m.mountEnvelope(stage, {
         base: BASE,
@@ -280,6 +281,7 @@
         onEnd: null
       });
     }).then(function (api) {
+      if (!api) return null;
       if ((EDITING && version !== mountVersion) || (!EDITING && phase === 'done')) { api.destroy(); return api; }
       engine = api;
       // Данные, пришедшие, пока движок грузил шрифты и бумагу (цвет печати у гостя
