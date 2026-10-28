@@ -2,8 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
+import ChooseTemplateLink from './ChooseTemplateLink';
 
-export default function DemoActions({ templateId }: { templateId: string }) {
+export default function DemoActions({ templateId, templateName }: { templateId: string; templateName: string }) {
   return (
     <div style={{
       position: 'fixed',
@@ -43,8 +44,9 @@ export default function DemoActions({ templateId }: { templateId: string }) {
       >
         Закрыть
       </Link>
-      <a
-        href={`/editor?template=${templateId}`}
+      <ChooseTemplateLink
+        templateId={templateId}
+        templateName={templateName}
         style={{
           padding: '12px 32px',
           borderRadius: '50px',
@@ -59,7 +61,7 @@ export default function DemoActions({ templateId }: { templateId: string }) {
         }}
       >
         Выбрать этот шаблон
-      </a>
+      </ChooseTemplateLink>
     </div>
   );
 }

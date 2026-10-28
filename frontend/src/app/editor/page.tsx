@@ -375,6 +375,8 @@ function EditorContent() {
   const revealInPreview = (ids: string[]) => scrollPreviewTo(previewRef.current?.querySelector('iframe'), ids);
   const selectSection = (s: TemplateSection) => {
     setOpenTitle(s.title);
+    // Какие разделы открывают и до какого доходят по «Далее» — там и ищем, где уходят
+    funnelGoal(GOAL.editorSection, `section:${s.title}`, { template: template.name, section: s.title });
     revealInPreview([`section:${s.id}`, ...(s.previewFields || []), ...s.fields.map(f => f.id)]);
     // Новый раздел — с начала: в широкой панели карточка листается сама, в
     // узкой (и на телефоне) листается панель или страница — если шапка
@@ -467,12 +469,15 @@ function EditorContent() {
   // Следующие шаги воронки внутри редактора — тоже по разу за визит страницы:
   // из открывших редактор почту вводит лишь каждый четвёртый, и без этих шагов
   // не видно, где уходят — на анкете с именами, в самом редакторе или на окне входа.
+  // С названием шаблона — чтобы видеть, на каком шаблоне уходят; key — для целей,
+  // которые за визит считаются по разу на что-то своё (раздел редактора).
   const funnelSentRef = useRef<Set<string>>(new Set());
-  const funnelGoal = (goal: string) => {
-    if (funnelSentRef.current.has(goal)) return;
-    funnelSentRef.current.add(goal);
-    reachGoal(goal);
+  const funnelGoal = (goal: string, key = goal, params: Record<string, string> = { template: template.name }) => {
+    if (funnelSentRef.current.has(key)) return;
+    funnelSentRef.current.add(key);
+    reachGoal(goal, params);
   };
+  const previewGoal = () => funnelGoal(GOAL.editorPreview);
 
   // Анкета «Расскажите о вашей свадьбе» на экране. «Открыл редактор» засчитывается и тем,
   // кто её не видит (готовое приглашение из кабинета, возврат к черновику), — без этой
@@ -943,7 +948,7 @@ function EditorContent() {
             <button className={styles.topBarIconBtn} onClick={handleSave} disabled={saving} title="Сохранить">
               <Save size={18} />
             </button>
-            <button className={styles.topBarBtnSoft} onClick={() => setShowPreview(true)}>
+            <button className={styles.topBarBtnSoft} onClick={() => { setShowPreview(true); previewGoal(); }}>
               Предпросмотр
             </button>
             {/* Гостю без входа кабинет показывать незачем: ссылка вела бы на вход
@@ -990,7 +995,7 @@ function EditorContent() {
             {/* Была панель зума без обработчиков — нажатия ничего не делали.
                 Оставили одну рабочую кнопку: полноэкранный предпросмотр. */}
             <div className={styles.canvasControls}>
-              <button className={styles.zoomBtn} onClick={() => setShowPreview(true)}
+              <button className={styles.zoomBtn} onClick={() => { setShowPreview(true); previewGoal(); }}
                 title="Открыть во весь экран">
                 <Maximize size={15} aria-hidden />
                 <span>Во весь экран</span>
@@ -1003,7 +1008,7 @@ function EditorContent() {
               className={styles.phoneContainer}
               style={phoneScale ? { width: 360 * phoneScale, height: 720 * phoneScale } : undefined}
               onClick={() => {
-                if (window.matchMedia('(max-width: 768px)').matches) setShowPreview(true);
+                if (window.matchMedia('(max-width: 768px)').matches) { setShowPreview(true); previewGoal(); }
               }}
             >
               <div className={styles.phoneMockup} style={phoneScale ? { transform: `scale(${phoneScale})` } : undefined}>

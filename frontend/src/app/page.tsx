@@ -12,6 +12,7 @@ import HeroPhone from '@/components/landing/HeroPhone';
 import FeatureDemo from '@/components/landing/FeatureDemo';
 import { NAME_MAX, withPreviewNames } from '@/lib/preview-names';
 import { usePreviewNames } from '@/lib/use-preview-names';
+import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
 
 // ─── Header ───────────────────────────────────────────────────────────────────
@@ -194,7 +195,8 @@ function TemplatesSection() {
 
         <div className={styles.templatesScroll} data-animate data-delay="150">
           {TEMPLATES.map((tpl) => (
-            <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}>
+            <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}
+              onClick={() => reachGoal(GOAL.templatePreview, { template: tpl.name, from: 'home' })}>
               <div className={styles.mosaicCard}>
                 <PreviewScale className={styles.previewScale}>
                   <LazyMount>

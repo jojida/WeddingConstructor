@@ -133,9 +133,13 @@ export function trackPageView(url: string): void {
 /** Цели воронки. Держим списком, чтобы не разъезжались с настройками Метрики. */
 export const GOAL = {
   catalogNames:   'catalog_names',    // вписал свои имена над превью шаблонов (from: templates | home)
+  templatePreview:'template_preview', // нажал «Посмотреть» у шаблона (template, from: catalog | home)
+  templateChoose: 'template_choose',  // нажал «Выбрать» у шаблона (template, from: catalog | demo)
   editorOpen:     'editor_open',      // открыл редактор — выбрал шаблон (параметр template — название шаблона)
   editorForm:     'editor_form',      // увидел анкету «Расскажите о вашей свадьбе» (первый экран нового приглашения)
   editorSetup:    'editor_setup',     // заполнил имена и дату (первый шаг редактора)
+  editorSection:  'editor_section',   // открыл раздел в редакторе (template, section) — по разу на раздел за визит
+  editorPreview:  'editor_preview',   // открыл предпросмотр во весь экран в редакторе (template)
   editorDone:     'editor_done',      // нажал «Готово» в редакторе (дальше вход или оплата)
   codeSent:       'code_sent',        // запросил код входа (сервер принял почту)
   signup:         'signup',           // вошёл по коду (регистрация или вход)
@@ -144,4 +148,42 @@ export const GOAL = {
   upgradeClick:   'upgrade_click',    // нажал «улучшить тариф» (параметр from — где)
   paymentStart:   'payment_start',    // нажал «Оплатить» (только платные тарифы)
   paymentSuccess: 'payment_success',  // оплата подтверждена (только платные тарифы)
+  jsError:        'js_error',         // ошибка скрипта на странице (page, message)
+  apiError:       'api_error',        // сервер не ответил или ответил 5xx (route, status)
 } as const;
+
+// ─── Ошибки ─────────────────────────────────────────────────────────────────
+/* Ошибки на страницах воронки уходят в Метрику целью: пока идёт реклама, видно,
+   где ломается сайт, — раньше, чем об этом напишут. Текст без почт, id и цифр,
+   каждая ошибка — раз за визит и не больше 20. Сайты пар, ссылки гостей и
+   кабинет вне учёта, как и всё остальное: reachGoal сам проверяет страницу. */
+const sentErrors = new Set<string>();
+const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+
+export function cleanErrorText(text: string): string {
+  return text.replace(/\S+@\S+/g, '<email>').replace(UUID, ':id').replace(/\d+/g, 'N').slice(0, 120);
+}
+
+/** Адрес запроса к серверу без id и параметров: /api/invites/:id */
+export function errorRoute(url: string): string {
+  return url.split('?')[0].replace(UUID, ':id').replace(/\/\d+(?=\/|$)/g, '/:n').slice(0, 80);
+}
+
+export function reportError(goal: string, params: Record<string, string | number>): void {
+  const key = goal + JSON.stringify(params);
+  if (sentErrors.has(key) || sentErrors.size >= 20) return;
+  sentErrors.add(key);
+  reachGoal(goal, params);
+}
+
+/** Ошибки скриптов страницы. Ошибки загрузки картинок и шрифтов сюда не попадают:
+    они не всплывают до window. Вызывается один раз при старте приложения. */
+export function trackPageErrors(): void {
+  window.addEventListener('error', (e) => {
+    reportError(GOAL.jsError, { page: window.location.pathname, message: cleanErrorText(e.message || 'error') });
+  });
+  window.addEventListener('unhandledrejection', (e) => {
+    const reason = e.reason as { message?: unknown } | undefined;
+    reportError(GOAL.jsError, { page: window.location.pathname, message: cleanErrorText(String(reason?.message ?? reason ?? 'rejection')) });
+  });
+}

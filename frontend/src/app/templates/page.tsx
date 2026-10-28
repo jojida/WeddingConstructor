@@ -7,6 +7,7 @@ import PreviewScale from '@/components/PreviewScale';
 import { LEGAL, TEMPLATES, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
 import { NAME_MAX, withPreviewNames } from '@/lib/preview-names';
 import { usePreviewNames } from '@/lib/use-preview-names';
+import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
 
 const SAMPLE_DATA = {
@@ -95,10 +96,13 @@ export default function TemplatesPage() {
             </div>
 
             <div className={styles.cardActions}>
-              <Link href={`/demo/${tpl.id}`} target="_blank" className={styles.actionBtnOutline}>
+              {/* Какой шаблон смотрят и какой берут — прямо с карточки каталога */}
+              <Link href={`/demo/${tpl.id}`} target="_blank" className={styles.actionBtnOutline}
+                onClick={() => reachGoal(GOAL.templatePreview, { template: tpl.name, from: 'catalog' })}>
                 Посмотреть
               </Link>
-              <Link href={`/editor?template=${tpl.id}`} className={styles.actionBtnPrimary}>
+              <Link href={`/editor?template=${tpl.id}`} className={styles.actionBtnPrimary}
+                onClick={() => reachGoal(GOAL.templateChoose, { template: tpl.name, from: 'catalog' })}>
                 Выбрать
               </Link>
             </div>

@@ -4,6 +4,7 @@ import DemoPreview from './DemoPreview';
 import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint, templateMusic } from '@/lib/constants';
 import { PLANS } from '@/lib/plans';
 import DemoActions from './DemoActions';
+import ChooseTemplateLink from './ChooseTemplateLink';
 
 interface Props {
   params: Promise<{ templateId: string }>;
@@ -99,9 +100,9 @@ function DemoAbout({ template }: { template: Tpl }) {
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '24px 0 8px' }}>
-          <a href={`/editor?template=${template.id}`} style={{ padding: '14px 32px', borderRadius: 50, background: 'linear-gradient(135deg, #d3c5ad, #685d4a)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
+          <ChooseTemplateLink templateId={template.id} templateName={template.name} style={{ padding: '14px 32px', borderRadius: 50, background: 'linear-gradient(135deg, #d3c5ad, #685d4a)', color: '#fff', textDecoration: 'none', fontWeight: 600, fontSize: 15 }}>
             Выбрать этот шаблон
-          </a>
+          </ChooseTemplateLink>
           <Link href="/templates" style={{ padding: '14px 28px', borderRadius: 50, border: '1px solid #c9bda9', color: '#685d4a', textDecoration: 'none', fontSize: 15 }}>
             Все шаблоны
           </Link>
@@ -169,7 +170,7 @@ export default async function DemoPage({ params }: Props) {
       />
       </div>
 
-      <DemoActions templateId={template.id} />
+      <DemoActions templateId={template.id} templateName={template.name} />
     </div>
     <DemoAbout template={template} />
     </>

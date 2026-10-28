@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/auth';
 import { planPriceDue } from '@/lib/plans';
-import { PLANS, LEGAL } from '@/lib/constants';
+import { PLANS, LEGAL, TEMPLATES } from '@/lib/constants';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import { ownPlace } from '@/lib/own-place';
 import { forgetPromo, savedPromo } from '@/lib/promo-link';
@@ -98,6 +98,8 @@ function PaymentContent() {
   const alreadyConnected = published && invite?.plan === selectedPlan && !isFree;
   const askPlace = !!place && !freePublication && !alreadyConnected;
   const placeMissing = !!place && (!place.venue.trim() || !place.address.trim());
+  // Шаблон в целях тарифа — видно, с каким шаблоном выбирают «Бесплатный» и идут платить
+  const templateName = TEMPLATES.find(t => t.id === invite?.templateId)?.name || invite?.templateId || '';
   /* Списка «что гости не увидят» при выборе «Бесплатного» здесь нет (был с 17.10.26):
      с ним публиковали вдвое реже — 22 из 30 вошедших за 10–17.10 против 6 из 16 за
      24–27.10, — а платить чаще не стали. Он остаётся на странице «Сайт опубликован»:
@@ -106,7 +108,7 @@ function PaymentContent() {
   // Выбор «Бесплатного» — шаг воронки: по умолчанию выбран «Премиум», так что
   // это осознанный выбор.
   const choosePlan = (id: string) => {
-    if (id === 'free' && selectedPlan !== 'free') reachGoal(GOAL.planFree);
+    if (id === 'free' && selectedPlan !== 'free') reachGoal(GOAL.planFree, { template: templateName });
     setSelectedPlan(id);
   };
 
@@ -115,7 +117,7 @@ function PaymentContent() {
     // Цель — само нажатие: попытку видно, даже если до кассы не дошли.
     // Бесплатная публикация — не оплата: своя цель засчитывается на странице
     // успеха, когда сайт действительно опубликован.
-    if (!freePublication && !alreadyConnected) reachGoal(GOAL.paymentStart, { plan: selectedPlan });
+    if (!freePublication && !alreadyConnected) reachGoal(GOAL.paymentStart, { plan: selectedPlan, template: templateName });
     let placePatch: { venue: string; venueAddress: string } | null = null;
     if (askPlace && place) {
       const venue = place.venue.trim();
