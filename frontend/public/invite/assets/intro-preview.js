@@ -15,6 +15,8 @@
    WCIntroPreview.show(on)     — показать / скрыть слои
    WCIntroPreview.peek(ms)     — показать закрытую заставку на пару секунд:
                                  пара поменяла её поле (цвет печати, надпись)
+   WCIntroPreview.select(id)   — держать заставку закрытой, пока выбран раздел
+                                 «Конверт»; при уходе скрыть и освободить её
    WCIntroPreview.button(play) — кнопка на обложке; play(done) проигрывает
                                  заставку и зовёт done() в конце
 
@@ -31,7 +33,7 @@
   var ON = Q.get('editing') === '1' && Q.get('intro') !== '0';
 
   var layers = [], btn = null, playFn = null, cover = null;
-  var playing = false, peekTimer = 0;
+  var playing = false, selected = false, peekTimer = 0;
 
   function ready(fn) {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn, { once: true });
@@ -107,8 +109,23 @@
     if (!ON || playing || !layers.length) return;
     show(true);
     clearTimeout(peekTimer);
-    peekTimer = setTimeout(function () { if (!playing) { show(false); if (api.onPeekEnd) api.onPeekEnd(); } }, ms || 2600);
+    if (!selected) peekTimer = setTimeout(endPeek, ms || 2600);
     if (api.onPeek) api.onPeek();
+  }
+
+  function endPeek() {
+    clearTimeout(peekTimer);
+    if (playing) return;
+    show(false);
+    if (api.onPeekEnd) api.onPeekEnd();
+  }
+
+  function select(section) {
+    if (!ON) return;
+    selected = section === 'envelope';
+    clearTimeout(peekTimer);
+    if (playing) return;
+    if (selected) peek(); else endPeek();
   }
 
   function play() {
@@ -128,6 +145,7 @@
       finished = true;
       playing = false;
       if (btn) btn.disabled = false;
+      if (selected) peek();
     });
   }
 
@@ -151,6 +169,7 @@
     layer: layer,
     show: show,
     peek: peek,
+    select: select,
     button: button,
     play: play,
     isPlaying: function () { return playing; },
@@ -158,4 +177,8 @@
     onPeekEnd: null
   };
   window.WCIntroPreview = api;
+  if (ON) window.addEventListener('message', function (e) {
+    if (e.origin !== window.location.origin || e.source !== window.parent) return;
+    if (e.data && e.data.type === 'wc:editor-section' && typeof e.data.section === 'string') select(e.data.section);
+  });
 })();

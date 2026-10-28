@@ -411,6 +411,23 @@ function EditorContent() {
       <span aria-hidden="true" />
     </button>;
 
+  // Выбранный «Конверт» остаётся видимым всё время правки, включая смену
+  // печати и повтор анимации. После перезагрузки iframe повторяем выбор.
+  const envelopeSelected = shownSection?.id === 'envelope' && sectionState(shownSection).enabled;
+  useEffect(() => {
+    if (step !== 'editor') return;
+    const postSelection = () => previewRef.current?.querySelector('iframe')?.contentWindow?.postMessage(
+      { type: 'wc:editor-section', section: envelopeSelected ? 'envelope' : '' }, window.location.origin
+    );
+    const onReady = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || e.source !== previewRef.current?.querySelector('iframe')?.contentWindow) return;
+      if (e.data?.type === 'wc:ready') postSelection();
+    };
+    window.addEventListener('message', onReady);
+    postSelection();
+    return () => window.removeEventListener('message', onReady);
+  }, [envelopeSelected, step, draftChecked]);
+
   // Телефон в превью — 360×720 по умолчанию; на невысоком экране он
   // обрезался снизу. Теперь масштаб подбирается под место (чуть крупнее на
   // больших экранах). На телефоне размер задаёт CSS — null.
