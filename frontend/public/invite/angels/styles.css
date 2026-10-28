@@ -37,6 +37,13 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
 
 /* Конверт заполняет всю ширину превью при любой высоте окна. */
 .wc-env3d .wc-env3d__stage { width: 100%; }
+/* В редакторе обложка короче экрана телефона. Слой конверта занимает
+   весь экран iframe, сохраняя исходную высоту самой обложки. */
+html .wc-env3d.wc-ip-layer {
+  bottom: auto;
+  height: 100vh;
+  height: 100dvh;
+}
 
 .invite {
   position: relative;

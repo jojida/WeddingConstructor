@@ -20,6 +20,23 @@ async function closedEnvelope(frame) {
   });
 }
 
+async function fullscreenEnvelope(frame, label) {
+  await frame.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  const geometry = await frame.evaluate(() => ({
+    viewport: { left: 0, top: 0, width: innerWidth, height: innerHeight },
+    boxes: ['.wc-env3d', '.wc-env3d__stage', '.wc-env3d canvas'].map(selector => {
+      const { left, top, width, height } = document.querySelector(selector).getBoundingClientRect();
+      return { selector, left, top, width, height };
+    }),
+  }));
+  for (const box of geometry.boxes) {
+    for (const axis of ['left', 'top', 'width', 'height']) {
+      assert.ok(Math.abs(box[axis] - geometry.viewport[axis]) <= 1,
+        `${label}: ${box.selector} ${axis}=${box[axis]}, expected ${geometry.viewport[axis]}`);
+    }
+  }
+}
+
 async function rememberCanvas(frame) {
   await frame.evaluate(() => { window.__previousEnvelopeCanvas = document.querySelector('.wc-env3d canvas'); });
 }
@@ -57,6 +74,12 @@ async function releasedEnvelope(frame) {
     const envelopeSection = page.getByRole('button', { name: 'Конверт', exact: true });
     await envelopeSection.click();
     await closedEnvelope(frame);
+    await fullscreenEnvelope(frame, 'selected envelope');
+    for (const viewport of [{ width: 1024, height: 768 }, { width: 390, height: 844 }, { width: 1884, height: 878 }]) {
+      await page.setViewportSize(viewport);
+      await fullscreenEnvelope(frame, `editor @${viewport.width}×${viewport.height}`);
+    }
+    console.log('Envelope layer, WebGL stage, and canvas fill the preview across desktop, tablet, and mobile layouts.');
     await page.waitForTimeout(6000);
     await closedEnvelope(frame);
     console.log('Selected envelope stays closed and visible beyond six seconds.');
@@ -76,6 +99,7 @@ async function releasedEnvelope(frame) {
     await frame.getByRole('button', { name: 'Посмотреть, как откроется' }).click();
     await frame.waitForFunction(() => document.querySelector('.wc-env3d').classList.contains('is-opening'));
     await closedEnvelope(frame);
+    await fullscreenEnvelope(frame, 'restored after playback');
     await rememberCanvas(frame);
     const enabled = page.getByRole('switch', { name: 'Конверт: показывать на сайте', exact: true }).first();
     await enabled.click();
