@@ -194,7 +194,7 @@
   color: #fff; font-weight: 700; font-size: 0.95em; line-height: 1;
 }
 .seatName {
-  flex: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  flex: 1; min-width: 0; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
   font-weight: 600; overflow-wrap: anywhere;
 }
 .seatEmpty { border-style: dashed; border-color: #cfc4b3; background: rgba(255, 255, 255, 0.6); color: var(--muted); box-shadow: none; }

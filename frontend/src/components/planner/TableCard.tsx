@@ -1,5 +1,5 @@
 'use client';
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { STATUS_COLOR, STATUS_LABEL, personTitle, seatsText, tableTitle, type PlannerPerson, type PlannerTable, type SnapshotIndex } from '@/lib/planner';
 import type { BoardCtl } from './SeatingBoard';
 import styles from './planner.module.css';
@@ -12,6 +12,64 @@ const PILL_L = 124;   // длина таблички
 const PILL_H = 38;    // её высота
 const GAP = 8;        // от края стола до таблички
 const MAX_DRAWN = 20; // больше мест — списком: таблички стали бы нечитаемо мелкими
+
+/* ── Имя на табличке — всегда полностью. Табличка не растёт, поэтому длинное имя
+   набирается мельче: подбираем кегль, при котором оно встаёт в 1–3 строки с переносом
+   только между словами и после дефиса. Короткие имена остаются в обычном кегле. */
+const NAME_SIZE = 13;  // обычный кегль имени и номера
+const NAME_MIN = 6;    // мельче не бывает: такое имя всё равно видно целиком в подсказке
+const LINE = 1.12;     // межстрочный интервал таблички
+// Место под имя: длина таблички минус поля, кружок номера и зазор (в em обычного кегля)
+const NAME_W = (PILL_L - (0.22 + 2 * 0.95 + 0.4 + 0.7) * NAME_SIZE) * 0.94;
+const NAME_H = PILL_H - 3;
+
+let measureCtx: CanvasRenderingContext2D | null | undefined;
+/** Ширина текста в em шрифта табличек; без canvas — по средней ширине буквы. */
+function emWidth(text: string, family: string): number {
+  if (measureCtx === undefined) measureCtx = typeof document === 'undefined' ? null : document.createElement('canvas').getContext('2d');
+  if (!measureCtx) return text.length * 0.62;
+  measureCtx.font = `600 100px ${family}`;
+  return measureCtx.measureText(text).width / 100;
+}
+
+const sizeCache = new Map<string, number>();
+/** Кегль имени (в условных единицах), при котором оно целиком помещается в табличку. */
+function nameSize(name: string, family: string): number {
+  const key = `${family}|${name}`;
+  let size = sizeCache.get(key);
+  if (size === undefined) sizeCache.set(key, (size = fitName(name, family)));
+  return size;
+}
+
+function fitName(name: string, family: string): number {
+  // Куски, между которыми можно перенести строку: слова и части через дефис
+  const parts = name.trim().split(/\s+/).flatMap((w) => w.match(/[^-]*-|[^-]+/g) ?? [w]);
+  const line = (from: number, to: number) => parts.slice(from, to).reduce((s, p, i) => s + (i && !parts[from + i - 1].endsWith('-') ? ' ' : '') + p, '');
+  const width = (from: number, to: number) => emWidth(line(from, to), family);
+  let best = 0;
+  for (let lines = 1; lines <= Math.min(3, parts.length); lines++) {
+    // Лучшая разбивка на lines строк — с самой узкой длинной строкой (кусков мало, перебор дешёвый)
+    let widest = Infinity;
+    const split = (from: number, left: number, acc: number) => {
+      if (left === 1) { widest = Math.min(widest, Math.max(acc, width(from, parts.length))); return; }
+      for (let to = from + 1; to <= parts.length - left + 1; to++) split(to, left - 1, Math.max(acc, width(from, to)));
+    };
+    split(0, lines, 0);
+    best = Math.max(best, Math.min(NAME_SIZE, NAME_W / widest, NAME_H / (lines * LINE)));
+  }
+  return Math.max(NAME_MIN, best);
+}
+
+/** Шрифт табличек (.root берёт --font-inter); ждём загрузки шрифтов, чтобы мерить настоящие буквы. */
+function useSeatFont(): string {
+  const [family, setFamily] = useState('');
+  useEffect(() => {
+    const read = () => setFamily(getComputedStyle(document.documentElement).getPropertyValue('--font-inter').trim() || 'system-ui, sans-serif');
+    read();
+    document.fonts?.ready.then(read);
+  }, []);
+  return family;
+}
 
 interface SeatSpot { x: number; y: number; deg: number; flip: boolean }
 interface Layout { w: number; h: number; table: { x: number; y: number; w: number; h: number; round: boolean }; seats: SeatSpot[] }
@@ -43,6 +101,7 @@ function layout(shape: PlannerTable['shape'], n: number): Layout {
 
 function Plan({ table, people, ctl }: { table: PlannerTable; people: PlannerPerson[]; ctl: BoardCtl }) {
   const L = layout(table.shape, table.capacity);
+  const family = useSeatFont();
   const u = (v: number) => `${(v * 100) / L.w}cqw`;           // условные единицы → ширина схемы
   const at = (x: number, y: number): CSSProperties => ({ left: `${(x / L.w) * 100}%`, top: `${(y / L.h) * 100}%` });
   const t = L.table;
@@ -78,7 +137,7 @@ function Plan({ table, people, ctl }: { table: PlannerTable; people: PlannerPers
             onDragStart={(e) => { e.dataTransfer.setData('text/plain', p.id); e.dataTransfer.effectAllowed = 'move'; ctl.dragStart([p.id]); }}
             onDragEnd={() => ctl.dragEnd()}>
             <span className={styles.seatNum} style={{ background: STATUS_COLOR[p.status] }}>{i + 1}</span>
-            <span className={`${styles.seatName} ${p.name ? '' : styles.unnamed}`}>{p.name || 'Без имени'}</span>
+            <span className={`${styles.seatName} ${p.name ? '' : styles.unnamed}`} style={family ? { fontSize: u(nameSize(p.name || 'Без имени', family)) } : undefined}>{p.name || 'Без имени'}</span>
           </button>
         );
       })}
