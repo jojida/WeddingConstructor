@@ -484,7 +484,15 @@
     if (!form) return;
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      function done() { form.hidden = true; var th = document.getElementById('rsvpThanks'); if (th) th.removeAttribute('hidden'); }
+      function done() {
+        form.hidden = true;
+        var th = document.getElementById('rsvpThanks');
+        if (!th) return;
+        th.removeAttribute('hidden');
+        // Форма длинная: свернулась — и «Спасибо» оказалось выше экрана, гость его не видел
+        var r = th.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight) th.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
       var nameEl = form.querySelector('[name="guestName"]');
       var guestName = nameEl ? nameEl.value.trim() : '';
       var attendEl = form.querySelector('input[name="attend"]:checked');

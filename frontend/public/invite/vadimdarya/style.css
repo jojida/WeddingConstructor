@@ -799,6 +799,16 @@ body {
   line-height: 1.7;
 }
 
+/* После отправки форма скрывается (атрибут hidden), остаётся «Спасибо» —
+   display: flex у .guest-form иначе перекрывал бы hidden */
+.guest-form[hidden], .rsvp-thanks[hidden] { display: none; }
+.rsvp-thanks {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+  color: var(--text-dark);
+  margin-top: 1.5rem;
+}
+
 /* Guest Form Styles */
 .guest-form {
   width: 100%;

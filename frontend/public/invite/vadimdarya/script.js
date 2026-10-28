@@ -383,8 +383,19 @@
     }
     var drinks = [].map.call(form.querySelectorAll('input[name="drink"]:checked'), function (c) { return c.value; });
     var btn = form.querySelector('button[type="submit"]');
+    // Как в остальных шаблонах: форма уходит, остаётся «Спасибо». Раньше заполненная
+    // форма оставалась на экране, а благодарность была только надписью на кнопке.
     var done = function () {
-      if (!btn) return;
+      var thanks = document.getElementById('rsvpThanks');
+      if (thanks) {
+        form.hidden = true;
+        thanks.hidden = false;
+        // Форма длинная: свернулась — и «Спасибо» оказалось выше экрана, гость его не видел
+        var r = thanks.getBoundingClientRect();
+        if (r.top < 0 || r.bottom > window.innerHeight) thanks.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        return;
+      }
+      if (!btn) return;   // старая разметка без блока «Спасибо» (страница из кэша)
       btn.disabled = true;
       btn.textContent = '✓ Спасибо! Ваш ответ получен';
       btn.style.opacity = '0.6';
