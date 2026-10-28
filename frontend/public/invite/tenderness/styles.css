@@ -680,6 +680,9 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
   text-align: left;
   background: var(--card);
 }
+/* display: flex выше перекрывает атрибут hidden — без этого после отправки
+   анкеты форма остаётся на экране рядом с «Спасибо». */
+.rsvp__form[hidden] { display: none; }
 /* Поле имени — образец и для полей ответов, которые добавляет rsvp-count.js.
    Не меньше 16px: иначе iPhone приближает страницу при вводе. */
 .rsvp__name {

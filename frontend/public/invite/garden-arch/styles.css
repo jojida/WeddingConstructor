@@ -636,6 +636,9 @@ img {
   gap: 26px;
   text-align: left;
 }
+/* display: flex выше перекрывает атрибут hidden — без этого после отправки
+   анкеты форма остаётся на экране рядом с «Спасибо». */
+.rsvp-form[hidden] { display: none; }
 
 .rsvp-fieldset {
   border: none;

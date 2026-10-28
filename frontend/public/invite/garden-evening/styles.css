@@ -628,6 +628,9 @@ html.hero-live.hero-go .hero__names { animation-delay: 1.3s; }
   gap: calc(64 * var(--u));
   text-align: left;
 }
+/* display: flex выше перекрывает атрибут hidden — без этого после отправки
+   анкеты форма остаётся на экране рядом с «Спасибо». */
+.rsvp__form[hidden] { display: none; }
 /* Поле имени — образец и для полей ответов, которые добавляет rsvp-count.js.
    Не меньше 16px: иначе iPhone приближает страницу при вводе. */
 .rsvp__name {
