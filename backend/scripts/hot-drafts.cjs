@@ -11,11 +11,7 @@ require('dotenv').config({ quiet: true });
 const prisma = require('../dist/lib/prisma').default;
 const { isFreeAccount } = require('../dist/lib/freeAccounts');
 
-const TEMPLATE_NAMES = {
-  vitrage: 'Витраж', forest: 'Туманный лес', tenderness: 'Нежность', angels: 'Ангелы', calla: 'Каллы',
-  'garden-evening': 'Вечер в саду', floral: 'Флоральный', ivory: 'Айвори', sketch: 'Скетч',
-  mediterranean: 'Средиземноморье', 'garden-arch': 'Цветущая арка', vadimdarya: 'Тёмная элегантность',
-};
+const TEMPLATE_NAMES = require('./template-names.cjs');
 const SOON_DAYS = 45; // приглашения рассылают за 6–8 недель — ближе уже горит
 
 const msk = d => new Date(d.getTime() + 3 * 3600_000);

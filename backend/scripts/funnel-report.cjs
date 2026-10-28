@@ -8,6 +8,8 @@ require('dotenv').config({ quiet: true });
 const prisma = require('../dist/lib/prisma').default;
 const { isFreeAccount } = require('../dist/lib/freeAccounts');
 const { ownPlace } = require('../dist/lib/templatePlaces');
+const TEMPLATE_NAMES = require('./template-names.cjs');
+const tplName = id => TEMPLATE_NAMES[id] || id;
 
 const from = process.argv[2] || '2026-10-10';
 const since = new Date(`${from}T00:00:00+03:00`);
@@ -71,7 +73,6 @@ const median = xs => { if (!xs.length) return '—'; const s = [...xs].sort((a, 
   // ── Кто эти пары ──
   const month = i => (/^\d{4}-\d{2}/.test(i.weddingDate) ? i.weddingDate.slice(0, 7) : 'без даты');
   line('8. Месяц свадьбы (все приглашения)', JSON.stringify(Object.fromEntries(Object.entries(count(invites, month)).sort())));
-  line('   шаблоны', JSON.stringify(count(invites, i => i.templateId)));
 
   // ── По дням регистрации: так сравниваются периоды (с бесплатным тарифом и без, правки воронки) ──
   const byDay = new Map();
@@ -86,6 +87,20 @@ const median = xs => { if (!xs.length) return '—'; const s = [...xs].sort((a, 
   }
   console.log('9. По дням регистрации: вошли / с приглашением / опубликовали / оплатили');
   for (const [d, r] of [...byDay].sort()) console.log(`   ${d}   ${r.in} / ${r.invite} / ${r.pub} / ${r.paid}`);
-  line('   оплаты (день оплаты по Москве, тариф)', JSON.stringify(paid.map(i => `${i.paidAt ? day(i.paidAt) : '?'} ${i.plan}`)));
+  line('   оплаты (день оплаты по Москве, тариф, шаблон)', JSON.stringify(paid.map(i => `${i.paidAt ? day(i.paidAt) : '?'} ${i.plan} «${tplName(i.templateId)}»`)));
+
+  // ── Шаблоны: что выбирают и с чем доходят до публикации и оплаты ──
+  const byTemplate = new Map();
+  for (const i of invites) {
+    if (!byTemplate.has(i.templateId)) byTemplate.set(i.templateId, { all: 0, pub: 0, paid: 0 });
+    const r = byTemplate.get(i.templateId);
+    r.all++;
+    if (i.status === 'published' || i.status === 'paid') r.pub++;
+    if (paid.includes(i)) r.paid++;
+  }
+  console.log('10. Шаблоны: начали / опубликовали / оплатили');
+  for (const [id, r] of [...byTemplate].sort((a, b) => b[1].all - a[1].all)) {
+    console.log(`   ${`«${tplName(id)}»`.padEnd(24)} ${r.all} / ${r.pub} / ${r.paid}`);
+  }
   console.log('');
 })().catch(e => { console.error('Ошибка отчёта:', e.message); process.exitCode = 1; }).finally(() => prisma.$disconnect());
