@@ -367,14 +367,14 @@ img {
   font-feature-settings: "lnum" 1;
 }
 
+/* Цветы улетают сами (ветер), холст касаний не ловит — палец на сердце листает страницу */
 .heart-canvas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   z-index: 4;
-  cursor: grab;
-  touch-action: none;
+  pointer-events: none;
 }
 
 /* ━━━━━━━━━━━━ МЕСТО ПРОВЕДЕНИЯ ━━━━━━━━━━━━ */

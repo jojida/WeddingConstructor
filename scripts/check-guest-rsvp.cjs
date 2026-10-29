@@ -13,21 +13,6 @@ const TEMPLATES = ['tenderness', 'ivory', 'calla', 'forest', 'garden-evening', '
   'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral'];
 const routeFor = id => `/invite/${id === 'mediterranean' ? '' : `${id}/`}index.html?intro=0`;
 
-// «Цветущая арка»: дальше сердца из цветов гость листает, только проведя по цветам
-async function passHeartGate(page) {
-  const canvas = page.locator('canvas.heart-canvas').first();
-  if (!(await canvas.count())) return;
-  await canvas.scrollIntoViewIfNeeded();
-  await page.waitForTimeout(600);
-  const box = await canvas.boundingBox();
-  for (let pass = 0; pass < 14; pass++) {
-    for (let x = 0; x <= 1; x += 0.05) {
-      await page.mouse.move(box.x + box.width * (pass % 2 ? 1 - x : x), box.y + box.height * ((pass + 0.5) / 14));
-    }
-  }
-  await page.waitForTimeout(1200);
-}
-
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
   let failed = 0;
@@ -42,8 +27,8 @@ async function passHeartGate(page) {
     try {
       await page.goto(base + routeFor(id), { waitUntil: 'load', timeout: 120000 });
       await page.waitForTimeout(2000);
-      await passHeartGate(page);
-      // Вся страница по экранам — многое у шаблонов появляется при прокрутке
+      // Вся страница по экранам колесом, как у гостя: многое у шаблонов появляется при прокрутке,
+      // и её ничто не должно держать (у «Цветущей арки» до 29.10.26 дальше сердца было не пролистать)
       const height = await page.evaluate(() => document.documentElement.scrollHeight);
       for (let y = 0; y < height; y += 600) { await page.mouse.wheel(0, 600); await page.waitForTimeout(100); }
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

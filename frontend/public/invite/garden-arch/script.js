@@ -9,7 +9,6 @@
   'use strict';
 
   var STATE = { apiBase: '', slug: '', date: '2026-08-15', time: '15:00' };
-  var EDITING = new URLSearchParams(location.search).get('editing') === '1';
 
   function pad(n) { return String(n).padStart(2, '0'); }
   function escapeHtml(s) {
@@ -194,15 +193,17 @@
     updateHeart();
   }
 
-  // ─── ИНТЕРАКТИВ: дата в БОЛЬШОМ сердце из цветов. Курсор мягко разгоняет лепестки —
-  //     они плавно разлетаются (нужно много движений), остаётся венок-сердце с датой ──
+  // ─── Дата в БОЛЬШОМ сердце из цветов. Когда сердце на экране, налетает ветер:
+  //     цветы сами срываются и улетают, остаётся венок-сердце с датой. Раньше их
+  //     нужно было сдувать пальцем, а дальше сердца страница не листалась, — гости
+  //     и посетители демо не понимали, что делать (демо открывали, а шаблон не брали) ──
   function initHeartReveal() {
     var wrap = document.getElementById('heartWrap');
     var section = document.querySelector('.wedday');
     var hint = document.getElementById('weddayHint');
     if (!wrap || !section) return;
 
-    var revealed = false, active = false;
+    var revealed = false;
     var PINKS = ['#e6a9bd', '#d98ba0', '#e6c2cf', '#f0d6de', '#dd9bb0'];
     var CREAMS = ['#f4efe3', '#efe7cf', '#fbf6ea'];
     var GREENS = ['#9fb083', '#bccaa6', '#8a9a6f'];
@@ -218,7 +219,6 @@
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       var ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
       wrap.appendChild(canvas);
-      active = true;
 
       // 1) точки сердца в нормированных координатах (плотно — чтобы дата была спрятана)
       var raw = [];
@@ -261,7 +261,6 @@
         if (pp.inZone0) zoneTotal++;
       }
       zoneTotal = zoneTotal || 1;
-      var running = false;
 
       function petal(x, y, r, rot, col) { ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(0, 0, r, r * 0.56, 0, 0, 6.2832); ctx.fill(); ctx.restore(); }
       function drawP(p) {
@@ -273,8 +272,8 @@
       }
       function render() { ctx.clearRect(0, 0, w, h); for (var i = 0; i < P.length; i++) if (!P[i].gone) drawP(P[i]); }
 
-      // «потревоженные» цветы летят И тают — где провёл курсором, там расчистилось
-      var tick = 0, RpxC = Math.max(8, Math.round(Rz * canvas.width / w));
+      // центр (дата) расчищен — пора показать подпись «дата открыта»
+      var RpxC = Math.max(8, Math.round(Rz * canvas.width / w));
       function centerClear() {
         var cw = canvas.width, ch = canvas.height;
         var sx = Math.max(0, (cw / 2 - RpxC) | 0), sy = Math.max(0, (ch * 0.46 - RpxC) | 0);
@@ -284,74 +283,71 @@
         var o = 0, t = 0; for (var q = 3; q < d.length; q += 16) { t++; if (d[q] > 40) o++; }
         return t && (o / t) < 0.2;
       }
-      function frame() {
-        var anim = false;
-        for (var i = 0; i < P.length; i++) {
-          var p = P[i]; if (p.gone || p.fixed || !p.dist) continue;
-          anim = true;
-          p.x += p.vx; p.y += p.vy; p.rot += p.vr;
-          p.vx *= 0.92; p.vy *= 0.92; p.vr *= 0.92;
-          p.fade -= 0.04;
-          if (p.fade <= 0 || p.x < -50 || p.x > w + 50 || p.y < -50 || p.y > h + 50) p.gone = true;
+      // Порыв ветра: внутренние цветы срываются по очереди слева направо, разгоняются
+      // вправо и вверх, покачиваются и тают — у правого и верхнего края холста тоже,
+      // чтобы не обрезались по линейке. Ободок-венок (fixed) остаётся.
+      function gust() {
+        var minX = Infinity, maxX = -Infinity;
+        for (var i = 0; i < P.length; i++) if (!P[i].fixed) { minX = Math.min(minX, P[i].ox); maxX = Math.max(maxX, P[i].ox); }
+        var spanX = (maxX - minX) || 1;
+        for (var j = 0; j < P.length; j++) {
+          var q = P[j]; if (q.fixed) continue;
+          q.delay = (q.ox - minX) / spanX * 1.5 + Math.random() * 0.4;   // с: порыв идёт слева направо
+          q.life = 1.6 + Math.random() * 0.8;                              // с: за сколько цветок тает
+          q.phase = Math.random() * 6.28;
+          q.spin = (Math.random() < 0.5 ? -1 : 1) * (1.5 + Math.random() * 2.5);
         }
-        render();
-        if (!revealed && (++tick % 5) === 0 && centerClear()) finish();   // дата видна
-        if (anim) requestAnimationFrame(frame);
-        else { if (!revealed && centerClear()) finish(); running = false; }
-      }
-      function startLoop() { if (!running) { running = true; requestAnimationFrame(frame); } }
-
-      // импульс по «съёмным» цветам: помечаем dist → летят и тают; радиус средний, чуть интенсивнее
-      function blow(bx, by) {
-        var Rd = w * 0.2;
-        for (var i = 0; i < P.length; i++) {
-          var p = P[i]; if (p.gone || p.fixed) continue;
-          var dx = p.x - bx, dy = p.y - by, d = Math.hypot(dx, dy);
-          if (d < Rd) {
-            p.dist = true;
-            var f = (1 - d / Rd) * 3.4, inv = d || 1;
-            p.vx += dx / inv * f + (Math.random() - 0.5) * 1.2;
-            p.vy += dy / inv * f - Math.random() * 1.0;
-            var sp = Math.hypot(p.vx, p.vy), MX = 7; if (sp > MX) { p.vx = p.vx / sp * MX; p.vy = p.vy / sp * MX; }
-            p.vr += (Math.random() - 0.5) * 0.4;
+        var t0 = performance.now(), last = t0;
+        function step(now) {
+          var t = (now - t0) / 1000, dt = Math.min(0.05, (now - last) / 1000);
+          last = now;
+          var alive = false;
+          for (var i = 0; i < P.length; i++) {
+            var p = P[i]; if (p.fixed || p.gone) continue;
+            alive = true;
+            if (t < p.delay) continue;
+            if (!p.flying) { p.flying = true; p.vx = 10 + Math.random() * 30; p.vy = -(15 + Math.random() * 30); }
+            var age = t - p.delay;
+            p.vx += (140 + Math.random() * 60) * dt;                      // ветер разгоняет вправо
+            p.vy += (Math.sin(p.phase + age * 6) * 120 - 35) * dt;        // покачивание и подъём
+            p.x += p.vx * dt; p.y += p.vy * dt;
+            p.rot += p.spin * dt;
+            // первую треть пути цветок яркий — видно, как он летит, потом тает
+            var life = 1 - Math.max(0, (age / p.life - 0.35) / 0.65);
+            var edge = Math.min((w - p.x) / (w * 0.12), p.y / (h * 0.1));
+            p.fade = Math.max(0, Math.min(life, edge, 1));
+            if (p.fade <= 0) p.gone = true;
           }
+          render();
+          if (!revealed && centerClear()) finish();
+          if (alive) requestAnimationFrame(step);
+          else if (!revealed) finish();
         }
-        startLoop();
+        requestAnimationFrame(step);
       }
-      function rel(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
-      canvas.addEventListener('pointermove', function (e) { var p = rel(e); blow(p.x, p.y); e.preventDefault(); }, { passive: false });
-      canvas.addEventListener('pointerdown', function (e) { var p = rel(e); blow(p.x, p.y); });
 
-      // открытие: внутренние цветы сдуты, ободок-венок ОСТАЁТСЯ на холсте + дата внутри
+      // открытие: внутренние цветы улетели, ободок-венок ОСТАЁТСЯ на холсте + дата внутри
       function finish() {
         revealed = true;
         if (hint) { hint.textContent = 'дата открыта'; hint.classList.add('done'); }
       }
 
-      render(); // большое сердце из цветов (анимация запускается по движению курсора)
+      render(); // большое сердце из цветов
+      // Ветер — когда сердце показалось на экране; без анимаций (настройка системы) — сразу дата
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        for (var r = 0; r < P.length; r++) if (!P[r].fixed) P[r].gone = true;
+        render(); finish();
+      } else if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          if (!entries.some(function (e) { return e.isIntersecting; })) return;
+          io.disconnect();
+          setTimeout(gust, 350);
+        }, { threshold: 0.6 });
+        io.observe(wrap);
+      } else gust();
     }
 
     build();
-
-    /* ── Скролл-гейт только для гостя (в редакторе скролл свободный, но цветы видны) ── */
-    if (!EDITING) {
-      var lockTarget = function () {
-        var r = section.getBoundingClientRect(), docTop = r.top + window.scrollY;
-        return Math.max(0, Math.round(docTop + section.offsetHeight / 2 - window.innerHeight * 0.5));
-      };
-      var gateActive = function () { return active && !revealed; };
-      var enforce = function () { if (revealed) return; if (active && window.scrollY > lockTarget() + 2) window.scrollTo(0, lockTarget()); requestAnimationFrame(enforce); };
-      window.addEventListener('wheel', function (e) { if (gateActive() && e.deltaY > 0 && window.scrollY >= lockTarget() - 2) e.preventDefault(); }, { passive: false });
-      var touchY = 0;
-      window.addEventListener('touchstart', function (e) { if (e.touches && e.touches.length) touchY = e.touches[0].clientY; }, { passive: true });
-      window.addEventListener('touchmove', function (e) {
-        if (!gateActive() || !e.touches.length) return;
-        if (e.target && e.target.classList && e.target.classList.contains('heart-canvas')) return;
-        if (touchY - e.touches[0].clientY > 0 && window.scrollY >= lockTarget() - 2) e.preventDefault();
-      }, { passive: false });
-      window.addEventListener('keydown', function (e) { if (!gateActive()) return; var k = e.key; if ((k === 'ArrowDown' || k === 'PageDown' || k === 'End' || k === ' ' || k === 'Spacebar') && window.scrollY >= lockTarget() - 2) e.preventDefault(); });
-      requestAnimationFrame(enforce);
-    }
   }
 
   // ─── Плавное проявление всего сайта: секции блоками + элементы со стэггером ──
