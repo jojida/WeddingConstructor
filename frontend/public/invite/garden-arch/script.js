@@ -193,10 +193,10 @@
     updateHeart();
   }
 
-  // ─── Дата в БОЛЬШОМ сердце из цветов. Когда сердце на экране, налетает ветер:
-  //     цветы сами срываются и улетают, остаётся венок-сердце с датой. Раньше их
-  //     нужно было сдувать пальцем, а дальше сердца страница не листалась, — гости
-  //     и посетители демо не понимали, что делать (демо открывали, а шаблон не брали) ──
+  // ─── Дата в БОЛЬШОМ сердце из цветов. Когда сердце на экране, цветы сами
+  //     разлетаются, остаётся венок-сердце с датой. Раньше их нужно было сдувать
+  //     пальцем, а дальше сердца страница не листалась, — гости и посетители демо
+  //     не понимали, что делать (демо открывали, а шаблон не брали) ──
   function initHeartReveal() {
     var wrap = document.getElementById('heartWrap');
     var section = document.querySelector('.wedday');
@@ -283,45 +283,62 @@
         var o = 0, t = 0; for (var q = 3; q < d.length; q += 16) { t++; if (d[q] > 40) o++; }
         return t && (o / t) < 0.2;
       }
-      // Порыв ветра: внутренние цветы срываются по очереди слева направо, разгоняются
-      // вправо и вверх, покачиваются и тают — у правого и верхнего края холста тоже,
-      // чтобы не обрезались по линейке. Ободок-венок (fixed) остаётся.
-      function gust() {
-        var minX = Infinity, maxX = -Infinity;
-        for (var i = 0; i < P.length; i++) if (!P[i].fixed) { minX = Math.min(minX, P[i].ox); maxX = Math.max(maxX, P[i].ox); }
-        var spanX = (maxX - minX) || 1;
-        for (var j = 0; j < P.length; j++) {
-          var q = P[j]; if (q.fixed) continue;
-          q.delay = (q.ox - minX) / spanX * 1.5 + Math.random() * 0.4;   // с: порыв идёт слева направо
-          q.life = 1.6 + Math.random() * 0.8;                              // с: за сколько цветок тает
-          q.phase = Math.random() * 6.28;
-          q.spin = (Math.random() < 0.5 ? -1 : 1) * (1.5 + Math.random() * 2.5);
+      // «потревоженные» цветы летят И тают — где прошёл «палец», там расчистилось
+      // Шаг — по времени, в «кадрах по 60 в секунду»: на слабом телефоне кадров меньше,
+      // но разлёт не превращается в замедленную съёмку
+      var tick = 0, running = false, last = 0;
+      function frame(now) {
+        var k = last ? Math.min(4, (now - last) / 16.7) : 1, damp = Math.pow(0.92, k);
+        last = now;
+        var anim = false;
+        for (var i = 0; i < P.length; i++) {
+          var p = P[i]; if (p.gone || p.fixed || !p.dist) continue;
+          anim = true;
+          p.x += p.vx * k; p.y += p.vy * k; p.rot += p.vr * k;
+          p.vx *= damp; p.vy *= damp; p.vr *= damp;
+          p.fade -= 0.04 * k;
+          if (p.fade <= 0 || p.x < -50 || p.x > w + 50 || p.y < -50 || p.y > h + 50) p.gone = true;
         }
-        var t0 = performance.now(), last = t0;
-        function step(now) {
-          var t = (now - t0) / 1000, dt = Math.min(0.05, (now - last) / 1000);
-          last = now;
-          var alive = false;
-          for (var i = 0; i < P.length; i++) {
-            var p = P[i]; if (p.fixed || p.gone) continue;
-            alive = true;
-            if (t < p.delay) continue;
-            if (!p.flying) { p.flying = true; p.vx = 10 + Math.random() * 30; p.vy = -(15 + Math.random() * 30); }
-            var age = t - p.delay;
-            p.vx += (140 + Math.random() * 60) * dt;                      // ветер разгоняет вправо
-            p.vy += (Math.sin(p.phase + age * 6) * 120 - 35) * dt;        // покачивание и подъём
-            p.x += p.vx * dt; p.y += p.vy * dt;
-            p.rot += p.spin * dt;
-            // первую треть пути цветок яркий — видно, как он летит, потом тает
-            var life = 1 - Math.max(0, (age / p.life - 0.35) / 0.65);
-            var edge = Math.min((w - p.x) / (w * 0.12), p.y / (h * 0.1));
-            p.fade = Math.max(0, Math.min(life, edge, 1));
-            if (p.fade <= 0) p.gone = true;
+        render();
+        if (!revealed && (++tick % 5) === 0 && centerClear()) finish();   // дата видна
+        if (anim) requestAnimationFrame(frame);
+        else { if (!revealed && centerClear()) finish(); running = false; }
+      }
+      function startLoop() { if (!running) { running = true; last = 0; requestAnimationFrame(frame); } }
+
+      // импульс по «съёмным» цветам: помечаем dist → летят и тают; радиус средний, чуть интенсивнее
+      function blow(bx, by) {
+        var Rd = w * 0.2;
+        for (var i = 0; i < P.length; i++) {
+          var p = P[i]; if (p.gone || p.fixed) continue;
+          var dx = p.x - bx, dy = p.y - by, d = Math.hypot(dx, dy);
+          if (d < Rd) {
+            p.dist = true;
+            var f = (1 - d / Rd) * 3.4, inv = d || 1;
+            p.vx += dx / inv * f + (Math.random() - 0.5) * 1.2;
+            p.vy += dy / inv * f - Math.random() * 1.0;
+            var sp = Math.hypot(p.vx, p.vy), MX = 7; if (sp > MX) { p.vx = p.vx / sp * MX; p.vy = p.vy / sp * MX; }
+            p.vr += (Math.random() - 0.5) * 0.4;
           }
-          render();
-          if (!revealed && centerClear()) finish();
-          if (alive) requestAnimationFrame(step);
-          else if (!revealed) finish();
+        }
+        startLoop();
+      }
+
+      // Сдувание как раньше от пальца, только само: невидимый «палец» проходит по сердцу
+      // зигзагом сверху вниз — цветы разлетаются от него во все стороны и тают.
+      // Раньше сдувать надо было самому, и дальше сердца страница не листалась.
+      function autoBlow() {
+        var rows = 6, dur = 1100, t0 = performance.now(), passed = 0;   // мс на весь проход
+        function at(k) {
+          var row = Math.min(rows - 1, Math.floor(k * rows)), f = k * rows - row;
+          var x = row % 2 ? 1 - f : f;                       // строки туда-обратно
+          return [w * (0.16 + 0.68 * x), h * (0.18 + 0.64 * (row + 0.5) / rows)];
+        }
+        function step(now) {
+          var k = Math.min(1, (now - t0) / dur);
+          // все точки пути с прошлого кадра: на слабом телефоне «палец» не перескакивает
+          for (; passed <= k; passed += 0.012) { var pt = at(Math.min(passed, 1)); blow(pt[0], pt[1]); }
+          if (k < 1) requestAnimationFrame(step);
         }
         requestAnimationFrame(step);
       }
@@ -333,7 +350,8 @@
       }
 
       render(); // большое сердце из цветов
-      // Ветер — когда сердце показалось на экране; без анимаций (настройка системы) — сразу дата
+      // Сдувается сразу, как только сердце показалось на экране (треть видна);
+      // без анимаций (настройка системы) — сразу дата
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         for (var r = 0; r < P.length; r++) if (!P[r].fixed) P[r].gone = true;
         render(); finish();
@@ -341,10 +359,10 @@
         var io = new IntersectionObserver(function (entries) {
           if (!entries.some(function (e) { return e.isIntersecting; })) return;
           io.disconnect();
-          setTimeout(gust, 350);
-        }, { threshold: 0.6 });
+          autoBlow();
+        }, { threshold: 0.35 });
         io.observe(wrap);
-      } else gust();
+      } else autoBlow();
     }
 
     build();
