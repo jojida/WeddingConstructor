@@ -47,6 +47,22 @@ test('Gmail, письма серии и ненастроенный RuSender — 
   assert.deepEqual(calls.map(c => c.url), [BREVO, BREVO, BREVO]);
 });
 
+test('личное письмо владельца: отправитель support@, ответ туда же; Яндекс — через RuSender', async () => {
+  const from = { email: 'support@weddingcraft.ru', name: 'Анна из WeddingCraft' };
+  await sendEmail({ to: 'pair@yandex.ru', subject: 'Как вам приглашение?', text: 'Здравствуйте!', from, replyTo: from.email, critical: true });
+  assert.equal(calls[0].url, RUSENDER);
+  assert.deepEqual(calls[0].body.mail.from, from);
+  calls = [];
+  await sendEmail({ to: 'pair@gmail.com', subject: 'Как вам приглашение?', text: 'Здравствуйте!', from, replyTo: from.email, critical: true });
+  assert.equal(calls[0].url, BREVO);
+  assert.deepEqual(calls[0].body.sender, from);
+  assert.deepEqual(calls[0].body.replyTo, { email: from.email });
+  // Без from — прежний отправитель
+  calls = [];
+  await sendEmail({ to: 'pair@gmail.com', subject: 'Код', text: '1' });
+  assert.deepEqual(calls[0].body.sender, { name: 'WeddingCraft', email: 'noreply@weddingcraft.ru' });
+});
+
 test('ошибка RuSender (кончился лимит тарифа) — код всё равно уходит через Brevo', async () => {
   rusenderStatus = 402;
   await sendEmail({ to: 'anna@yandex.ru', subject: 'Код', text: '4', critical: true });

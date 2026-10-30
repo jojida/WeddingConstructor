@@ -33,8 +33,11 @@ export interface Mail {
   replyTo?: string;
   /** Доп. заголовки, например List-Unsubscribe у писем серии. */
   headers?: Record<string, string>;
-  /** Код входа: на российские почты уходит через RuSender, если он настроен. */
+  /** Код входа и личные письма владельца: на российские почты уходят через RuSender, если он настроен. */
   critical?: boolean;
+  /** Отправитель вместо MAIL_FROM — личное письмо владельца от support@ (scripts/send-letter.cjs).
+      Только адрес на нашем домене: RuSender и Brevo пропускают отправителей проверенного домена. */
+  from?: { email: string; name?: string };
 }
 
 /* Mail.ru и Яндекс отклоняют или прячут часть писем Brevo: журнал Brevo 17.10.26 —
@@ -67,7 +70,7 @@ async function sendViaRuSender(mail: Mail): Promise<boolean> {
         mail: {
           to: { email: mail.to },
           // Адрес отправителя обязан быть на домене ключа отправки, иначе RuSender ответит 404
-          from: { email: process.env.RUSENDER_FROM || 'noreply@weddingcraft.ru', name: FROM_NAME },
+          from: { email: mail.from?.email || process.env.RUSENDER_FROM || 'noreply@weddingcraft.ru', name: mail.from?.name || FROM_NAME },
           subject: mail.subject,
           text: mail.text,
           ...(mail.html ? { html: mail.html } : {}),
@@ -76,7 +79,7 @@ async function sendViaRuSender(mail: Mail): Promise<boolean> {
     });
     await res.body?.cancel();
     if (res.ok) {
-      console.log('✉️ Код входа отправлен через RuSender');
+      console.log('✉️ Письмо отправлено через RuSender');
       return true;
     }
     console.error(`RuSender API ${res.status} — письмо уходит через основной сервис`);
@@ -104,7 +107,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: `${FROM_NAME} <${FROM_EMAIL}>`,
+        from: `${mail.from?.name || FROM_NAME} <${mail.from?.email || FROM_EMAIL}>`,
         to: [mail.to],
         reply_to: mail.replyTo || REPLY_TO_EMAIL,
         subject: mail.subject,
@@ -132,7 +135,7 @@ export async function sendEmail(mail: Mail): Promise<void> {
         accept: 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: FROM_NAME, email: FROM_EMAIL },
+        sender: { name: mail.from?.name || FROM_NAME, email: mail.from?.email || FROM_EMAIL },
         to: [{ email: mail.to }],
         replyTo: { email: mail.replyTo || REPLY_TO_EMAIL },
         subject: mail.subject,
@@ -151,7 +154,8 @@ export async function sendEmail(mail: Mail): Promise<void> {
   // Фолбэк на SMTP (локальная разработка)
   if (process.env.SMTP_USER && process.env.SMTP_PASS) {
     await smtpTransport.sendMail({
-      from: process.env.SMTP_FROM || `"${FROM_NAME}" <${process.env.SMTP_USER}>`,
+      from: mail.from ? `"${mail.from.name || FROM_NAME}" <${mail.from.email}>`
+        : process.env.SMTP_FROM || `"${FROM_NAME}" <${process.env.SMTP_USER}>`,
       to: mail.to,
       replyTo: mail.replyTo || REPLY_TO_EMAIL,
       subject: mail.subject,
