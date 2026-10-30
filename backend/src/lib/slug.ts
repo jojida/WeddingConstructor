@@ -7,7 +7,7 @@ export const RESERVED_SLUGS = new Set([
   'api', 'auth', 'by-domain', 'dashboard', 'demo', 'editor', 'invite', 'payment', 'print',
   'templates', 'admin', 'login', 'register', 'signup', 'about', 'pricing', 'help',
   'static', 'assets', '_next', 'favicon', 'robots', 'sitemap', 'www', 'public', 'uploads', 'studio', 'privacy', 'oferta', 'contacts',
-  'blog', 'c',
+  'blog', 'c', 'rassadka-gostey-na-svadbu',
 ]);
 
 export const SLUG_RE = /^[a-z0-9][a-z0-9-]{1,38}[a-z0-9]$/;

@@ -26,7 +26,7 @@ let previousPage = '';
    и кабинет по-прежнему не учитываются. Заголовки страниц воронки общие
    («Редактор приглашения», «Оплата тарифа») — имён пар в них нет. */
 const ANALYTICS_PATHS = [
-  '/', '/templates', '/print', '/contacts', '/privacy', '/oferta', '/blog',
+  '/', '/templates', '/print', '/contacts', '/privacy', '/oferta', '/blog', '/rassadka-gostey-na-svadbu',
   '/editor', '/auth', '/payment', '/payment/success',
 ];
 

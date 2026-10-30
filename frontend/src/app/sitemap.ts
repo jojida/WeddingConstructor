@@ -26,6 +26,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: SITE_URL, lastModified, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/templates`, lastModified, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/print`, lastModified, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${SITE_URL}/rassadka-gostey-na-svadbu`, lastModified, changeFrequency: 'monthly', priority: 0.8 },
     ...templatePages,
     { url: `${SITE_URL}/blog`, lastModified, changeFrequency: 'weekly', priority: 0.7 },
     ...articlePages,
