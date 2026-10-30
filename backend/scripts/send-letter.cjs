@@ -6,8 +6,9 @@
 
    На сервере (после сборки бэкенда):
      cd /var/www/wedding/backend && node scripts/send-letter.cjs
-   Скрипт спросит адрес, тему, подпись отправителя и текст (вставьте его и закончите
-   строкой из одной точки), покажет письмо целиком и отправит только после «да».
+   Скрипт спросит адрес, тему и текст (вставьте его и закончите строкой из одной
+   точки), покажет письмо целиком и отправит только после «да». Отправитель в почте
+   пары — «WeddingCraft <support@weddingcraft.ru>», подпись — в самом тексте.
    Посмотреть, что получится, без отправки: node scripts/send-letter.cjs --dry   */
 require('dotenv').config({ quiet: true });
 const readline = require('readline');
@@ -15,18 +16,21 @@ const { sendEmail, isEmailConfigured } = require('../dist/lib/email');
 const { escapeHtml } = require('../dist/lib/security');
 
 const FROM = 'support@weddingcraft.ru';
+const FROM_NAME = 'WeddingCraft';
 const DRY = process.argv.includes('--dry');
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Вставленный текст приходит пачкой строк — копим их в очередь, чтобы ни одна не потерялась
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: !!process.stdin.isTTY });
+// Своё приглашение readline («> ») при наборе затирало подсказки — вопросы пишем отдельной строкой
+rl.setPrompt('');
 const queue = [];
 let waiting = null;
 let closed = false;
 rl.on('line', line => { if (waiting) { const w = waiting; waiting = null; w(line); } else queue.push(line); });
 rl.on('close', () => { closed = true; if (waiting) { const w = waiting; waiting = null; w(null); } });
 function ask(prompt) {
-  if (prompt) process.stdout.write(prompt);
+  if (prompt) console.log(prompt);
   if (queue.length) return Promise.resolve(queue.shift());
   if (closed) return Promise.resolve(null);
   return new Promise(resolve => { waiting = resolve; });
@@ -51,12 +55,11 @@ function stop(message) {
 
 (async () => {
   if (!DRY && !isEmailConfigured()) return stop('Почта на этом сервере не настроена (нет ключей Brevo/Resend/SMTP).');
-  const to = ((await ask('Кому (почта): ')) || '').trim();
+  const to = ((await ask('1. Адрес почты пары — и Enter:')) || '').trim();
   if (!EMAIL_RE.test(to)) return stop('Это не похоже на адрес почты — ничего не отправлено.');
-  const subject = ((await ask('Тема: ')) || '').trim();
+  const subject = ((await ask('2. Тема письма — и Enter:')) || '').trim();
   if (!subject) return stop('Нужна тема письма — ничего не отправлено.');
-  const name = ((await ask('Подпись отправителя — как вас увидит пара [WeddingCraft]: ')) || '').trim() || 'WeddingCraft';
-  console.log('Текст письма: вставьте его и закончите строкой из одной точки «.»');
+  console.log('3. Текст письма — вставьте его. В конце отдельной строкой поставьте точку «.» и нажмите Enter:');
   const lines = [];
   for (;;) {
     const line = await ask('');
@@ -67,7 +70,7 @@ function stop(message) {
   if (!text) return stop('Пустое письмо — ничего не отправлено.');
 
   console.log('\n──────── Письмо ────────');
-  console.log(`От:   ${name} <${FROM}>`);
+  console.log(`От:   ${FROM_NAME} <${FROM}>`);
   console.log(`Кому: ${to}`);
   console.log(`Тема: ${subject}\n`);
   console.log(text);
@@ -77,14 +80,14 @@ function stop(message) {
     rl.close();
     return;
   }
-  const answer = ((await ask('Отправить? (да/нет): ')) || '').trim().toLowerCase();
+  const answer = ((await ask('Всё верно? Чтобы отправить, напишите «да» и нажмите Enter:')) || '').trim().toLowerCase();
   if (!['да', 'д', 'yes', 'y'].includes(answer)) {
     console.log('Не отправлено.');
     rl.close();
     return;
   }
   try {
-    await sendEmail({ to, subject, text, html: toHtml(text), from: { email: FROM, name }, replyTo: FROM, critical: true });
+    await sendEmail({ to, subject, text, html: toHtml(text), from: { email: FROM, name: FROM_NAME }, replyTo: FROM, critical: true });
     console.log(`✅ Отправлено: ${to}. Ответ придёт на ${FROM}.`);
   } catch (e) {
     console.error(`⚠️ Не отправлено: ${e.message}`);
