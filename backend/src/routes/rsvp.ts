@@ -6,7 +6,7 @@ import { plannerDenial } from '../lib/planner/access';
 import { reconcile } from '../lib/planner/roster';
 import { cleanPeople, loadPublicMenu, peopleAnswer } from '../lib/planner/public';
 import { errName } from '../lib/planner/util';
-import { isPaid, hasRsvp, hasResponseStats } from '../lib/plans';
+import { isPaid, hasRsvp, rsvpVisibleLimit } from '../lib/plans';
 import { inviteDrinkLabels } from '../lib/drinks';
 import { rateLimit } from '../middleware/rateLimit';
 import { Attendance, attendanceOf, cleanAnswers, isAttendance, parseAnswers, summarizeAnswers } from '../lib/rsvpDetails';
@@ -149,16 +149,21 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
     return res.status(403).json({ error: 'Нет доступа' });
   }
 
-  if (!hasResponseStats(invite.plan)) return res.status(403).json({ error: 'Ответы гостей доступны в «Премиум» и «Максимум»' });
+  if (!hasRsvp(invite.plan)) return res.status(403).json({ error: 'Ответы гостей доступны в «Премиум» и «Максимум»' });
 
   const rows = await prisma.guestResponse.findMany({
     where: { invitationId },
     orderBy: { createdAt: 'desc' },
     include: { reminder: { select: { phone: true, telegramChatId: true, maxUserId: true, answer: true, answeredAt: true } } },
   });
+  // Бесплатный тариф: видны первые по времени ответы — новые встают в очередь, а уже
+  // открытые не пропадают. Скрытые отдаём только числом: ни имён, ни ответов.
+  const limit = rsvpVisibleLimit(invite.plan);
+  const visible = limit === null ? rows : rows.slice(-limit);
+  const locked = limit === null ? null : { limit, total: rows.length, hidden: rows.length - visible.length };
   // Статус и ответы на вопросы — в готовом виде, кабинету не нужно разбирать JSON.
   // Напоминание — без chat id: паре нужен канал, телефон и ответ гостя.
-  const responses = rows.map(({ reminder, ...r }) => ({
+  const responses = visible.map(({ reminder, ...r }) => ({
     ...r, attendance: attendanceOf(r), answers: parseAnswers(r.answers),
     reminder: reminder ? {
       channel: reminder.telegramChatId ? 'telegram' : reminder.maxUserId ? 'max' : reminder.phone ? 'sms' : 'waiting',
@@ -191,7 +196,7 @@ router.get('/:invitationId', authMiddleware, async (req: AuthRequest, res: Respo
     }, Object.create(null) as Record<string, number>),
   };
 
-  return res.json({ responses, stats, drinkLabels: inviteDrinkLabels(invite.customData) });
+  return res.json({ responses, stats, locked, drinkLabels: inviteDrinkLabels(invite.customData) });
 });
 
 export default router;

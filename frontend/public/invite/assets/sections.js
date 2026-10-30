@@ -6,7 +6,8 @@
   var required = ['cover', 'date', 'venue', 'closing'];
   var state = {};
   var plan = '';
-  var freeLocked = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
+  // Анкета (rsvp) на бесплатном с 30.10.26 открыта: паре видно 5 ответов (lib/plans.ts)
+  var freeLocked = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'menu'];
   var style = document.createElement('style');
   style.textContent = '.wc-section-hidden{display:none!important}';
   document.head.appendChild(style);

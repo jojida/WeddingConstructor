@@ -11,7 +11,7 @@ import {
 import api from '@/lib/api';
 import { readAuthToken, readStorage, writeStorage } from '@/lib/browser-storage';
 import { canResumeDraft, readGuestDraft } from '@/lib/editor-draft';
-import { isPlanSectionLocked } from '@/lib/plans';
+import { isPlanSectionLocked, rsvpVisibleLimit } from '@/lib/plans';
 import { isSectionEnabled } from '@/lib/section-visibility';
 import { withSketchDemoPhotos } from '@/lib/sketch-demo-photos';
 import { withSketchLocation } from '@/lib/sketch-location';
@@ -401,7 +401,8 @@ function EditorContent() {
     const note = locked
       ? (section.id === 'menu' ? 'Доступен в тарифе «Максимум»'
         : section.id === 'venue' && hiddenPlace ? `Гости не видят ${quotePlace(hiddenPlace)}` : 'Доступен с тарифа «Премиум»')
-      : !enabled ? 'Убран с сайта' : section.required ? 'Обязательный блок' : '';
+      : !enabled ? 'Убран с сайта' : section.required ? 'Обязательный блок'
+        : section.id === 'rsvp' && rsvpVisibleLimit(data.plan) ? `Бесплатно в кабинете видно ${rsvpVisibleLimit(data.plan)} ответов` : '';
     return { locked, enabled, note };
   };
 

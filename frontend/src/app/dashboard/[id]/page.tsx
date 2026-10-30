@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
 import ReviewCard from '@/components/ReviewCard';
 import RemindersTab from '@/components/RemindersTab';
-import { PLAN_TITLES, hasResponseStats, isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
+import { PLAN_TITLES, hasRsvp, isAdvancedPlan, hasCustomDomain, hasNotifications, hasPlanner, SALUTATIONS, previewGreeting, inviteDrinkLabels, formatDrinkChoice, guestsWord } from '@/lib/constants';
 
 // Рассадка грузится, только когда открыта её вкладка: остальным владельцам этот код ни к чему
 const PlannerSection = dynamic(() => import('@/components/planner/PlannerSection'), {
@@ -47,6 +47,8 @@ interface RsvpData {
     maybe?: number; maybeGuests?: number; attendingChildren?: number;
     answers?: { id: string; q: string; counts: Record<string, number> }[];
   };
+  // Бесплатный тариф: видны первые limit ответов, скрытые — только числом
+  locked?: { limit: number; total: number; hidden: number } | null;
   drinkLabels: Record<string, string>;
 }
 
@@ -148,7 +150,7 @@ function ManageInviteSession() {
           ))}
         </div>
 
-        {tab === 'responses' && (hasResponseStats(invite.plan) ? <ResponsesTab inviteId={invite.id} /> : <ResponsesUpsell invite={invite} />)}
+        {tab === 'responses' && (hasRsvp(invite.plan) ? <ResponsesTab inviteId={invite.id} /> : <ResponsesUpsell invite={invite} />)}
         {tab === 'guests'    && <GuestsTab invite={invite} advanced={advanced} origin={origin} />}
         {/* Рассадка, меню и печать — один экземпляр раздела: при переключении гости не перезагружаются */}
         {(tab === 'seating' || tab === 'menu' || tab === 'print') && (hasPlanner(invite.plan)
@@ -173,6 +175,38 @@ function ResponsesUpsell({ invite }: { invite: Invite }) {
   </div>;
 }
 
+/* Бесплатный тариф: первые ответы видны, остальные сохранены и ждут оплаты.
+   Скрытые сервер отдаёт только числом — ни имён, ни ответов. */
+function FreeAnswersNote({ inviteId, locked }: { inviteId: string; locked: NonNullable<RsvpData['locked']> }) {
+  const n = locked.hidden;
+  if (n === 0) return (
+    <div style={{ fontSize: 13, color: '#7d766c', marginBottom: 12 }}>
+      Ответов: {locked.total}. На бесплатном тарифе видно первые {locked.limit} — следующие тоже сохранятся,
+      а открыть их можно на тарифе «Премиум».
+    </div>
+  );
+  const one = n % 10 === 1 && n % 100 !== 11;
+  return (
+    <div style={{ background: 'linear-gradient(135deg,#fff,#f7f1e8)', border: BORDER, borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
+      <div style={{ fontWeight: 700, color: '#0e1d26', fontSize: 16, marginBottom: 4 }}>
+        🔒 Ещё {n} {answersWord(n)} {one ? 'ждёт' : 'ждут'} вас
+      </div>
+      <div style={{ fontSize: 14, color: '#7d766c', marginBottom: 14 }}>
+        Всего гости прислали {locked.total} {answersWord(locked.total)}, на бесплатном тарифе видно первые {locked.limit}.
+        Остальные сохранены: с тарифом «Премиум» откроются все — со статистикой и уведомлениями о новых ответах.
+      </div>
+      <Link href={`/payment?id=${inviteId}`} className="btn-primary" style={{ textDecoration: 'none', padding: '10px 22px', fontSize: 14 }}>
+        Открыть все ответы →
+      </Link>
+    </div>
+  );
+}
+
+function answersWord(n: number): string {
+  const m10 = n % 10, m100 = n % 100;
+  return m10 === 1 && m100 !== 11 ? 'ответ' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'ответа' : 'ответов';
+}
+
 // ─── Вкладка «Ответы» ──────────────────────────────────────────────────────
 function ResponsesTab({ inviteId }: { inviteId: string }) {
   const [data, setData] = useState<RsvpData | null>(null);
@@ -185,11 +219,19 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
 
   if (err) return <Empty>{err}</Empty>;
   if (!data) return <Empty>Загрузка…</Empty>;
-  if (data.stats.total === 0) return <Empty>Пока нет ответов. Они появятся, когда гости заполнят анкету.</Empty>;
+  const locked = data.locked;
+  if ((locked ? locked.total : data.stats.total) === 0) return (
+    <Empty>
+      Пока нет ответов. Они появятся, когда гости заполнят анкету.
+      {locked && ` На бесплатном тарифе здесь видно первые ${locked.limit} ответов.`}
+    </Empty>
+  );
 
   const kids = data.stats.attendingChildren || 0;
   return (
     <div>
+      {/* Статистика — платная; на бесплатном вместо неё — сколько ответов ждёт оплаты */}
+      {locked ? <FreeAnswersNote inviteId={inviteId} locked={locked} /> : <>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>
         <Stat n={data.stats.total} label="Всего ответов" />
         <Stat n={data.stats.attendingGuests ?? data.stats.attending} label="Гостей придёт" color="#2e8b57"
@@ -213,6 +255,7 @@ function ResponsesTab({ inviteId }: { inviteId: string }) {
           {Object.entries(s.counts).map(([k, v]) => `${k}: ${v}`).join(' · ')}
         </div>
       ))}
+      </>}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 8 }}>
         {data.responses.map(r => {
           const st = statusOf(r);

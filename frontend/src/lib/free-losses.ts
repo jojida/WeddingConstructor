@@ -30,7 +30,6 @@ export function freeLosses(invite: InviteLike): string[] {
     items.push(venue ? `место — ${quotePlace(venue)} — и карту проезда`
       : address ? `адрес — ${quotePlace(address)} — и карту проезда` : 'место и карту проезда');
   }
-  if (on('rsvp')) items.push('анкету: кто придёт и с кем, ответы — вам в Telegram');
   const steps = Array.isArray(invite.schedule)
     ? invite.schedule.filter(s => !!s && typeof s === 'object' && String((s as { title?: unknown }).title ?? '').trim()).length
     : 0;

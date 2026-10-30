@@ -41,13 +41,18 @@ test('тарифы: состав и цены фронтенда совпадаю
   assert.deepEqual(frontend.PLANS.map(p => [p.id, p.price]), [['free', 0], ['premium', 2490], ['maximum', 3990]]);
   for (const p of frontend.PLANS) {
     assert.equal(p.price * 100, backend.PLANS[p.id].price);
-    for (const feature of ['hasRsvp', 'hasResponseStats', 'hasNotifications', 'hasMusic', 'hasCustomDomain', 'hasPlanner']) {
+    for (const feature of ['hasRsvp', 'hasResponseStats', 'rsvpVisibleLimit', 'hasNotifications', 'hasMusic', 'hasCustomDomain', 'hasPlanner']) {
       assert.equal(frontend[feature](p.id), backend[feature](p.id), `${p.id}: ${feature}`);
     }
     assert.deepEqual(frontend.planSections(p.id), backend.planSections(p.id));
     assert.equal(frontend.planPriceDue('maximum', p.id, true) * 100, backend.planPriceDue('maximum', p.id, true));
   }
-  assert.equal(backend.hasRsvp('free'), false);
+  // Анкета на бесплатном: гости отвечают, паре видно 5 ответов, статистика — платная
+  assert.equal(backend.hasRsvp('free'), true);
+  assert.equal(backend.hasResponseStats('free'), false);
+  assert.equal(backend.rsvpVisibleLimit('free'), 5);
+  assert.equal(backend.rsvpVisibleLimit('premium'), null);
+  assert.equal(backend.planSections('free').rsvp, undefined, 'анкета на бесплатном не скрывается');
   assert.equal(backend.hasPlanner('premium'), false);
   assert.equal(backend.hasPlanner('maximum'), true);
 });
@@ -85,14 +90,41 @@ test('публикация, ограничения и улучшение тар�
     const raw = await prisma.invitation.findUnique({ where: { id: inv.id } });
     assert.equal(raw.paymentId, '');
     assert.equal(JSON.parse(raw.enabledSections).venue, true, 'настройки сохранены для улучшения');
+    assert.equal(pub.enabledSections.rsvp, true, 'анкета на бесплатном видна гостям');
     for (const [route, method, body] of [
-      [`/api/rsvp/${inv.slug}`, 'POST', { guestName: 'Анна', attending: true }],
-      [`/api/rsvp/${inv.id}`, 'GET'],
       [`/api/guests/${inv.id}`, 'GET'],
       [`/api/invites/${inv.id}/telegram-connect`, 'POST', {}],
       [`/api/invites/${inv.id}/settings`, 'PATCH', { notifyChannel: 'telegram' }],
       [`/api/planner/${inv.id}`, 'GET'],
     ]) assert.equal((await call(route, method, body)).status, 403, route);
+  });
+
+  await t.test('бесплатный: анкета принимает все ответы, паре видно первые 5, после оплаты — все', async () => {
+    const free = (await call('/api/invites', 'POST', { templateId: 'calla' })).json;
+    assert.equal((await call('/api/payment/create', 'POST', { inviteId: free.id, plan: 'free' })).status, 200);
+    const { slug } = await prisma.invitation.findUnique({ where: { id: free.id } });
+    for (let i = 1; i <= 7; i++) {
+      const sent = await call(`/api/rsvp/${slug}`, 'POST', { guestName: `Гость ${i}`, attendance: i === 7 ? 'no' : 'yes' }, false);
+      assert.equal(sent.status, 200, `ответ ${i} принят`);
+      // Разное время ответа: «первые пять» — по времени, а не по порядку записи в базе
+      await prisma.guestResponse.update({ where: { id: sent.json.id }, data: { createdAt: new Date(Date.UTC(2026, 9, 1, 10, i)) } });
+    }
+    const list = await call(`/api/rsvp/${free.id}`);
+    assert.equal(list.status, 200);
+    assert.deepEqual(list.json.locked, { limit: 5, total: 7, hidden: 2 });
+    assert.deepEqual(list.json.responses.map(r => r.guestName), ['Гость 5', 'Гость 4', 'Гость 3', 'Гость 2', 'Гость 1']);
+    assert.ok(!JSON.stringify(list.json).includes('Гость 6'), 'скрытые ответы не уходят даже в ответе сервера');
+    assert.equal(list.json.stats.total, 5);
+    // Чужое приглашение по-прежнему закрыто
+    const stranger = jwt.sign({ userId: (await prisma.user.create({ data: { email: 'stranger@example.test' } })).id }, process.env.JWT_SECRET);
+    const foreign = await realFetch(`${base}/api/rsvp/${free.id}`, { headers: { Authorization: `Bearer ${stranger}` } });
+    assert.equal(foreign.status, 403);
+    // После оплаты открываются все ответы, ограничения нет
+    await prisma.invitation.update({ where: { id: free.id }, data: { plan: 'premium' } });
+    const all = (await call(`/api/rsvp/${free.id}`)).json;
+    assert.equal(all.locked, null);
+    assert.equal(all.responses.length, 7);
+    assert.equal(all.stats.notAttending, 1);
   });
 
   await t.test('Премиум собирает ответы, Максимум открывает планировщик обычному клиенту', async () => {

@@ -5,12 +5,12 @@ export type Plan = 'free' | 'premium' | 'maximum';
 export const PLANS = [
   {
     id: 'free', name: 'Бесплатный', price: 0, period: 'бесплатно, без срока действия',
-    features: ['Любой шаблон приглашения', 'Имена, дата, тексты и фото', 'Музыкальный фон', 'Ссылка для гостей и подключение домена', 'Правки в любой момент', 'Подпись WeddingCraft внизу сайта'],
+    features: ['Любой шаблон приглашения', 'Имена, дата, тексты и фото', 'Музыкальный фон', 'Анкета для гостей — в кабинете видно 5 ответов', 'Ссылка для гостей и подключение домена', 'Правки в любой момент', 'Подпись WeddingCraft внизу сайта'],
     color: '#9a948a', popular: false, badge: '',
   },
   {
     id: 'premium', name: 'Премиум', price: 2490, period: 'разовая оплата за один сайт',
-    features: ['Всё из бесплатного тарифа', 'Анимация открытия', 'Анкета для гостей', 'Место и карта проезда', 'Программа дня и дресс-код', 'Статистика ответов', 'Кабинет в Telegram и уведомления на почту', 'Список гостей и персональные ссылки'],
+    features: ['Всё из бесплатного тарифа', 'Анимация открытия', 'Все ответы анкеты, без ограничений', 'Место и карта проезда', 'Программа дня и дресс-код', 'Статистика ответов', 'Кабинет в Telegram и уведомления на почту', 'Список гостей и персональные ссылки'],
     color: '#c9a96e', popular: true, badge: 'Популярный',
   },
   {
@@ -40,8 +40,16 @@ export const PLAN_TITLES: Record<string, string> = {
 };
 
 const full = (plan?: string | null) => plan === 'premium' || plan === 'maximum' || plan === 'pro';
-export const hasRsvp = (plan?: string | null): boolean => full(plan) || plan === 'lite' || plan === 'basic' || plan === 'standard';
-export const hasResponseStats = hasRsvp;
+const legacyRsvp = (plan?: string | null) => plan === 'lite' || plan === 'basic' || plan === 'standard';
+/** С 30.10.26 анкета есть и на бесплатном тарифе: гости отвечают как обычно, а паре в кабинете
+    видны первые FREE_RSVP_LIMIT ответов. Остальные сохраняются и открываются после оплаты. */
+export const FREE_RSVP_LIMIT = 5;
+/** Гости могут отвечать на анкету. */
+export const hasRsvp = (plan?: string | null): boolean => plan === 'free' || full(plan) || legacyRsvp(plan);
+/** Все ответы без ограничения и статистика по ним. */
+export const hasResponseStats = (plan?: string | null): boolean => full(plan) || legacyRsvp(plan);
+/** Сколько ответов видно паре; null — все. */
+export const rsvpVisibleLimit = (plan?: string | null): number | null => hasResponseStats(plan) ? null : FREE_RSVP_LIMIT;
 export const hasNotifications = (plan?: string | null): boolean => full(plan) || plan === 'basic' || plan === 'standard';
 export const hasMusic = (plan?: string | null): boolean => plan === 'free' || hasNotifications(plan);
 export const isAdvancedPlan = (plan?: string | null): boolean => full(plan);
@@ -54,7 +62,7 @@ export const hasGuestReminders = (plan?: string | null): boolean => plan === 'ma
 export const hasIntro = (plan?: string | null): boolean => plan !== 'free';
 
 /** envelope — анимация открытия (конверт, двери, видео-заставка): только платным тарифам. */
-export const FREE_LOCKED_SECTIONS = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
+export const FREE_LOCKED_SECTIONS = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'menu'];
 export const isPlanSectionLocked = (plan: string | null | undefined, id?: string): boolean =>
   !!id && ((plan === 'free' && FREE_LOCKED_SECTIONS.includes(id)) || (plan === 'premium' && id === 'menu'));
 

@@ -37,7 +37,8 @@ test('на бесплатном тарифе — что гости не увид
   const losses = freeLosses(invite);
   assert.equal(losses[0], 'место — «Белый сад» — и карту проезда');
   assert.ok(losses.includes('программу дня (2 пункта)'), JSON.stringify(losses));
-  assert.ok(losses.some(item => item.startsWith('анкету')), JSON.stringify(losses));
+  // Анкету гости бесплатного сайта видят с 30.10.26 — в списке её нет
+  assert.ok(!losses.some(item => item.startsWith('анкету')), JSON.stringify(losses));
   // Пример из шаблона за место пары не выдаём; выключенный парой блок не упоминаем
   const sample = freeLosses({ ...invite, venue: 'Усадьба Кусково', venueAddress: 'Москва, ул. Юности, 2', enabledSections: { rsvp: false, schedule: false } });
   assert.equal(sample[0], 'место и карту проезда');

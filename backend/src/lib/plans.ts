@@ -6,8 +6,16 @@ export const PLANS = {
   maximum: { price: 399000, label: 'Максимум', rank: 2 },
 };
 const full = (plan?: string | null) => plan === 'premium' || plan === 'maximum' || plan === 'pro';
-export const hasRsvp = (plan?: string | null): boolean => full(plan) || plan === 'lite' || plan === 'basic' || plan === 'standard';
-export const hasResponseStats = hasRsvp;
+const legacyRsvp = (plan?: string | null) => plan === 'lite' || plan === 'basic' || plan === 'standard';
+/** С 30.10.26 анкета есть и на бесплатном тарифе: гости отвечают как обычно, а паре в кабинете
+    видны первые FREE_RSVP_LIMIT ответов. Остальные сохраняются и открываются после оплаты. */
+export const FREE_RSVP_LIMIT = 5;
+/** Гости могут отвечать на анкету. */
+export const hasRsvp = (plan?: string | null): boolean => plan === 'free' || full(plan) || legacyRsvp(plan);
+/** Все ответы без ограничения и статистика по ним. */
+export const hasResponseStats = (plan?: string | null): boolean => full(plan) || legacyRsvp(plan);
+/** Сколько ответов видно паре; null — все. */
+export const rsvpVisibleLimit = (plan?: string | null): number | null => hasResponseStats(plan) ? null : FREE_RSVP_LIMIT;
 export const hasNotifications = (plan?: string | null): boolean => full(plan) || plan === 'basic' || plan === 'standard';
 export const hasMusic = (plan?: string | null): boolean => plan === 'free' || hasNotifications(plan);
 export const isAdvanced = (plan?: string | null): boolean => full(plan);
@@ -16,7 +24,7 @@ export const hasPlanner = (plan?: string | null): boolean => plan === 'maximum' 
 /** Напоминание гостям перед свадьбой (Telegram, SMS) — только «Максимум». */
 export const hasGuestReminders = (plan?: string | null): boolean => plan === 'maximum' || plan === 'pro';
 
-export const FREE_LOCKED_SECTIONS = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'rsvp', 'menu'];
+export const FREE_LOCKED_SECTIONS = ['envelope', 'venue', 'hall', 'map', 'schedule', 'dresscode', 'style', 'menu'];
 export function planSections(plan?: string | null, enabledSections: Record<string, boolean> = {}) {
   return plan === 'free'
     ? { ...enabledSections, ...Object.fromEntries(FREE_LOCKED_SECTIONS.map(id => [id, false])) }

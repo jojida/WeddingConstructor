@@ -7,7 +7,7 @@ import api from '@/lib/api';
 import { writeStorage } from '@/lib/browser-storage';
 import { useAuthStore } from '@/store/auth';
 import Navbar from '@/components/Navbar';
-import { TEMPLATES, guestsWord, hasResponseStats } from '@/lib/constants';
+import { TEMPLATES, guestsWord, hasRsvp } from '@/lib/constants';
 import styles from './page.module.css';
 
 interface Invite {
@@ -37,7 +37,11 @@ function coverUrl(invite: Invite): string {
 }
 
 // attendingGuests — людей (анкета спрашивает «Сколько вас будет?»), attending — ответов
-interface RsvpStats { total: number; attending: number; notAttending: number; attendingGuests?: number; maybe?: number; maybeGuests?: number }
+interface RsvpStats {
+  total: number; attending: number; notAttending: number; attendingGuests?: number; maybe?: number; maybeGuests?: number;
+  // Бесплатный тариф: сколько всего ответов и сколько из них скрыто до оплаты
+  locked?: { limit: number; total: number; hidden: number } | null;
+}
 
 const isPublished = (i: Invite) => i.status === 'paid' || i.status === 'published';
 
@@ -76,9 +80,9 @@ function DashboardSession() {
   // «Управление». Ответы бывают только у опубликованных сайтов.
   const [rsvp, setRsvp] = useState<Record<string, RsvpStats>>({});
   useEffect(() => {
-    invites.filter(inv => isPublished(inv) && hasResponseStats(inv.plan)).forEach(inv => {
+    invites.filter(inv => isPublished(inv) && hasRsvp(inv.plan)).forEach(inv => {
       api.get(`/api/rsvp/${inv.id}`)
-        .then(res => setRsvp(prev => ({ ...prev, [inv.id]: res.data.stats })))
+        .then(res => setRsvp(prev => ({ ...prev, [inv.id]: { ...res.data.stats, locked: res.data.locked } })))
         .catch(() => {});
     });
   }, [invites]);
@@ -255,6 +259,12 @@ function RsvpSummary({ id, stats }: { id: string; stats?: RsvpStats }) {
     <Link href={`/dashboard/${id}`} className={styles.rsvpRow} title="Ответы гостей">
       {!stats ? (
         <span className={styles.rsvpMuted}>Ответы гостей…</span>
+      ) : stats.locked ? (
+        // Бесплатный тариф: статистики нет — только сколько ответили и сколько ждёт оплаты
+        stats.locked.total === 0 ? <span className={styles.rsvpMuted}>Гости ещё не ответили</span> : <>
+          <span className={styles.rsvpYes}>Ответили: <b>{stats.locked.total}</b></span>
+          {stats.locked.hidden > 0 && <span className={styles.rsvpMuted}>🔒 Скрыто до оплаты: <b>{stats.locked.hidden}</b></span>}
+        </>
       ) : stats.total === 0 ? (
         <span className={styles.rsvpMuted}>Гости ещё не ответили</span>
       ) : (
