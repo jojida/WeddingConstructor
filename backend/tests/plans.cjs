@@ -119,6 +119,20 @@ test('публикация, ограничения и улучшение тар�
     const stranger = jwt.sign({ userId: (await prisma.user.create({ data: { email: 'stranger@example.test' } })).id }, process.env.JWT_SECRET);
     const foreign = await realFetch(`${base}/api/rsvp/${free.id}`, { headers: { Authorization: `Bearer ${stranger}` } });
     assert.equal(foreign.status, 403);
+    // Письмо паре: часть ответов скрыта — один раз, со ссылкой на оплату и на кабинет
+    const { runLifecycleEmails, letterFor, render } = require('../dist/lib/lifecycleEmails');
+    const kinds = async () => (await prisma.emailEvent.findMany({ where: { invitationId: free.id } })).map(e => e.kind).sort();
+    await runLifecycleEmails(Date.now());   // первый проход только замечает бесплатный сайт
+    await runLifecycleEmails(Date.now());
+    assert.deepEqual(await kinds(), ['free_hidden', 'mark:free_seen']);
+    await runLifecycleEmails(Date.now() + 2 * 86_400_000);
+    assert.deepEqual(await kinds(), ['free_hidden', 'mark:free_seen'], 'повторно не шлём, и письмо про анкету через день — тоже');
+    const letter = letterFor('free_hidden', { ...free, slug, groomName: '', brideName: '', venue: '', venueAddress: '', rsvp: { total: 7, hidden: 2 } });
+    assert.equal(letter.title, 'Ещё 2 ответа ждут вас');
+    assert.match(letter.paragraphs[0], /прислали 7 ответов/);
+    assert.match(letter.url, new RegExp(`/payment\\?id=${free.id}&plan=premium&.*utm_campaign=free_hidden`));
+    assert.match(letter.secondary.url, new RegExp(`/dashboard/${free.id}\\?utm_source=email`));
+    assert.ok(!render(letter, free.userId).text.includes('Гость 6'), 'в письме нет имён гостей');
     // После оплаты открываются все ответы, ограничения нет
     await prisma.invitation.update({ where: { id: free.id }, data: { plan: 'premium' } });
     const all = (await call(`/api/rsvp/${free.id}`)).json;

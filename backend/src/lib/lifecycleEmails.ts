@@ -6,6 +6,8 @@
 // Письма:
 //   draft_24h  — черновик не опубликован сутки (и других опубликованных нет);
 //   free_1d    — через день после бесплатной публикации: все ответы анкеты и ответы в Telegram;
+//   free_hidden — гости прислали больше ответов, чем видно на бесплатном (5): сколько
+//                ждёт и как открыть все. Сразу, как это случилось, один раз на сайт;
 //   free_4d    — через 4 дня: своё место пары, которое гости не видят (если
 //                указано; пример шаблона не считается), иначе карта, программа, дресс-код;
 //   date_90    — до свадьбы ~3 месяца: пора рассылать (любой опубликованный сайт);
@@ -24,6 +26,7 @@ import { isEmailConfigured, sendEmail } from './email';
 import { escapeHtml, jwtSecret } from './security';
 import { isFreeAccount } from './freeAccounts';
 import { ownPlace, quotePlace } from './templatePlaces';
+import { FREE_RSVP_LIMIT } from './plans';
 
 const HOUR = 3600_000;
 const DAY = 24 * HOUR;
@@ -33,7 +36,7 @@ const API = (process.env.BACKEND_URL || 'https://api.weddingcraft.ru').replace(/
 const YANDEX_REVIEWS = 'https://yandex.ru/profile/162112565078';
 const MAX_PER_RUN = 60;
 
-type Kind = 'draft_24h' | 'free_1d' | 'free_4d' | 'date_90' | 'date_60' | 'after_wedding';
+type Kind = 'draft_24h' | 'free_1d' | 'free_hidden' | 'free_4d' | 'date_90' | 'date_60' | 'after_wedding';
 
 // ─── Отписка ────────────────────────────────────────────────────────────
 export function unsubscribeToken(userId: string): string {
@@ -82,9 +85,15 @@ ${letter.secondary ? `<p style="margin:14px 0 0;font-size:14px;line-height:1.6">
 interface InviteRow {
   id: string; userId: string; slug: string; plan: string; groomName: string; brideName: string;
   venue: string; venueAddress: string;
+  /** Ответы анкеты: всего и сколько скрыто на бесплатном (только для free_hidden) */
+  rsvp?: { total: number; hidden: number };
 }
 
 const couple = (i: InviteRow) => [i.groomName, i.brideName].filter(Boolean).join(' и ');
+const answersWord = (n: number) => {
+  const m10 = n % 10, m100 = n % 100;
+  return m10 === 1 && m100 !== 11 ? 'ответ' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'ответа' : 'ответов';
+};
 const editorUrl = (i: InviteRow) => `${SITE}/editor?id=${encodeURIComponent(i.id)}&utm_source=email&utm_medium=lifecycle`;
 // utm_content отличает вариант письма (например, личный — с местом пары)
 const upgradeUrl = (i: InviteRow, kind: Kind, content?: string) =>
@@ -116,6 +125,26 @@ export function letterFor(kind: Kind, i: InviteRow): Letter {
         ],
         cta: 'Открыть все ответы', url: upgradeUrl(i, kind),
       };
+    case 'free_hidden': {
+      const total = i.rsvp?.total ?? 0;
+      const hidden = i.rsvp?.hidden ?? 0;
+      const one = hidden % 10 === 1 && hidden % 100 !== 11;
+      return {
+        subject: 'Гости отвечают на ваше приглашение',
+        title: `Ещё ${hidden} ${answersWord(hidden)} ${one ? 'ждёт' : 'ждут'} вас`,
+        paragraphs: [
+          `Гости прислали ${total} ${answersWord(total)} на анкету в вашем приглашении. На бесплатном тарифе в кабинете ` +
+            `видно первые ${FREE_RSVP_LIMIT}, остальные сохранены.`,
+          'С тарифом «Премиум» откроются все ответы и статистика, а каждый новый ответ сразу придёт вам в Telegram или на почту. ' +
+            '2 490 ₽ разово, без подписки, ссылка для гостей не изменится.',
+        ],
+        cta: 'Открыть все ответы', url: upgradeUrl(i, kind),
+        secondary: {
+          label: `Посмотреть первые ${FREE_RSVP_LIMIT} ответов в кабинете`,
+          url: `${SITE}/dashboard/${encodeURIComponent(i.id)}?utm_source=email&utm_medium=lifecycle&utm_campaign=${kind}`,
+        },
+      };
+    }
     case 'free_4d': {
       // Пара указала своё место, а на бесплатном тарифе гости его не видят —
       // называем их место: это личнее и честнее общего «добавьте карту».
@@ -259,9 +288,18 @@ export async function runLifecycleEmails(now = Date.now()): Promise<void> {
       await prisma.emailEvent.create({ data: { userId: f.userId, invitationId: f.id, kind: 'mark:free_seen' } }).catch(() => {});
       continue;
     }
+    // Гости ответили больше, чем видно на бесплатном, — это письмо важнее остальных:
+    // в этот проход других писем сайту не шлём
+    const answers = await prisma.guestResponse.count({ where: { invitationId: f.id } });
+    const hiddenSent = await already(f.id, 'free_hidden');
+    if (answers > FREE_RSVP_LIMIT && !hiddenSent) {
+      await deliver('free_hidden', { ...f, rsvp: { total: answers, hidden: answers - FREE_RSVP_LIMIT } }, f.user, now);
+      continue;
+    }
     const age = now - mark.sentAt.getTime();
     if (age >= 4 * DAY && age < 10 * DAY) await deliver('free_4d', f, f.user, now);
-    else if (age >= DAY && age < 6 * DAY) await deliver('free_1d', f, f.user, now);
+    // free_1d — про ту же анкету: после free_hidden он лишний
+    else if (age >= DAY && age < 6 * DAY && !hiddenSent) await deliver('free_1d', f, f.user, now);
   }
 
   // 3. По дате свадьбы — у опубликованных сайтов.
