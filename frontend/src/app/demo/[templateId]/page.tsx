@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import DemoPreview from './DemoPreview';
-import { TEMPLATES, TEMPLATE_DEFAULTS, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint, templateMusic } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_DEFAULTS, TEMPLATE_FIELDS, SITE_URL, sampleWeddingDate, templateSampleDate, templateCustomDefaults, demoMapPoint, templateMusic } from '@/lib/constants';
 import { PLANS } from '@/lib/plans';
+import { TEMPLATE_TEXTS } from '@/lib/template-texts';
 import DemoActions from './DemoActions';
 import ChooseTemplateLink from './ChooseTemplateLink';
 
@@ -71,6 +72,18 @@ function similarTemplates(template: Tpl, count = 4): Tpl[] {
    приглашение живёт внутри iframe, а его содержимое странице не засчитывается. */
 function DemoAbout({ template }: { template: Tpl }) {
   const phrase = STYLE_PHRASE[template.id];
+  const text = TEMPLATE_TEXTS[template.id];
+  // Разделы — из той же схемы, что и панель редактора: список всегда совпадает с шаблоном
+  const sections = [...new Set((TEMPLATE_FIELDS[template.id] ?? []).map(s => s.title.replace(/\s*\(.*\)$/, '')))];
+  const crumbs = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Главная', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Шаблоны', item: `${SITE_URL}/templates` },
+      { '@type': 'ListItem', position: 3, name: `Шаблон «${template.name}»`, item: `${SITE_URL}/demo/${template.id}` },
+    ],
+  };
   const paid = PLANS.filter(p => p.price > 0).map(p => p.price);
   const minPrice = paid.length ? Math.min(...paid) : 0;
   const p: React.CSSProperties = { fontSize: 16, lineHeight: 1.7, color: '#5b554c', margin: '0 0 14px' };
@@ -80,6 +93,7 @@ function DemoAbout({ template }: { template: Tpl }) {
 
   return (
     <section style={{ width: '100%', background: '#faf8f4', padding: '56px 16px 140px', fontFamily: 'var(--font-inter), Inter, sans-serif' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs).replace(/</g, '\\u003c') }} />
       <div style={{ maxWidth: 760, margin: '0 auto' }}>
         <h1 style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 400, fontSize: 'clamp(26px, 5vw, 36px)', lineHeight: 1.2, color: '#0e1d26', margin: '0 0 10px' }}>
           Шаблон свадебного приглашения «{template.name}»
@@ -90,6 +104,32 @@ function DemoAbout({ template }: { template: Tpl }) {
         </div>
         <p style={p}>{template.description}</p>
 
+        {text && (
+          <>
+            <h2 style={h2}>Как открывается и как выглядит</h2>
+            <p style={p}>{text.opening}</p>
+            {text.paidIntro && (
+              <p style={{ ...p, fontSize: 14, color: '#8a8378' }}>
+                Анимация открытия входит в платные тарифы — на бесплатном гость сразу видит обложку.
+              </p>
+            )}
+            <p style={p}>{text.look}</p>
+
+            <h2 style={h2}>Какой свадьбе подойдёт</h2>
+            <p style={p}>{text.fits}</p>
+          </>
+        )}
+
+        {sections.length > 0 && (
+          <>
+            <h2 style={h2}>Что есть в приглашении</h2>
+            {/* Общий сброс стилей убирает маркеры списков — задаём явно */}
+            <ul style={{ ...p, listStyle: 'disc', paddingLeft: 20, columns: '2 200px', columnGap: 32 }}>
+              {sections.map(title => <li key={title}>{title}</li>)}
+            </ul>
+          </>
+        )}
+
         <h2 style={h2}>Что можно настроить</h2>
         <p style={p}>
           Замените имена, дату, тексты, фото и музыку. Лишние разделы можно скрыть.
@@ -97,6 +137,10 @@ function DemoAbout({ template }: { template: Tpl }) {
         <p style={p}>
           Редактор без регистрации, публикация от 0 ₽.
           {minPrice > 0 && <> Платные тарифы — от {minPrice.toLocaleString('ru-RU')} ₽, без подписки.</>}
+        </p>
+        <p style={p}>
+          Готовые тексты для приглашения — в статье{' '}
+          <Link href="/blog/tekst-priglasheniya-na-svadbu" style={{ color: '#685d4a' }}>«Текст приглашения на свадьбу: 50 примеров»</Link>.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '24px 0 8px' }}>
