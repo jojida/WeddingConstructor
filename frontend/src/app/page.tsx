@@ -676,6 +676,8 @@ function JsonLd() {
         '@type': 'Organization',
         '@id': `${SITE_URL}/#organization`,
         name: 'WeddingCraft',
+        // Русское написание: по «веддингкрафт» поисковики нас с сайтом не связывали (29.10.26)
+        alternateName: ['ВеддингКрафт', 'Веддинг Крафт', 'Wedding Craft'],
         url: SITE_URL,
         logo: `${SITE_URL}/brand/avatar.png`,
         email: LEGAL.contactEmail,
@@ -685,6 +687,7 @@ function JsonLd() {
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
         name: 'WeddingCraft — электронные свадебные приглашения',
+        alternateName: ['WeddingCraft', 'ВеддингКрафт'],
         url: SITE_URL,
         publisher: { '@id': `${SITE_URL}/#organization` },
         inLanguage: 'ru-RU',
