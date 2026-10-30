@@ -120,7 +120,7 @@ export default function TemplatesPage() {
         </p>
         <p>
           Не знаете, что написать? Возьмите готовый вариант из статьи{' '}
-          <Link href="/blog/tekst-priglasheniya-na-svadbu">«Текст приглашения на свадьбу: 30 примеров»</Link>.
+          <Link href="/blog/tekst-priglasheniya-na-svadbu">«Текст приглашения на свадьбу: 50 примеров»</Link>.
         </p>
       </section>
 
