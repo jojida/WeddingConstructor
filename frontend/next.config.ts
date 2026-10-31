@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
       // Content-hashed font files can be reused across pages and invitations.
       source: '/invite/assets/fonts/google/:asset([a-f0-9]{20}\\.(?:css|woff2|ttf))',
       headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+    }, {
+      /* HTML шаблонов (/invite/index.html, /invite/<id>/index.html) — не отдельные страницы
+         в поиске: это дубли демо с примерными именами. indexifembedded (Google) оставляет их
+         содержимое в индексе там, где шаблон встроен, — на /demo/<id>. Картинки, шрифты
+         и сайты пар (корневые /<slug>, старые /invite/<slug>) правило не задевает. */
+      source: '/:page(invite/.+\\.html)',
+      headers: [{ key: 'X-Robots-Tag', value: 'noindex, indexifembedded' }],
     }];
   },
   /* www.weddingcraft.ru открывал сайт как отдельный адрес, и поисковики индексировали
