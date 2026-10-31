@@ -382,8 +382,18 @@ function Footer() {
               <li><Link href="/print" className={styles.footerLink}>Печатные приглашения · 290 ₽</Link></li>
               <li><a href="#rsvp" className={styles.footerLink}>Управление</a></li>
               <li><Link href="/rassadka-gostey-na-svadbu" className={styles.footerLink}>Рассадка гостей</Link></li>
+            </ul>
+          </div>
+          {/* Ссылки на статьи с главной — поисковики считают такие страницы важнее
+              (две статьи до 31.10.26 были «просканированы, но не проиндексированы») */}
+          <div>
+            <h5 className={styles.footerHeading}>Статьи</h5>
+            <ul className={styles.footerLinks}>
+              <li><Link href="/blog/kak-sdelat-elektronnoe-priglashenie-na-svadbu" className={styles.footerLink}>Как сделать электронное приглашение</Link></li>
               <li><Link href="/blog/tekst-priglasheniya-na-svadbu" className={styles.footerLink}>Тексты приглашений</Link></li>
-              <li><Link href="/blog" className={styles.footerLink}>Статьи</Link></li>
+              <li><Link href="/blog/anketa-dlya-gostey-na-svadbu" className={styles.footerLink}>Анкета для гостей</Link></li>
+              <li><Link href="/blog/priglashenie-na-venchanie" className={styles.footerLink}>Приглашение на венчание</Link></li>
+              <li><Link href="/blog" className={styles.footerLink}>Все статьи</Link></li>
             </ul>
           </div>
           <div>

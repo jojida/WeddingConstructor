@@ -117,6 +117,10 @@ function DemoAbout({ template }: { template: Tpl }) {
 
             <h2 style={h2}>Какой свадьбе подойдёт</h2>
             <p style={p}>{text.fits}</p>
+
+            <h2 style={h2}>Какие фото и цвета подойдут</h2>
+            <p style={p}>{text.photos}</p>
+            <p style={p}>{text.palette}</p>
           </>
         )}
 
@@ -130,17 +134,10 @@ function DemoAbout({ template }: { template: Tpl }) {
           </>
         )}
 
-        <h2 style={h2}>Что можно настроить</h2>
-        <p style={p}>
-          Замените имена, дату, тексты, фото и музыку. Лишние разделы можно скрыть.
-        </p>
-        <p style={p}>
-          Редактор без регистрации, публикация от 0 ₽.
-          {minPrice > 0 && <> Платные тарифы — от {minPrice.toLocaleString('ru-RU')} ₽, без подписки.</>}
-        </p>
-        <p style={p}>
-          Готовые тексты для приглашения — в статье{' '}
-          <Link href="/blog/tekst-priglasheniya-na-svadbu" style={{ color: '#685d4a' }}>«Текст приглашения на свадьбу: 50 примеров»</Link>.
+        {/* Общее для всех демо — одной строкой: страницы различаются текстом выше */}
+        <p style={{ ...p, marginTop: 28 }}>
+          Имена, дату, тексты, фото и музыку меняете в редакторе без регистрации, лишние разделы скрываются.
+          Публикация от 0 ₽{minPrice > 0 && <>, платные тарифы — от {minPrice.toLocaleString('ru-RU')} ₽ без подписки</>}.
         </p>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, margin: '24px 0 8px' }}>
@@ -151,6 +148,13 @@ function DemoAbout({ template }: { template: Tpl }) {
             Все шаблоны
           </Link>
         </div>
+
+        <h2 style={h2}>Полезно перед рассылкой</h2>
+        <ul style={{ ...p, listStyle: 'disc', paddingLeft: 20 }}>
+          <li><Link href="/blog/kak-sdelat-elektronnoe-priglashenie-na-svadbu" style={{ color: '#685d4a' }}>Как сделать электронное приглашение на свадьбу: пошаговая инструкция</Link></li>
+          <li><Link href="/blog/tekst-priglasheniya-na-svadbu" style={{ color: '#685d4a' }}>Текст приглашения на свадьбу: 50 примеров</Link></li>
+          {text?.article && <li><Link href={text.article.href} style={{ color: '#685d4a' }}>{text.article.title}</Link></li>}
+        </ul>
 
         <h2 style={h2}>Похожие шаблоны</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
