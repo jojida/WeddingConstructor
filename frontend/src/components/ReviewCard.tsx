@@ -9,7 +9,9 @@ import styles from './ReviewCard.module.css';
 /* «Как вам WeddingCraft?» — внизу кабинета опубликованного сайта. Сюда же ведёт письмо после
    свадьбы (?review=1). На главную отзыв попадает, только если пара разрешила и мы его проверили
    (backend/src/lib/reviews.ts); оценки 1–3 не публикуются — их читаем, чтобы исправить.
-   Ссылка на отзыв в Яндексе — при любой оценке: звать туда только довольных нечестно. */
+   Ссылка на отзыв в Яндексе — при любой оценке: звать туда только довольных нечестно.
+   link — та же карточка на странице /review по ссылке из письма со звёздами: без входа,
+   по подписи в ссылке; rating — звезда, на которую нажали в письме. */
 
 interface OwnReview { rating: number; text: string; names: string; publish: boolean; status: 'pending' | 'published' | 'hidden' }
 interface ReviewState { review: OwnReview | null; canReview: boolean; names: string }
@@ -39,8 +41,18 @@ function Stars({ value, onChange }: { value: number; onChange?: (n: number) => v
   );
 }
 
-export default function ReviewCard({ inviteId }: { inviteId: string }) {
+export default function ReviewCard({ inviteId, link, fallback }: {
+  inviteId: string;
+  link?: { token: string; rating?: number };
+  /** Что показать, если отзыв по этой ссылке оставить нельзя */
+  fallback?: React.ReactNode;
+}) {
+  const endpoint = link
+    ? `/api/reviews/link/${encodeURIComponent(inviteId)}?t=${encodeURIComponent(link.token)}`
+    : `/api/reviews/invite/${inviteId}`;
+  const preset = link?.rating;
   const [state, setState] = useState<ReviewState | null>(null);
+  const [failed, setFailed] = useState(false);
   const [editing, setEditing] = useState(false);
   const [rating, setRating] = useState(0);
   const [text, setText] = useState('');
@@ -51,19 +63,19 @@ export default function ReviewCard({ inviteId }: { inviteId: string }) {
 
   useEffect(() => {
     let live = true;
-    api.get<ReviewState>(`/api/reviews/invite/${inviteId}`)
+    api.get<ReviewState>(endpoint)
       .then((res) => {
         if (!live) return;
         const r = res.data.review;
         setState(res.data);
-        setRating(r?.rating ?? 0);
+        setRating(r?.rating ?? preset ?? 0);
         setText(r?.text ?? '');
         setNames(r?.names ?? res.data.names ?? '');
         setPublish(r?.publish ?? false);
       })
-      .catch(() => { /* карточка просто не покажется */ });
+      .catch(() => { if (live) setFailed(true); /* в кабинете карточка просто не покажется */ });
     return () => { live = false; };
-  }, [inviteId]);
+  }, [endpoint, preset]);
 
   // Ссылка из письма после свадьбы: прокрутить к карточке
   useEffect(() => {
@@ -71,14 +83,15 @@ export default function ReviewCard({ inviteId }: { inviteId: string }) {
     rootRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [state]);
 
-  if (!state?.canReview) return null;
+  if (failed || (state && !state.canReview)) return <>{fallback ?? null}</>;
+  if (!state) return null;
   const saved = state.review;
   const good = rating >= GOOD;
 
   const submit = async () => {
     setBusy(true);
     try {
-      const res = await api.put<{ review: OwnReview }>(`/api/reviews/invite/${inviteId}`, { rating, text, names, publish: good && publish });
+      const res = await api.put<{ review: OwnReview }>(endpoint, { rating, text, names, publish: good && publish });
       setState({ ...state, review: res.data.review });
       setEditing(false);
       toast.success('Спасибо за отзыв!');

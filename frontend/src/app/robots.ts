@@ -14,6 +14,7 @@ export default function robots(): MetadataRoute.Robots {
         '/editor',
         '/auth',
         '/payment',
+        '/review',
         '/print/editor',
         '/print/orders',
         '/by-domain/',

@@ -14,6 +14,9 @@
 //   date_60    — до свадьбы ~2 месяца, бесплатный тариф: успеть собрать ответы.
 //   after_wedding — через 2–10 дней после свадьбы, если пара ещё не оставила отзыв:
 //                попросить отзыв (без скидок и бонусов — просто вопрос).
+//   review_ask — через неделю после публикации, если отзыва нет и after_wedding не было:
+//                звёзды прямо в письме, оценка по ссылке без входа (/review). Пары,
+//                оплатившие до 01.11.26, владелец спросил лично — им не шлём.
 //
 // Бесплатная публикация не хранит дату, поэтому отсчёт free_* ведётся от
 // служебной отметки «mark:free_seen» — её ставит первый проход, увидевший сайт.
@@ -27,6 +30,7 @@ import { escapeHtml, jwtSecret } from './security';
 import { isFreeAccount } from './freeAccounts';
 import { ownPlace, quotePlace } from './templatePlaces';
 import { FREE_RSVP_LIMIT } from './plans';
+import { reviewLinkToken } from './reviews';
 
 const HOUR = 3600_000;
 const DAY = 24 * HOUR;
@@ -35,8 +39,10 @@ const API = (process.env.BACKEND_URL || 'https://api.weddingcraft.ru').replace(/
 // Карточка «онлайн-компании» в Яндекс Бизнесе — отзывы пар (та же ссылка в frontend/src/lib/constants.ts)
 const YANDEX_REVIEWS = 'https://yandex.ru/profile/162112565078';
 const MAX_PER_RUN = 60;
+// Оплатившим раньше владелец написал лично (30–31.10.26) — автоматическая просьба об отзыве им не нужна
+const REVIEW_ASK_PAID_SINCE = new Date('2026-11-01T00:00:00+03:00');
 
-type Kind = 'draft_24h' | 'free_1d' | 'free_hidden' | 'free_4d' | 'date_90' | 'date_60' | 'after_wedding';
+type Kind = 'draft_24h' | 'free_1d' | 'free_hidden' | 'free_4d' | 'date_90' | 'date_60' | 'after_wedding' | 'review_ask';
 
 // ─── Отписка ────────────────────────────────────────────────────────────
 export function unsubscribeToken(userId: string): string {
@@ -55,6 +61,8 @@ interface Letter {
   subject: string; title: string; paragraphs: string[]; cta: string; url: string;
   /** Вторая ссылка — текстом под кнопкой */
   secondary?: { label: string; url: string };
+  /** Ряд звёзд над кнопкой: ссылки на оценку 1…5 (только в HTML — в тексте есть кнопка) */
+  stars?: string[];
 }
 
 export function render(letter: Letter, userId: string): { text: string; html: string } {
@@ -73,7 +81,9 @@ export function render(letter: Letter, userId: string): { text: string; html: st
 <div style="font-family:Georgia,'Times New Roman',serif;font-size:20px;color:#2b2925;margin-bottom:22px">WeddingCraft</div>
 <h1 style="font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:24px;line-height:1.3;color:#2b2925;margin:0 0 16px">${escapeHtml(letter.title)}</h1>
 ${letter.paragraphs.map(p => `<p style="font-size:15px;line-height:1.65;margin:0 0 14px">${escapeHtml(p)}</p>`).join('\n')}
-<p style="margin:24px 0 6px"><a href="${escapeHtml(letter.url)}" style="display:inline-block;background:#364350;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 26px;border-radius:999px">${escapeHtml(letter.cta)}</a></p>
+${letter.stars ? `<p style="margin:18px 0 2px;font-size:36px;line-height:1;letter-spacing:4px">${letter.stars.map((url, n) =>
+    `<a href="${escapeHtml(url)}" title="${n + 1} из 5" style="color:#d4a43a;text-decoration:none">★</a>`).join('')}</p>
+<p style="margin:0 0 6px;font-size:12px;color:#9a9285">Нажмите на звезду: 1 — плохо, 5 — отлично</p>\n` : ''}<p style="margin:24px 0 6px"><a href="${escapeHtml(letter.url)}" style="display:inline-block;background:#364350;color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;padding:13px 26px;border-radius:999px">${escapeHtml(letter.cta)}</a></p>
 ${letter.secondary ? `<p style="margin:14px 0 0;font-size:14px;line-height:1.6"><a href="${escapeHtml(letter.secondary.url)}" style="color:#685d4a">${escapeHtml(letter.secondary.label)}</a></p>\n` : ''}</div>
 <p style="max-width:520px;margin:16px auto 0;font-size:12px;line-height:1.6;color:#9a9285;text-align:center">
 Вы получили письмо, потому что создали приглашение на weddingcraft.ru.<br>
@@ -125,6 +135,20 @@ export function letterFor(kind: Kind, i: InviteRow): Letter {
         ],
         cta: 'Открыть все ответы', url: upgradeUrl(i, kind),
       };
+    case 'review_ask': {
+      const link = `${SITE}/review?i=${encodeURIComponent(i.id)}&t=${reviewLinkToken(i.id, i.userId)}`;
+      return {
+        subject: 'Как вам WeddingCraft? Оценка в одно нажатие',
+        title: names ? `${names}, как вам приглашение?` : 'Как вам приглашение?',
+        paragraphs: [
+          'Вы опубликовали сайт-приглашение на WeddingCraft. Расскажите, как вам: нажмите на звезду — это пара секунд, входить в кабинет не нужно.',
+          'Нам важна любая оценка. Если что-то не понравилось или не получилось, напишите и об этом — так мы поймём, что исправить.',
+        ],
+        stars: [1, 2, 3, 4, 5].map(n => `${link}&r=${n}`),
+        cta: 'Оценить WeddingCraft', url: link,
+        secondary: { label: 'Или оставьте отзыв на Яндексе', url: YANDEX_REVIEWS },
+      };
+    }
     case 'free_hidden': {
       const total = i.rsvp?.total ?? 0;
       const hidden = i.rsvp?.hidden ?? 0;
@@ -314,6 +338,20 @@ export async function runLifecycleEmails(now = Date.now()): Promise<void> {
     else if (left <= -2 && left >= -10 && !(await prisma.review.findUnique({ where: { invitationId: l.id }, select: { id: true } }))) {
       await deliver('after_wedding', l, l.user, now);
     }
+  }
+
+  // 4. Просьба об отзыве: через неделю после публикации, один раз на сайт, если отзыва нет.
+  // Бесплатные — от отметки «mark:free_seen» (даты публикации у них нет), платные — от оплаты.
+  const published = await prisma.invitation.findMany({
+    where: { status: { in: ['paid', 'published'] } }, select: { ...SELECT, paidAt: true }, take: 2000,
+  });
+  for (const s of published) {
+    if (await already(s.id, 'review_ask') || await already(s.id, 'after_wedding')) continue;
+    if (await prisma.review.findUnique({ where: { invitationId: s.id }, select: { id: true } })) continue;
+    const since = s.plan === 'free'
+      ? (await prisma.emailEvent.findUnique({ where: { invitationId_kind: { invitationId: s.id, kind: 'mark:free_seen' } } }))?.sentAt
+      : s.paidAt && s.paidAt >= REVIEW_ASK_PAID_SINCE ? s.paidAt : null;
+    if (since && now - since.getTime() >= 7 * DAY) await deliver('review_ask', s, s.user, now);
   }
 }
 

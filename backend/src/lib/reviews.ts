@@ -2,8 +2,10 @@
 // из письма после свадьбы), владелец сервиса получает его в Telegram-чат поддержки и одобряет
 // кнопкой. На главной — только одобренные И с согласием пары. Оценки 1–3 на сайт не попадают:
 // это повод написать паре и разобраться.
+import crypto from 'crypto';
 import type { Invitation, Review } from '@prisma/client';
 import prisma from './prisma';
+import { jwtSecret } from './security';
 import { telegramApi } from './telegram';
 import { supportChatId } from './supportChat';
 import { errName } from './planner/util';
@@ -18,6 +20,18 @@ export class ReviewError extends Error {
 
 /** Отзыв оставляют о работающем сайте: опубликованном бесплатно или оплаченном. */
 export const canReview = (status: string): boolean => status === 'paid' || status === 'published';
+
+/** Ссылка из письма «Как вам WeddingCraft?» открывает отзыв без входа в кабинет:
+    подпись привязана к сайту и его владельцу, подделать её без секрета сервера нельзя. */
+export function reviewLinkToken(invitationId: string, userId: string): string {
+  return crypto.createHmac('sha256', jwtSecret()).update(`review:${invitationId}:${userId}`).digest('hex').slice(0, 32);
+}
+export function checkReviewLinkToken(invite: Pick<Invitation, 'id' | 'userId'>, token: unknown): boolean {
+  if (typeof token !== 'string') return false;
+  const expected = Buffer.from(reviewLinkToken(invite.id, invite.userId));
+  const got = Buffer.from(token);
+  return got.length === expected.length && crypto.timingSafeEqual(got, expected);
+}
 
 export const coupleNames = (i: { groomName: string; brideName: string }): string =>
   [i.groomName, i.brideName].map((s) => (s || '').trim()).filter(Boolean).join(' и ');
