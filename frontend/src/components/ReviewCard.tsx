@@ -10,8 +10,9 @@ import styles from './ReviewCard.module.css';
    свадьбы (?review=1). На главную отзыв попадает, только если пара разрешила и мы его проверили
    (backend/src/lib/reviews.ts); оценки 1–3 не публикуются — их читаем, чтобы исправить.
    Ссылка на отзыв в Яндексе — при любой оценке: звать туда только довольных нечестно.
-   link — та же карточка на странице /review по ссылке из письма со звёздами: без входа,
-   по подписи в ссылке; rating — звезда, на которую нажали в письме. */
+   Главная кнопка — отзыв на Яндексе (его видят пары, которые выбирают приглашение), форма ниже — отзыв нам.
+   link — та же карточка на странице /review по ссылке из письма «Как вам WeddingCraft?»: без входа,
+   по подписи в ссылке; rating — заранее выбранная звезда (?r=), если она есть в ссылке. */
 
 interface OwnReview { rating: number; text: string; names: string; publish: boolean; status: 'pending' | 'published' | 'hidden' }
 interface ReviewState { review: OwnReview | null; canReview: boolean; names: string }
@@ -135,7 +136,12 @@ export default function ReviewCard({ inviteId, link, fallback }: {
   return (
     <section ref={rootRef} className={styles.card} aria-label="Отзыв о WeddingCraft">
       <h3 className={styles.title}>Как вам WeddingCraft?</h3>
-      <p className={styles.hint} style={{ marginTop: 0 }}>Пара слов от вас поможет нам стать лучше. Показывать ли отзыв на сайте — решаете вы.</p>
+      {/* Главное — отзыв на Яндексе: его видят пары, которые выбирают приглашение */}
+      <p className={styles.hint} style={{ marginTop: 0 }}>Оставьте отзыв на Яндексе — его прочитают пары, которые сейчас выбирают приглашение.</p>
+      <div className={styles.actions} style={{ marginBottom: 18 }}>
+        <a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={styles.primary}>Оставить отзыв на Яндексе</a>
+      </div>
+      <p className={styles.hint}>Или напишите только нам — показывать ли отзыв на сайте, решаете вы.</p>
       <Stars value={rating} onChange={setRating} />
 
       {rating > 0 && (
@@ -162,9 +168,6 @@ export default function ReviewCard({ inviteId, link, fallback }: {
           </div>
         </div>
       )}
-      <p className={styles.hint}>
-        Отзыв можно оставить и <a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={styles.link}>на Яндексе</a> — там его увидят пары, которые выбирают приглашение.
-      </p>
     </section>
   );
 }

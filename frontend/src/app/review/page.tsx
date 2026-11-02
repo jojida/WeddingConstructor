@@ -4,9 +4,9 @@ import Navbar from '@/components/Navbar';
 import ReviewCard from '@/components/ReviewCard';
 import styles from '../blog/blog.module.css';
 
-/* Отзыв по ссылке из письма «Как вам WeddingCraft?» (backend lifecycleEmails, review_ask) —
-   без входа в кабинет: в ссылке id сайта и подпись (backend/src/lib/reviews.ts), r — звезда,
-   на которую нажали в письме. Сохраняется только кнопкой «Отправить»: почтовые сканеры,
+/* Отзыв по ссылке «напишите только нам» из письма «Как вам WeddingCraft?» (backend lifecycleEmails,
+   review_ask) — без входа в кабинет: в ссылке id сайта и подпись (backend/src/lib/reviews.ts),
+   r — заранее выбранная звезда, если есть. Сохраняется только кнопкой «Отправить»: почтовые сканеры,
    открывающие ссылки из писем, оценку за пару не поставят. Страница закрыта от поиска,
    а в Метрику её адрес с подписью не уходит (нет в ANALYTICS_PATHS). */
 export const metadata: Metadata = {
