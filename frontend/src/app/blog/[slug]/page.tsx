@@ -18,7 +18,7 @@ export function generateStaticParams() {
   return ARTICLES.map(a => ({ slug: a.slug }));
 }
 
-const OG_IMAGE = { url: '/invite/calla/assets/couple-photo.jpg', width: 1200, height: 630, alt: 'Свадебное приглашение WeddingCraft' };
+const OG_IMAGE = { url: '/brand/og-cover.jpg', width: 1200, height: 630, alt: 'WeddingCraft — сайты-приглашения на свадьбу' };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

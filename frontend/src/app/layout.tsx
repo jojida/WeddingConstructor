@@ -56,13 +56,13 @@ export const metadata: Metadata = {
     description:
       "Электронное приглашение на свадьбу: изящные шаблоны, ваши фото и музыка, анкета для гостей " +
       "с ответами в Telegram. Есть бесплатный тариф.",
-    images: [{ url: "/invite/calla/assets/couple-photo.jpg", width: 1200, height: 630, alt: "Пример свадебного сайта-приглашения WeddingCraft" }],
+    images: [{ url: "/brand/og-cover.jpg", width: 1200, height: 630, alt: "WeddingCraft — сайты-приглашения на свадьбу" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Сайт-приглашение на свадьбу онлайн — WeddingCraft",
     description: "Электронное приглашение на свадьбу: шаблоны, анкета для гостей, ответы в Telegram.",
-    images: ["/invite/calla/assets/couple-photo.jpg"],
+    images: ["/brand/og-cover.jpg"],
   },
   // Подтверждение прав в Google Search Console и Pinterest (бизнес-аккаунт) — теги должны
   // оставаться, иначе подтверждение снимут.

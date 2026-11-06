@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     description:
       'Каталог шаблонов электронных свадебных приглашений с анкетой для гостей: акварельные, минималистичные, тёмные и игривые дизайны.',
     url: '/templates',
-    images: [{ url: '/invite/calla/assets/couple-photo.jpg', alt: 'Шаблоны свадебных сайтов-приглашений WeddingCraft' }],
+    images: [{ url: '/brand/og-cover.jpg', width: 1200, height: 630, alt: 'Шаблоны свадебных сайтов-приглашений WeddingCraft' }],
   },
 };
 

@@ -7,7 +7,7 @@ import styles from './blog.module.css';
 const TITLE = 'Статьи о свадебных приглашениях';
 const DESCRIPTION =
   'Тексты приглашений на свадьбу, анкета для гостей, сроки рассылки, приглашения на никах и венчание — советы и готовые примеры.';
-const OG_IMAGE = { url: '/invite/calla/assets/couple-photo.jpg', width: 1200, height: 630, alt: 'Свадебное приглашение WeddingCraft' };
+const OG_IMAGE = { url: '/brand/og-cover.jpg', width: 1200, height: 630, alt: 'WeddingCraft — сайты-приглашения на свадьбу' };
 
 export const metadata: Metadata = {
   title: `${TITLE}: тексты, советы, примеры`,
