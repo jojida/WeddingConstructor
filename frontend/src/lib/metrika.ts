@@ -160,8 +160,11 @@ export const GOAL = {
 const sentErrors = new Set<string>();
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
 
+/* Цифры — в N (телефоны, номера, суммы), кроме номера ошибки React («error #418»,
+   react.dev/errors/418): без него в Метрике не понять, какая это ошибка. */
 export function cleanErrorText(text: string): string {
-  return text.replace(/\S+@\S+/g, '<email>').replace(UUID, ':id').replace(/\d+/g, 'N').slice(0, 120);
+  return text.replace(/\S+@\S+/g, '<email>').replace(UUID, ':id')
+    .replace(/(#|errors\/)?\d+/g, (digits, code) => (code ? digits : 'N')).slice(0, 120);
 }
 
 /** Адрес запроса к серверу без id и параметров: /api/invites/:id */

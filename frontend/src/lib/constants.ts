@@ -32,16 +32,18 @@ export const LEGAL = {
 };
 
 /** Дата свадьбы для превью и демо: всегда впереди на ~3 месяца,
-    чтобы таймеры обратного отсчёта в шаблонах не показывали ноль. */
-export function sampleWeddingDate(daysAhead = 90): string {
-  return new Date(Date.now() + daysAhead * 86400000).toISOString().slice(0, 10);
+    чтобы таймеры обратного отсчёта в шаблонах не показывали ноль.
+    now — от какого «сегодня» считать. Где превью рисуются на сервере заранее (каталог),
+    его передаёт сервер: иначе дата в HTML дня сборки расходится с датой браузера. */
+export function sampleWeddingDate(daysAhead = 90, now = Date.now()): string {
+  return new Date(now + daysAhead * 86400000).toISOString().slice(0, 10);
 }
 
 /** Дата свадьбы в демо и карточке шаблона: у шаблона может быть своя
     (sampleDaysAhead в TEMPLATES), чтобы демо не показывали одну и ту же. */
-export function templateSampleDate(tpl?: unknown): string {
+export function templateSampleDate(tpl?: unknown, now?: number): string {
   const days = (tpl as { sampleDaysAhead?: number } | undefined)?.sampleDaysAhead;
-  return sampleWeddingDate(typeof days === 'number' ? days : 90);
+  return sampleWeddingDate(typeof days === 'number' ? days : 90, now);
 }
 
 /** Дедлайн ответа гостей по умолчанию: за 3 недели до свадьбы, формат ДД.ММ.ГГ.
