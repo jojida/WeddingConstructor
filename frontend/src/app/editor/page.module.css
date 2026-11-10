@@ -94,12 +94,15 @@
   flex: 1 1 50%; min-width: 0; position: relative; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
   margin: 16px 0 16px 16px; border-radius: 24px;
+  /* Сверху — строка с переключателем устройства: рамка встаёт под неё */
+  padding: 64px 24px 24px;
   background: radial-gradient(120% 90% at 50% 32%, #fdfcfa 0%, #f0ece6 58%, #e6e0d7 100%);
   order: 1;
 }
 
-/* Canvas Controls */
-.canvasControls { position: absolute; top: 16px; left: 16px; display: flex; gap: 8px; z-index: 20; }
+/* Canvas Controls: «Во весь экран» слева, «Телефон / Планшет» по центру */
+.canvasControls { position: absolute; top: 14px; left: 16px; right: 16px; height: 40px; display: flex; align-items: center; gap: 8px; z-index: 20; }
+.deviceSwitch { position: absolute; left: 50%; transform: translateX(-50%); }
 .zoomBtn {
   display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px;
   background: rgba(255, 255, 255, .78); backdrop-filter: blur(8px);
@@ -119,6 +122,13 @@
 .phoneScreen { width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #111827; }
 .phoneContent { width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; }
 .phoneContent::-webkit-scrollbar { display: none; }
+/* Планшет: экран 768×1024, рамка потоньше, камера посередине верхней рамки */
+.tabletMockup { position: relative; width: 816px; height: 1072px; border-radius: 40px; padding: 22px; }
+.tabletMockup::before {
+  content: ''; position: absolute; top: 8px; left: 50%; width: 6px; height: 6px; margin-left: -3px;
+  border-radius: 50%; background: #3b362f;
+}
+.tabletMockup .phoneScreen { border-radius: 18px; }
 
 /* ─── RIGHT SIDEBAR ─────────────────────────────────────────────────────────── */
 /* Половина экрана (раньше — узкая колонка 320 px). Внутри: список разделов
@@ -253,15 +263,59 @@
 .sectionSetup:hover { border-color: #c9c1b6; }
 
 /* Поля внутри карточки */
-.field { margin-bottom: 20px; }
+.field { margin-bottom: 24px; }
 .fieldLabel {
-  display: block; margin-bottom: 8px;
-  font: 600 14px var(--font-inter); color: #2d2924;
+  display: block; margin-bottom: 10px;
+  font: 600 15px/1.35 var(--font-inter); color: #2b2925;
 }
+
+/* Поля ввода — как в конфигураторах: крупный текст 17 px (меньше 16 px iOS
+   приближает страницу при касании поля), высокое поле на мягкой кремовой
+   заливке без рамки, при наборе — белое с золотой рамкой. Шрифт и цвета сайта.
+   Общий класс .input-field остаётся у остальных страниц прежним. */
+.page :global(.input-field), .setup :global(.input-field) {
+  min-height: 56px; padding: 15px 18px;
+  border: 1.5px solid transparent; border-radius: 14px;
+  background: #f6f2ec; color: #1d1b18;
+  font: 400 17px/1.45 var(--font-inter);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.page :global(.input-field):hover, .setup :global(.input-field):hover { background: #f1ebe2; }
+.page :global(.input-field):focus, .setup :global(.input-field):focus {
+  background: #fff; border-color: #c9a96e; box-shadow: 0 0 0 4px rgba(201, 169, 110, .2);
+}
+.page :global(.input-field)::placeholder, .setup :global(.input-field)::placeholder { color: #a39b8e; }
+.page textarea:global(.input-field) { min-height: 150px; padding: 16px 18px; line-height: 1.55; resize: vertical; }
+.charCounter { margin-top: 6px; text-align: right; font: 12px var(--font-inter); color: #a39b8e; }
+.charCounterFull { color: #c0392b; }
+
+/* Кнопки у полей: мягкие (как поле) и тёмная главная */
+.softBtn {
+  flex: 1; min-height: 44px; padding: 0 14px; white-space: nowrap;
+  border: 1.5px solid transparent; border-radius: 12px; background: #f6f2ec; color: #2b2925;
+  font: 500 14px var(--font-inter); cursor: pointer; transition: background .15s, border-color .15s;
+}
+.softBtn:hover { background: #efe8dd; }
+.softBtnOn { border-color: #c9a96e; background: #fbf5ea; }
+.softBtnDanger { color: #b4432f; }
+.softBtnDanger:hover { background: #f8e9e5; }
+.softBtn:focus-visible, .inkBtn:focus-visible, .addRowBtn:focus-visible { outline: 2px solid #c9a96e; outline-offset: 2px; }
+.inkBtn {
+  flex: none; height: 48px; padding: 0 18px; border: 0; border-radius: 12px;
+  background: #1f1c19; color: #fff; font: 600 15px var(--font-inter); cursor: pointer;
+}
+.inkBtn:hover { background: #3a352f; }
+.colorPick { flex: none; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 12px; background: none; cursor: pointer; }
+.addRowBtn {
+  width: 100%; min-height: 48px; margin-top: 10px; padding: 0 14px;
+  border: 1.5px dashed #d8cdbb; border-radius: 14px; background: transparent; color: #6e5a33;
+  font: 600 15px var(--font-inter); cursor: pointer; transition: background .15s, border-color .15s;
+}
+.addRowBtn:hover { background: #fbf5ea; border-color: #c9a96e; }
 .toggleRow {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  margin-bottom: 12px; padding: 12px 14px; border-radius: 14px; background: #f8f6f2;
-  font: 14px/1.4 var(--font-inter); color: #2d2924; cursor: pointer;
+  margin-bottom: 12px; min-height: 56px; padding: 12px 16px; border-radius: 14px; background: #f6f2ec;
+  font: 15px/1.4 var(--font-inter); color: #2b2925; cursor: pointer;
 }
 .toggleInput {
   appearance: none; flex: none; position: relative; margin: 0;
@@ -369,16 +423,16 @@
 
 /* Dropzone */
 .dropzone {
-  width: 100%; height: 130px;
-  border: 1.5px dashed #d1d5db; border-radius: 10px;
+  width: 100%; height: 150px;
+  border: 1.5px dashed #d8cdbb; border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
-  background: #ffffff;
+  background: #f6f2ec;
 }
-.dropzone:hover { border-color: #9ca3af; background: #f9fafb; }
-.dropzoneInner { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 13px; color: #6b7280; }
-.dropzoneIcon { font-size: 22px; }
-.dropzoneHint { font-size: 11px; color: #9ca3af; }
+.dropzone:hover { border-color: #c9a96e; background: #fbf5ea; }
+.dropzoneInner { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 15px; color: #5c554c; }
+.dropzoneIcon { font-size: 24px; }
+.dropzoneHint { font-size: 12px; color: #9a9187; }
 .dropzoneOverlay { position: absolute; inset: 0; background: rgba(17,24,39,0.5); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.2s; }
 .dropzone:hover .dropzoneOverlay { opacity: 1; }
 .dropzoneLocked { opacity: 0.75; }

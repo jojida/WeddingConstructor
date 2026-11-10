@@ -24,6 +24,9 @@ import { readPreviewNames } from '@/lib/preview-names';
 import dynamic from 'next/dynamic';
 import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import type { PhotoCutout } from './BackgroundRemovalEditor';
+import { DEVICES, DeviceSwitch, FullPreview, fitScale, useMediaQuery, useStoredDevice, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
+import TextVariants from './TextVariants';
+import { isUpperCaseText, textVariantsFor } from '@/lib/text-variants';
 import styles from './page.module.css';
 
 const AuthModal = dynamic(() => import('@/components/AuthModal'));
@@ -187,7 +190,7 @@ function SetupStep({ templateId, onComplete, initialData }: {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column' }}>
+    <div className={styles.setup} style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column' }}>
       <header style={{ padding: '0 48px', height: 64, borderBottom: '1px solid rgba(206,197,186,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', flexShrink: 0 }}>
         <Link href="/" style={{ fontFamily: 'var(--font-playfair)', fontSize: 20, color: '#0e1d26', textDecoration: 'none', fontWeight: 500 }}>WeddingCraft</Link>
         <Link href="/templates" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#7d766c', textDecoration: 'none' }}>
@@ -272,14 +275,14 @@ function SetupField({ label, htmlFor, required, note, hint, error, children }: {
 }) {
   return (
     <div>
-      <label htmlFor={htmlFor} style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#7d766c', marginBottom: 7, textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-inter)' }}>
-        {label}{required && <span style={{ color: '#685d4a', marginLeft: 3 }}>*</span>}
-        {note && <span style={{ fontWeight: 500, textTransform: 'none', letterSpacing: 0, color: '#a39b8e' }}> · {note}</span>}
+      <label htmlFor={htmlFor} style={{ display: 'block', fontSize: 15, fontWeight: 600, color: '#2b2925', marginBottom: 9, lineHeight: 1.35, fontFamily: 'var(--font-inter)' }}>
+        {label}{required && <span style={{ color: '#a8843f', marginLeft: 3 }}>*</span>}
+        {note && <span style={{ fontWeight: 500, color: '#a39b8e' }}> · {note}</span>}
       </label>
       {children}
       {error
-        ? <div role="alert" style={{ marginTop: 6, fontSize: 12, color: '#c0392b', fontFamily: 'var(--font-inter)' }}>{error}</div>
-        : hint && <div style={{ marginTop: 6, fontSize: 12, lineHeight: 1.45, color: '#8a8378', fontFamily: 'var(--font-inter)' }}>{hint}</div>}
+        ? <div role="alert" style={{ marginTop: 7, fontSize: 13, color: '#c0392b', fontFamily: 'var(--font-inter)' }}>{error}</div>
+        : hint && <div style={{ marginTop: 7, fontSize: 13, lineHeight: 1.45, color: '#8a8378', fontFamily: 'var(--font-inter)' }}>{hint}</div>}
     </div>
   );
 }
@@ -431,9 +434,14 @@ function EditorContent() {
     return () => window.removeEventListener('message', onReady);
   }, [envelopeSelected, step, draftChecked]);
 
-  // Телефон в превью — 360×720 по умолчанию; на невысоком экране он
-  // обрезался снизу. Теперь масштаб подбирается под место (чуть крупнее на
-  // больших экранах). На телефоне размер задаёт CSS — null.
+  // Превью — в рамке телефона (360×720) или планшета (экран 768×1024): шаблон
+  // верстается под ширину выбранного устройства. На невысоком экране рамка
+  // обрезалась снизу — масштаб подбирается под место (над рамкой — строка с
+  // переключателем, 64 px). На телефоне только телефон, размер задаёт CSS — null.
+  const [device, setDevice] = useStoredDevice();
+  const phoneScreen = useMediaQuery('(max-width: 768px)');
+  const shownDevice: PreviewDevice = phoneScreen ? 'phone' : device;
+  const [fullMode, setFullMode] = useState<FullPreviewMode>('phone');
   const stageRef = useRef<HTMLElement>(null);
   const [phoneScale, setPhoneScale] = useState<number | null>(1);
   useLayoutEffect(() => {
@@ -441,14 +449,13 @@ function EditorContent() {
     if (!el) return;
     const fit = () => {
       if (window.matchMedia('(max-width: 768px)').matches) { setPhoneScale(null); return; }
-      const k = Math.min((el.clientHeight - 48) / 720, (el.clientWidth - 48) / 360, 1.15);
-      setPhoneScale(Math.max(0.45, Math.floor(k * 100) / 100));
+      setPhoneScale(fitScale(shownDevice, el.clientWidth - 48, el.clientHeight - 88));
     };
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [step, draftChecked]);
+  }, [step, draftChecked, shownDevice]);
 
   // Вход в редактор — вторая ступень воронки после галереи шаблонов.
   // Реф защищает от двойного вызова: в разработке StrictMode прогоняет
@@ -479,6 +486,34 @@ function EditorContent() {
     reachGoal(goal, params);
   };
   const previewGoal = () => funnelGoal(GOAL.editorPreview);
+  // Другое устройство — превью грузится заново и стоит в начале приглашения.
+  // Когда шаблон готов, возвращаем его к открытому разделу: смотрят, как
+  // на планшете выглядит именно то, что сейчас правят.
+  const revealOnReadyRef = useRef(false);
+  const chooseDevice = (d: PreviewDevice) => {
+    if (d === device) return;
+    revealOnReadyRef.current = true;
+    setDevice(d);
+  };
+  // Во весь экран — на том же устройстве, что и превью рядом с полями; выбор
+  // телефона или планшета там переносится и сюда, «Компьютер» — только там
+  const openPreview = () => { setFullMode(shownDevice); setShowPreview(true); previewGoal(); };
+  const chooseFullMode = (m: FullPreviewMode) => { setFullMode(m); if (m !== 'desktop') chooseDevice(m); };
+  const closePreview = useCallback(() => setShowPreview(false), []);
+  useEffect(() => {
+    if (!shownSection) return;
+    const ids = [`section:${shownSection.id}`, ...(shownSection.previewFields || []), ...shownSection.fields.map(f => f.id)];
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onReady = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || e.data?.type !== 'wc:ready' || !revealOnReadyRef.current) return;
+      if (e.source !== previewRef.current?.querySelector('iframe')?.contentWindow) return;
+      revealOnReadyRef.current = false;
+      // Блоки шаблона раскладываются ещё мгновение после wc:ready
+      timer = setTimeout(() => { lastReveal = { key: '', at: 0 }; revealInPreview(ids); }, 700);
+    };
+    window.addEventListener('message', onReady);
+    return () => { window.removeEventListener('message', onReady); clearTimeout(timer); };
+  }, [shownSection]);
 
   // Анкета «Расскажите о вашей свадьбе» на экране. «Открыл редактор» засчитывается и тем,
   // кто её не видит (готовое приглашение из кабинета, возврат к черновику), — без этой
@@ -909,13 +944,10 @@ function EditorContent() {
     <>
       {/* ── FULL PREVIEW OVERLAY ──────────────────────────────────────────── */}
       {showPreview && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: '#ececec', overflow: 'auto' }}>
-          <button onClick={() => setShowPreview(false)}
-            style={{ position: 'fixed', top: 16, right: 16, zIndex: 10000, background: 'rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.14)', borderRadius: 8, color: '#333', padding: '8px 20px', cursor: 'pointer', fontSize: 13, fontFamily: 'var(--font-inter)', backdropFilter: 'blur(8px)' }}>
-            ✕ Закрыть
-          </button>
-          <TemplatePreview data={data} apiBase={apiBase} fullPage />
-        </div>
+        <FullPreview mode={fullMode} onMode={chooseFullMode} onClose={closePreview}>
+          {/* Другое устройство — шаблон грузится заново под его ширину */}
+          <TemplatePreview key={fullMode} data={data} apiBase={apiBase} fullPage />
+        </FullPreview>
       )}
 
       <div className={styles.page}>
@@ -949,7 +981,7 @@ function EditorContent() {
             <button className={styles.topBarIconBtn} onClick={handleSave} disabled={saving} title="Сохранить">
               <Save size={18} />
             </button>
-            <button className={styles.topBarBtnSoft} onClick={() => { setShowPreview(true); previewGoal(); }}>
+            <button className={styles.topBarBtnSoft} onClick={openPreview}>
               Предпросмотр
             </button>
             {/* Гостю без входа кабинет показывать незачем: ссылка вела бы на вход
@@ -993,29 +1025,33 @@ function EditorContent() {
 
           {/* ── CANVAS (LEFT) ─────────────────────────────────────────────── */}
           <main className={styles.canvas} ref={stageRef}>
-            {/* Была панель зума без обработчиков — нажатия ничего не делали.
-                Оставили одну рабочую кнопку: полноэкранный предпросмотр. */}
+            {/* Полноэкранный предпросмотр и выбор устройства: телефон или
+                планшет (на телефоне строки нет — там только телефон). */}
             <div className={styles.canvasControls}>
-              <button className={styles.zoomBtn} onClick={() => { setShowPreview(true); previewGoal(); }}
+              <button className={styles.zoomBtn} onClick={openPreview}
                 title="Открыть во весь экран">
                 <Maximize size={15} aria-hidden />
                 <span>Во весь экран</span>
               </button>
+              <DeviceSwitch className={styles.deviceSwitch} value={device} options={['phone', 'tablet'] as const} onChange={chooseDevice} />
             </div>
             {/* На телефоне превью не ловит касания (иначе свайп листал бы
                 приглашение вместо страницы), зато тап по нему открывает
                 полноэкранный просмотр. На большом экране всё как было. */}
             <div
               className={styles.phoneContainer}
-              style={phoneScale ? { width: 360 * phoneScale, height: 720 * phoneScale } : undefined}
+              style={phoneScale ? { width: DEVICES[shownDevice].w * phoneScale, height: DEVICES[shownDevice].h * phoneScale } : undefined}
               onClick={() => {
-                if (window.matchMedia('(max-width: 768px)').matches) { setShowPreview(true); previewGoal(); }
+                if (window.matchMedia('(max-width: 768px)').matches) openPreview();
               }}
             >
-              <div className={styles.phoneMockup} style={phoneScale ? { transform: `scale(${phoneScale})` } : undefined}>
+              <div className={`${styles.phoneMockup} ${shownDevice === 'tablet' ? styles.tabletMockup : ''}`}
+                style={phoneScale ? { transform: `scale(${phoneScale})` } : undefined}>
                 <div className={styles.phoneScreen}>
                   <div className={styles.phoneContent} ref={previewRef}>
-                    <TemplatePreview data={data} apiBase={apiBase} editing />
+                    {/* Другое устройство — шаблон грузится заново под его ширину:
+                        часть шаблонов раскладывает блоки скриптом один раз */}
+                    <TemplatePreview key={shownDevice} data={data} apiBase={apiBase} editing />
                   </div>
                 </div>
               </div>
@@ -1118,6 +1154,7 @@ function EditorContent() {
                                 onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
                                 apiBase={apiBase}
                                 templateId={data.templateId}
+                                weddingDate={data.weddingDate}
                                 uploadImage={uploadImage}
                                 uploadAudio={uploadAudio}
                                 frame={(data.customData?.photoFrames || {})[f.id] ?? null}
@@ -1295,7 +1332,7 @@ function EditorContent() {
 
 // ─── Движок полей по схеме шаблона ─────────────────────────────────────────────
 const iconBtn = (disabled: boolean): React.CSSProperties => ({
-  width: 26, height: 26, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 6,
+  width: 34, height: 34, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 10,
   // Значок — векторный и по центру: текстовые «×» и «↑» у шрифта сидят ниже середины
   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
   background: '#fff', cursor: disabled ? 'default' : 'pointer', fontSize: 14, lineHeight: 1,
@@ -1305,15 +1342,16 @@ const iconBtn = (disabled: boolean): React.CSSProperties => ({
 function CharCounter({ value, max }: { value: string; max: number }) {
   const len = (value || '').length;
   return (
-    <div style={{ textAlign: 'right', fontSize: 10, color: len >= max ? '#e74c3c' : '#a39b8e', marginTop: 3, fontFamily: 'var(--font-inter)' }}>
+    <div className={`${styles.charCounter} ${len >= max ? styles.charCounterFull : ''}`}>
       {len} / {max}
     </div>
   );
 }
 
-function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uploadImage, uploadAudio, frame, slot, onFrame, photoCutout, onPhotoCutout, customIcons, onCustomIcons }: {
+function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, weddingDate, uploadImage, uploadAudio, frame, slot, onFrame, photoCutout, onPhotoCutout, customIcons, onCustomIcons }: {
   field: TemplateField;
   templateId?: string;
+  weddingDate?: string;   // срок ответа в готовых текстах анкеты
   value: any;
   onChange: (v: any) => void;
   apiBase: string;
@@ -1332,23 +1370,31 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
   const isLink = /link$/i.test(field.id);
   const textMax = field.maxLength ?? (isLink ? undefined : 70);
   const areaMax = field.maxLength ?? 300;
+  // Подпись над полем привязана к нему: нажатие по ней ставит курсор в поле
+  const inputId = `field-${field.id}`;
   switch (field.type) {
     case 'text':
       return (
-        <Field label={field.label}>
-          <input className="input-field" placeholder={field.hint || ''} maxLength={textMax}
+        <Field label={field.label} htmlFor={inputId}>
+          <input id={inputId} className="input-field" placeholder={field.hint || ''} maxLength={textMax}
             value={value || ''} onChange={e => onChange(e.target.value)} />
           {textMax ? <CharCounter value={value} max={textMax} /> : null}
         </Field>
       );
-    case 'textarea':
+    case 'textarea': {
+      // Готовые тексты — заглавными, если так набран текст шаблона («Флоральный»)
+      const defs = TEMPLATE_DEFAULTS[templateId || ''];
+      const def = field.scope === 'data' ? (defs as Record<string, unknown> | undefined)?.[field.id] : defs?.custom?.[field.id];
+      const variants = textVariantsFor(field.id, { maxLength: areaMax, weddingDate, upperCase: isUpperCaseText(typeof def === 'string' ? def : '') });
       return (
-        <Field label={field.label}>
-          <textarea className="input-field" rows={4} placeholder={field.hint || ''} maxLength={areaMax}
+        <Field label={field.label} htmlFor={inputId}>
+          <textarea id={inputId} className="input-field" rows={5} placeholder={field.hint || ''} maxLength={areaMax}
             value={value || ''} onChange={e => onChange(e.target.value)} />
           <CharCounter value={value} max={areaMax} />
+          {variants.length > 0 && <TextVariants label={field.label} variants={variants} value={value || ''} onPick={onChange} />}
         </Field>
       );
+    }
     case 'image':
       return (
         <Field label={field.label}>
@@ -1417,7 +1463,7 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, uplo
               );
             })}
           </div>
-          {field.hint ? <div style={{ fontSize: 11, color: '#a39b8e', marginTop: 8, fontFamily: 'var(--font-inter)' }}>{field.hint}</div> : null}
+          {field.hint ? <div style={{ fontSize: 13, lineHeight: 1.45, color: '#8a8378', marginTop: 10, fontFamily: 'var(--font-inter)' }}>{field.hint}</div> : null}
         </Field>
       );
     }
@@ -1443,15 +1489,15 @@ function RsvpQuestionsPicker({ value, onChange }: { value: string[]; onChange: (
         const on = value.includes(q.id);
         return (
           <label key={q.id} style={{
-            display: 'flex', gap: 10, alignItems: 'flex-start', padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
-            border: `1px solid ${on ? '#b9a98f' : 'rgba(206,197,186,0.6)'}`, background: on ? '#f7f2ea' : '#fff',
+            display: 'flex', gap: 12, alignItems: 'flex-start', padding: '12px 14px', borderRadius: 14, cursor: 'pointer',
+            border: `1.5px solid ${on ? '#c9a96e' : 'transparent'}`, background: on ? '#fbf5ea' : '#f6f2ec',
             fontFamily: 'var(--font-inter)',
           }}>
             <input type="checkbox" checked={on} onChange={() => toggle(q.id)}
-              style={{ width: 16, height: 16, margin: '2px 0 0', flexShrink: 0, accentColor: '#685d4a', cursor: 'pointer' }} />
+              style={{ width: 18, height: 18, margin: '2px 0 0', flexShrink: 0, accentColor: '#1f1c19', cursor: 'pointer' }} />
             <span>
-              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#2f2a24' }}>{q.label}</span>
-              <span style={{ display: 'block', fontSize: 12, color: '#8a8378', marginTop: 2 }}>{q.hint}</span>
+              <span style={{ display: 'block', fontSize: 15, fontWeight: 600, color: '#2b2925' }}>{q.label}</span>
+              <span style={{ display: 'block', fontSize: 13, color: '#8a8378', marginTop: 2 }}>{q.hint}</span>
             </span>
           </label>
         );
@@ -1565,27 +1611,26 @@ function AudioPicker({ value, onChange, apiBase, templateId, uploadAudio, hint }
         onClick={onSelect}
         onKeyDown={e => { if ((e.key === 'Enter' || e.key === ' ') && onSelect) { e.preventDefault(); onSelect(); } }}
         style={{
-          display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10, cursor: onSelect ? 'pointer' : 'default',
-          border: selected ? '1px solid #685d4a' : '1px solid rgba(206,197,186,0.6)',
-          background: selected ? '#efe3d2' : 'transparent', fontFamily: 'var(--font-inter)',
+          display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 14, cursor: onSelect ? 'pointer' : 'default',
+          border: selected ? '1.5px solid #c9a96e' : '1.5px solid transparent',
+          background: selected ? '#fbf5ea' : '#f6f2ec', fontFamily: 'var(--font-inter)',
         }}>
         <button type="button" aria-label={isPlaying ? `Остановить «${title}»` : `Послушать «${title}»`}
           onClick={e => { e.stopPropagation(); toggle(url); }}
-          style={{ flex: 'none', width: 30, height: 30, borderRadius: '50%', border: '1px solid rgba(104,93,74,0.35)', background: '#fff', color: '#4b463d', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
+          style={{ flex: 'none', width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(104,93,74,0.25)', background: '#fff', color: '#4b463d', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
           {isPlaying
             ? <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" rx="1" fill="currentColor" /><rect x="7" y="1.5" width="3" height="9" rx="1" fill="currentColor" /></svg>
             : <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.6v8.8L10.2 6z" fill="currentColor" /></svg>}
         </button>
         <span style={{ flex: 1, minWidth: 0 }}>
-          <span style={{ display: 'block', fontSize: 13, color: '#2f2b25', lineHeight: 1.25 }}>{title}</span>
-          <span style={{ display: 'block', fontSize: 11, color: '#8a8175', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</span>
+          <span style={{ display: 'block', fontSize: 15, color: '#2b2925', lineHeight: 1.3 }}>{title}</span>
+          <span style={{ display: 'block', fontSize: 13, color: '#8a8175', lineHeight: 1.35, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</span>
         </span>
-        {selected && <span aria-hidden="true" style={{ flex: 'none', fontSize: 13, color: '#685d4a' }}>✓</span>}
+        {selected && <span aria-hidden="true" style={{ flex: 'none', fontSize: 15, color: '#8a6d2f' }}>✓</span>}
       </div>
     );
   };
 
-  const btn: React.CSSProperties = { flex: 1, padding: 7, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' };
   return (
     <div>
       <input ref={inputRef} type="file" accept="audio/*" style={{ display: 'none' }}
@@ -1602,18 +1647,18 @@ function AudioPicker({ value, onChange, apiBase, templateId, uploadAudio, hint }
       {!value && (
         <p style={{ margin: '8px 0 0', fontSize: 12, color: '#8a8175', fontFamily: 'var(--font-inter)' }}>Сейчас сайт без музыки</p>
       )}
-      <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-        <button type="button" onClick={() => inputRef.current?.click()} style={btn}>
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button type="button" onClick={() => inputRef.current?.click()} className={styles.softBtn}>
           {own ? 'Заменить свою' : 'Загрузить свою'}
         </button>
         {value && (
           <button type="button" onClick={() => { audioRef.current?.pause(); onChange(''); }}
-            style={{ ...btn, border: '1px solid rgba(231,76,60,0.3)', color: '#e74c3c' }}>
+            className={`${styles.softBtn} ${styles.softBtnDanger}`}>
             Без музыки
           </button>
         )}
       </div>
-      {hint && <p style={{ margin: '8px 0 0', fontSize: 11, lineHeight: 1.4, color: '#8a8175', fontFamily: 'var(--font-inter)' }}>{hint}</p>}
+      {hint && <p style={{ margin: '8px 0 0', fontSize: 13, lineHeight: 1.45, color: '#8a8175', fontFamily: 'var(--font-inter)' }}>{hint}</p>}
     </div>
   );
 }
@@ -1654,20 +1699,18 @@ function ImagePicker({ value, onChange, apiBase, uploadImage, frame, slot, onFra
         )}
         {frameSrc && <div className={styles.dropzoneOverlay}>Изменить</div>}
       </div>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
-        <button type="button" onClick={() => setShowGallery(true)}
-          style={{ flex: 1, whiteSpace: 'nowrap', padding: 7, border: '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
+        <button type="button" onClick={() => setShowGallery(true)} className={styles.softBtn}>
           🖼 Из галереи
         </button>
         {canFrame && (
           <button type="button" onClick={() => setShowFrame(s => !s)} aria-expanded={showFrame}
-            style={{ flex: 1, whiteSpace: 'nowrap', padding: 7, border: showFrame || frame ? '1px solid #685d4a' : '1px solid rgba(206,197,186,0.6)', borderRadius: 8, background: showFrame ? '#efe3d2' : 'transparent', fontSize: 12, color: '#4b463d', cursor: 'pointer', fontFamily: 'var(--font-inter)' }}>
+            className={`${styles.softBtn} ${showFrame || frame ? styles.softBtnOn : ''}`}>
             ✥ Кадрировать
           </button>
         )}
         {value && (
-          <button type="button" onClick={() => onChange('')}
-            style={{ flex: 1, whiteSpace: 'nowrap', padding: 7, border: '1px solid rgba(231,76,60,0.3)', borderRadius: 8, background: 'transparent', fontSize: 12, color: '#e74c3c', cursor: 'pointer' }}>
+          <button type="button" onClick={() => onChange('')} className={`${styles.softBtn} ${styles.softBtnDanger}`}>
             Удалить
           </button>
         )}
@@ -1721,10 +1764,9 @@ function ColorListEditor({ value, onChange }: { value: string[]; onChange: (v: s
         ))}
       </div>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <input type="color" value={hex} onChange={e => setHex(e.target.value)} style={{ width: 40, height: 40, padding: 0, border: 'none', borderRadius: 8, cursor: 'pointer' }} />
-        <input type="text" className="input-field" value={hex} onChange={e => setHex(e.target.value)} style={{ flex: 1, fontFamily: 'monospace' }} />
-        <button type="button" onClick={() => { if (!colors.includes(hex)) onChange([...colors, hex]); }}
-          style={{ padding: '10px 16px', background: '#685d4a', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Добавить</button>
+        <input type="color" value={hex} onChange={e => setHex(e.target.value)} aria-label="Выбрать цвет" className={styles.colorPick} />
+        <input type="text" className="input-field" value={hex} onChange={e => setHex(e.target.value)} aria-label="Код цвета" style={{ flex: 1, minWidth: 0, minHeight: 48, padding: '0 14px', fontVariantNumeric: 'tabular-nums' }} />
+        <button type="button" onClick={() => { if (!colors.includes(hex)) onChange([...colors, hex]); }} className={styles.inkBtn}>Добавить</button>
       </div>
     </div>
   );
@@ -1830,7 +1872,7 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon, apiBase, u
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {items.map((item, i) => (
-          <div key={i} style={{ padding: 9, background: '#fafaf7', border: '1px solid rgba(206,197,186,0.4)', borderRadius: 10 }}>
+          <div key={i} style={{ padding: 12, background: '#fff', border: '1px solid #ece5da', borderRadius: 16 }}>
             {icons.length > 0 && (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 7 }}>
                 {icons.map(ic => {
@@ -1859,10 +1901,10 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon, apiBase, u
             )}
             {/* Название — отдельной строкой во всю ширину: в одной строке со временем и
                 кнопками в узкой панели от него оставалось «Сбор гос…» */}
-            <div style={{ display: 'grid', gridTemplateColumns: icons.length > 0 || noIcon ? '96px 1fr' : '96px 44px 1fr', gap: 6, alignItems: 'center' }}>
-              <input className="input-field" type="time" style={{ padding: '6px 4px', fontSize: 12, textAlign: 'center' }} value={item.time} onChange={e => update(i, { time: e.target.value })} />
+            <div style={{ display: 'grid', gridTemplateColumns: icons.length > 0 || noIcon ? '124px 1fr' : '124px 56px 1fr', gap: 8, alignItems: 'center' }}>
+              <input className="input-field" type="time" style={{ minHeight: 48, padding: '0 10px', textAlign: 'center' }} value={item.time} onChange={e => update(i, { time: e.target.value })} aria-label="Время" />
               {icons.length === 0 && !noIcon && (
-                <input className="input-field" style={{ padding: '6px 2px', fontSize: 16, textAlign: 'center' }} placeholder="✦" value={item.icon} onChange={e => update(i, { icon: e.target.value })} title="Эмодзи (необязательно)" />
+                <input className="input-field" style={{ minHeight: 48, padding: '0 4px', textAlign: 'center' }} placeholder="✦" value={item.icon} onChange={e => update(i, { icon: e.target.value })} title="Эмодзи (необязательно)" aria-label="Эмодзи" />
               )}
               <div style={{ display: 'flex', gap: 2, justifySelf: 'end' }}>
                 <button type="button" onClick={() => move(i, -1)} disabled={i === 0} style={iconBtn(i === 0)} aria-label="Выше"><ArrowUp size={14} strokeWidth={2} aria-hidden /></button>
@@ -1872,17 +1914,16 @@ function ScheduleEditor({ value, onChange, iconSet, withDesc, noIcon, apiBase, u
                   style={{ ...iconBtn(lastOne), color: lastOne ? '#ccc' : '#e74c3c' }}><X size={15} strokeWidth={2.2} aria-hidden /></button>
               </div>
             </div>
-            <input className="input-field" style={{ marginTop: 6, padding: '7px 10px', fontSize: 13 }} placeholder="Событие, например «Сбор гостей»"
+            <input className="input-field" style={{ marginTop: 8, minHeight: 48, padding: '0 14px' }} placeholder="Событие, например «Сбор гостей»"
               value={item.title} onChange={e => update(i, { title: e.target.value })} aria-label="Название пункта" />
             {withDesc && (
-              <textarea className="input-field" rows={2} placeholder="Описание (необязательно)" style={{ marginTop: 6, fontSize: 12 }}
-                value={item.desc || ''} onChange={e => update(i, { desc: e.target.value })} />
+              <textarea className="input-field" rows={2} placeholder="Описание (необязательно)" style={{ marginTop: 8, minHeight: 88 }}
+                value={item.desc || ''} onChange={e => update(i, { desc: e.target.value })} aria-label="Описание пункта" />
             )}
           </div>
         ))}
       </div>
-      <button type="button" onClick={add}
-        style={{ width: '100%', padding: 9, border: '1.5px dashed rgba(206,197,186,0.7)', borderRadius: 10, background: 'transparent', fontSize: 12, color: '#685d4a', cursor: 'pointer', fontFamily: 'var(--font-inter)', fontWeight: 600, marginTop: 8 }}>
+      <button type="button" onClick={add} className={styles.addRowBtn}>
         + Добавить пункт
       </button>
     </div>
@@ -1901,24 +1942,23 @@ function DrinksEditor({ value, onChange }: {
     <div style={{ marginBottom: 4 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {items.map((it, i) => (
-          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 6, alignItems: 'center' }}>
-            <input className="input-field" style={{ padding: '7px 8px', fontSize: 13 }} placeholder="Напиток" value={it.label} onChange={e => update(i, e.target.value)} />
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8, alignItems: 'center' }}>
+            <input className="input-field" style={{ minHeight: 48, padding: '0 14px' }} placeholder="Напиток" value={it.label} onChange={e => update(i, e.target.value)} aria-label={`Напиток ${i + 1}`} />
             <button type="button" onClick={() => remove(i)} aria-label="Удалить напиток" style={{ ...iconBtn(false), color: '#e74c3c' }}><X size={15} strokeWidth={2.2} aria-hidden /></button>
           </div>
         ))}
       </div>
-      <button type="button" onClick={add}
-        style={{ width: '100%', padding: 9, border: '1.5px dashed rgba(206,197,186,0.7)', borderRadius: 10, background: 'transparent', fontSize: 12, color: '#685d4a', cursor: 'pointer', fontFamily: 'var(--font-inter)', fontWeight: 600, marginTop: 8 }}>
+      <button type="button" onClick={add} className={styles.addRowBtn}>
         + Добавить напиток
       </button>
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, htmlFor, children }: { label: string; htmlFor?: string; children: React.ReactNode }) {
   return (
     <div className={styles.field}>
-      <label className={styles.fieldLabel}>{label}</label>
+      <label className={styles.fieldLabel} htmlFor={htmlFor}>{label}</label>
       {children}
     </div>
   );
