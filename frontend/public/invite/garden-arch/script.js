@@ -123,7 +123,7 @@
   function iconNode(raw) {
     raw = raw || '';
     if (isImageIcon(raw)) return '<img class="tl-icon-node" src="' + escapeHtml(imageUrl(raw)) + '" alt="">';
-    return '<span class="tl-icon-node" style="display:flex;align-items:center;justify-content:center;font-size:54px">' + escapeHtml(raw) + '</span>';
+    return '<span class="tl-icon-node" style="display:flex;align-items:center;justify-content:center;font-size:calc(54 * var(--px, 1px))">' + escapeHtml(raw) + '</span>';
   }
   function scheduleFromDOM() {
     var arr = [];

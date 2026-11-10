@@ -199,7 +199,8 @@
     var TOP0 = 20, STEP = 300, BOTTOM = 280;
     var H = TOP0 + (N - 1) * STEP + BOTTOM;
     var xL = 168, xR = 246;
-    tl.style.height = H + 'px';
+    // В единицах шаблона (--px): на планшете трек растёт вместе с колонкой
+    tl.style.height = 'calc(' + H + ' * var(--px, 1px))';
 
     var ys = [], xs = [];
     for (var i = 0; i < N; i++) { ys.push(TOP0 + 90 + i * STEP); xs.push(i % 2 === 0 ? xL : xR); }
@@ -216,7 +217,7 @@
       var side = idx % 2 === 0 ? 'left' : 'right';
       var div = document.createElement('div');
       div.className = 'stop ' + side + ' fu in';
-      div.style.top = (TOP0 + idx * STEP) + 'px';
+      div.style.top = 'calc(' + (TOP0 + idx * STEP) + ' * var(--px, 1px))';
       div.innerHTML =
         '<img class="ic" src="' + escapeHtml(imageUrl(it.icon || '')) + '" alt="">' +
         '<span class="time">' + escapeHtml(it.time || '') + '</span>' +
@@ -282,7 +283,9 @@
     /* Трек растянут неравномерно (preserveAspectRatio="none"), поэтому
        координаты viewBox переводим в пиксели по каждой оси отдельно. */
     var kx = CAR.svg.clientWidth / 420;
-    var ky = CAR.svg.clientHeight / 1500;
+    // Высота viewBox меняется с числом пунктов программы (rebuildTimeline)
+    var vb = CAR.svg.viewBox && CAR.svg.viewBox.baseVal;
+    var ky = CAR.svg.clientHeight / ((vb && vb.height) || 1500);
     var x = p.x * kx, y = p.y * ky;
 
     /* Картинка нарисована носом вверх, отсюда поправка на 90 градусов. */

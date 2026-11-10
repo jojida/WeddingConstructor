@@ -437,7 +437,7 @@ function EditorContent() {
   // Превью — в рамке телефона (360×720) или планшета (экран 768×1024): шаблон
   // верстается под ширину выбранного устройства. На невысоком экране рамка
   // обрезалась снизу — масштаб подбирается под место (над рамкой — строка с
-  // переключателем, 64 px). На телефоне только телефон, размер задаёт CSS — null.
+  // кнопкой «Во весь экран», 64 px). На телефоне только телефон, размер задаёт CSS — null.
   const [device, setDevice] = useStoredDevice();
   const phoneScreen = useMediaQuery('(max-width: 768px)');
   const shownDevice: PreviewDevice = phoneScreen ? 'phone' : device;
@@ -1025,15 +1025,14 @@ function EditorContent() {
 
           {/* ── CANVAS (LEFT) ─────────────────────────────────────────────── */}
           <main className={styles.canvas} ref={stageRef}>
-            {/* Полноэкранный предпросмотр и выбор устройства: телефон или
-                планшет (на телефоне строки нет — там только телефон). */}
+            {/* Полноэкранный предпросмотр. Выбор телефона или планшета — справа,
+                над настройками (на телефоне его нет — там только телефон). */}
             <div className={styles.canvasControls}>
               <button className={styles.zoomBtn} onClick={openPreview}
                 title="Открыть во весь экран">
                 <Maximize size={15} aria-hidden />
                 <span>Во весь экран</span>
               </button>
-              <DeviceSwitch className={styles.deviceSwitch} value={device} options={['phone', 'tablet'] as const} onChange={chooseDevice} />
             </div>
             {/* На телефоне превью не ловит касания (иначе свайп листал бы
                 приглашение вместо страницы), зато тап по нему открывает
@@ -1076,9 +1075,8 @@ function EditorContent() {
                 <div className={styles.sidebarTitle}>Редактор</div>
                 <div className={styles.sidebarSubtitle}>{template.name}</div>
               </div>
-              {sections?.some(s => s.id) && <p className={styles.sectionsHint}>
-                Уберите ненужные блоки переключателем — их можно вернуть в любой момент.
-              </p>}
+              {/* Как смотреть превью слева: телефон или планшет */}
+              <DeviceSwitch value={device} options={['phone', 'tablet'] as const} onChange={chooseDevice} />
             </div>
 
             <div className={styles.sidebarContent}>
@@ -1086,6 +1084,10 @@ function EditorContent() {
               {sections && shownSection && st ? (
                   <div className={styles.panelGrid}>
                     <nav className={styles.sectionNav} aria-label="Разделы приглашения" ref={navRef}>
+                      {/* Подсказка про переключатели — над списком (в шапке справа теперь выбор устройства) */}
+                      {sections.some(s => s.id) && <p className={styles.navHint}>
+                        Уберите ненужные блоки переключателем — их можно вернуть в любой момент.
+                      </p>}
                       {sections.map(section => {
                         const s = sectionState(section);
                         const current = section === shownSection;

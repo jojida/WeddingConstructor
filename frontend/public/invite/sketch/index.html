@@ -65,7 +65,7 @@
 
     <!-- ══════════════ НАШ ДЕНЬ ══════════════ -->
     <section class="section ourday" data-wc-section="date">
-      <img decoding="async" loading="lazy" class="confetti" style="top:-10px;left:-8px;width:90px" src="assets/confetti-blue.svg" alt="">
+      <img decoding="async" loading="lazy" class="confetti" style="top:calc(-10 * var(--px));left:calc(-8 * var(--px));width:calc(90 * var(--px))" src="assets/confetti-blue.svg" alt="">
       <h2 class="h-script fu">Наш день</h2>
       <div class="dates fu fu-d1" id="dateRow">
         <span class="d" data-day>06</span>
@@ -82,7 +82,7 @@
 
     <!-- ══════════════ ЛОКАЦИЯ ══════════════ -->
     <section class="section location" data-wc-section="venue">
-      <img decoding="async" loading="lazy" class="confetti" style="top:8px; right:-10px; width:110px" src="assets/confetti-yellow.svg" alt="">
+      <img decoding="async" loading="lazy" class="confetti" style="top:calc(8 * var(--px)); right:calc(-10 * var(--px)); width:calc(110 * var(--px))" src="assets/confetti-yellow.svg" alt="">
       <img decoding="async" loading="lazy" class="loc-icon fu" src="assets/gazebo.lossless.webp" alt="">
       <h2 class="h-marker fu">Локация</h2>
       <p class="lead fu fu-d1" data-edit="locationText">Праздник пройдёт здесь:</p>
@@ -120,7 +120,7 @@
         </div>
         <!-- 16:00 -->
         <div class="stop right s2 fu">
-          <img decoding="async" loading="lazy" class="ic" src="assets/rings.svg" alt="" style="height:82px">
+          <img decoding="async" loading="lazy" class="ic" src="assets/rings.svg" alt="" style="height:calc(82 * var(--px))">
           <span class="time">16:00</span>
           <span class="lab">Церемония</span>
         </div>
@@ -132,20 +132,20 @@
         </div>
         <!-- 18:00 -->
         <div class="stop right s4 fu">
-          <img decoding="async" loading="lazy" class="ic" src="assets/cake-slice.lossless.webp" alt="" style="height:84px">
+          <img decoding="async" loading="lazy" class="ic" src="assets/cake-slice.lossless.webp" alt="" style="height:calc(84 * var(--px))">
           <span class="time">18:00</span>
           <span class="lab">Банкет</span>
         </div>
         <!-- 20:00 -->
         <div class="stop left s5 fu">
-          <img decoding="async" loading="lazy" class="ic" src="assets/disco-ball.svg" alt="" style="height:92px">
+          <img decoding="async" loading="lazy" class="ic" src="assets/disco-ball.svg" alt="" style="height:calc(92 * var(--px))">
           <span class="time">20:00</span>
           <span class="lab">Танцы</span>
         </div>
 
         <!-- конфетти у дискотеки -->
-        <img decoding="async" loading="lazy" class="confetti" style="left:-12px; bottom:70px; width:128px" src="assets/confetti-yellow.svg" alt="">
-        <img decoding="async" loading="lazy" class="confetti" style="right:-12px; bottom:20px; width:120px" src="assets/confetti-blue.svg" alt="">
+        <img decoding="async" loading="lazy" class="confetti" style="left:calc(-12 * var(--px)); bottom:calc(70 * var(--px)); width:calc(128 * var(--px))" src="assets/confetti-yellow.svg" alt="">
+        <img decoding="async" loading="lazy" class="confetti" style="right:calc(-12 * var(--px)); bottom:calc(20 * var(--px)); width:calc(120 * var(--px))" src="assets/confetti-blue.svg" alt="">
       </div>
     </section>
 
@@ -187,16 +187,16 @@
 
     <!-- ══════════════ АНКЕТА ══════════════ -->
     <section class="section survey" data-wc-section="rsvp">
-      <img decoding="async" loading="lazy" class="confetti" style="top:-30px; right:-8px; width:130px" src="assets/confetti-yellow.svg" alt="">
+      <img decoding="async" loading="lazy" class="confetti" style="top:calc(-30 * var(--px)); right:calc(-8 * var(--px)); width:calc(130 * var(--px))" src="assets/confetti-yellow.svg" alt="">
       <h2 class="h-marker fu">Анкета</h2>
       <p class="lead fu fu-d1" data-edit="surveyText">Подтвердите участие и выберите напитки.</p>
 
       <form class="rsvp-form fu fu-d1" id="rsvpForm">
         <p class="q">Как вас зовут?</p>
         <input type="text" name="guestName" class="rsvp-name" placeholder="Ваше имя"
-               style="display:block;width:100%;max-width:320px;margin:0 auto;border:none;border-bottom:2px solid var(--ink);
-                      background:transparent;font-family:var(--font-form);font-size:18px;color:var(--ink);
-                      text-align:center;padding:6px 4px;outline:none;">
+               style="display:block;width:100%;max-width:calc(320 * var(--px));margin:0 auto;border:none;border-bottom:calc(2 * var(--px)) solid var(--ink);
+                      background:transparent;font-family:var(--font-form);font-size:calc(18 * var(--px));color:var(--ink);
+                      text-align:center;padding:calc(6 * var(--px)) calc(4 * var(--px));outline:none;">
 
         <p class="q">Будете ли вы на мероприятии?</p>
         <label class="opt radio"><input type="radio" name="attend" value="yes" checked><span class="box"></span>Да, буду!</label>

@@ -1,6 +1,16 @@
 /* ════════════════════════════════════════════════════════════
    ШАБЛОН «ЦВЕТУЩАЯ АРКА» — Blue/White/Green Garden Arch
 ════════════════════════════════════════════════════════════ */
+
+/* Единица размеров шаблона. На телефоне и компьютере --px = 1px — вёрстка та же,
+   что была в пикселях. На планшете в портрете (в редакторе — режим «Планшет»)
+   колонка 620 px растягивается на всю ширину экрана, без полей по бокам: все
+   размеры растут вместе с окном, композиция та же, что на телефоне. */
+:root { --px: 1px; }
+@media (min-width: 621px) and (max-width: 1024px) and (orientation: portrait) {
+  :root { --px: calc(100vw / 620); }
+}
+
 :root {
   --bg: #ffffff;
   --ink: #4b4f44;
@@ -9,7 +19,7 @@
   --gold-deep: #9c7f4f;
   --sage: #8fa07c;
   --pink: #c98ba0;
-  --pad-x: 30px;
+  --pad-x: calc(30 * var(--px));
 }
 
 *,
@@ -38,19 +48,19 @@ img {
 
 .card {
   width: 100%;
-  max-width: 620px;
+  max-width: calc(620 * var(--px));
   margin: 0 auto;
   background: var(--bg);
   overflow: hidden;
   position: relative;
-  box-shadow: 0 0 60px rgba(60, 70, 50, 0.18);
+  box-shadow: 0 0 calc(60 * var(--px)) rgba(60, 70, 50, 0.18);
 }
 
 .script-h {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
   font-weight: 500;
-  font-size: clamp(34px, 9vw, 46px);
+  font-size: clamp(calc(34 * var(--px)), 9vw, calc(46 * var(--px)));
   color: var(--ink);
   text-align: center;
   line-height: 1.08;
@@ -59,7 +69,7 @@ img {
 /* ── site-wide reveal-on-scroll (секции + поэлементно со стэггером) ── */
 .reveal {
   opacity: 0;
-  transform: translateY(46px);
+  transform: translateY(calc(46 * var(--px)));
   transition: opacity 1s cubic-bezier(.22, 1, .36, 1), transform 1s cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -71,7 +81,7 @@ img {
 /* поэлементное появление — назначается из script.js */
 .anim {
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(calc(30 * var(--px)));
   transition: opacity .85s cubic-bezier(.22, 1, .36, 1), transform .85s cubic-bezier(.22, 1, .36, 1);
 }
 
@@ -158,12 +168,12 @@ img {
 }
 
 .cover-eyebrow {
-  font-size: clamp(8px, 2.4vw, 11px);
+  font-size: clamp(calc(8 * var(--px)), 2.4vw, calc(11 * var(--px)));
   font-weight: 400;
   letter-spacing: 0.34em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin-bottom: 8px;
+  margin-bottom: calc(8 * var(--px));
 }
 
 .cover-names {
@@ -175,37 +185,37 @@ img {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-shadow: 0 0 14px #fff, 0 0 26px #fff, 0 0 40px #fff;
+  text-shadow: 0 0 calc(14 * var(--px)) #fff, 0 0 calc(26 * var(--px)) #fff, 0 0 calc(40 * var(--px)) #fff;
 }
 
 .cover-names .cn-line {
-  font-size: clamp(40px, 12.5vw, 66px);
+  font-size: clamp(calc(40 * var(--px)), 12.5vw, calc(66 * var(--px)));
 }
 
 .cover-names .cn-amp {
-  font-size: clamp(22px, 6.5vw, 34px);
+  font-size: clamp(calc(22 * var(--px)), 6.5vw, calc(34 * var(--px)));
   color: var(--gold);
-  margin: -3px 0;
+  margin: calc(-3 * var(--px)) 0;
 }
 
 .cover-date {
-  font-size: clamp(9px, 2.6vw, 12px);
+  font-size: clamp(calc(9 * var(--px)), 2.6vw, calc(12 * var(--px)));
   font-weight: 400;
   letter-spacing: 0.28em;
   color: var(--ink-soft);
-  margin-top: 12px;
-  text-shadow: 0 0 12px #fff, 0 0 22px #fff;
+  margin-top: calc(12 * var(--px));
+  text-shadow: 0 0 calc(12 * var(--px)) #fff, 0 0 calc(22 * var(--px)) #fff;
 }
 
 /* ━━━━━━━━━━━━ ДОРОГИЕ ДРУЗЬЯ ━━━━━━━━━━━━ */
 .friends {
   background: var(--bg);
-  padding: 54px var(--pad-x) 44px;
+  padding: calc(54 * var(--px)) var(--pad-x) calc(44 * var(--px));
 }
 
 .friends-frame {
   position: relative;
-  padding: 60px 30px 50px;
+  padding: calc(60 * var(--px)) calc(30 * var(--px)) calc(50 * var(--px));
 }
 
 .friends-goldframe {
@@ -220,30 +230,30 @@ img {
 
 .friends-bouquet {
   position: absolute;
-  top: -46px;
+  top: calc(-46 * var(--px));
   left: 50%;
   transform: translateX(-50%);
-  width: 165px;
+  width: calc(165 * var(--px));
   z-index: 3;
   pointer-events: none;
 }
 
 .friends-olive {
   position: absolute;
-  width: 96px;
+  width: calc(96 * var(--px));
   z-index: 2;
   pointer-events: none;
 }
 
 .friends-olive-tr {
-  top: -10px;
-  right: -14px;
+  top: calc(-10 * var(--px));
+  right: calc(-14 * var(--px));
   transform: rotate(8deg);
 }
 
 .friends-olive-bl {
-  bottom: -10px;
-  left: -14px;
+  bottom: calc(-10 * var(--px));
+  left: calc(-14 * var(--px));
   transform: rotate(180deg);
 }
 
@@ -251,18 +261,18 @@ img {
   position: relative;
   z-index: 2;
   text-align: center;
-  padding-top: 14px;
+  padding-top: calc(14 * var(--px));
 }
 
 .friends-text {
-  font-size: clamp(11px, 3.1vw, 13px);
+  font-size: clamp(calc(11 * var(--px)), 3.1vw, calc(13 * var(--px)));
   font-weight: 300;
   letter-spacing: 0.12em;
   line-height: 2;
   text-transform: uppercase;
   color: var(--ink-soft);
-  max-width: 330px;
-  margin: 18px auto 28px;
+  max-width: calc(330 * var(--px));
+  margin: calc(18 * var(--px)) auto calc(28 * var(--px));
 }
 
 .friends-photos {
@@ -273,8 +283,8 @@ img {
 
 .polaroid {
   background: #fff;
-  padding: 8px 8px 22px;
-  box-shadow: 2px 4px 14px rgba(40, 50, 30, 0.2);
+  padding: calc(8 * var(--px)) calc(8 * var(--px)) calc(22 * var(--px));
+  box-shadow: calc(2 * var(--px)) calc(4 * var(--px)) calc(14 * var(--px)) rgba(40, 50, 30, 0.2);
   width: 46%;
   overflow: hidden;
   transition: transform .4s cubic-bezier(.22, 1, .36, 1), box-shadow .4s;
@@ -290,7 +300,7 @@ img {
 
 .polaroid-l {
   transform: rotate(-5deg);
-  margin-right: -10px;
+  margin-right: calc(-10 * var(--px));
   z-index: 1;
 }
 
@@ -300,19 +310,19 @@ img {
 }
 
 .polaroid-l:hover {
-  transform: rotate(-2deg) translateY(-6px) scale(1.03);
+  transform: rotate(-2deg) translateY(calc(-6 * var(--px))) scale(1.03);
   z-index: 5;
 }
 
 .polaroid-r:hover {
-  transform: rotate(1deg) translateY(-6px) scale(1.03);
+  transform: rotate(1deg) translateY(calc(-6 * var(--px))) scale(1.03);
   z-index: 5;
 }
 
 /* ━━━━━━━━━━━━ WEDDING DAY / ИНТЕРАКТИВНОЕ СЕРДЦЕ ━━━━━━━━━━━━ */
 .wedday {
   background: var(--bg);
-  padding: 30px var(--pad-x) 18px;
+  padding: calc(30 * var(--px)) var(--pad-x) calc(18 * var(--px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -320,20 +330,20 @@ img {
 }
 
 .wedday-script {
-  width: 200px;
+  width: calc(200 * var(--px));
   max-width: 60%;
   opacity: 0.9;
   mix-blend-mode: multiply;
 }
 
 .wedday-divider {
-  width: 150px;
-  margin: 6px 0 14px;
+  width: calc(150 * var(--px));
+  margin: calc(6 * var(--px)) 0 calc(14 * var(--px));
   mix-blend-mode: multiply;
 }
 
 .wedday-hint {
-  font-size: clamp(11px, 3vw, 13px);
+  font-size: clamp(calc(11 * var(--px)), 3vw, calc(13 * var(--px)));
   font-weight: 400;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -347,10 +357,10 @@ img {
 
 .heart-wrap {
   position: relative;
-  width: 330px;
+  width: calc(330 * var(--px));
   max-width: 86%;
   aspect-ratio: 1 / 1;
-  margin: 14px auto 4px;
+  margin: calc(14 * var(--px)) auto calc(4 * var(--px));
 }
 
 .heart-day {
@@ -360,7 +370,7 @@ img {
   transform: translate(-50%, -60%);
   font-family: 'Cormorant Garamond', serif;
   font-weight: 500;
-  font-size: clamp(65px, 18vw, 100px);
+  font-size: clamp(calc(65 * var(--px)), 18vw, calc(100 * var(--px)));
   color: var(--pink);
   line-height: 1;
   font-variant-numeric: lining-nums;
@@ -380,7 +390,7 @@ img {
 /* ━━━━━━━━━━━━ МЕСТО ПРОВЕДЕНИЯ ━━━━━━━━━━━━ */
 .venue {
   background: var(--bg);
-  padding: 30px var(--pad-x) 36px;
+  padding: calc(30 * var(--px)) var(--pad-x) calc(36 * var(--px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -388,28 +398,28 @@ img {
 }
 
 .venue-sprig {
-  width: 120px;
-  margin-bottom: 4px;
+  width: calc(120 * var(--px));
+  margin-bottom: calc(4 * var(--px));
 }
 
 .venue-name {
-  font-size: clamp(13px, 3.6vw, 17px);
+  font-size: clamp(calc(13 * var(--px)), 3.6vw, calc(17 * var(--px)));
   font-weight: 400;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin: 14px 0 18px;
+  margin: calc(14 * var(--px)) 0 calc(18 * var(--px));
 }
 
 .venue-illustration {
   width: 100%;
-  max-width: 470px;
+  max-width: calc(470 * var(--px));
 }
 
 .venue-laurel {
-  width: 230px;
+  width: calc(230 * var(--px));
   max-width: 70%;
-  margin-top: 16px;
+  margin-top: calc(16 * var(--px));
   mix-blend-mode: multiply;
 }
 
@@ -417,7 +427,7 @@ img {
 .program {
   position: relative;
   background: var(--bg);
-  padding: 72px var(--pad-x) 84px;
+  padding: calc(72 * var(--px)) var(--pad-x) calc(84 * var(--px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -427,7 +437,7 @@ img {
 /* цветочная рамка ТОЛЬКО сверху и снизу (как в оригинале): горизонтальные гирлянды,
    режутся только по бокам (уходят за край), не перекрывают иконки/текст */
 .program .script-h {
-  margin-bottom: 22px;
+  margin-bottom: calc(22 * var(--px));
   position: relative;
   z-index: 2;
 }
@@ -436,7 +446,7 @@ img {
   position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 440px;
+  max-width: calc(440 * var(--px));
   margin: 0 auto;
   z-index: 2;
 }
@@ -470,10 +480,10 @@ img {
 }
 
 .tl-icon-node {
-  width: clamp(72px, 20vw, 116px);
+  width: clamp(calc(72 * var(--px)), 20vw, calc(116 * var(--px)));
   height: auto;
   object-fit: contain;
-  margin-bottom: 4px;
+  margin-bottom: calc(4 * var(--px));
 }
 
 .tl-node-info {
@@ -484,7 +494,7 @@ img {
 
 .tl-time {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(24px, 6.5vw, 30px);
+  font-size: clamp(calc(24 * var(--px)), 6.5vw, calc(30 * var(--px)));
   font-weight: 500;
   color: var(--ink);
   letter-spacing: 0.05em;
@@ -494,12 +504,12 @@ img {
 }
 
 .tl-text {
-  font-size: 11px;
+  font-size: calc(11 * var(--px));
   font-weight: 400;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin-top: 5px;
+  margin-top: calc(5 * var(--px));
   overflow-wrap: anywhere;
 }
 
@@ -539,26 +549,26 @@ img {
 }
 
 .cd-title {
-  margin-bottom: 18px;
+  margin-bottom: calc(18 * var(--px));
 }
 
 .countdown {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 4px;
+  gap: calc(4 * var(--px));
 }
 
 .cd-cell {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 58px;
+  min-width: calc(58 * var(--px));
 }
 
 .cd-cell span {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(38px, 11vw, 54px);
+  font-size: clamp(calc(38 * var(--px)), 11vw, calc(54 * var(--px)));
   font-weight: 500;
   color: var(--ink);
   line-height: 1;
@@ -567,20 +577,20 @@ img {
 }
 
 .cd-cell small {
-  font-size: 9px;
+  font-size: calc(9 * var(--px));
   font-weight: 400;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin-top: 8px;
+  margin-top: calc(8 * var(--px));
 }
 
 .cd-colon {
   font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(30px, 9vw, 44px);
+  font-size: clamp(calc(30 * var(--px)), 9vw, calc(44 * var(--px)));
   color: var(--gold);
   line-height: 1;
-  padding-top: 4px;
+  padding-top: calc(4 * var(--px));
 }
 
 .cd-couple {
@@ -590,13 +600,13 @@ img {
   bottom: 4%;
   transform: translateX(-50%);
   width: 42%;
-  max-width: 240px;
+  max-width: calc(240 * var(--px));
 }
 
 /* ━━━━━━━━━━━━ АНКЕТА ГОСТЯ ━━━━━━━━━━━━ */
 .rsvp {
   background: var(--bg);
-  padding: 30px var(--pad-x) 44px;
+  padding: calc(30 * var(--px)) var(--pad-x) calc(44 * var(--px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -604,8 +614,8 @@ img {
 }
 
 .rsvp-heart {
-  width: 120px;
-  margin-bottom: 12px;
+  width: calc(120 * var(--px));
+  margin-bottom: calc(12 * var(--px));
   mix-blend-mode: multiply;
 }
 
@@ -613,27 +623,27 @@ img {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
   font-weight: 500;
-  font-size: clamp(28px, 8vw, 38px);
+  font-size: clamp(calc(28 * var(--px)), 8vw, calc(38 * var(--px)));
   color: var(--ink);
-  margin-bottom: 12px;
+  margin-bottom: calc(12 * var(--px));
 }
 
 .rsvp-sub {
-  font-size: clamp(11px, 3vw, 13px);
+  font-size: clamp(calc(11 * var(--px)), 3vw, calc(13 * var(--px)));
   font-weight: 300;
   line-height: 1.7;
   letter-spacing: 0.04em;
   color: var(--ink-soft);
-  max-width: 340px;
-  margin-bottom: 30px;
+  max-width: calc(340 * var(--px));
+  margin-bottom: calc(30 * var(--px));
 }
 
 .rsvp-form {
   width: 100%;
-  max-width: 340px;
+  max-width: calc(340 * var(--px));
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: calc(26 * var(--px));
   text-align: left;
 }
 /* display: flex выше перекрывает атрибут hidden — без этого после отправки
@@ -644,58 +654,58 @@ img {
   border: none;
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: calc(11 * var(--px));
 }
 
 .rsvp-legend {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
-  font-size: 20px;
+  font-size: calc(20 * var(--px));
   font-weight: 500;
   color: var(--ink);
-  margin-bottom: 8px;
+  margin-bottom: calc(8 * var(--px));
 }
 
 .rsvp-name {
   width: 100%;
   border: none;
-  border-bottom: 1px solid var(--ink-soft);
+  border-bottom: calc(1 * var(--px)) solid var(--ink-soft);
   background: transparent;
   font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+  font-size: calc(14 * var(--px));
   color: var(--ink);
-  padding: 7px 2px;
+  padding: calc(7 * var(--px)) calc(2 * var(--px));
   outline: none;
 }
 
 .rsvp-option {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: calc(12 * var(--px));
   cursor: pointer;
-  font-size: 14px;
+  font-size: calc(14 * var(--px));
   font-weight: 300;
   color: var(--ink);
 }
 
 .rsvp-option input {
   accent-color: var(--gold);
-  width: 16px;
-  height: 16px;
+  width: calc(16 * var(--px));
+  height: calc(16 * var(--px));
   flex-shrink: 0;
   cursor: pointer;
 }
 
 .rsvp-submit {
   align-self: center;
-  width: 200px;
-  margin-top: 6px;
-  padding: 13px 20px;
-  border: 1px solid var(--ink);
+  width: calc(200 * var(--px));
+  margin-top: calc(6 * var(--px));
+  padding: calc(13 * var(--px)) calc(20 * var(--px));
+  border: calc(1 * var(--px)) solid var(--ink);
   background: transparent;
   color: var(--ink);
   font-family: 'Montserrat', sans-serif;
-  font-size: 10px;
+  font-size: calc(10 * var(--px));
   font-weight: 400;
   letter-spacing: 0.32em;
   text-transform: uppercase;
@@ -709,20 +719,20 @@ img {
 }
 
 .rsvp-thanks {
-  padding: 26px 0 6px;
+  padding: calc(26 * var(--px)) 0 calc(6 * var(--px));
 }
 
 .thanks-script {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
-  font-size: clamp(24px, 7vw, 34px);
+  font-size: clamp(calc(24 * var(--px)), 7vw, calc(34 * var(--px)));
   color: var(--ink);
 }
 
 /* ━━━━━━━━━━━━ ДРЕСС-КОД ━━━━━━━━━━━━ */
 .dresscode {
   background: var(--bg);
-  padding: 30px var(--pad-x) 30px;
+  padding: calc(30 * var(--px)) var(--pad-x) calc(30 * var(--px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -730,46 +740,46 @@ img {
 }
 
 .dc-sub {
-  font-size: clamp(10px, 2.8vw, 12px);
+  font-size: clamp(calc(10 * var(--px)), 2.8vw, calc(12 * var(--px)));
   font-weight: 400;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin: 12px 0 22px;
+  margin: calc(12 * var(--px)) 0 calc(22 * var(--px));
 }
 
 .dc-swatches {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 14px;
-  margin-bottom: 30px;
-  max-width: 252px;
+  gap: calc(14 * var(--px));
+  margin-bottom: calc(30 * var(--px));
+  max-width: calc(252 * var(--px));
 }
 
 .ga-swatch {
-  width: 46px;
-  height: 46px;
+  width: calc(46 * var(--px));
+  height: calc(46 * var(--px));
   border-radius: 50%;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), 0 3px 8px rgba(40, 50, 30, 0.18);
+  box-shadow: inset 0 0 0 calc(1 * var(--px)) rgba(255, 255, 255, 0.5), 0 calc(3 * var(--px)) calc(8 * var(--px)) rgba(40, 50, 30, 0.18);
 }
 
 /* Переключатель образов: обе группы лежат в разметке, неактивная скрыта. */
 .dc-tabs {
   display: flex;
   justify-content: center;
-  gap: 10px;
-  margin: -14px 0 22px;
+  gap: calc(10 * var(--px));
+  margin: calc(-14 * var(--px)) 0 calc(22 * var(--px));
 }
 .dc-tab {
-  font-size: clamp(10px, 2.8vw, 12px);
+  font-size: clamp(calc(10 * var(--px)), 2.8vw, calc(12 * var(--px)));
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-soft);
   background: none;
-  border: 1px solid rgba(93, 114, 66, 0.35);
-  border-radius: 999px;
-  padding: 7px 18px;
+  border: calc(1 * var(--px)) solid rgba(93, 114, 66, 0.35);
+  border-radius: calc(999 * var(--px));
+  padding: calc(7 * var(--px)) calc(18 * var(--px));
   cursor: pointer;
   transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
@@ -782,7 +792,7 @@ img {
 
 .dc-photos {
   display: flex;
-  gap: 16px;
+  gap: calc(16 * var(--px));
   justify-content: center;
   width: 100%;
 }
@@ -790,7 +800,7 @@ img {
 .dc-card {
   position: relative;
   width: 44%;
-  max-width: 200px;
+  max-width: calc(200 * var(--px));
 }
 
 .dc-photo {
@@ -798,8 +808,8 @@ img {
   aspect-ratio: 3 / 4.5;
   object-fit: cover;
   object-position: top center;
-  border-radius: 3px;
-  box-shadow: 0 4px 16px rgba(40, 50, 30, 0.16);
+  border-radius: calc(3 * var(--px));
+  box-shadow: 0 calc(4 * var(--px)) calc(16 * var(--px)) rgba(40, 50, 30, 0.16);
 }
 
 /* Пион лежит на углу карточки, а не поверх снимка: раньше он занимал
@@ -824,19 +834,19 @@ img {
 }
 
 .dc-divider {
-  width: 170px;
-  margin: 36px 0 10px;
+  width: calc(170 * var(--px));
+  margin: calc(36 * var(--px)) 0 calc(10 * var(--px));
 }
 
 .dc-doves {
-  width: 170px;
+  width: calc(170 * var(--px));
   opacity: 1;
 }
 
 /* ━━━━━━━━━━━━ ПОЖЕЛАНИЯ (рамка из полевых цветов) ━━━━━━━━━━━━ */
 .wishes {
   background: var(--bg);
-  padding: 6px 0 14px;
+  padding: calc(6 * var(--px)) 0 calc(14 * var(--px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -847,7 +857,7 @@ img {
 .wishes-arch-wrap {
   position: relative;
   width: 132%;
-  max-width: 860px;
+  max-width: calc(860 * var(--px));
   margin: 0 -16%;
 }
 
@@ -871,14 +881,14 @@ img {
 }
 
 .wishes-inner .script-h {
-  font-size: clamp(16px, 4vw, 22px);
+  font-size: clamp(calc(16 * var(--px)), 4vw, calc(22 * var(--px)));
   line-height: 1.15;
-  margin-bottom: 14px;
+  margin-bottom: calc(14 * var(--px));
   flex-shrink: 0;
 }
 
 .wishes-text {
-  font-size: 10px;
+  font-size: calc(10 * var(--px));
   font-weight: 300;
   letter-spacing: 0.06em;
   line-height: 2.0;
@@ -890,7 +900,7 @@ img {
 /* ━━━━━━━━━━━━ ФИНАЛ ━━━━━━━━━━━━ */
 .closing {
   background: var(--bg);
-  padding: 20px var(--pad-x) 56px;
+  padding: calc(20 * var(--px)) var(--pad-x) calc(56 * var(--px));
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -898,16 +908,16 @@ img {
 }
 
 .closing-h {
-  max-width: 360px;
-  margin-bottom: 14px;
+  max-width: calc(360 * var(--px));
+  margin-bottom: calc(14 * var(--px));
 }
 
 /* финальный венок (полумесяц из лилий) + монограмма из двух букв внутри */
 .closing-wreath-wrap {
   position: relative;
-  width: 300px;
+  width: calc(300 * var(--px));
   max-width: 82%;
-  margin-top: 18px;
+  margin-top: calc(18 * var(--px));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -937,7 +947,7 @@ img {
 .mono-letters {
   display: flex;
   align-items: center;
-  font-size: clamp(50px, 15vw, 74px);
+  font-size: clamp(calc(50 * var(--px)), 15vw, calc(74 * var(--px)));
   letter-spacing: -0.02em;
 }
 
@@ -955,7 +965,7 @@ img {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: clamp(30px, 9vw, 46px);
+  font-size: clamp(calc(30 * var(--px)), 9vw, calc(46 * var(--px)));
   color: var(--ink);
   opacity: 0.5;
   pointer-events: none;
@@ -964,29 +974,29 @@ img {
 /* ━━━━━━━━━━━━ RESPONSIVE ━━━━━━━━━━━━ */
 @media (max-width: 480px) {
   :root {
-    --pad-x: 22px;
+    --pad-x: calc(22 * var(--px));
   }
 
   .friends-frame {
-    padding: 52px 18px 42px;
+    padding: calc(52 * var(--px)) calc(18 * var(--px)) calc(42 * var(--px));
   }
 
   .cd-cell {
-    min-width: 50px;
+    min-width: calc(50 * var(--px));
   }
 }
 
 @media (max-width: 380px) {
   :root {
-    --pad-x: 15px;
+    --pad-x: calc(15 * var(--px));
   }
 
   .cd-cell {
-    min-width: 44px;
+    min-width: calc(44 * var(--px));
   }
 
   .tl-icon-node {
-    width: 72px;
+    width: calc(72 * var(--px));
   }
 }
 
@@ -998,12 +1008,17 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
 
 /* ── Карта места (Яндекс) в «Месте проведения» — ../assets/venue-map.js ── */
 .venue .wc-map {
-  --wc-map-width: 440px;
-  --wc-map-h: 230px;
-  --wc-map-radius: 6px;
-  --wc-map-border: 1px solid rgba(184, 154, 106, .55);
-  --wc-map-shadow: 0 6px 18px rgba(75, 79, 68, .08);
+  --wc-map-width: calc(440 * var(--px));
+  --wc-map-h: calc(230 * var(--px));
+  --wc-map-radius: calc(6 * var(--px));
+  --wc-map-border: calc(1 * var(--px)) solid rgba(184, 154, 106, .55);
+  --wc-map-shadow: 0 calc(6 * var(--px)) calc(18 * var(--px)) rgba(75, 79, 68, .08);
   --wc-map-accent: var(--gold-deep);
-  margin-top: 18px;
+  margin-top: calc(18 * var(--px));
 }
-.venue .wc-map__route { margin-top: 20px; font-size: 12px; letter-spacing: .24em; text-transform: uppercase; }
+.venue .wc-map__route { margin-top: calc(20 * var(--px)); font-size: calc(12 * var(--px)); letter-spacing: .24em; text-transform: uppercase; }
+
+/* Планшет в портрете: колонка во всю ширину — тень по краям не нужны */
+@media (min-width: 621px) and (max-width: 1024px) and (orientation: portrait) {
+  .card { box-shadow: none; }
+}

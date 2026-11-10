@@ -73,6 +73,15 @@ html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display:
   .invite { box-shadow: 0 0 60px rgba(0, 0, 0, .45); }
 }
 
+/* Планшет в портрете (в редакторе — режим «Планшет», 768×1024): макет на всю
+   ширину экрана, без полей по бокам. Единица --u растёт вместе с окном —
+   композиция та же, что на телефоне, только крупнее. Компьютер и планшет
+   лёжа — колонкой, как раньше. */
+@media (min-width: 501px) and (max-width: 1024px) and (orientation: portrait) {
+  :root { --col: 100vw; }
+  .invite { box-shadow: none; }   /* колонки больше нет — тень по краям не нужна */
+}
+
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;

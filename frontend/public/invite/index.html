@@ -130,7 +130,7 @@
         </div>
         <div class="date-circle">
           <span class="date-num">2030</span>
-          <span class="date-lbl" style="font-size:9px">год</span>
+          <span class="date-lbl" style="font-size:calc(9 * var(--px))">год</span>
         </div>
       </div>
     </section>
@@ -395,8 +395,8 @@
         <fieldset>
           <legend>Как вас зовут?</legend>
           <input type="text" name="guestName" placeholder="Ваше имя"
-                 style="width:100%;border:none;border-bottom:1.5px solid #114e88;background:transparent;
-                        font-family:inherit;font-size:15px;color:#354366;padding:6px 2px;outline:none;">
+                 style="width:100%;border:none;border-bottom:calc(1.5 * var(--px)) solid #114e88;background:transparent;
+                        font-family:inherit;font-size:calc(15 * var(--px));color:#354366;padding:calc(6 * var(--px)) calc(2 * var(--px));outline:none;">
         </fieldset>
 
         <fieldset>
@@ -443,12 +443,12 @@
         </fieldset>
 
         <button type="submit" class="rsvp-submit-med"
-                style="display:block;margin:8px auto 0;padding:12px 36px;border:1.5px solid #114e88;
-                       background:#114e88;color:#fff;font-family:inherit;font-size:13px;letter-spacing:1px;
-                       border-radius:24px;cursor:pointer;">Отправить</button>
+                style="display:block;margin:calc(8 * var(--px)) auto 0;padding:calc(12 * var(--px)) calc(36 * var(--px));border:calc(1.5 * var(--px)) solid #114e88;
+                       background:#114e88;color:#fff;font-family:inherit;font-size:calc(13 * var(--px));letter-spacing:calc(1 * var(--px));
+                       border-radius:calc(24 * var(--px));cursor:pointer;">Отправить</button>
       </form>
 
-      <div class="rsvp-thanks" id="rsvpThanks" hidden style="text-align:center;padding:20px;color:#114e88;font-size:18px;">
+      <div class="rsvp-thanks" id="rsvpThanks" hidden style="text-align:center;padding:calc(20 * var(--px));color:#114e88;font-size:calc(18 * var(--px));">
         Спасибо! Будем рады видеть вас 💙
       </div>
     </section>
