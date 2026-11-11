@@ -77,7 +77,7 @@
   width: var(--preview-base, 480px) !important;
   height: var(--preview-height, 680px) !important;
   max-width: none !important;
-  transform: translateX(var(--preview-offset, 0px)) scale(var(--preview-scale, 0.4));
+  transform: translate(var(--preview-offset, 0px), var(--preview-offset-y, 0px)) scale(var(--preview-scale, 0.4));
   transform-origin: top left;
   border-radius: 0 !important;
   box-shadow: none !important;

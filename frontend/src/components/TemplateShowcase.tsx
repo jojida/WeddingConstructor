@@ -12,18 +12,33 @@ import styles from './TemplateShowcase.module.css';
    TemplatePreview), просто в разных пропорциях. Её же печатает вкладка
    «Открытка с QR» в кабинете (PrintCardTab), так что витрина честно
    показывает, что получится на бумаге. */
-/* Экран телефона ~9:19 — рендерим миниатюру уже, чтобы она заполнила его
-   по высоте, а не оставила пустую полосу снизу */
-const PHONE_BASE = 360;
-/* Миниатюры-картинки с постоянными пропорциями: их высота зависит только от
-   ширины, поэтому в телефоне они идут в режиме cover (см. PreviewScale) */
-const PHONE_COVER = new Set(['tenderness', 'forest', 'garden-evening', 'vitrage', 'angels']);
+/* Экран телефона ~9:19 — заметно уже открытки (~0,7). Миниатюры свёрстаны
+   под ширину 480px, поэтому и в телефоне рисуются в 480: при более узком
+   рендере (раньше было 360) текст и рамки вылезали за правый край.
+
+   Миниатюры, которые сами тянутся по высоте (Айвори, Тёмная элегантность,
+   Средиземноморье, Цветущая арка, Каллы), заполняют экран целиком.
+
+   Остальные — картинка фиксированных пропорций или блок под открытку: они
+   идут в режиме cover. Число — их высота при ширине 480px: столько рендерим,
+   масштабируем по высоте экрана, по бокам срезается только фон — окно
+   обрезки держится вокруг текста (fitText в PreviewScale). */
+const PHONE_COVER: Record<string, number> = {
+  tenderness: 711,
+  forest: 763,
+  'garden-evening': 776,
+  vitrage: 738,
+  angels: 764,
+  floral: 677,
+  sketch: 677,
+};
 
 export default function TemplateShowcase({ data, apiBase, initialVisible = false }: {
   data: InviteData;
   apiBase: string;
   initialVisible?: boolean;
 }) {
+  const coverHeight = PHONE_COVER[data.templateId];
   return (
     <div className={styles.stage}>
       <div className={styles.paper}>
@@ -36,7 +51,7 @@ export default function TemplateShowcase({ data, apiBase, initialVisible = false
       <div className={styles.phone}>
         <div className={styles.screen}>
           <PreviewScale className={styles.scale}
-            {...(PHONE_COVER.has(data.templateId) ? { baseWidth: 480, coverHeight: 680 } : { baseWidth: PHONE_BASE })}>
+            {...(coverHeight ? { coverHeight, fitText: true, fitKey: `${data.groomName}|${data.brideName}` } : {})}>
             <LazyMount initialVisible={initialVisible}>
               <TemplatePreview data={data} apiBase={apiBase} />
             </LazyMount>

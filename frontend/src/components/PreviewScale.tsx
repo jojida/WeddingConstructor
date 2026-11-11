@@ -16,53 +16,158 @@ import { useEffect, useRef } from 'react';
    карточки — превью выглядит одинаково на любом экране. */
 const BASE_WIDTH = 480;
 
-/* baseWidth — «родная» ширина рендера. Для экрана телефона в витрине
-   (TemplateShowcase) она уже 480px: экран вытянут по высоте, и миниатюра,
-   рассчитанная на пропорции карточки, при 480px оставляла пустую полосу
-   снизу. CSS читает её из --preview-base.
+/* Запас по бокам текста при обрезке, в «родных» px миниатюры: росчерки
+   рукописных шрифтов (Great Vibes и др.) выходят за габарит строки. */
+const TEXT_MARGIN = 18;
 
-   coverHeight — режим «cover» для миниатюр-картинок с постоянными
-   пропорциями (Нежность, Лес, Ангелы…): их высота растёт только с шириной,
-   и в вытянутом экране снизу оставалось пусто. Тогда рендерим миниатюру
-   baseWidth × coverHeight, масштабируем по высоте контейнера и центрируем,
-   края по бокам срезаются (--preview-offset). */
-export default function PreviewScale({ className, children, baseWidth = BASE_WIDTH, coverHeight }: {
+/* baseWidth — «родная» ширина рендера (читает CSS из --preview-base). Уже
+   480px её делать нельзя: вёрстка миниатюр в px и долях ширины макета, при
+   узком рендере текст и рамки вылезают за правый край.
+
+   coverHeight — режим «cover» для экрана телефона в витрине (TemplateShowcase):
+   экран вытянут (~9:19), а миниатюра рассчитана на пропорции открытки. Рендерим
+   её baseWidth × coverHeight, масштабируем по высоте экрана, по бокам срезается
+   лишнее (--preview-offset).
+
+   fitText — в режиме cover срезать можно только фон, не текст. Окно обрезки
+   центрируется по тексту миниатюры (у «Нежности», например, арка с именами
+   смещена вправо), а если текст шире окна — миниатюра отдаляется ровно
+   настолько, чтобы он поместился с запасом. Освободившееся место сверху и
+   снизу заливается фоном самой миниатюры, композиция остаётся по центру.
+
+   fitKey — меняется вместе с текстом (имена в поле «со своими именами»):
+   тогда ширина текста перемеряется. */
+export default function PreviewScale({ className, children, baseWidth = BASE_WIDTH, coverHeight, fitText = false, fitKey }: {
   className?: string;
   children: React.ReactNode;
   baseWidth?: number;
   coverHeight?: number;
+  fitText?: boolean;
+  fitKey?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const textBox = useRef<{ x0: number; x1: number } | null>(null);
+  const remeasureRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    textBox.current = null;
+    const set = (name: string, value: string) => el.style.setProperty(name, value);
 
-    const fit = () => {
-      if (coverHeight) {
-        const scale = Math.max(el.clientHeight / coverHeight, el.clientWidth / baseWidth);
-        if (!scale) return;
-        el.style.setProperty('--preview-scale', String(scale));
-        el.style.setProperty('--preview-height', `${coverHeight}px`);
-        el.style.setProperty('--preview-offset', `${Math.round((el.clientWidth - baseWidth * scale) / 2)}px`);
-        return;
+    // Горизонтальные границы видимого текста миниатюры — в её «родных» px
+    const measure = () => {
+      const root = el.firstElementChild as HTMLElement | null;
+      const scale = parseFloat(el.style.getPropertyValue('--preview-scale'));
+      if (!root || !scale) return null;
+      const rootLeft = root.getBoundingClientRect().left;
+      let x0 = Infinity;
+      let x1 = -Infinity;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const parent = node.parentElement;
+        if (!parent || !node.textContent?.trim()) continue;
+        const style = getComputedStyle(parent);
+        if (style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity) === 0) continue;
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects()) {
+          if (rect.width < 0.5) continue;
+          x0 = Math.min(x0, (rect.left - rootLeft) / scale);
+          x1 = Math.max(x1, (rect.right - rootLeft) / scale);
+        }
       }
-      const scale = el.clientWidth / baseWidth;
-      if (!scale) return;
-      el.style.setProperty('--preview-scale', String(scale));
-      // Высоту превью подгоняем так, чтобы после сжатия оно закрыло карточку.
-      el.style.setProperty('--preview-height', `${Math.round(el.clientHeight / scale)}px`);
+      return x1 > x0 ? { x0, x1 } : null;
     };
 
+    // Фон миниатюры — им заливаются поля, если она отдалена
+    const paintBackground = () => {
+      let node = el.firstElementChild as HTMLElement | null;
+      for (let depth = 0; node && depth < 4; depth++, node = node.firstElementChild as HTMLElement | null) {
+        const color = getComputedStyle(node).backgroundColor;
+        if (color && color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)') {
+          el.style.backgroundColor = color;
+          return;
+        }
+      }
+    };
+
+    const fit = () => {
+      const width = el.clientWidth;
+      const height = el.clientHeight;
+      if (!width || !height) return;
+      if (coverHeight) {
+        let scale = Math.max(height / coverHeight, width / baseWidth);
+        let center = baseWidth / 2;
+        const box = fitText ? textBox.current : null;
+        if (box) {
+          const textScale = width / Math.min(baseWidth, box.x1 - box.x0 + 2 * TEXT_MARGIN);
+          scale = Math.max(width / baseWidth, Math.min(scale, textScale));
+          center = (box.x0 + box.x1) / 2;
+        }
+        const visible = width / scale;
+        const left = Math.min(Math.max(center - visible / 2, 0), baseWidth - visible);
+        set('--preview-scale', String(scale));
+        set('--preview-height', `${coverHeight}px`);
+        set('--preview-offset', `${Math.round(-left * scale)}px`);
+        set('--preview-offset-y', `${Math.max(0, Math.round((height - coverHeight * scale) / 2))}px`);
+        return;
+      }
+      const scale = width / baseWidth;
+      set('--preview-scale', String(scale));
+      // Высоту превью подгоняем так, чтобы после сжатия оно закрыло карточку.
+      set('--preview-height', `${Math.round(height / scale)}px`);
+    };
+
+    const remeasure = () => {
+      if (!coverHeight || !fitText) return;
+      const box = measure();
+      if (!box) return;
+      paintBackground();
+      const prev = textBox.current;
+      // Мелкие сдвиги (тикающий таймер) не трогают окно — иначе оно дёргается
+      if (prev && Math.abs(prev.x0 - box.x0) < 2 && Math.abs(prev.x1 - box.x1) < 2) return;
+      textBox.current = box;
+      fit();
+    };
+    remeasureRef.current = remeasure;
+
     fit();
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', fit);
-      return () => window.removeEventListener('resize', fit);
+    remeasure();
+
+    let resize: ResizeObserver | null = null;
+    if (typeof ResizeObserver === 'undefined') window.addEventListener('resize', fit);
+    else { resize = new ResizeObserver(fit); resize.observe(el); }
+
+    // Миниатюра монтируется позже (LazyMount + динамический импорт шаблона),
+    // а ширина текста зависит от шрифтов — перемеряем, когда появляется
+    // содержимое и когда догружаются шрифты. Смену цифр таймера (characterData)
+    // не слушаем, чтобы окно не пересчитывалось каждую секунду.
+    let frame = 0;
+    const schedule = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(remeasure); };
+    let mutations: MutationObserver | null = null;
+    const fonts = typeof document !== 'undefined' ? document.fonts : undefined;
+    if (coverHeight && fitText) {
+      mutations = new MutationObserver(schedule);
+      mutations.observe(el, { childList: true, subtree: true });
+      fonts?.addEventListener?.('loadingdone', schedule);
+      fonts?.ready?.then(schedule);
     }
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [baseWidth, coverHeight]);
+
+    return () => {
+      resize?.disconnect();
+      window.removeEventListener('resize', fit);
+      mutations?.disconnect();
+      fonts?.removeEventListener?.('loadingdone', schedule);
+      cancelAnimationFrame(frame);
+    };
+  }, [baseWidth, coverHeight, fitText]);
+
+  // Сменились имена — текст другой ширины, окно обрезки надо пересчитать
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => remeasureRef.current());
+    return () => cancelAnimationFrame(frame);
+  }, [fitKey]);
 
   return (
     <div ref={ref} className={className} style={{ '--preview-base': `${baseWidth}px` } as React.CSSProperties}>

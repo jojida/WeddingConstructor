@@ -124,7 +124,6 @@ body {
    ============================================================ */
 .guests { aspect-ratio: 1024.5 / 1844.25; }
 .guests__pearls-tl { top: 1%; left: -18%; width: 28%; }
-.guests__callas-tr { top: -1%; right: -8%; width: 30%; transform: scaleX(-1) scaleY(-1); }
 .guests__callas-bl { bottom: -1%; left: -4%; width: 26%; }
 .guests__pearls-br { bottom: 6%; right: -8%; width: 40%; transform: scaleX(-1); }
 .guests__title { position: absolute; top: 8%; left: 0; right: 0; text-align: center; font-size: 12cqw; }

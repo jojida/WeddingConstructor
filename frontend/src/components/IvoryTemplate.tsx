@@ -126,10 +126,15 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
     const [yy, mm, dd] = data.weddingDate.split('-').map(Number);
     if (yy && mm && dd) { day = String(dd); month = MONTHS[mm - 1]; year = String(yy); }
   }
+  // Имя невесты начинается с середины (199 из 411) — длинные имена вылезали
+  // за край. Кегль общий для обоих (~0,5 кегля на букву), до 64 у коротких.
+  const nameSize = Math.min(64, 358 / (groom.length * 0.5), 200 / (bride.length * 0.5));
   const name: CSSProperties = {
     position: 'absolute', fontFamily: "'Caslon Becker', 'Cormorant Garamond', Georgia, serif",
-    fontStyle: 'italic', fontSize: u(64), lineHeight: 'normal', color: '#fff', whiteSpace: 'nowrap', zIndex: 3,
+    fontStyle: 'italic', fontSize: u(nameSize), lineHeight: 'normal', color: '#fff', whiteSpace: 'nowrap', zIndex: 3,
   };
+  // Подъём строки над базовой линией — пропорционально кеглю
+  const lift = (n: number) => u(n * nameSize / 64);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#000', containerType: 'inline-size' }}>
@@ -144,8 +149,8 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
         position: 'absolute', left: 0, right: 0, top: y(63), margin: 0, zIndex: 3, textAlign: 'center',
         fontFamily: "'Cormorant Garamond', Georgia, serif", fontVariant: 'small-caps', fontSize: u(22), color: '#fff',
       }}>Приглашение на свадьбу</p>
-      <span style={{ ...name, left: u(41), top: `calc(${y(473)} - ${u(30)})` }}>{groom}</span>
-      <span style={{ ...name, left: u(199), top: `calc(${y(582)} - ${u(24)})` }}>{bride}</span>
+      <span style={{ ...name, left: u(41), top: `calc(${y(473)} - ${lift(30)})` }}>{groom}</span>
+      <span style={{ ...name, left: u(199), top: `calc(${y(582)} - ${lift(24)})` }}>{bride}</span>
       <p style={{
         position: 'absolute', left: 0, right: 0, top: `calc(${y(772)} - ${u(10)})`, margin: 0, zIndex: 3,
         display: 'flex', justifyContent: 'center', gap: u(40),

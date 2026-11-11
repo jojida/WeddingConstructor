@@ -324,31 +324,6 @@
           "alt": ""
         },
         {
-          "id": "aeodpj6qy241",
-          "name": "deco",
-          "x": 335.7124938964844,
-          "y": -7.73748779296875,
-          "w": 129.1125030517578,
-          "h": 133.47500610351562,
-          "rotation": 0,
-          "opacity": 1,
-          "locked": false,
-          "hidden": false,
-          "selector": ".canvas.guests.reveal .deco.guests__callas-tr.fade-soft",
-          "boundText": false,
-          "baseline": {
-            "x": 335.7124938964844,
-            "y": -7.73748779296875,
-            "w": 129.1125030517578,
-            "h": 133.47500610351562
-          },
-          "kind": "image",
-          "assetId": "/invite/calla/assets/callas-cluster.svg",
-          "fit": "fill",
-          "radius": 0,
-          "alt": ""
-        },
-        {
           "id": "2mwjc9wry241",
           "name": "deco",
           "x": -17.212499618530273,

@@ -116,6 +116,10 @@ export default function GardenEveningTemplate({ data, apiBase, fullPage, slug, e
   const u = (n: number) => `calc(${n} * 100cqw / 1366)`;
   const groom = data.groomName || 'Даниил';
   const bride = data.brideName || 'Ольга';
+  // Имена в одну строку: длинная пара — мельче (~0,5 кегля на букву, строка
+  // не шире 1200 из 1366), центр строки остаётся на месте
+  const namesSize = Math.min(159, 1200 / ((groom.length + bride.length + 3) * 0.5));
+  const namesTop = 690 + 0.625 * (159 - namesSize);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#f7f0e0', containerType: 'inline-size' }}>
@@ -127,8 +131,8 @@ export default function GardenEveningTemplate({ data, apiBase, fullPage, slug, e
         color: 'rgba(255,255,255,.92)', textShadow: '0 0 8px rgba(120,80,40,.3)',
       }}>приглашение на свадьбу</p>
       <p style={{
-        position: 'absolute', left: 0, right: 0, top: u(690), margin: 0, textAlign: 'center', whiteSpace: 'nowrap',
-        fontFamily: "'Great Vibes', cursive", fontSize: u(159), lineHeight: 1.25, color: '#fff',
+        position: 'absolute', left: 0, right: 0, top: u(namesTop), margin: 0, textAlign: 'center', whiteSpace: 'nowrap',
+        fontFamily: "'Great Vibes', cursive", fontSize: u(namesSize), lineHeight: 1.25, color: '#fff',
         textShadow: '0 0 10px rgba(110,70,30,.25)',
       }}>{groom} &amp; {bride}</p>
     </div>
