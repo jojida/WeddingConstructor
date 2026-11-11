@@ -160,8 +160,9 @@ function ManageInviteSession() {
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
         {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}
 
-        {/* Отзыв о сервисе — у опубликованного сайта; сюда ведёт письмо после свадьбы (?review=1) */}
-        {(invite.status === 'paid' || invite.status === 'published') && <ReviewCard inviteId={invite.id} />}
+        {/* Отзыв о сервисе — только у оплаченного сайта (бесплатных не просим, как и сервер:
+            canReview в backend/src/lib/reviews.ts); сюда ведёт письмо после свадьбы (?review=1) */}
+        {(invite.status === 'paid' || invite.status === 'published') && invite.plan !== 'free' && <ReviewCard inviteId={invite.id} />}
       </div>
     </div>
   );

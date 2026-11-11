@@ -18,8 +18,10 @@ export class ReviewError extends Error {
   constructor(public status: number, message: string) { super(message); }
 }
 
-/** Отзыв оставляют о работающем сайте: опубликованном бесплатно или оплаченном. */
-export const canReview = (status: string): boolean => status === 'paid' || status === 'published';
+/** Отзыв просим и принимаем только у оплативших (решение владельца 11.11.26: мнение
+    бесплатных пар не спрашиваем) — и о работающем сайте, не о черновике. */
+export const canReview = (status: string, plan: string): boolean =>
+  (status === 'paid' || status === 'published') && plan !== 'free';
 
 /** Ссылка из письма «Как вам WeddingCraft?» открывает отзыв без входа в кабинет:
     подпись привязана к сайту и его владельцу, подделать её без секрета сервера нельзя. */
@@ -58,7 +60,7 @@ export const publishable = (r: Pick<Review, 'rating' | 'publish' | 'text'>): boo
   r.publish && r.rating >= PUBLISH_MIN_RATING && r.text.length > 0;
 
 export async function saveReview(invite: Invitation, body: Record<string, unknown>): Promise<Review> {
-  if (!canReview(invite.status)) throw new ReviewError(403, 'Отзыв можно оставить, когда сайт опубликован');
+  if (!canReview(invite.status, invite.plan)) throw new ReviewError(403, 'Отзыв можно оставить, когда сайт оплачен');
   const rating = body.rating;
   if (typeof rating !== 'number' || !Number.isInteger(rating) || rating < 1 || rating > 5) throw new ReviewError(400, 'Поставьте оценку от 1 до 5');
   const text = cleanText(body.text, REVIEW_LIMITS.text, true);

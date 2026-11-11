@@ -36,7 +36,7 @@ async function readReview(find: () => Promise<Invitation | null>, res: Response,
     const invite = await find();
     if (!invite) return res.status(404).json({ error: missing });
     const review = await prisma.review.findUnique({ where: { invitationId: invite.id } });
-    return res.json({ review: ownView(review), canReview: canReview(invite.status), names: coupleNames(invite) });
+    return res.json({ review: ownView(review), canReview: canReview(invite.status, invite.plan), names: coupleNames(invite) });
   } catch (e) {
     console.error('Отзывы: ошибка чтения:', errName(e));
     return res.status(500).json({ error: 'Ошибка сервера' });

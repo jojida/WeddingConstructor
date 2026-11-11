@@ -78,9 +78,10 @@ test('отзывы пар', async (t) => {
   const owner = await prisma.user.create({ data: { email: 'couple@example.test' } });
   const stranger = await prisma.user.create({ data: { email: 'stranger@example.test' } });
   const tok = sign(owner), other = sign(stranger);
-  const mk = (data) => prisma.invitation.create({ data: { userId: owner.id, templateId: 'calla', plan: 'free', status: 'published', groomName: 'Андрей', brideName: 'Екатерина', ...data } });
+  const mk = (data) => prisma.invitation.create({ data: { userId: owner.id, templateId: 'calla', plan: 'premium', status: 'paid', groomName: 'Андрей', brideName: 'Екатерина', ...data } });
   const inv = await mk({ slug: 'andrey-ekaterina' });
   const draft = await mk({ slug: 'draft-site', status: 'draft' });
+  const free = await mk({ slug: 'free-site', plan: 'free', status: 'published' });
   const R = (id = inv.id) => `/api/reviews/invite/${id}`;
   const press = (data, from = SUPPORT, secret = telegramWebhookSecret(), text = 'отзыв') => call('/api/telegram/webhook', 'POST', {
     update_id: 1,
@@ -94,6 +95,11 @@ test('отзывы пар', async (t) => {
     assert.deepEqual(empty.json, { review: null, canReview: true, names: 'Андрей и Екатерина' });
     assert.equal((await call(R(draft.id), 'GET', undefined, tok)).json.canReview, false);
     assert.equal((await call(R(draft.id), 'PUT', { rating: 5 }, tok)).status, 403, 'черновик — рано');
+    assert.equal((await call(R(free.id), 'GET', undefined, tok)).json.canReview, false, 'бесплатных об отзыве не просим');
+    assert.equal((await call(R(free.id), 'PUT', { rating: 5 }, tok)).status, 403);
+    const freeLink = `/api/reviews/link/${free.id}?t=${reviewLinkToken(free.id, owner.id)}`;
+    assert.equal((await call(freeLink)).json.canReview, false, 'старая ссылка из письма бесплатной паре');
+    assert.equal((await call(freeLink, 'PUT', { rating: 5 })).status, 403);
     assert.equal((await call(R(), 'PUT', { rating: 5 }, other)).status, 404, 'чужой сайт');
     assert.equal((await call(R(), 'PUT', { rating: 5 })).status, 401);
     for (const rating of [0, 6, 4.5, '5', null]) assert.equal((await call(R(), 'PUT', { rating }, tok)).status, 400, `оценка ${rating}`);
@@ -183,20 +189,22 @@ test('отзывы пар', async (t) => {
     assert.equal(await prisma.review.count({ where: { id: review.id } }), 0);
   });
 
-  await t.test('письмо после свадьбы: через 2–10 дней и только тем, кто ещё не написал отзыв', async () => {
+  await t.test('письмо после свадьбы: через 2–10 дней, только оплатившим и тем, кто ещё не написал отзыв', async () => {
     const DAY = 86_400_000, now = Date.now();
     const day = (offset) => new Date(now + offset * DAY).toISOString().slice(0, 10);
-    const people = await Promise.all(['a', 'b', 'c'].map((s) => prisma.user.create({ data: { email: `after-${s}@example.test` } })));
-    const site = (user, slug, weddingDate) => prisma.invitation.create({ data: { userId: user.id, slug, templateId: 'calla', plan: 'premium', status: 'paid', weddingDate } });
+    const people = await Promise.all(['a', 'b', 'c', 'd'].map((s) => prisma.user.create({ data: { email: `after-${s}@example.test` } })));
+    const site = (user, slug, weddingDate, data = {}) => prisma.invitation.create({ data: { userId: user.id, slug, templateId: 'calla', plan: 'premium', status: 'paid', weddingDate, ...data } });
     const fresh = await site(people[0], 'after-fresh', day(-3));
     const reviewed = await site(people[1], 'after-reviewed', day(-3));
     const old = await site(people[2], 'after-old', day(-20));
+    const freeSite = await site(people[3], 'after-free', day(-3), { plan: 'free', status: 'published' });
     await prisma.review.create({ data: { invitationId: reviewed.id, userId: people[1].id, rating: 5, names: 'Пара' } });
     await runLifecycleEmails(now);
-    const kinds = async (invitationId) => (await prisma.emailEvent.findMany({ where: { invitationId } })).map((e) => e.kind);
+    const kinds = async (invitationId) => (await prisma.emailEvent.findMany({ where: { invitationId, NOT: { kind: { startsWith: 'mark:' } } } })).map((e) => e.kind);
     assert.deepEqual(await kinds(fresh.id), ['after_wedding']);
     assert.deepEqual(await kinds(reviewed.id), []);
     assert.deepEqual(await kinds(old.id), []);
+    assert.deepEqual(await kinds(freeSite.id), [], 'бесплатных об отзыве не просим');
 
     const letter = letterFor('after_wedding', { ...fresh, groomName: 'Иван', brideName: 'Мария', venue: '', venueAddress: '' });
     assert.equal(letter.subject, 'Как прошла свадьба?');
@@ -226,7 +234,7 @@ test('отзывы пар', async (t) => {
       && /Новый отзыв/.test(b.text) && /Гости всё нашли сами/.test(b.text))(c), 'отзыв по ссылке — владельцу');
   });
 
-  await t.test('письмо «Как вам WeddingCraft?»: через неделю после публикации, один раз, без лишних', async () => {
+  await t.test('письмо «Как вам WeddingCraft?»: через неделю после оплаты, только оплатившим, один раз', async () => {
     const DAY = 86_400_000, now = Date.parse('2026-11-20T12:00:00+03:00');
     const person = (s) => prisma.user.create({ data: { email: `ask-${s}@example.test` } });
     const site = async (s, data) => {
@@ -239,29 +247,32 @@ test('отзывы пар', async (t) => {
     const freeNew = await site('free-new', { plan: 'free', status: 'published' });
     await seen(freeNew, 3);
     const paidNew = await site('paid-new', { plan: 'premium', status: 'paid', paidAt: new Date('2026-11-05T12:00:00+03:00') });
+    const paidRecent = await site('paid-recent', { plan: 'maximum', status: 'paid', paidAt: new Date(now - 3 * DAY) });
     const paidEarly = await site('paid-early', { plan: 'premium', status: 'paid', paidAt: new Date('2026-10-27T12:00:00+03:00') });
-    const reviewed = await site('reviewed', { plan: 'free', status: 'published' });
-    await seen(reviewed, 12);
+    const reviewed = await site('reviewed', { plan: 'premium', status: 'paid', paidAt: new Date('2026-11-05T12:00:00+03:00') });
     await prisma.review.create({ data: { invitationId: reviewed.id, userId: reviewed.userId, rating: 5, names: 'Пара' } });
     await runLifecycleEmails(now);
     const kinds = async (i) => (await prisma.emailEvent.findMany({ where: { invitationId: i.id, NOT: { kind: { startsWith: 'mark:' } } } })).map((e) => e.kind);
-    assert.deepEqual(await kinds(freeOld), ['review_ask']);
     assert.deepEqual(await kinds(paidNew), ['review_ask']);
-    assert.ok(!(await kinds(freeNew)).includes('review_ask'), 'рано — опубликован 3 дня назад');
+    assert.deepEqual(await kinds(freeOld), [], 'бесплатных об отзыве не просим');
+    assert.ok(!(await kinds(freeNew)).includes('review_ask'), 'бесплатных об отзыве не просим');
+    assert.deepEqual(await kinds(paidRecent), [], 'рано — оплачено 3 дня назад');
     assert.deepEqual(await kinds(paidEarly), [], 'оплатившим до 01.11 владелец написал лично');
     assert.deepEqual(await kinds(reviewed), [], 'отзыв уже есть');
-    await runLifecycleEmails(now + 3 * DAY);
-    assert.deepEqual(await kinds(freeOld), ['review_ask'], 'второй раз не просим');
+    await runLifecycleEmails(now + 5 * DAY);
+    assert.deepEqual(await kinds(paidNew), ['review_ask'], 'второй раз не просим');
+    assert.deepEqual(await kinds(paidRecent), ['review_ask'], 'через неделю после оплаты');
+    assert.deepEqual(await kinds(freeOld), [], 'бесплатных не просим и позже');
 
-    const letter = letterFor('review_ask', { ...freeOld, groomName: 'Иван', brideName: 'Мария', venue: '', venueAddress: '' });
-    const token = reviewLinkToken(freeOld.id, freeOld.userId);
+    const letter = letterFor('review_ask', { ...paidNew, groomName: 'Иван', brideName: 'Мария', venue: '', venueAddress: '' });
+    const token = reviewLinkToken(paidNew.id, paidNew.userId);
     assert.equal(letter.title, 'Иван и Мария, как вам приглашение?');
     assert.equal(letter.url, 'https://yandex.ru/profile/162112565078', 'главная кнопка — отзыв на Яндексе');
     assert.equal(letter.cta, 'Оставить отзыв на Яндексе');
-    assert.match(letter.secondary.url, new RegExp(`/review\\?i=${freeOld.id}&t=${token}$`), 'запасная — отзыв нам без входа');
+    assert.match(letter.secondary.url, new RegExp(`/review\\?i=${paidNew.id}&t=${token}$`), 'запасная — отзыв нам без входа');
     assert.equal(letter.stars, undefined);
     assert.ok(!/скидк|бонус|₽/.test(letter.paragraphs.join(' ')), 'просьба об отзыве — без рекламы');
-    const { text, html } = render(letter, freeOld.userId);
+    const { text, html } = render(letter, paidNew.userId);
     assert.ok(text.includes(letter.url) && text.includes(letter.secondary.url), 'в тексте обе ссылки');
     assert.ok(html.includes('href="https://yandex.ru/profile/162112565078"'));
   });

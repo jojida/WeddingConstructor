@@ -14,9 +14,11 @@
 //   date_60    — до свадьбы ~2 месяца, бесплатный тариф: успеть собрать ответы.
 //   after_wedding — через 2–10 дней после свадьбы, если пара ещё не оставила отзыв:
 //                попросить отзыв (без скидок и бонусов — просто вопрос).
-//   review_ask — через неделю после публикации, если отзыва нет и after_wedding не было:
+//   review_ask — через неделю после оплаты, если отзыва нет и after_wedding не было:
 //                главная кнопка — отзыв на Яндексе, запасная — отзыв нам без входа (/review).
 //                Пары, оплатившие до 01.11.26, владелец спросил лично — им не шлём.
+//   Оба письма об отзыве — только оплатившим: мнение бесплатных пар не спрашиваем
+//   (решение владельца 11.11.26; до этого review_ask получили ~65 бесплатных пар).
 //
 // Бесплатная публикация не хранит дату, поэтому отсчёт free_* ведётся от
 // служебной отметки «mark:free_seen» — её ставит первый проход, увидевший сайт.
@@ -336,23 +338,23 @@ export async function runLifecycleEmails(now = Date.now()): Promise<void> {
     if (left === null) continue;
     if (left >= 84 && left <= 90) await deliver('date_90', l, l.user, now);
     else if (left >= 54 && left <= 60 && l.plan === 'free') await deliver('date_60', l, l.user, now);
-    else if (left <= -2 && left >= -10 && !(await prisma.review.findUnique({ where: { invitationId: l.id }, select: { id: true } }))) {
+    else if (l.plan !== 'free' && left <= -2 && left >= -10
+      && !(await prisma.review.findUnique({ where: { invitationId: l.id }, select: { id: true } }))) {
       await deliver('after_wedding', l, l.user, now);
     }
   }
 
-  // 4. Просьба об отзыве: через неделю после публикации, один раз на сайт, если отзыва нет.
-  // Бесплатные — от отметки «mark:free_seen» (даты публикации у них нет), платные — от оплаты.
-  const published = await prisma.invitation.findMany({
-    where: { status: { in: ['paid', 'published'] } }, select: { ...SELECT, paidAt: true }, take: 2000,
+  // 4. Просьба об отзыве: через неделю после оплаты, один раз на сайт, если отзыва нет.
+  // Только оплатившим — бесплатных об отзыве не просим.
+  const paid = await prisma.invitation.findMany({
+    where: { status: { in: ['paid', 'published'] }, plan: { not: 'free' }, paidAt: { gte: REVIEW_ASK_PAID_SINCE } },
+    select: { ...SELECT, paidAt: true }, take: 2000,
   });
-  for (const s of published) {
+  for (const s of paid) {
+    if (!s.paidAt || now - s.paidAt.getTime() < 7 * DAY) continue;
     if (await already(s.id, 'review_ask') || await already(s.id, 'after_wedding')) continue;
     if (await prisma.review.findUnique({ where: { invitationId: s.id }, select: { id: true } })) continue;
-    const since = s.plan === 'free'
-      ? (await prisma.emailEvent.findUnique({ where: { invitationId_kind: { invitationId: s.id, kind: 'mark:free_seen' } } }))?.sentAt
-      : s.paidAt && s.paidAt >= REVIEW_ASK_PAID_SINCE ? s.paidAt : null;
-    if (since && now - since.getTime() >= 7 * DAY) await deliver('review_ask', s, s.user, now);
+    await deliver('review_ask', s, s.user, now);
   }
 }
 
