@@ -105,32 +105,52 @@ export default function CallaTemplate({ data, apiBase, fullPage, slug, editing }
     );
   }
 
-  /* ── Preview card thumbnail ── */
+  /* ── Карточка-превью: обложка шаблона (public/invite/calla, раздел 1) ──
+     Размеры — в долях ширины карточки (cqw), как в styles.css шаблона:
+     имена 19cqw, «&» 13cqw, дата 6.4cqw, каллы 66 % ширины. Раньше имена были
+     в vw с потолком 46px — вдвое мельче шаблона, и даты не было.
+     Стебель калл всегда доходит до низа карточки: в вытянутом экране
+     телефона (TemplateShowcase) цветок вырастает по высоте, а не обрывается. */
   const bride = data.brideName || 'Дарья';
   const groom = data.groomName || 'Вадим';
+  // Длинные имена — мельче (~0,6 кегля на букву Marck Script, строка не
+  // шире 66 % карточки), обычные — 19cqw, как в шаблоне
+  const nameSize = Math.min(19, 66 / (Math.max(bride.length, groom.length, 1) * 0.6));
+  const [yy, mm, dd] = (data.weddingDate || '').split('-').map(Number);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const date = yy && mm && dd ? `${pad(dd)} | ${pad(mm)} | ${yy}` : '';
   return (
     <div style={{
-      position: 'relative', width: '100%', height: '100%', overflow: 'hidden',
+      position: 'relative', width: '100%', height: '100%', overflow: 'hidden', containerType: 'inline-size',
       background: 'radial-gradient(circle at 30% 20%, rgba(255,255,255,.25), transparent 60%), #d7d3cb',
     }}>
       <img
+        src="/invite/calla/assets/pearls-string.svg"
+        alt=""
+        style={{ position: 'absolute', top: '-15.6cqw', left: '-4%', width: '42%', pointerEvents: 'none' }}
+      />
+      {/* 603×1600: высота 66 % ширины = 175cqw; если карточка выше — по её высоте */}
+      <img
         src="/invite/calla/assets/callas-pair.webp"
         alt="Каллы"
-        style={{ position: 'absolute', top: '2%', right: '-6%', width: '64%', opacity: .96, pointerEvents: 'none' }}
+        style={{ position: 'absolute', top: '1%', right: '-6%', height: 'max(99%, 175.1cqw)', width: 'auto', pointerEvents: 'none' }}
       />
       <img
         src="/invite/calla/assets/pearls-string.svg"
         alt=""
-        style={{ position: 'absolute', top: 0, left: '-6%', width: '48%', pointerEvents: 'none' }}
+        style={{ position: 'absolute', bottom: '4%', right: '6%', width: '42%', transform: 'scaleX(-1) rotate(8deg)', pointerEvents: 'none' }}
       />
       <div style={{
-        position: 'absolute', left: '8%', top: '34%',
+        position: 'absolute', left: '9%', top: '26%',
         display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-        color: '#f8f6f1', textShadow: '0 1px 4px rgba(120,112,98,.4)',
+        color: '#f8f6f1', textShadow: '0 1px 4px rgba(120,112,98,.4)', whiteSpace: 'nowrap',
       }}>
-        <span style={{ fontFamily: "'Marck Script', cursive", fontSize: 'clamp(20px, 11vw, 46px)', lineHeight: .95 }}>{bride}</span>
-        <span style={{ fontFamily: "'Pinyon Script', cursive", fontSize: 'clamp(14px, 7vw, 30px)', margin: '2px 0' }}>&amp;</span>
-        <span style={{ fontFamily: "'Marck Script', cursive", fontSize: 'clamp(20px, 11vw, 46px)', lineHeight: .95 }}>{groom}</span>
+        <span style={{ fontFamily: "'Marck Script', cursive", fontSize: `${nameSize}cqw`, lineHeight: .95 }}>{bride}</span>
+        <span style={{ fontFamily: "'Pinyon Script', cursive", fontSize: '13cqw', margin: '1cqw 0' }}>&amp;</span>
+        <span style={{ fontFamily: "'Marck Script', cursive", fontSize: `${nameSize}cqw`, lineHeight: .95 }}>{groom}</span>
+        {date && (
+          <span style={{ marginTop: '5cqw', fontFamily: "'Cormorant Garamond', serif", fontSize: '6.4cqw', letterSpacing: '1.2cqw' }}>{date}</span>
+        )}
       </div>
     </div>
   );
