@@ -94,10 +94,23 @@ fi
 
 cd "$REPO/frontend"
 
-# package.json тронули — значит, могли появиться новые зависимости.
-if ! git diff --quiet "$local_rev" "$remote_rev" -- frontend/package.json frontend/package-lock.json; then
-  log "менялся package.json — ставлю зависимости"
+# Зависимости фронта ставим, когда node_modules не совпадает с package-lock.json.
+# Отметка — хеш лок-файла, который пишем после успешного npm ci. Сам npm ci
+# стирает node_modules вместе с отметкой, поэтому после ручной переустановки
+# следующий деплой просто поставит всё ещё раз.
+#
+# Раньше здесь сравнивали коммиты: git diff ... -- frontend/package.json. Но путь
+# в git diff считается от текущей папки, а мы уже в frontend/ — git искал
+# frontend/frontend/package.json, разницы «не было», и npm ci не запускался
+# никогда. 11.11.26 на этом упали три деплоя подряд: в коде появилась библиотека
+# qrcode, а на сервере её так и не поставили (Can't resolve 'qrcode').
+# Сверка по хешу заодно долечивает пропущенную или упавшую установку.
+LOCK_STAMP=node_modules/.wc-package-lock.sha256
+lock_hash=$(sha256sum package-lock.json | cut -d' ' -f1)
+if [ "$(cat "$LOCK_STAMP" 2>/dev/null || true)" != "$lock_hash" ]; then
+  log "зависимости фронта не совпадают с package-lock.json — ставлю (npm ci)"
   npm ci --no-audit --no-fund
+  echo "$lock_hash" > "$LOCK_STAMP"
 fi
 
 # Собираем в отдельную папку (distDir из WC_BUILD_DIR, см. next.config.ts),
