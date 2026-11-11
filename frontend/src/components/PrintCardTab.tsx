@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import QRCode from 'qrcode';
@@ -18,8 +18,10 @@ import styles from './PrintCardTab.module.css';
    стили @media print прячут всё остальное и задают @page без полей. Так текст
    и QR остаются векторными, а сервер ничего не рендерит.
 
-   Только платные тарифы (hasPrintCard). На бесплатном — та же открытка под
-   замком и ссылка на оплату. */
+   Платные тарифы (hasPrintCard) печатают чистую открытку. На бесплатном всё
+   работает так же, но поверх обеих сторон — водяной знак WeddingCraft
+   (Watermark): PDF собирается в браузере, и замок на кнопке легко обойти,
+   а знак остаётся в самом файле. */
 
 type Placement = 'right' | 'left' | 'back';
 type Format = 'a6' | 'a5';
@@ -45,7 +47,7 @@ export type PrintCardInvite = InviteData & {
 export default function PrintCardTab({ invite, origin, apiBase }: {
   invite: PrintCardInvite; origin: string; apiBase: string;
 }) {
-  const allowed = hasPrintCard(invite.plan);
+  const watermark = !hasPrintCard(invite.plan);
   const [format, setFormat] = useState<Format>('a6');
   const [placement, setPlacement] = useState<Placement>('right');
   const [caption, setCaption] = useState('Приглашение онлайн');
@@ -69,7 +71,7 @@ export default function PrintCardTab({ invite, origin, apiBase }: {
     ...invite, customData: { ...invite.customData, wcPrint: true },
   }), [invite]);
 
-  const sheetProps = { data, apiBase, format, placement, caption, qr, url };
+  const sheetProps = { data, apiBase, format, placement, caption, qr, url, watermark };
   const fmt = FORMATS[format];
   const k = PREVIEW_W / (fmt.w * MM);
 
@@ -101,20 +103,10 @@ export default function PrintCardTab({ invite, origin, apiBase }: {
             <ScaledSheet k={k} fmt={fmt}><Sheet side="front" {...sheetProps} /></ScaledSheet>
             {placement === 'back' && <ScaledSheet k={k} fmt={fmt}><Sheet side="back" {...sheetProps} /></ScaledSheet>}
           </div>
-          {!allowed && (
-            <div className={styles.lock}>
-              <div className={styles.lockBox}>
-                <div className={styles.lockIcon} aria-hidden="true">🔒</div>
-                <b>Доступно на тарифах «Премиум» и «Максимум»</b>
-                <span>Скачайте открытку в PDF и распечатайте дома или в типографии.</span>
-                <Link href={`/payment?id=${invite.id}`} className="btn-primary" style={{ marginTop: 6 }}>Выбрать тариф</Link>
-              </div>
-            </div>
-          )}
         </div>
 
         <div className={styles.controls}>
-          <fieldset className={styles.group} disabled={!allowed}>
+          <fieldset className={styles.group}>
             <legend className={styles.label}>QR-код</legend>
             <div className={styles.chips}>
               {PLACEMENTS.map(p => (
@@ -124,7 +116,7 @@ export default function PrintCardTab({ invite, origin, apiBase }: {
             </div>
           </fieldset>
 
-          <fieldset className={styles.group} disabled={!allowed}>
+          <fieldset className={styles.group}>
             <legend className={styles.label}>Размер</legend>
             <div className={styles.chips}>
               {(Object.keys(FORMATS) as Format[]).map(f => (
@@ -134,14 +126,14 @@ export default function PrintCardTab({ invite, origin, apiBase }: {
             </div>
           </fieldset>
 
-          <label className={styles.group}>
-            <span className={styles.label}>Подпись у QR-кода</span>
-            <input className="input-field" value={caption} maxLength={32} disabled={!allowed}
+          {placement === 'back' && <label className={styles.group}>
+            <span className={styles.label}>Надпись на обороте</span>
+            <input className="input-field" value={caption} maxLength={32}
               onChange={e => setCaption(e.target.value)} placeholder="Приглашение онлайн" />
-          </label>
+          </label>}
 
           {domainUrl && (
-            <fieldset className={styles.group} disabled={!allowed}>
+            <fieldset className={styles.group}>
               <legend className={styles.label}>Ссылка в QR-коде</legend>
               <div className={styles.chips}>
                 <button type="button" className={`${styles.chip} ${!useDomain ? styles.chipOn : ''}`} onClick={() => setUseDomain(false)}>{siteUrl.replace(/^https?:\/\//, '')}</button>
@@ -150,13 +142,19 @@ export default function PrintCardTab({ invite, origin, apiBase }: {
             </fieldset>
           )}
 
-          {allowed && !isPublished(invite.status) && (
+          {!isPublished(invite.status) && (
             <p className={styles.warn}>Сайт ещё не опубликован — по QR-коду гости пока увидят заглушку. Опубликуйте его перед печатью.</p>
           )}
 
-          <button type="button" className="btn-primary" onClick={print} disabled={!allowed || !qr} style={{ width: '100%' }}>
+          <button type="button" className="btn-primary" onClick={print} disabled={!qr} style={{ width: '100%' }}>
             Скачать PDF
           </button>
+          {watermark && (
+            <p className={styles.note}>
+              На бесплатном тарифе на открытке водяной знак WeddingCraft.{' '}
+              <Link href={`/payment?id=${invite.id}`}>На «Премиум» и «Максимум» — без него →</Link>
+            </p>
+          )}
           <p className={styles.hint}>
             Откроется окно печати: выберите «Сохранить как PDF» или сразу принтер. Печатайте без полей, масштаб 100%.
             {placement === 'back' && ' В PDF две страницы — лицевая и оборот, для двусторонней печати.'}
@@ -165,7 +163,7 @@ export default function PrintCardTab({ invite, origin, apiBase }: {
       </div>
 
       {/* Листы для печати: вне экрана, видны только в @media print */}
-      {qr && allowed && createPortal(
+      {qr && createPortal(
         <div className="wc-print-root" aria-hidden="true">
           <style>{`
             .wc-print-root { position: fixed; left: -10000px; top: 0; pointer-events: none; }
@@ -196,9 +194,9 @@ function ScaledSheet({ k, fmt, children }: { k: number; fmt: { w: number; h: num
   );
 }
 
-function Sheet({ side, data, apiBase, format, placement, caption, qr, url }: {
+function Sheet({ side, data, apiBase, format, placement, caption, qr, url, watermark }: {
   side: 'front' | 'back'; data: InviteData; apiBase: string; format: Format;
-  placement: Placement; caption: string; qr: string; url: string;
+  placement: Placement; caption: string; qr: string; url: string; watermark: boolean;
 }) {
   const { w, h } = FORMATS[format];
   const sheet: React.CSSProperties = {
@@ -215,6 +213,8 @@ function Sheet({ side, data, apiBase, format, placement, caption, qr, url }: {
     if (y && m && d) date = `${d} ${MONTHS[m - 1]} ${y}`;
     return (
       <div className="wc-print-sheet" style={{ ...sheet, background: '#faf7f2', color: '#2c2620', fontFamily: "'Cormorant Garamond', Georgia, serif", textAlign: 'center' }}>
+        {/* знак под текстом и QR: код должен сканироваться чисто */}
+        {watermark && <Watermark />}
         <div style={{ position: 'absolute', inset: u(6), border: `0.3mm solid rgba(104,93,74,.35)` }} />
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: u(14) }}>
           {caption && <div style={{ fontSize: u(3.4), letterSpacing: '0.2em', textTransform: 'uppercase', color: '#7d705c' }}>{caption}</div>}
@@ -241,19 +241,42 @@ function Sheet({ side, data, apiBase, format, placement, caption, qr, url }: {
       <div style={{ width: BASE, height: baseH, transform: `scale(${scale})`, transformOrigin: 'top left', overflow: 'hidden', pointerEvents: 'none' }}>
         <TemplatePreview data={data} apiBase={apiBase} />
       </div>
+      {watermark && <Watermark />}
+      {/* QR в углу — компактный (≈14 мм на A6) и у самого края, без подписи:
+          крупная плашка закрывала дату внизу первого экрана (у «Айвори» — год) */}
       {placement !== 'back' && (
         <div style={{
-          position: 'absolute', bottom: u(5), [placement === 'left' ? 'left' : 'right']: u(5),
-          width: u(22), padding: u(2), boxSizing: 'border-box', borderRadius: u(1.6),
-          background: 'rgba(255,255,255,.94)', boxShadow: '0 0.3mm 1.2mm rgba(0,0,0,.18)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: u(1.2),
+          position: 'absolute', bottom: u(3), [placement === 'left' ? 'left' : 'right']: u(3),
+          width: u(16), padding: u(0.9), boxSizing: 'border-box', borderRadius: u(1),
+          background: 'rgba(255,255,255,.95)', boxShadow: '0 0.2mm 0.8mm rgba(0,0,0,.16)',
         }}>
           <div style={{ width: '100%', aspectRatio: '1' }} className={styles.qr} dangerouslySetInnerHTML={{ __html: qr }} />
-          {caption && (
-            <div style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: u(2.3), lineHeight: 1.1, color: '#2c2620', textAlign: 'center' }}>{caption}</div>
-          )}
         </div>
       )}
     </div>
+  );
+}
+
+/* Водяной знак бесплатного тарифа: «WeddingCraft» косой шахматкой поверх листа.
+   Лежит под QR-кодом, чтобы не мешать сканированию.
+   Векторный <svg> с <pattern>, а не фон: фоновые картинки браузер печатает, только
+   если включена галочка «Фон», а этот слой попадает в PDF всегда. Белая надпись с
+   тёмной обводкой видна и на тёмных обложках («Айвори»), и на светлых. */
+function Watermark() {
+  // свой id узора у каждого листа: предпросмотр на экране при печати скрыт, и ссылка
+  // на узор из скрытого поддерева могла бы не отрисоваться
+  const id = `wc-wm-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
+  return (
+    <svg aria-hidden="true" width="100%" height="100%" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      <defs>
+        <pattern id={id} width="360" height="110" patternUnits="userSpaceOnUse" patternTransform="rotate(-28)">
+          <text x="0" y="40" fontFamily="'Playfair Display', Georgia, serif" fontSize="26" fill="rgba(255,255,255,.5)"
+            stroke="rgba(40,30,20,.35)" strokeWidth="0.6">WeddingCraft</text>
+          <text x="180" y="95" fontFamily="'Playfair Display', Georgia, serif" fontSize="26" fill="rgba(255,255,255,.5)"
+            stroke="rgba(40,30,20,.35)" strokeWidth="0.6">WeddingCraft</text>
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill={`url(#${id})`} />
+    </svg>
   );
 }
