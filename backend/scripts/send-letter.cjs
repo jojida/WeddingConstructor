@@ -7,8 +7,10 @@
    На сервере (после сборки бэкенда):
      cd /var/www/wedding/backend && node scripts/send-letter.cjs
    Скрипт спросит адрес, тему и текст (вставьте его и закончите строкой из одной
-   точки), покажет письмо целиком и отправит только после «да». Отправитель в почте
-   пары — «WeddingCraft <support@weddingcraft.ru>», подпись — в самом тексте.
+   точки), покажет письмо целиком и отправит только после «да». Если что-то не так —
+   1, 2 или 3 вместо «да»: заново ввести адрес, тему или текст, письмо покажется снова;
+   «нет» — отменить. Отправитель в почте пары — «WeddingCraft <support@weddingcraft.ru>»,
+   подпись — в самом тексте.
    Посмотреть, что получится, без отправки: node scripts/send-letter.cjs --dry   */
 require('dotenv').config({ quiet: true });
 const readline = require('readline');
@@ -53,38 +55,75 @@ function stop(message) {
   process.exitCode = 1;
 }
 
+// Каждый вопрос повторяется, пока ответ не подойдёт; null — ввод закончился (Ctrl+D)
+async function readTo() {
+  for (;;) {
+    const v = await ask('1. Адрес почты пары — и Enter:');
+    if (v === null) return null;
+    if (EMAIL_RE.test(v.trim())) return v.trim();
+    console.log('Это не похоже на адрес почты — введите ещё раз.');
+  }
+}
+async function readSubject() {
+  for (;;) {
+    const v = await ask('2. Тема письма — и Enter:');
+    if (v === null) return null;
+    if (v.trim()) return v.trim();
+    console.log('Нужна тема письма.');
+  }
+}
+async function readText() {
+  for (;;) {
+    console.log('3. Текст письма — вставьте его. В конце отдельной строкой поставьте точку «.» и нажмите Enter:');
+    const lines = [];
+    for (;;) {
+      const line = await ask('');
+      if (line === null) return lines.join('\n').trim() || null;
+      if (line.trim() === '.') break;
+      lines.push(line.replace(/\s+$/, ''));
+    }
+    const text = lines.join('\n').trim();
+    if (text) return text;
+    console.log('Письмо пустое.');
+  }
+}
+
 (async () => {
   if (!DRY && !isEmailConfigured()) return stop('Почта на этом сервере не настроена (нет ключей Brevo/Resend/SMTP).');
-  const to = ((await ask('1. Адрес почты пары — и Enter:')) || '').trim();
-  if (!EMAIL_RE.test(to)) return stop('Это не похоже на адрес почты — ничего не отправлено.');
-  const subject = ((await ask('2. Тема письма — и Enter:')) || '').trim();
-  if (!subject) return stop('Нужна тема письма — ничего не отправлено.');
-  console.log('3. Текст письма — вставьте его. В конце отдельной строкой поставьте точку «.» и нажмите Enter:');
-  const lines = [];
-  for (;;) {
-    const line = await ask('');
-    if (line === null || line.trim() === '.') break;
-    lines.push(line.replace(/\s+$/, ''));
-  }
-  const text = lines.join('\n').trim();
-  if (!text) return stop('Пустое письмо — ничего не отправлено.');
+  let to = await readTo();
+  let subject = to && await readSubject();
+  let text = subject && await readText();
+  if (!to || !subject || !text) return stop('Ввод прервался — ничего не отправлено.');
 
-  console.log('\n──────── Письмо ────────');
-  console.log(`От:   ${FROM_NAME} <${FROM}>`);
-  console.log(`Кому: ${to}`);
-  console.log(`Тема: ${subject}\n`);
-  console.log(text);
-  console.log('────────────────────────');
-  if (DRY) {
-    console.log(`\nHTML-версия:\n${toHtml(text)}\n\nПроверка (--dry): ничего не отправлено.`);
-    rl.close();
-    return;
-  }
-  const answer = ((await ask('Всё верно? Чтобы отправить, напишите «да» и нажмите Enter:')) || '').trim().toLowerCase();
-  if (!['да', 'д', 'yes', 'y'].includes(answer)) {
-    console.log('Не отправлено.');
-    rl.close();
-    return;
+  for (;;) {
+    console.log('\n──────── Письмо ────────');
+    console.log(`От:   ${FROM_NAME} <${FROM}>`);
+    console.log(`Кому: ${to}`);
+    console.log(`Тема: ${subject}\n`);
+    console.log(text);
+    console.log('────────────────────────');
+    if (DRY) {
+      console.log(`\nHTML-версия:\n${toHtml(text)}\n\nПроверка (--dry): ничего не отправлено.`);
+      rl.close();
+      return;
+    }
+    const answer = ((await ask('Всё верно? «да» — отправить. Исправить: 1 — адрес, 2 — тему, 3 — текст. «нет» — отменить:')) ?? 'нет').trim().toLowerCase();
+    if (['да', 'д', 'yes', 'y'].includes(answer)) break;
+    const fix = { '1': readTo, '2': readSubject, '3': readText }[answer];
+    if (!fix) {
+      if (['нет', 'н', 'no', 'n'].includes(answer)) {
+        console.log('Не отправлено.');
+        rl.close();
+        return;
+      }
+      console.log('Не понял ответ — напишите «да», 1, 2, 3 или «нет».');
+      continue;
+    }
+    const value = await fix();
+    if (value === null) return stop('Ввод прервался — ничего не отправлено.');
+    if (answer === '1') to = value;
+    else if (answer === '2') subject = value;
+    else text = value;
   }
   try {
     await sendEmail({ to, subject, text, html: toHtml(text), from: { email: FROM, name: FROM_NAME }, replyTo: FROM, critical: true });
