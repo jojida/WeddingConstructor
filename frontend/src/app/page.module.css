@@ -353,63 +353,19 @@
 
 .templateScrollItem {
   width: 100%;
-  height: 520px;
   display: block;
   text-decoration: none;
+  color: inherit;
 }
 
-.mosaicCard {
-  position: relative;
-  width: 100%; height: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  background: var(--surface-container-low);
-  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s;
-}
-.mosaicCard:hover { transform: translateY(-4px); box-shadow: 0 30px 60px -12px rgba(14,29,38,0.1); }
-
-.mosaicImg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s;
-}
-.mosaicCard:hover .mosaicImg { transform: scale(1.04); }
-
-.previewScale {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  pointer-events: none;
-}
-/* Превью рисуется в «родной» ширине шаблона, а масштаб под карточку считает
-   PreviewScale.tsx — иначе на узкой карточке содержимое не помещается. */
-.previewScale > div {
-  width: 480px !important;
-  height: var(--preview-height, 650px) !important;
-  max-width: none !important;
-  transform: scale(var(--preview-scale, 0.8));
-  transform-origin: top left;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  overflow: hidden;
-}
-
-.mosaicOverlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(14,29,38,0.6) 0%, transparent 55%);
-  opacity: 0.7;
-  transition: opacity 0.3s;
-}
-.mosaicCard:hover .mosaicOverlay { opacity: 1; }
-.mosaicInfo { position: absolute; bottom: 24px; left: 20px; z-index: 1; }
-
+/* Карточка шаблона — витрина TemplateShowcase (открытка для печати + телефон),
+   название под ней */
 .mosaicTitle {
+  margin: 14px 4px 0;
   font-family: var(--font-playfair);
   font-size: 20px;
   font-weight: 500;
-  color: #fff;
+  color: var(--on-surface, #0e1d26);
   line-height: 1.3;
 }
 
@@ -722,7 +678,6 @@
   .headerInner { padding: 16px 40px; }
   .heroGrid { padding: 40px 40px; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 32px; }
   .heroHeadline { font-size: 52px; }
-  .templateScrollItem { height: 420px; }
   .footerGrid { grid-template-columns: 1fr 1fr; gap: 40px; }
   .pricingNote { padding: 0 20px; }
   .pricingCardPopular { transform: scale(1); }
@@ -749,15 +704,12 @@
   .howMobileLabel { display: flex; align-items: center; margin-bottom: 6px; }
   .featuresGrid { grid-template-columns: 1fr; }
   .templatesScroll { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .templateScrollItem { height: 300px; }
   .homeNames { margin: -24px 0 20px; gap: 8px; }
   .homeNamesTitle { font-size: 14px; }
   .homeNamesFields { grid-template-columns: 1fr 1fr; width: 100%; }
   .homeNamesFields input { padding: 10px 12px; }
-  /* На узкой карточке длинные названия («Средиземноморье») упирались в край
-     и обрезались: подпись не была ограничена справа. */
-  .mosaicInfo { left: 12px; right: 12px; bottom: 14px; }
-  .mosaicTitle { font-size: 15px; line-height: 1.25; overflow-wrap: break-word; }
+  /* Длинные названия («Средиземноморье») на узкой карточке переносятся */
+  .mosaicTitle { margin-top: 10px; font-size: 15px; line-height: 1.25; overflow-wrap: break-word; }
   .ctaBox { padding: 48px 24px; }
   .ctaTitle { font-size: 28px; }
   .footerGrid { grid-template-columns: 1fr; gap: 32px; }

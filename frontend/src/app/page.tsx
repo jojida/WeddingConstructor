@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
 import api from '@/lib/api';
 import { TEMPLATES, SITE_URL, VK_URL, YANDEX_REVIEWS_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
-import TemplatePreview from '@/components/TemplatePreview';
-import LazyMount from '@/components/LazyMount';
+import TemplateShowcase from '@/components/TemplateShowcase';
 import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
-import PreviewScale from '@/components/PreviewScale';
 import HeroPhone from '@/components/landing/HeroPhone';
 import FeatureDemo from '@/components/landing/FeatureDemo';
 import { NAME_MAX, withPreviewNames } from '@/lib/preview-names';
@@ -197,28 +195,20 @@ function TemplatesSection() {
           {TEMPLATES.map((tpl) => (
             <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}
               onClick={() => reachGoal(GOAL.templatePreview, { template: tpl.name, from: 'home' })}>
-              <div className={styles.mosaicCard}>
-                <PreviewScale className={styles.previewScale}>
-                  <LazyMount>
-                    <TemplatePreview
-                      data={withPreviewNames({
-                        ...SAMPLE_DATA,
-                        brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                        groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                        templateId: tpl.id,
-                        weddingDate: templateSampleDate(tpl),
-                        coverPhoto: tpl.defaultCover,
-                        galleryPhotos: tpl.defaultGallery
-                      }, shown)}
-                      apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                    />
-                  </LazyMount>
-                </PreviewScale>
-                <div className={styles.mosaicOverlay} />
-                <div className={styles.mosaicInfo}>
-                  <h3 className={styles.mosaicTitle}>{tpl.name}</h3>
-                </div>
-              </div>
+              {/* Слева открытка для печати, справа телефон — TemplateShowcase */}
+              <TemplateShowcase
+                data={withPreviewNames({
+                  ...SAMPLE_DATA,
+                  brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
+                  groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
+                  templateId: tpl.id,
+                  weddingDate: templateSampleDate(tpl),
+                  coverPhoto: tpl.defaultCover,
+                  galleryPhotos: tpl.defaultGallery
+                }, shown)}
+                apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+              />
+              <h3 className={styles.mosaicTitle}>{tpl.name}</h3>
             </Link>
           ))}
         </div>

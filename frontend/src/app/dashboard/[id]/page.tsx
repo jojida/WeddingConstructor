@@ -15,6 +15,11 @@ import { PLAN_TITLES, hasRsvp, isAdvancedPlan, hasCustomDomain, hasNotifications
 const PlannerSection = dynamic(() => import('@/components/planner/PlannerSection'), {
   loading: () => <div style={{ padding: 40, textAlign: 'center', color: '#9a948a', fontSize: 14 }}>Загрузка…</div>,
 });
+import type { PrintCardInvite } from '@/components/PrintCardTab';
+// Открытка для печати с QR-кодом (только платные тарифы, на бесплатном — под замком)
+const PrintCardTab = dynamic(() => import('@/components/PrintCardTab'), {
+  loading: () => <div style={{ padding: 40, textAlign: 'center', color: '#9a948a', fontSize: 14 }}>Загрузка…</div>,
+});
 
 interface Invite {
   id: string; slug: string; status: string; plan: string;
@@ -52,7 +57,7 @@ interface RsvpData {
   drinkLabels: Record<string, string>;
 }
 
-type Tab = 'responses' | 'guests' | 'seating' | 'menu' | 'print' | 'remind' | 'notify' | 'domain';
+type Tab = 'responses' | 'guests' | 'seating' | 'menu' | 'print' | 'card' | 'remind' | 'notify' | 'domain';
 
 const PRIMARY = '#685d4a';
 const BORDER = '1px solid rgba(206,197,186,0.5)';
@@ -104,6 +109,7 @@ function ManageInviteSession() {
     { key: 'seating',   label: '🪑 Рассадка', show: !!user?.planner },
     { key: 'menu',      label: '🍽 Меню', show: !!user?.planner },
     { key: 'print',     label: '🖨 Печать', show: !!user?.planner },
+    { key: 'card',      label: '💌 Открытка с QR', show: true },
     { key: 'remind',    label: '⏰ Напоминания', show: true },
     { key: 'notify',    label: '🔔 Уведомления', show: true },
     { key: 'domain',    label: '🌐 Домен', show: true },
@@ -112,7 +118,7 @@ function ManageInviteSession() {
   return (
     <div style={{ minHeight: '100vh', background: '#faf8f5' }}>
       <Navbar />
-      <div style={{ maxWidth: tab === 'seating' ? 1440 : tab === 'menu' || tab === 'print' ? 980 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
+      <div style={{ maxWidth: tab === 'seating' ? 1440 : tab === 'menu' || tab === 'print' || tab === 'card' ? 980 : 880, margin: '0 auto', padding: '32px 20px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div>
             <h1 style={{ fontFamily: 'var(--font-playfair, Georgia), serif', fontSize: 30, color: '#0e1d26', margin: 0 }}>{couple}</h1>
@@ -156,6 +162,7 @@ function ManageInviteSession() {
         {(tab === 'seating' || tab === 'menu' || tab === 'print') && (hasPlanner(invite.plan)
           ? <PlannerSection inviteId={invite.id} slug={invite.slug} view={tab} />
           : <PlannerUpsell invite={invite} />)}
+        {tab === 'card'      && <PrintCardTab invite={invite as unknown as PrintCardInvite} origin={origin} apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'} />}
         {tab === 'remind'    && <RemindersTab invite={invite} onOpenNotify={() => setTab('notify')} onOpenGuests={() => setTab('guests')} />}
         {tab === 'notify'    && <NotifyTab invite={invite} userEmail={user?.email || ''} onSaved={loadInvite} />}
         {tab === 'domain'    && <DomainTab invite={invite} advanced={hasCustomDomain(invite.plan)} onSaved={loadInvite} />}

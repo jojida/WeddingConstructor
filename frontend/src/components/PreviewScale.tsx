@@ -16,9 +16,21 @@ import { useEffect, useRef } from 'react';
    карточки — превью выглядит одинаково на любом экране. */
 const BASE_WIDTH = 480;
 
-export default function PreviewScale({ className, children }: {
+/* baseWidth — «родная» ширина рендера. Для экрана телефона в витрине
+   (TemplateShowcase) она уже 480px: экран вытянут по высоте, и миниатюра,
+   рассчитанная на пропорции карточки, при 480px оставляла пустую полосу
+   снизу. CSS читает её из --preview-base.
+
+   coverHeight — режим «cover» для миниатюр-картинок с постоянными
+   пропорциями (Нежность, Лес, Ангелы…): их высота растёт только с шириной,
+   и в вытянутом экране снизу оставалось пусто. Тогда рендерим миниатюру
+   baseWidth × coverHeight, масштабируем по высоте контейнера и центрируем,
+   края по бокам срезаются (--preview-offset). */
+export default function PreviewScale({ className, children, baseWidth = BASE_WIDTH, coverHeight }: {
   className?: string;
   children: React.ReactNode;
+  baseWidth?: number;
+  coverHeight?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,7 +39,15 @@ export default function PreviewScale({ className, children }: {
     if (!el) return;
 
     const fit = () => {
-      const scale = el.clientWidth / BASE_WIDTH;
+      if (coverHeight) {
+        const scale = Math.max(el.clientHeight / coverHeight, el.clientWidth / baseWidth);
+        if (!scale) return;
+        el.style.setProperty('--preview-scale', String(scale));
+        el.style.setProperty('--preview-height', `${coverHeight}px`);
+        el.style.setProperty('--preview-offset', `${Math.round((el.clientWidth - baseWidth * scale) / 2)}px`);
+        return;
+      }
+      const scale = el.clientWidth / baseWidth;
       if (!scale) return;
       el.style.setProperty('--preview-scale', String(scale));
       // Высоту превью подгоняем так, чтобы после сжатия оно закрыло карточку.
@@ -42,7 +62,11 @@ export default function PreviewScale({ className, children }: {
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
+  }, [baseWidth, coverHeight]);
 
-  return <div ref={ref} className={className}>{children}</div>;
+  return (
+    <div ref={ref} className={className} style={{ '--preview-base': `${baseWidth}px` } as React.CSSProperties}>
+      {children}
+    </div>
+  );
 }

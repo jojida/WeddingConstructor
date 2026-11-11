@@ -1,9 +1,7 @@
 'use client';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
-import TemplatePreview from '@/components/TemplatePreview';
-import LazyMount from '@/components/LazyMount';
-import PreviewScale from '@/components/PreviewScale';
+import TemplateShowcase from '@/components/TemplateShowcase';
 import { LEGAL, TEMPLATES, templateSampleDate } from '@/lib/constants';
 import { NAME_MAX, withPreviewNames } from '@/lib/preview-names';
 import { usePreviewNames } from '@/lib/use-preview-names';
@@ -72,23 +70,21 @@ export default function TemplatesCatalog({ sampleFrom }: { sampleFrom: number })
             data-animate
             className={styles.card}
           >
+            {/* Слева открытка для печати, справа телефон — TemplateShowcase */}
             <div className={styles.cardImageWrapper}>
-              <PreviewScale className={styles.previewScale}>
-                <LazyMount initialVisible={i < 4}>
-                  <TemplatePreview
-                    data={withPreviewNames({
-                      ...SAMPLE_DATA,
-                      brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                      groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                      templateId: tpl.id,
-                      weddingDate: templateSampleDate(tpl, sampleFrom),
-                      coverPhoto: tpl.defaultCover,
-                      galleryPhotos: tpl.defaultGallery
-                    }, shown)}
-                    apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
-                  />
-                </LazyMount>
-              </PreviewScale>
+              <TemplateShowcase
+                initialVisible={i < 4}
+                data={withPreviewNames({
+                  ...SAMPLE_DATA,
+                  brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
+                  groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
+                  templateId: tpl.id,
+                  weddingDate: templateSampleDate(tpl, sampleFrom),
+                  coverPhoto: tpl.defaultCover,
+                  galleryPhotos: tpl.defaultGallery
+                }, shown)}
+                apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
+              />
             </div>
 
             <div className={styles.cardInfo}>

@@ -1,0 +1,90 @@
+/* Все размеры — в долях ширины витрины (cqw): карточка одинаково выглядит
+   и в три колонки на десктопе, и в две узкие на телефоне. */
+.stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 100 / 96;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 90% at 20% 10%, rgba(255,255,255,.55), rgba(255,255,255,0) 60%),
+    #ebe5dc;
+}
+
+/* Открытка: пропорции листа A6 / A5 (105 × 148 мм) */
+.paper {
+  position: absolute;
+  left: 6cqw;
+  top: 6cqw;
+  width: 59cqw;
+  aspect-ratio: 105 / 148;
+  overflow: hidden;
+  border-radius: 1px;
+  background: #fff;
+  box-shadow:
+    0 0.3cqw 0.6cqw rgba(60,45,30,.10),
+    0 4cqw 8cqw -3cqw rgba(60,45,30,.35);
+  transition: transform .5s cubic-bezier(.23,1,.32,1);
+}
+
+/* Телефон стоит правее и чуть ниже, перекрывая край открытки */
+.phone {
+  position: absolute;
+  right: 6cqw;
+  bottom: 5cqw;
+  width: 32cqw;
+  aspect-ratio: 9 / 19;
+  border-radius: 5.2cqw;
+  background: #1b1a19;
+  padding: 1.1cqw;
+  box-shadow:
+    inset 0 0 0 0.25cqw #4a4744,
+    0 4cqw 7cqw -2cqw rgba(30,20,10,.45);
+  transition: transform .5s cubic-bezier(.23,1,.32,1);
+}
+.screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4.2cqw;
+  background: #fff;
+}
+.notch {
+  position: absolute;
+  top: 2.4cqw;
+  left: 50%;
+  width: 9cqw;
+  height: 2.3cqw;
+  transform: translateX(-50%);
+  border-radius: 2cqw;
+  background: #1b1a19;
+  z-index: 2;
+}
+
+.stage:hover .paper { transform: translateY(-1cqw) rotate(-0.6deg); }
+.stage:hover .phone { transform: translateY(-1.6cqw); }
+
+/* Миниатюра рисуется в родной ширине 480px и ужимается (PreviewScale.tsx) */
+.scale {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+.scale > div {
+  width: var(--preview-base, 480px) !important;
+  height: var(--preview-height, 680px) !important;
+  max-width: none !important;
+  transform: translateX(var(--preview-offset, 0px)) scale(var(--preview-scale, 0.4));
+  transform-origin: top left;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paper, .phone { transition: none; }
+  .stage:hover .paper, .stage:hover .phone { transform: none; }
+}

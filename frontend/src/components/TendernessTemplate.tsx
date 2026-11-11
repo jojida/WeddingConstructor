@@ -148,7 +148,8 @@ export default function TendernessTemplate({ data, apiBase, fullPage, slug, edit
     return forms[a > 10 && a < 20 ? 2 : b === 1 ? 0 : b > 1 && b < 5 ? 1 : 2];
   };
   let cd: { n: number; l: string }[] | null = null;
-  if (now !== null && y && m && d) {
+  // На печатной открытке (PrintCardTab, флаг wcPrint) таймер не нужен — на бумаге он сразу устареет
+  if (now !== null && y && m && d && !data.customData?.wcPrint) {
     const [hh, mm] = time.split(':').map(Number);
     const left = Math.max(0, new Date(y, m - 1, d, hh, mm).getTime() - now);
     const dd = Math.floor(left / 86400000), h = Math.floor(left / 3600000) % 24;

@@ -136,7 +136,11 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
     );
   }
 
-  // Превью: в редакторе — живое и прокручиваемое, на карточке — статичная миниатюра
+  // На карточках и печатной открытке — лёгкая миниатюра первого экрана без iframe:
+  // в iframe имена появляются только анимацией (.reveal), и на печать они не попадали
+  if (!editing) return <VadimDaryaCard data={data} apiBase={apiBase} />;
+
+  // Превью в редакторе — живое и прокручиваемое
   return (
     <iframe
       ref={iframeRef}
@@ -152,5 +156,52 @@ export default function VadimDaryaTemplate({ data, apiBase, fullPage, slug, edit
       }}
       title="Превью приглашения"
     />
+  );
+}
+
+/* ── Карточка-превью «Тёмной элегантности»: первый экран сайта ──────────────
+   Повторяет .hero из public/invite/vadimdarya/style.css: фото на весь экран,
+   затемнение снизу, «Приглашение на свадьбу», имена по диагонали, дата.
+   Размеры — в долях ширины (cqw) от телефона 480px: 18vw имён = 18cqw. */
+const VD_MONTHS = ['ЯНВАРЯ', 'ФЕВРАЛЯ', 'МАРТА', 'АПРЕЛЯ', 'МАЯ', 'ИЮНЯ', 'ИЮЛЯ', 'АВГУСТА', 'СЕНТЯБРЯ', 'ОКТЯБРЯ', 'НОЯБРЯ', 'ДЕКАБРЯ'];
+
+function VadimDaryaCard({ data, apiBase }: { data: InviteData; apiBase: string }) {
+  const own = !!data.coverPhoto && !data.coverPhoto.startsWith('/invite/vadimdarya/');
+  const cover = !data.coverPhoto ? '/invite/vadimdarya/images/couple.jpg'
+    : data.coverPhoto.startsWith('/uploads') ? `${apiBase}${data.coverPhoto}` : data.coverPhoto;
+  const groom = data.groomName || 'Александр';
+  const bride = data.brideName || 'Анна';
+  let day = '20', month = 'СЕНТЯБРЯ', year = '2026';
+  const [yy, mm, dd] = (data.weddingDate || '').split('-').map(Number);
+  if (yy && mm && dd) { day = String(dd); month = VD_MONTHS[mm - 1]; year = String(yy); }
+  // Длинное имя в 18cqw вылезло бы за край — уменьшаем кегль
+  const longest = Math.max(groom.length, bride.length, 1);
+  const nameSize = Math.min(18, 80 / (longest * 0.5));
+  const script = "'Cormorant Garamond', Georgia, serif";
+  const body = "'Montserrat', system-ui, sans-serif";
+  const name: React.CSSProperties = {
+    margin: 0, fontFamily: script, fontSize: `${nameSize}cqw`, fontWeight: 300, fontStyle: 'italic', lineHeight: 1.15,
+    color: '#fff', letterSpacing: '-0.01em', whiteSpace: 'nowrap', textShadow: '0 4px 30px rgba(0,0,0,.5), 0 0 40px rgba(201,168,76,.18)',
+  };
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#1a1712', containerType: 'inline-size' }}>
+      <img src={cover} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: own ? '50% 30%' : '100% top' }} />
+      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(10,8,5,.3) 0%, rgba(10,8,5,.1) 40%, rgba(10,8,5,.5) 80%, rgba(10,8,5,.95) 100%)' }} />
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 6cqw' }}>
+        <p style={{ margin: '0 0 6.5cqw', fontFamily: body, fontSize: 'clamp(8px, 2.2cqw, 11px)', fontWeight: 300, letterSpacing: '0.5em', color: 'rgba(255,255,255,.8)', textTransform: 'uppercase' }}>
+          Приглашение на свадьбу
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', maxWidth: '67cqw', marginBottom: '8cqw' }}>
+          <p style={{ ...name, textAlign: 'left' }}>{groom}</p>
+          <span style={{ fontFamily: script, fontSize: '20cqw', color: 'rgba(255,255,255,.4)', fontStyle: 'italic', fontWeight: 300, lineHeight: 0.6, textAlign: 'right', paddingRight: '35%', margin: '-2cqw 0' }}>&amp;</span>
+          <p style={{ ...name, textAlign: 'right' }}>{bride}</p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2.5cqw', fontFamily: body, fontWeight: 200, fontSize: '3cqw', letterSpacing: '0.5em', color: 'rgba(255,255,255,.8)' }}>
+          <span>{day}</span><span style={{ color: 'rgba(255,255,255,.5)' }}>·</span>
+          <span>{month}</span><span style={{ color: 'rgba(255,255,255,.5)' }}>·</span>
+          <span>{year}</span>
+        </div>
+      </div>
+    </div>
   );
 }
