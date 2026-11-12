@@ -232,13 +232,15 @@ function Sheet({ side, data, apiBase, format, placement, caption, qr, url, water
     );
   }
 
-  // Лицевая сторона: миниатюра в родной ширине 480px, ужатая до ширины листа
-  const wpx = w * MM;
-  const scale = wpx / BASE;
-  const baseH = Math.round((h * MM) / scale);
+  // Лицевая сторона: миниатюра в родной ширине 480px, ужатая до ширины листа.
+  // На 1px больше листа и сдвинута на полпикселя: её край уходит под обрезку,
+  // а у листа нет белого фона — иначе по краю проступала белая нить (как было
+  // в витрине, см. BLEED в PreviewScale). На бумаге прозрачный лист = белый.
+  const scale = (w * MM + 1) / BASE;
+  const baseH = (h * MM + 1) / scale;
   return (
-    <div className="wc-print-sheet" style={sheet}>
-      <div style={{ width: BASE, height: baseH, transform: `scale(${scale})`, transformOrigin: 'top left', overflow: 'hidden', pointerEvents: 'none' }}>
+    <div className="wc-print-sheet" style={{ ...sheet, background: 'transparent' }}>
+      <div style={{ width: BASE, height: baseH, transform: `translate(-0.5px, -0.5px) scale(${scale})`, transformOrigin: 'top left', overflow: 'hidden', pointerEvents: 'none', background: '#f6f3ee' }}>
         <TemplatePreview data={data} apiBase={apiBase} />
       </div>
       {watermark && <Watermark />}

@@ -20,6 +20,12 @@ const BASE_WIDTH = 480;
    рукописных шрифтов (Great Vibes и др.) выходят за габарит строки. */
 const TEXT_MARGIN = 18;
 
+/* Миниатюра на BLEED px (экранных) больше контейнера и сдвинута на половину:
+   её собственный край уходит под обрезку overflow: hidden. Раньше масштаб
+   считался по округлённой clientWidth, миниатюра недотягивала до края на долю
+   пикселя, и по краю открытки и экрана проступала белая нить подложки. */
+const BLEED = 1;
+
 /* baseWidth — «родная» ширина рендера (читает CSS из --preview-base). Уже
    480px её делать нельзя: вёрстка миниатюр в px и долях ширины макета, при
    узком рендере текст и рамки вылезают за правый край.
@@ -80,43 +86,56 @@ export default function PreviewScale({ className, children, baseWidth = BASE_WID
       return x1 > x0 ? { x0, x1 } : null;
     };
 
-    // Фон миниатюры — им заливаются поля, если она отдалена
+    // Фон миниатюры — им заливаются поля, если она отдалена. Ищем со второго
+    // уровня: первый — масштабируемая обёртка, у неё свой фон-«бумага» на время загрузки.
+    let fill = '';
     const paintBackground = () => {
-      let node = el.firstElementChild as HTMLElement | null;
+      let node = el.firstElementChild?.firstElementChild as HTMLElement | null;
       for (let depth = 0; node && depth < 4; depth++, node = node.firstElementChild as HTMLElement | null) {
         const color = getComputedStyle(node).backgroundColor;
         if (color && color !== 'transparent' && color !== 'rgba(0, 0, 0, 0)') {
-          el.style.backgroundColor = color;
+          fill = color;
           return;
         }
       }
     };
 
+    // Размер контейнера с долями пикселя (ResizeObserver); до первого замера — clientWidth
+    const size = { width: 0, height: 0 };
+
     const fit = () => {
-      const width = el.clientWidth;
-      const height = el.clientHeight;
+      const width = size.width || el.clientWidth;
+      const height = size.height || el.clientHeight;
       if (!width || !height) return;
+      const w = width + BLEED;
+      const h = height + BLEED;
       if (coverHeight) {
-        let scale = Math.max(height / coverHeight, width / baseWidth);
+        let scale = Math.max(h / coverHeight, w / baseWidth);
         let center = baseWidth / 2;
         const box = fitText ? textBox.current : null;
         if (box) {
-          const textScale = width / Math.min(baseWidth, box.x1 - box.x0 + 2 * TEXT_MARGIN);
-          scale = Math.max(width / baseWidth, Math.min(scale, textScale));
+          const textScale = w / Math.min(baseWidth, box.x1 - box.x0 + 2 * TEXT_MARGIN);
+          scale = Math.max(w / baseWidth, Math.min(scale, textScale));
           center = (box.x0 + box.x1) / 2;
         }
-        const visible = width / scale;
+        const visible = w / scale;
         const left = Math.min(Math.max(center - visible / 2, 0), baseWidth - visible);
+        // > 0 — миниатюра отдалена, сверху и снизу поля её фона
+        const band = (h - coverHeight * scale) / 2;
         set('--preview-scale', String(scale));
         set('--preview-height', `${coverHeight}px`);
-        set('--preview-offset', `${Math.round(-left * scale)}px`);
-        set('--preview-offset-y', `${Math.max(0, Math.round((height - coverHeight * scale) / 2))}px`);
+        set('--preview-offset', `${-left * scale - BLEED / 2}px`);
+        set('--preview-offset-y', `${Math.max(0, band) - BLEED / 2}px`);
+        // Заливка только когда есть поля: иначе её край тоже проступал бы нитью
+        el.style.backgroundColor = band > 0 ? fill : '';
         return;
       }
-      const scale = width / baseWidth;
+      const scale = w / baseWidth;
       set('--preview-scale', String(scale));
-      // Высоту превью подгоняем так, чтобы после сжатия оно закрыло карточку.
-      set('--preview-height', `${Math.round(height / scale)}px`);
+      // Высоту превью подгоняем так, чтобы после сжатия оно закрыло карточку с запасом
+      set('--preview-height', `${h / scale}px`);
+      set('--preview-offset', `${-BLEED / 2}px`);
+      set('--preview-offset-y', `${-BLEED / 2}px`);
     };
 
     const remeasure = () => {
@@ -137,7 +156,14 @@ export default function PreviewScale({ className, children, baseWidth = BASE_WID
 
     let resize: ResizeObserver | null = null;
     if (typeof ResizeObserver === 'undefined') window.addEventListener('resize', fit);
-    else { resize = new ResizeObserver(fit); resize.observe(el); }
+    else {
+      resize = new ResizeObserver(entries => {
+        const rect = entries[entries.length - 1]?.contentRect;
+        if (rect) { size.width = rect.width; size.height = rect.height; }
+        fit();
+      });
+      resize.observe(el);
+    }
 
     // Миниатюра монтируется позже (LazyMount + динамический импорт шаблона),
     // а ширина текста зависит от шрифтов — перемеряем, когда появляется

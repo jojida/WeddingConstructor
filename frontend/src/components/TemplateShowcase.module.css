@@ -12,7 +12,10 @@
     #ebe5dc;
 }
 
-/* Открытка: пропорции листа A6 / A5 (105 × 148 мм) */
+/* Открытка: пропорции листа A6 / A5 (105 × 148 мм).
+   Подложки нет намеренно: белый фон проступал нитью по краям — сглаживание
+   края смешивало его с картинкой. Пока миниатюра грузится, лист закрашивает
+   сама её обёртка (.scale > div). */
 .paper {
   position: absolute;
   left: 6cqw;
@@ -21,46 +24,38 @@
   aspect-ratio: 105 / 148;
   overflow: hidden;
   border-radius: 1px;
-  background: #fff;
   box-shadow:
     0 0.3cqw 0.6cqw rgba(60,45,30,.10),
     0 4cqw 8cqw -3cqw rgba(60,45,30,.35);
   transition: transform .5s cubic-bezier(.23,1,.32,1);
 }
 
-/* Телефон стоит правее и чуть ниже, перекрывая край открытки */
+/* Телефон — обычный силуэт: светлая рамка, скругления, без «чёлки».
+   Экран 9:16, а не 9:19,5 как у iPhone: миниатюры свёрстаны под пропорции
+   открытки (~0,7), и в длинном экране их приходилось отдалять — сверху и снизу
+   оставались поля. Стоит правее и ниже, перекрывая край открытки. */
 .phone {
   position: absolute;
-  right: 6cqw;
-  bottom: 5cqw;
-  width: 32cqw;
-  aspect-ratio: 9 / 19;
-  border-radius: 5.2cqw;
-  background: #1b1a19;
-  padding: 1.1cqw;
+  right: 5.5cqw;
+  bottom: 5.5cqw;
+  width: 34cqw;
+  padding: 1.2cqw;
+  border-radius: 3.8cqw;
+  background: linear-gradient(160deg, #fdfcfa 0%, #f1ede7 55%, #e4dfd7 100%);
   box-shadow:
-    inset 0 0 0 0.25cqw #4a4744,
-    0 4cqw 7cqw -2cqw rgba(30,20,10,.45);
+    inset 0 0 0 0.22cqw rgba(60,45,30,.16),
+    0 0.3cqw 0.6cqw rgba(60,45,30,.12),
+    0 4cqw 7cqw -2cqw rgba(30,20,10,.38);
   transition: transform .5s cubic-bezier(.23,1,.32,1);
 }
 .screen {
   position: relative;
   width: 100%;
-  height: 100%;
+  aspect-ratio: 9 / 16;
   overflow: hidden;
-  border-radius: 4.2cqw;
-  background: #fff;
-}
-.notch {
-  position: absolute;
-  top: 2.4cqw;
-  left: 50%;
-  width: 9cqw;
-  height: 2.3cqw;
-  transform: translateX(-50%);
-  border-radius: 2cqw;
-  background: #1b1a19;
-  z-index: 2;
+  border-radius: 2.6cqw;
+  /* граница экрана по рамке; своей подложки у экрана нет — как у открытки */
+  box-shadow: 0 0 0 0.15cqw rgba(60,45,30,.18);
 }
 
 .stage:hover .paper { transform: translateY(-1cqw) rotate(-0.6deg); }
@@ -73,6 +68,8 @@
   overflow: hidden;
   pointer-events: none;
 }
+/* Обёртка миниатюры — чуть больше контейнера (BLEED в PreviewScale), так что
+   её край всегда под обрезкой. Её фон — «бумага», пока миниатюра не загрузилась. */
 .scale > div {
   width: var(--preview-base, 480px) !important;
   height: var(--preview-height, 680px) !important;
@@ -82,6 +79,7 @@
   border-radius: 0 !important;
   box-shadow: none !important;
   overflow: hidden;
+  background: #f6f3ee;
 }
 
 @media (prefers-reduced-motion: reduce) {
