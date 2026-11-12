@@ -15,12 +15,17 @@
 /* Открытка: пропорции листа A6 / A5 (105 × 148 мм).
    Подложки нет намеренно: белый фон проступал нитью по краям — сглаживание
    края смешивало его с картинкой. Пока миниатюра грузится, лист закрашивает
-   сама её обёртка (.scale > div). */
+   сама её обёртка (.scale > div).
+   По центру высоты, а телефон выше неё и выступает сверху и снизу
+   (12.11.26, «телефон сильно меньше карточки — как у weddingpost: телефон
+   больше, рамка тоньше»). Телефон заходит на край открытки на 2,5cqw (5 % её
+   ширины): дальше длинные имена («Константин» в «Тёмной элегантности»)
+   уходили под телефон. */
 .paper {
   position: absolute;
-  left: 6cqw;
-  top: 6cqw;
-  width: 59cqw;
+  left: 5cqw;
+  top: 13.1cqw;
+  width: 49.5cqw;
   aspect-ratio: 105 / 148;
   overflow: hidden;
   border-radius: 1px;
@@ -34,20 +39,20 @@
    Вытянут примерно как обычный телефон (весь ~1 : 1,9), но окно с
    приглашением — 9:16,4, почти пропорции открытки: в длинном окне миниатюры
    приходилось отдалять, и сверху и снизу оставались поля. Остаток высоты —
-   адресная строка с доменом пары внизу экрана. Стоит правее и ниже,
-   перекрывая край открытки. */
+   адресная строка с доменом пары внизу экрана. Стоит справа, выше открытки
+   и перекрывает её край; рамка тонкая (0,8cqw), как у weddingpost. */
 .phone {
   position: absolute;
   right: 5.5cqw;
-  bottom: 5.5cqw;
-  width: 33cqw;
-  padding: 1.2cqw;
-  border-radius: 3.8cqw;
+  bottom: 7.1cqw;
+  width: 42.5cqw;
+  padding: 0.8cqw;
+  border-radius: 3.6cqw;
   /* тёмно-графитовая рамка с бликом по краю: мягче чёрной в бежевой палитре,
      но силуэт телефона читается и отделяется от тёмных шаблонов */
   background: linear-gradient(160deg, #4d4945 0%, #3b3835 55%, #2e2b28 100%);
   box-shadow:
-    inset 0 0 0 0.22cqw #66615b,
+    inset 0 0 0 0.15cqw #66615b,
     0 0.3cqw 0.6cqw rgba(30,20,10,.18),
     0 4cqw 7cqw -2cqw rgba(30,20,10,.45);
   transition: transform .5s cubic-bezier(.23,1,.32,1);
@@ -56,7 +61,7 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  border-radius: 2.6cqw;
+  border-radius: 2.8cqw;
   /* своей подложки у экрана нет — как у открытки; край экрана — по рамке */
 }
 /* Окно с приглашением */
@@ -71,14 +76,14 @@
    уменьшается в TemplateShowcase.tsx, крайний случай — многоточие. */
 .address {
   display: block;
-  height: 4.4cqw;
-  padding: 0 1.4cqw;
+  height: 5.6cqw;
+  padding: 0 1.8cqw;
   background: #eeebe6;
   border-top: 0.15cqw solid rgba(60,45,30,.08);
   color: #7a7268;
   font-family: var(--font-inter), system-ui, sans-serif;
   font-weight: 500;
-  line-height: 4.4cqw;
+  line-height: 5.6cqw;
   letter-spacing: .01em;
   text-align: center;
   white-space: nowrap;

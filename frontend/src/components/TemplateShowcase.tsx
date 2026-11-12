@@ -50,8 +50,9 @@ export default function TemplateShowcase({ data, apiBase, initialVisible = false
   const coverHeight = PHONE_COVER[data.templateId];
   // Домен из имён пары — как адрес сайта в браузере: evgeniy-nadezhda.ru
   const domain = coupleDomain(data.groomName, data.brideName);
-  // Ширина строки ~28cqw, символ ~0,56 кегля: длинные имена — мельче, но не крупнее 2,2cqw
-  const addressSize = Math.min(2.2, 28 / (0.56 * domain.length)).toFixed(2);
+  // Ширина строки ~37cqw (телефон 42,5cqw без рамки и полей строки, см. .phone/.address),
+  // символ ~0,56 кегля: длинные имена — мельче, но не крупнее 2,8cqw
+  const addressSize = Math.min(2.8, 37 / (0.56 * domain.length)).toFixed(2);
   return (
     <div className={styles.stage}>
       <div className={styles.paper}>
