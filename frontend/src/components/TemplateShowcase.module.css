@@ -31,14 +31,16 @@
 }
 
 /* Телефон — обычный силуэт: светлая рамка, скругления, без «чёлки».
-   Экран 9:16, а не 9:19,5 как у iPhone: миниатюры свёрстаны под пропорции
-   открытки (~0,7), и в длинном экране их приходилось отдалять — сверху и снизу
-   оставались поля. Стоит правее и ниже, перекрывая край открытки. */
+   Вытянут примерно как обычный телефон (весь ~1 : 1,9), но окно с
+   приглашением — 9:16,4, почти пропорции открытки: в длинном окне миниатюры
+   приходилось отдалять, и сверху и снизу оставались поля. Остаток высоты —
+   адресная строка с доменом пары внизу экрана. Стоит правее и ниже,
+   перекрывая край открытки. */
 .phone {
   position: absolute;
   right: 5.5cqw;
   bottom: 5.5cqw;
-  width: 34cqw;
+  width: 33cqw;
   padding: 1.2cqw;
   border-radius: 3.8cqw;
   background: linear-gradient(160deg, #fdfcfa 0%, #f1ede7 55%, #e4dfd7 100%);
@@ -51,11 +53,36 @@
 .screen {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 16;
   overflow: hidden;
   border-radius: 2.6cqw;
   /* граница экрана по рамке; своей подложки у экрана нет — как у открытки */
   box-shadow: 0 0 0 0.15cqw rgba(60,45,30,.18);
+}
+/* Окно с приглашением */
+.view {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16.4;
+  overflow: hidden;
+}
+/* Адресная строка браузера: домен из имён пары (evgeniy-nadezhda.ru) —
+   свой домен можно подключить на любом тарифе. Кегль для длинных имён
+   уменьшается в TemplateShowcase.tsx, крайний случай — многоточие. */
+.address {
+  display: block;
+  height: 4.4cqw;
+  padding: 0 1.4cqw;
+  background: #eeebe6;
+  border-top: 0.15cqw solid rgba(60,45,30,.08);
+  color: #7a7268;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-weight: 500;
+  line-height: 4.4cqw;
+  letter-spacing: .01em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stage:hover .paper { transform: translateY(-1cqw) rotate(-0.6deg); }

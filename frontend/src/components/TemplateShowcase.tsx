@@ -2,6 +2,7 @@
 import TemplatePreview, { InviteData } from './TemplatePreview';
 import PreviewScale from './PreviewScale';
 import LazyMount from './LazyMount';
+import { slugify } from '@/studio/slug';
 import styles from './TemplateShowcase.module.css';
 
 /* Витрина шаблона в карточках главной и каталога: слева открытка для печати
@@ -12,8 +13,8 @@ import styles from './TemplateShowcase.module.css';
    TemplatePreview), просто в разных пропорциях. Её же печатает вкладка
    «Открытка с QR» в кабинете (PrintCardTab), так что витрина честно
    показывает, что получится на бумаге. */
-/* Экран телефона 9:16 (обычный телефон, не вытянутый iPhone) — всё равно уже
-   открытки (~0,7). Миниатюры свёрстаны под ширину 480px, поэтому и в телефоне
+/* Окно приглашения в телефоне 9:16,4 (под ним адресная строка) — всё равно
+   уже открытки (~0,7). Миниатюры свёрстаны под ширину 480px, поэтому и в телефоне
    рисуются в 480: при более узком рендере (раньше было 360) текст и рамки
    вылезали за правый край.
 
@@ -34,12 +35,23 @@ const PHONE_COVER: Record<string, number> = {
   sketch: 677,
 };
 
+/** Домен-пример из имён: «Евгений», «Надежда» → evgeniy-nadezhda.ru (транслит как у слагов Верстака) */
+function coupleDomain(groom?: string, bride?: string): string {
+  const g = slugify(groom || '', 20) || 'zhenikh';
+  const b = slugify(bride || '', 20) || 'nevesta';
+  return `${g}-${b}.ru`;
+}
+
 export default function TemplateShowcase({ data, apiBase, initialVisible = false }: {
   data: InviteData;
   apiBase: string;
   initialVisible?: boolean;
 }) {
   const coverHeight = PHONE_COVER[data.templateId];
+  // Домен из имён пары — как адрес сайта в браузере: evgeniy-nadezhda.ru
+  const domain = coupleDomain(data.groomName, data.brideName);
+  // Ширина строки ~28cqw, символ ~0,56 кегля: длинные имена — мельче, но не крупнее 2,2cqw
+  const addressSize = Math.min(2.2, 28 / (0.56 * domain.length)).toFixed(2);
   return (
     <div className={styles.stage}>
       <div className={styles.paper}>
@@ -51,12 +63,15 @@ export default function TemplateShowcase({ data, apiBase, initialVisible = false
       </div>
       <div className={styles.phone}>
         <div className={styles.screen}>
-          <PreviewScale className={styles.scale}
-            {...(coverHeight ? { coverHeight, fitText: true, fitKey: `${data.groomName}|${data.brideName}` } : {})}>
-            <LazyMount initialVisible={initialVisible}>
-              <TemplatePreview data={data} apiBase={apiBase} />
-            </LazyMount>
-          </PreviewScale>
+          <div className={styles.view}>
+            <PreviewScale className={styles.scale}
+              {...(coverHeight ? { coverHeight, fitText: true, fitKey: `${data.groomName}|${data.brideName}` } : {})}>
+              <LazyMount initialVisible={initialVisible}>
+                <TemplatePreview data={data} apiBase={apiBase} />
+              </LazyMount>
+            </PreviewScale>
+          </div>
+          <span className={styles.address} aria-hidden="true" style={{ fontSize: `${addressSize}cqw` }}>{domain}</span>
         </div>
       </div>
     </div>
