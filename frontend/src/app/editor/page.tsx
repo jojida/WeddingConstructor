@@ -434,8 +434,8 @@ function EditorContent() {
     return () => window.removeEventListener('message', onReady);
   }, [envelopeSelected, step, draftChecked]);
 
-  // Превью — в рамке телефона (360×720) или планшета (экран 768×1024): шаблон
-  // верстается под ширину выбранного устройства. На невысоком экране рамка
+  // Превью — в рамке телефона (360×720), планшета (экран 768×1024) или монитора
+  // (экран 1440×900): шаблон верстается под ширину выбранного устройства. На невысоком экране рамка
   // обрезалась снизу — масштаб подбирается под место (над рамкой — строка с
   // кнопкой «Во весь экран», 64 px). На телефоне только телефон, размер задаёт CSS — null.
   const [device, setDevice] = useStoredDevice();
@@ -496,9 +496,9 @@ function EditorContent() {
     setDevice(d);
   };
   // Во весь экран — на том же устройстве, что и превью рядом с полями; выбор
-  // телефона или планшета там переносится и сюда, «Компьютер» — только там
+  // устройства там переносится и сюда («Компьютер» во весь экран — без рамки, на всю ширину окна)
   const openPreview = () => { setFullMode(shownDevice); setShowPreview(true); previewGoal(); };
-  const chooseFullMode = (m: FullPreviewMode) => { setFullMode(m); if (m !== 'desktop') chooseDevice(m); };
+  const chooseFullMode = (m: FullPreviewMode) => { setFullMode(m); chooseDevice(m); };
   const closePreview = useCallback(() => setShowPreview(false), []);
   useEffect(() => {
     if (!shownSection) return;
@@ -1044,7 +1044,7 @@ function EditorContent() {
                 if (window.matchMedia('(max-width: 768px)').matches) openPreview();
               }}
             >
-              <div className={`${styles.phoneMockup} ${shownDevice === 'tablet' ? styles.tabletMockup : ''}`}
+              <div className={`${styles.phoneMockup} ${shownDevice === 'tablet' ? styles.tabletMockup : ''} ${shownDevice === 'desktop' ? styles.desktopMockup : ''}`}
                 style={phoneScale ? { transform: `scale(${phoneScale})` } : undefined}>
                 <div className={styles.phoneScreen}>
                   <div className={styles.phoneContent} ref={previewRef}>
@@ -1075,8 +1075,9 @@ function EditorContent() {
                 <div className={styles.sidebarTitle}>Редактор</div>
                 <div className={styles.sidebarSubtitle}>{template.name}</div>
               </div>
-              {/* Как смотреть превью слева: телефон или планшет */}
-              <DeviceSwitch value={device} options={['phone', 'tablet'] as const} onChange={chooseDevice} />
+              {/* Как смотреть превью слева: телефон, планшет или компьютер */}
+              <DeviceSwitch value={device} options={['phone', 'tablet', 'desktop'] as const} onChange={chooseDevice}
+                className={styles.deviceSwitch} />
             </div>
 
             <div className={styles.sidebarContent}>

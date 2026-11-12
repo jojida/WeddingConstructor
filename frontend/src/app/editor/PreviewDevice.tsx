@@ -4,19 +4,23 @@ import { Monitor, Smartphone, Tablet, X } from 'lucide-react';
 import { readStorage, writeStorage } from '@/lib/browser-storage';
 import s from './PreviewDevice.module.css';
 
-/* Превью приглашения на телефоне и на планшете.
+/* Превью приглашения на телефоне, планшете и компьютере.
 
    Рамка — это размер окна, в котором шаблон верстается: у телефона экран
-   332 px (макет 360×720 с рамкой), у планшета — 768×1024, как iPad в портрете.
-   Под нужную ширину шаблон перерисовывается сам: iframe получает эту ширину,
-   а уменьшает рамку под место только transform. */
-export type PreviewDevice = 'phone' | 'tablet';
-export type FullPreviewMode = PreviewDevice | 'desktop';
+   332 px (макет 360×720 с рамкой), у планшета — 768×1024, как iPad в портрете,
+   у компьютера — 1440×900, частое окно ноутбука. Под нужную ширину шаблон
+   перерисовывается сам: iframe получает эту ширину, а уменьшает рамку под
+   место только transform. */
+export type PreviewDevice = 'phone' | 'tablet' | 'desktop';
+/** Во весь экран: те же устройства, «Компьютер» там — на всю ширину окна, без рамки */
+export type FullPreviewMode = PreviewDevice;
 
 export const DEVICES: Record<PreviewDevice, { w: number; h: number; min: number; max: number; label: string }> = {
   phone: { w: 360, h: 720, min: 0.45, max: 1.15, label: 'Телефон' },
   // 768×1024 экран + рамка 22 px и обводка 2 px с каждой стороны
   tablet: { w: 816, h: 1072, min: 0.3, max: 1, label: 'Планшет' },
+  // 1440×900 экран + рамка монитора 14 px и обводка 2 px с каждой стороны
+  desktop: { w: 1472, h: 932, min: 0.2, max: 1, label: 'Компьютер' },
 };
 
 const STORAGE_KEY = 'wc_editor_device';
@@ -28,7 +32,7 @@ export function useStoredDevice(): [PreviewDevice, (d: PreviewDevice) => void] {
   useEffect(() => {
     const saved = readStorage('localStorage', STORAGE_KEY);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- разовое чтение после монтирования, см. выше
-    if (saved === 'tablet') setDevice('tablet');
+    if (saved === 'tablet' || saved === 'desktop') setDevice(saved);
   }, []);
   const choose = (d: PreviewDevice) => {
     setDevice(d);
@@ -71,7 +75,7 @@ export function DeviceSwitch<T extends FullPreviewMode>({ value, options, onChan
         const on = o === value;
         return (
           <button key={o} type="button" role="radio" aria-checked={on} className={s.switchBtn}
-            title={o === 'desktop' ? 'Во всю ширину окна, как на компьютере' : `Как на ${o === 'phone' ? 'телефоне' : 'планшете'}`}
+            title={`Как на ${o === 'phone' ? 'телефоне' : o === 'tablet' ? 'планшете' : 'компьютере'}`}
             onClick={() => onChange(o)}>
             <Icon size={16} strokeWidth={1.8} aria-hidden />
             <span>{LABELS[o]}</span>

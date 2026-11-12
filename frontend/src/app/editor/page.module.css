@@ -128,6 +128,24 @@
   border-radius: 50%; background: #3b362f;
 }
 .tabletMockup .phoneScreen { border-radius: 18px; }
+/* Компьютер: экран 1440×900 (частое окно ноутбука), тонкая рамка монитора,
+   камера посередине верхней рамки. Шаблон в нём — как у гостя на компьютере. */
+.desktopMockup { position: relative; width: 1472px; height: 932px; border-radius: 22px; padding: 14px; }
+.desktopMockup::before {
+  content: ''; position: absolute; top: 5px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px;
+  border-radius: 50%; background: #3b362f;
+}
+.desktopMockup .phoneScreen { border-radius: 6px; }
+
+/* Переключатель «Телефон / Планшет / Компьютер» над настройками: на узкой
+   панели — только значки (подпись остаётся для чтения с экрана и в подсказке) */
+@media (max-width: 1100px) {
+  .deviceSwitch button { padding: 0 11px; }
+  .deviceSwitch button span {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+  }
+}
 
 /* ─── RIGHT SIDEBAR ─────────────────────────────────────────────────────────── */
 /* Половина экрана (раньше — узкая колонка 320 px). Внутри: список разделов
