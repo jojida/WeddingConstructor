@@ -543,7 +543,9 @@ function ReviewsSection() {
   useEffect(() => {
     if (reviews.length && window.location.hash === '#reviews') document.getElementById('reviews')?.scrollIntoView();
   }, [reviews.length]);
-  if (reviews.length === 0) return null;
+  // Опубликованных отзывов нет (или сервер не ответил) — блок с кнопкой «Оставить отзыв».
+  // Он же рисуется на сервере, так что страница не прыгает, пока грузятся отзывы.
+  if (reviews.length === 0) return <ReviewsInvite />;
   const card: React.CSSProperties = {
     background: '#fff', border: '1px solid rgba(206,197,186,0.5)', borderRadius: 18,
     padding: '26px 24px', flex: '1 1 280px', maxWidth: 360,
@@ -578,6 +580,29 @@ function ReviewsSection() {
             Отзывы на Яндексе — и оставить свой
           </a>
         </p>
+      </div>
+    </section>
+  );
+}
+
+/* Пока опубликованных отзывов нет — отдельный блок с кнопкой «Оставить отзыв»
+   (решение владельца 13.11.26, по примеру блоков отзывов у конкурентов, но без цифр,
+   которых у нас нет). Звёзды пустые: рейтинга пока нет, а полные читались бы как «5,0».
+   Отзыв — в карточке Яндекс Бизнеса; без скидок и просьб написать «только хороший». */
+function ReviewsInvite() {
+  return (
+    <section id="reviews" className={styles.featuresSection}>
+      <div className={styles.sectionInner}>
+        <div className={styles.reviewsInvite}>
+          <div className={styles.reviewsInviteStars} aria-hidden="true">☆☆☆☆☆</div>
+          <h2 className={styles.sectionTitle}>Отзывы о WeddingCraft</h2>
+          <p className={styles.reviewsInviteText}>
+            Делали приглашение у нас? Расскажите, как всё прошло, — ваш отзыв поможет парам, которые сейчас выбирают.
+          </p>
+          <a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={styles.ctaBtn}>
+            Оставить отзыв на Яндексе
+          </a>
+        </div>
       </div>
     </section>
   );
