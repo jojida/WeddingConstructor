@@ -392,6 +392,9 @@ function Footer() {
               <li><Link href="/dashboard" className={styles.footerLink}>Личный кабинет</Link></li>
               <li><a href="#features" className={styles.footerLink}>Возможности</a></li>
               <li><Link href="/auth" className={styles.footerLink}>Войти</Link></li>
+              {/* Отзывы — в карточке Яндекс Бизнеса (онлайн-компания: на Картах адреса нет,
+                  жилое помещение Яндекс на Картах не публикует). Как у weddingpost — ссылкой, без своей формы */}
+              <li><a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={styles.footerLink}>Оставить отзыв</a></li>
             </ul>
           </div>
           <div>
@@ -570,6 +573,11 @@ function ReviewsSection() {
             );
           })}
         </div>
+        <p style={{ textAlign: 'center', margin: '28px 0 0', fontSize: 15 }}>
+          <a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#7a6a55', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+            Отзывы на Яндексе — и оставить свой
+          </a>
+        </p>
       </div>
     </section>
   );
