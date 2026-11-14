@@ -18,6 +18,7 @@
     date: '2028-07-30', time: '12:30',
     groom: 'Никита', bride: 'Ольга',
     signUser: false,        // подпись финала задала пара (иначе — имена)
+    looksSeen: false,       // данные дресс-кода уже приходили (дальше правки переключают вкладку)
     scheduleSig: '',
     paraSig: {}
   };
@@ -28,12 +29,15 @@
   ];
 
   var DEFAULT_SCHEDULE = [
-    { time: '12:00', title: 'Торжественная регистрация', icon: 'assets/ic-rings.webp' },
-    { time: '14:00', title: 'Фуршет', icon: 'assets/ic-champagne.webp' },
-    { time: '15:00', title: 'Фотосессия', icon: 'assets/ic-camera.webp' },
-    { time: '18:00', title: 'Праздничный банкет', icon: 'assets/ic-cloche.webp' },
-    { time: '22:00', title: 'Окончание праздничного дня', icon: 'assets/ic-bouquet.webp' }
+    { time: '12:00', title: 'Регистрация брака', icon: 'assets/ic-rings.webp' },
+    { time: '14:00', title: 'Фуршет и поздравления', icon: 'assets/ic-champagne.webp' },
+    { time: '15:00', title: 'Прогулка и фотосессия', icon: 'assets/ic-camera.webp' },
+    { time: '18:00', title: 'Свадебный ужин', icon: 'assets/ic-cloche.webp' },
+    { time: '22:00', title: 'Букет невесты и финал вечера', icon: 'assets/ic-bouquet.webp' }
   ];
+
+  // Цвета костюмов по умолчанию (платья — в разметке)
+  var DEFAULT_MEN = ['#efe4d6', '#d8c7b3', '#b9a48e', '#c8ccd2', '#a9b8c9', '#e3c4bf'];
 
   var MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
   var WEEKDAYS = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
@@ -104,15 +108,58 @@
   }
 
   // Пустая строка — пара удалила фото: возвращаем фото дизайна.
+  // true — фото действительно сменилось
   function setImg(key, url) {
-    if (url == null) return;
+    if (url == null) return false;
+    var changed = false;
     document.querySelectorAll('img[data-edit="' + key + '"]').forEach(function (el) {
       var next = url === '' ? el.getAttribute('data-def') : imageUrl(url);
       if (!next) return;
       var abs = next;
       try { abs = new URL(next, window.location.href).href; } catch (e) {}
-      if (el.src !== abs) el.src = next;
+      if (el.src !== abs) { el.src = next; changed = true; }
     });
+    return changed;
+  }
+
+  /* ─── Дресс-код: вкладки «Женщины / Мужчины» ─── */
+  function showLooks(which, replay) {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      var on = b.getAttribute('data-look') === which;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.looks__panel').forEach(function (p) {
+      var on = p.getAttribute('data-look') === which;
+      var was = p.classList.contains('is-active');
+      p.classList.toggle('is-active', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+      // открытая вкладка: силуэты появляются по очереди заново
+      if (on && !was && replay && !REDUCED) {
+        var grid = p.querySelector('.rv-pop.in');
+        if (grid) { grid.classList.remove('in'); void grid.offsetWidth; grid.classList.add('in'); }
+      }
+    });
+  }
+
+  function initLooks() {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      b.addEventListener('click', function () { showLooks(b.getAttribute('data-look'), true); });
+    });
+    // В редакторе подсвеченное (правимое) поле дресс-кода — сразу на экране:
+    // скрытая вкладка (visibility) находится и подсвечивается редактором
+    if (EDITING && 'MutationObserver' in window) {
+      var mo = new MutationObserver(function (list) {
+        list.forEach(function (r) {
+          if (!r.target.classList || !r.target.classList.contains('wc-editor-flash')) return;
+          var panel = r.target.closest('.looks__panel');
+          if (panel) showLooks(panel.getAttribute('data-look'));
+        });
+      });
+      document.querySelectorAll('.looks__panel [data-edit]').forEach(function (el) {
+        mo.observe(el, { attributes: true, attributeFilter: ['class'] });
+      });
+    }
   }
 
   /* ─── Имена: обложка и подпись финала ─────────────── */
@@ -255,11 +302,11 @@
     if (!rows.length || !W || !H) return;
     var u = TL.u = W / 1366;
     var centers = rows.map(function (r) { return r.offsetTop + r.offsetHeight / 2; });
-    var pts = [[736 * u, Math.max(40 * u, centers[0] - 130 * u)]];
-    rows.forEach(function (r, k) {
-      pts.push([(r.classList.contains('is-right') ? 500 : 820) * u, centers[k]]);
-    });
-    pts.push([(rows[rows.length - 1].classList.contains('is-right') ? 560 : 865) * u, centers[centers.length - 1] + 170 * u]);
+    var xOf = function (r) { return (r.classList.contains('is-right') ? 500 : 820) * u; };
+    // Начало и конец — прямо вверх и вниз от крайних пунктов: без завитков
+    var pts = [[xOf(rows[0]), Math.max(40 * u, centers[0] - 150 * u)]];
+    rows.forEach(function (r, k) { pts.push([xOf(r), centers[k]]); });
+    pts.push([xOf(rows[rows.length - 1]), centers[centers.length - 1] + 150 * u]);
 
     var d = 'M ' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
     for (var k = 1; k < pts.length; k++) {
@@ -337,9 +384,9 @@
   function rebuildDresses(colors) {
     var list = cleanColors(colors);
     var box = document.querySelector('[data-edit="palette"]');
-    if (!box || !list.length) return;
+    if (!box || !list.length) return false;
     var sig = list.join(',');
-    if (box.dataset.sig === sig) return;
+    if (box.dataset.sig === sig) return false;
     box.dataset.sig = sig;
     var shown = box.classList.contains('in');
     box.innerHTML = '';
@@ -352,6 +399,34 @@
       box.appendChild(sp);
     });
     if (shown) box.classList.add('in');
+    return true;
+  }
+
+  // Костюмы: символ #suit, пиджак — цвет палитры, бабочка — оттенок темнее
+  function rebuildSuits(colors) {
+    var list = cleanColors(colors);
+    var box = document.querySelector('[data-edit="menColors"]');
+    if (!box || !list.length) return false;
+    var sig = list.join(',');
+    if (box.dataset.sig === sig) return false;
+    box.dataset.sig = sig;
+    var shown = box.classList.contains('in');
+    box.innerHTML = '';
+    var NS = 'http://www.w3.org/2000/svg';
+    list.forEach(function (c) {
+      var svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', 'suit');
+      svg.setAttribute('viewBox', '0 0 257 308');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.style.setProperty('--c', c);
+      svg.style.setProperty('--b', bowColor(c));
+      var use = document.createElementNS(NS, 'use');
+      use.setAttribute('href', '#suit');
+      svg.appendChild(use);
+      box.appendChild(svg);
+    });
+    if (shown) box.classList.add('in');
+    return true;
   }
 
   /* ─── Анкета: переключатели и напитки ─────────────── */
@@ -639,10 +714,21 @@
     setOptText('surveyText', d.surveyText);
     setRichText('closingTitle', d.closingTitle);
 
-    ['coverPhoto', 'dressCodePhoto', 'dressPhoto2', 'dressPhoto3', 'dressPhoto4'].forEach(function (k) { setImg(k, d[k]); });
+    setImg('coverPhoto', d.coverPhoto);
+    // Дресс-код: в редакторе правку сразу видно — открываем её вкладку
+    // (первые данные после загрузки вкладку не переключают)
+    var looksReady = STATE.looksSeen, showTab = '';
+    [['dressCodePhoto', 'women'], ['dressPhoto2', 'women'], ['dressPhoto3', 'women'], ['dressPhoto4', 'women'],
+     ['dressMan1', 'men'], ['dressMan2', 'men'], ['dressMan3', 'men'], ['dressMan4', 'men']].forEach(function (k) {
+      if (setImg(k[0], d[k[0]])) showTab = k[1];
+      if (d[k[0]] != null) STATE.looksSeen = true;
+    });
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
-    rebuildDresses(d.dressCodeColors);
+    if (rebuildDresses(d.dressCodeColors)) showTab = 'women';
+    if (rebuildSuits(d.menColors)) showTab = 'men';
+    if (d.dressCodeColors != null || d.menColors != null) STATE.looksSeen = true;
+    if (EDITING && looksReady && showTab) showLooks(showTab);
     applySchedule(d.schedule);
     rebuildDrinks(d.drinks);
   }
@@ -669,6 +755,8 @@
     document.querySelectorAll('img[data-edit]').forEach(function (img) {
       img.setAttribute('data-def', img.getAttribute('src') || '');
     });
+    rebuildSuits(DEFAULT_MEN);
+    initLooks();
     initReveal();
     applySchedule(DEFAULT_SCHEDULE);   // базовое наполнение (сам по себе, без редактора)
     initTrack();

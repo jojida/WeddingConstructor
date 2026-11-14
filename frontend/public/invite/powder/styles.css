@@ -575,8 +575,8 @@ html.no-anim .cover__names { opacity: 1; -webkit-mask-image: none; mask-image: n
 .prog__heart { fill: #d89b92; }
 
 /* ============================================================
-   9 — ДРЕСС-КОД (макет: 14617–18153): платья в цветах палитры,
-   коллаж образов, пожелание
+   9 — ДРЕСС-КОД (макет: 14617–18153): вкладки «Женщины / Мужчины»,
+   в каждой — силуэты в цветах палитры и коллаж образов; пожелание
    ============================================================ */
 .dress {
   padding: calc(70.6 * var(--u)) calc(38 * var(--u)) calc(332 * var(--u));
@@ -586,6 +586,50 @@ html.no-anim .cover__names { opacity: 1; -webkit-mask-image: none; mask-image: n
 .dress__blob { left: calc(1011 * var(--u)); bottom: calc(106 * var(--u)); width: calc(355 * var(--u)); }
 .dress__title { letter-spacing: .239em; padding-left: .239em; }
 .dress__text { max-width: calc(920 * var(--u)); margin-top: calc(110 * var(--u)); }
+/* Вкладки «Женщины / Мужчины» — розовый кант, как у кнопки карты; активная — розовая */
+.looks__tabs {
+  display: inline-flex;
+  margin-top: calc(84 * var(--u));
+  padding: calc(8 * var(--u));
+  border: calc(2.5 * var(--u)) solid #f3c6d0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+  box-shadow: inset 0 0 calc(12 * var(--u)) rgba(255, 185, 202, .45);
+}
+.looks__tab {
+  margin: 0;
+  padding: calc(20 * var(--u)) calc(50 * var(--u)) calc(20 * var(--u)) calc(50 * var(--u) + .2em);
+  border: 0; border-radius: 999px;
+  background: transparent;
+  font-family: var(--f-text);
+  font-weight: 600;
+  font-size: max(12px, calc(38 * var(--u)));
+  line-height: 1.2;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--pink);
+  cursor: pointer;
+  transition: background-color .3s ease, color .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.looks__tab.is-active { background: var(--pink); color: #fff; }
+.looks__tab:focus-visible { outline: calc(3 * var(--u)) solid rgba(204, 124, 114, .45); outline-offset: calc(4 * var(--u)); }
+/* Обе вкладки в одной ячейке сетки: высота блока не прыгает, смена — растворением */
+.looks__panels { display: grid; margin-top: calc(10 * var(--u)); }
+.looks__panel {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(calc(18 * var(--u)));
+  transition: opacity .5s ease, transform .5s ease, visibility 0s linear .5s;
+}
+.looks__panel.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease, transform .5s ease, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) { .looks__panel { transition: none; transform: none; } }
 .dress__grid {
   display: flex; flex-wrap: wrap; justify-content: center;
   gap: calc(104 * var(--u)) calc(45 * var(--u));
@@ -614,6 +658,9 @@ html.no-anim .cover__names { opacity: 1; -webkit-mask-image: none; mask-image: n
   background: url("assets/dress-shade.png") center / 100% 100% no-repeat;
   mix-blend-mode: multiply;
 }
+/* Костюм: векторный символ #suit, цвета — из --c и --b */
+.suit { display: block; width: calc(258 * var(--u)); height: auto; aspect-ratio: 257 / 308; overflow: visible; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 .looks { display: flex; justify-content: center; gap: calc(18 * var(--u)); margin-top: calc(158 * var(--u)); }
 .looks__col { display: flex; flex-direction: column; width: calc(636 * var(--u)); }
 .look { margin: 0; overflow: hidden; background: #f7e7e5; }

@@ -161,26 +161,85 @@
       </div>
     </section>
 
-    <!-- 9 — ДРЕСС-КОД: платья в цветах палитры пары, образы и пожелание -->
+    <!-- 9 — ДРЕСС-КОД: вкладки «Женщины / Мужчины». В каждой — силуэты в цветах
+         палитры пары (платья / костюмы) и коллаж из четырёх фото образов.
+         Неактивная вкладка скрыта visibility, а не display: так редактор находит
+         и подсвечивает её фото, а кадрирование (photo-frame.js) знает размеры рамок -->
     <section class="dress" id="dresscode" data-wc-section="dresscode">
       <h2 class="title dress__title rv" data-edit="dressTitle">Дресс-код</h2>
       <p class="text dress__text rv" data-edit="dressText">Будем рады, если в своих образах вы поддержите нежную палитру нашего праздника</p>
-      <div class="dress__grid rv-pop" data-edit="palette">
-        <span class="dress__item" style="--c:#fddfe5;--b:#f690a8"><i></i></span><span class="dress__item" style="--c:#ffeef1;--b:#ffedf0"><i></i></span><span class="dress__item" style="--c:#fff1e3;--b:#fff0e1"><i></i></span>
-        <span class="dress__item" style="--c:#faf2d7;--b:#ffe487"><i></i></span><span class="dress__item" style="--c:#feecdd;--b:#f6d8ba"><i></i></span><span class="dress__item" style="--c:#d0eef4;--b:#39c6e1"><i></i></span>
+      <div class="looks__tabs rv" role="tablist" aria-label="Дресс-код гостей">
+        <button class="looks__tab is-active" type="button" role="tab" aria-selected="true" data-look="women">Женщины</button>
+        <button class="looks__tab" type="button" role="tab" aria-selected="false" data-look="men">Мужчины</button>
       </div>
-      <div class="looks rv-soft">
-        <div class="looks__col">
-          <figure class="look look--a"><img src="assets/look-1.jpg" data-edit="dressCodePhoto" alt="Пример образа 1" loading="lazy" decoding="async" /></figure>
-          <figure class="look look--d"><img src="assets/look-4.jpg" data-edit="dressPhoto4" alt="Пример образа 4" loading="lazy" decoding="async" /></figure>
+      <div class="looks__panels">
+        <div class="looks__panel is-active" role="tabpanel" data-look="women">
+          <div class="dress__grid rv-pop" data-edit="palette">
+            <span class="dress__item" style="--c:#fddfe5;--b:#f690a8"><i></i></span><span class="dress__item" style="--c:#ffeef1;--b:#ffedf0"><i></i></span><span class="dress__item" style="--c:#fff1e3;--b:#fff0e1"><i></i></span>
+            <span class="dress__item" style="--c:#faf2d7;--b:#ffe487"><i></i></span><span class="dress__item" style="--c:#feecdd;--b:#f6d8ba"><i></i></span><span class="dress__item" style="--c:#d0eef4;--b:#39c6e1"><i></i></span>
+          </div>
+          <div class="looks rv-soft">
+            <div class="looks__col">
+              <figure class="look look--a"><img src="assets/look-1.jpg" data-edit="dressCodePhoto" alt="Образ для женщин 1" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--d"><img src="assets/look-6.jpg" data-edit="dressPhoto4" alt="Образ для женщин 4" loading="lazy" decoding="async" /></figure>
+            </div>
+            <div class="looks__col">
+              <figure class="look look--b"><img src="assets/look-2.jpg" data-edit="dressPhoto2" alt="Образ для женщин 2" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--c"><img src="assets/look-5.jpg" data-edit="dressPhoto3" alt="Образ для женщин 3" loading="lazy" decoding="async" /></figure>
+            </div>
+          </div>
         </div>
-        <div class="looks__col">
-          <figure class="look look--b"><img src="assets/look-2.jpg" data-edit="dressPhoto2" alt="Пример образа 2" loading="lazy" decoding="async" /></figure>
-          <figure class="look look--c"><img src="assets/look-3.jpg" data-edit="dressPhoto3" alt="Пример образа 3" loading="lazy" decoding="async" /></figure>
+        <div class="looks__panel" role="tabpanel" data-look="men" aria-hidden="true">
+          <div class="dress__grid rv-pop" data-edit="menColors">
+            <!-- костюмы строит script.js из палитры; рисунок — символ #suit ниже -->
+          </div>
+          <div class="looks rv-soft">
+            <div class="looks__col">
+              <figure class="look look--a"><img src="assets/look-7.jpg" data-edit="dressMan1" alt="Образ для мужчин 1" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--d"><img src="assets/look-9.jpg" data-edit="dressMan4" alt="Образ для мужчин 4" loading="lazy" decoding="async" /></figure>
+            </div>
+            <div class="looks__col">
+              <figure class="look look--b"><img src="assets/look-8.jpg" data-edit="dressMan2" alt="Образ для мужчин 2" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--c"><img src="assets/look-3.jpg" data-edit="dressMan3" alt="Образ для мужчин 3" loading="lazy" decoding="async" /></figure>
+            </div>
+          </div>
         </div>
       </div>
       <p class="dress__note rv" data-edit="dressNote">Просьба избегать чёрных и белых цветов</p>
       <img width="160" height="197" class="blob dress__blob" src="assets/blob-dress.webp" alt="" loading="lazy" decoding="async" />
+      <!-- Костюм в стиле платьев макета: пиджак — цвет палитры (--c), бабочка,
+           платочек и пуговицы — тот же оттенок темнее (--b), контур — в тон -->
+      <svg class="sprite" aria-hidden="true" width="0" height="0">
+        <symbol id="suit" viewBox="0 0 257 308">
+          <g stroke="#6b5f4e" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" style="stroke: color-mix(in srgb, var(--c) 30%, #3d332d)">
+            <path style="fill:var(--c)" d="M 58 50 C 44 62 36 92 32 128 C 28 168 25 210 23 246 C 33 250 46 251 57 249 C 60 212 64 170 68 132 C 70 112 72 98 72 92 Z" />
+            <path style="fill:var(--c)" d="M 199 50 C 213 62 221 92 225 128 C 229 168 232 210 234 246 C 224 250 211 251 200 249 C 197 212 193 170 189 132 C 187 112 185 98 185 92 Z" />
+            <path fill="#000" fill-opacity=".07" stroke="none" d="M 50 132 C 47 170 44 210 43 248 C 48 250 53 250 57 249 C 60 212 64 170 68 132 C 70 112 72 98 72 92 C 62 104 54 116 50 132 Z" />
+            <path fill="#000" fill-opacity=".07" stroke="none" d="M 207 132 C 210 170 213 210 214 248 C 209 250 204 250 200 249 C 197 212 193 170 189 132 C 187 112 185 98 185 92 C 195 104 203 116 207 132 Z" />
+            <path fill="none" d="M 24 234 C 34 237 46 238 57 236 M 233 234 C 223 237 211 238 200 236" />
+            <path style="fill:var(--c)" d="M 104 28 C 88 34 70 40 56 48 C 64 62 70 78 72 94 C 70 140 68 200 70 238 C 70 256 71 270 74 284 C 88 288 103 289 117 287 C 120 262 124 236 128.5 214 C 133 236 137 262 140 287 C 154 289 169 288 183 284 C 186 270 187 256 187 238 C 189 200 187 140 185 94 C 187 78 193 62 201 48 C 187 40 169 34 153 28 Z" />
+            <path fill="#000" fill-opacity=".06" stroke="none" d="M 162 150 C 172 196 176 240 178 285 C 171 287 162 288 152 288 C 150 248 151 204 150 168 Z" />
+            <path fill="#000" fill-opacity=".05" stroke="none" d="M 80 104 C 84 150 86 200 88 287 C 83 287 78 286 74 284 C 71 270 70 256 70 238 C 68 200 70 140 72 104 Z" />
+            <path fill="#fff" d="M 106 29 C 114 36 122 40 128.5 40 C 135 40 143 36 151 29 L 128.5 166 Z" />
+            <path fill="none" stroke-width="1.6" d="M 128.5 52 L 128.5 160" />
+            <path fill="#fff" d="M 108 28 L 120 56 L 128.5 44 Z" />
+            <path fill="#fff" d="M 149 28 L 137 56 L 128.5 44 Z" />
+            <path style="fill:var(--c)" d="M 105 29 L 89 70 L 97 75 L 85 84 C 98 112 112 142 124 170 L 128.5 166 C 120 122 113 76 105 29 Z" />
+            <path style="fill:var(--c)" d="M 152 29 L 168 70 L 160 75 L 172 84 C 159 112 145 142 133 170 L 128.5 166 C 137 122 144 76 152 29 Z" />
+            <path fill="#000" fill-opacity=".08" stroke="none" d="M 89 70 L 97 75 L 85 84 C 98 112 112 142 124 170 C 108 140 96 112 89 88 Z" />
+            <path fill="#000" fill-opacity=".08" stroke="none" d="M 168 70 L 160 75 L 172 84 C 159 112 145 142 133 170 C 149 140 161 112 168 88 Z" />
+            <path style="fill:var(--b)" d="M 122 42 C 114 33 103 28 96 31 C 92 39 92 49 96 57 C 103 59 114 54 122 48 Z" />
+            <path style="fill:var(--b)" d="M 135 42 C 143 33 154 28 161 31 C 165 39 165 49 161 57 C 154 59 143 54 135 48 Z" />
+            <rect style="fill:var(--b)" x="120.5" y="37" width="16" height="13" rx="4" />
+            <path fill="none" stroke-width="1.4" d="M 103 37 C 108 40 113 42 119 43.5 M 103 52 C 108 49.5 113 47.5 119 47 M 154 37 C 149 40 144 42 138 43.5 M 154 52 C 149 49.5 144 47.5 138 47" />
+            <path style="fill:var(--b)" d="M 86 119 L 90 109 L 95 116 L 100 108 L 104 117 Z" />
+            <path fill="none" d="M 84 119 L 106 117" />
+            <path fill="none" d="M 79 232 C 89 234 100 234 110 232 M 178 232 C 168 234 157 234 147 232" />
+            <circle style="fill:var(--b)" cx="128.5" cy="184" r="3.6" />
+            <circle style="fill:var(--b)" cx="128.5" cy="203" r="3.6" />
+          </g>
+        </symbol>
+      </svg>
     </section>
 
     <!-- 10 — ДЕТАЛИ: розовый мрамор, светлая арка и букет -->
