@@ -22,6 +22,10 @@ export const PRINT_FIELDS = [
 export type PrintData = Record<(typeof PRINT_FIELDS)[number]['key'], string> & { photo?: string; photoPosition?: string; photoFrame?: { x: number; y: number; z: number; r?: number } };
 export const PRINT_PHOTO_TEMPLATES = ['azure-bloom', 'floral-gold', 'newspaper', 'editorial'];
 export const printDimensions = (id: string) => id === 'azure-bloom' ? '148 × 105 мм' : '105 × 148 мм';
+/** Лёгкое превью макета для витрины: /print, блок на главной, список заказов. Сам макет —
+    /print/<id>.svg со встроенными шрифтами и фото — весит 0,3–3,5 МБ, его показывает только
+    редактор. WebP делает scripts/generate-print-previews.cjs; размеры — оттуда же. */
+export const printPreview = (id: string) => ({ src: `/print/${id}.webp`, width: 560, height: id === 'azure-bloom' ? 398 : 789 });
 export const PRINT_SAMPLE: PrintData = { groom: 'Александр', bride: 'Анастасия', date: '2027-06-19', time: '16:00', greeting: 'Дорогие родные и друзья!', message: 'Есть моменты, которые хочется разделить с самыми близкими. Приглашаем вас стать частью нашей истории и отпраздновать день нашей свадьбы.', venue: 'Усадьба «Архангельское»', address: 'Московская область, посёлок Архангельское', footer: 'С любовью и в ожидании встречи' };
 export function getPrintSample(id: string): PrintData {
   const supplied: Record<string, Partial<PrintData>> = {
