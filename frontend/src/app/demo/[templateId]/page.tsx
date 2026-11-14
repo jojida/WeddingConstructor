@@ -11,6 +11,16 @@ interface Props {
   params: Promise<{ templateId: string }>;
 }
 
+/* Шаблоны известны при сборке: страницы демо собираются заранее и отдаются готовыми,
+   как каталог и статьи, а не рисуются заново на каждый запрос (до 14.11.26 сервер отвечал
+   «no-store»). Остальные адреса /demo/<что-то> — 404. Раз в сутки страница пересобирается
+   сама: пример даты свадьбы (см. sampleWeddingDate) не устареет, даже если выкладок долго нет. */
+export const dynamicParams = false;
+export const revalidate = 86400;
+export function generateStaticParams() {
+  return TEMPLATES.map(t => ({ templateId: t.id }));
+}
+
 const SAMPLE_DATA = {
   brideName: 'Дарья',
   groomName: 'Вадим',
