@@ -17,6 +17,7 @@ const PALETTES: Record<string, Palette> = {
   calla:            { bg: '#f3f1ec', ink: '#3a3631', accent: '#9c8f7a' },
   angels:           { bg: '#f2f6fb', ink: '#3d4a5c', accent: '#b8935a' },
   tenderness:       { bg: '#f6efe9', ink: '#4a3b32', accent: '#b08968' },
+  powder:           { bg: '#fdf3f3', ink: '#735e59', accent: '#cc7c72' },
   forest:           { bg: '#eef2ea', ink: '#2f3a2c', accent: '#6b7d5a' },
   'garden-evening': { bg: '#f6efe4', ink: '#3b3127', accent: '#b07b4f' },
   'garden-arch':    { bg: '#f1f4ee', ink: '#2f3a2c', accent: '#6b7d5a' },

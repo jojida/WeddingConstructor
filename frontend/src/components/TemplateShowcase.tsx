@@ -27,6 +27,7 @@ import styles from './TemplateShowcase.module.css';
    обрезки держится вокруг текста (fitText в PreviewScale). */
 const PHONE_COVER: Record<string, number> = {
   tenderness: 711,
+  powder: 822,
   forest: 763,
   'garden-evening': 776,
   vitrage: 738,

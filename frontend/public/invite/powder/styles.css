@@ -1,0 +1,784 @@
+/* ============================================================
+   «Пудра» — свадебное приглашение по Canva-макету «Pink Beige
+   Watercolor Illustration Wedding Invitation» (сайт шириной 1366px).
+   Размеры — в пикселях макета: calc(N * var(--u)).
+   Шрифты: Cormorant Garamond (весь текст, как в макете) и Great Vibes
+   (имена и программа; рукописный шрифт макета платный — Great Vibes
+   ближе всего из свободных с кириллицей). Кегли и разрядка подобраны
+   по ширине строк макета.
+   ============================================================ */
+
+:root {
+  --col: 500px;
+  /* Единица макета. Колонка = min(ширина окна, --col), полоса прокрутки скрыта */
+  --u: calc(min(100vw, var(--col)) / 1366);
+
+  --pink: #cc7c72;
+  --taupe: #735e59;
+  --ink: #1f1b1a;
+  --blush: #fef5f5;
+
+  --f-text: "Cormorant Garamond", "Times New Roman", Georgia, serif;
+  --f-script: "Anastasia Script", "Great Vibes", "Marck Script", cursive;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #f4e9e7;
+  color: var(--pink);
+  font-family: var(--f-text);
+  font-weight: 600;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+}
+html, body { overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+.invite {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: var(--col);
+  margin: 0 auto;
+  background: #fff;
+  overflow: hidden;
+}
+@media (min-width: 520px) {
+  .invite { box-shadow: 0 0 60px rgba(160, 90, 80, .18); }
+}
+
+/* Планшет в портрете (в редакторе — режим «Планшет», 768×1024): макет на всю
+   ширину экрана, без полей по бокам. Компьютер и планшет лёжа — колонкой. */
+@media (min-width: 501px) and (max-width: 1024px) and (orientation: portrait) {
+  :root { --col: 100vw; }
+  .invite { box-shadow: none; }
+}
+
+img { max-width: none; }
+section { position: relative; }
+
+/* Заголовки разделов и текст — заглавными, с разрядкой, как в макете.
+   Разрядка добавляется и после последней буквы строки — отступ слева
+   той же величины держит строки ровно по центру */
+.title {
+  margin: 0;
+  font-family: var(--f-text);
+  font-weight: 600;
+  font-size: calc(57.6 * var(--u));
+  line-height: calc(64 * var(--u));
+  letter-spacing: .225em;
+  padding-left: .225em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--pink);
+  overflow-wrap: anywhere;
+}
+.text {
+  margin-left: auto; margin-right: auto;
+  font-weight: 600;
+  font-size: calc(44.8 * var(--u));
+  line-height: calc(49.5 * var(--u));
+  letter-spacing: .2em;
+  padding-left: .2em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--pink);
+  overflow-wrap: anywhere;
+}
+.text p { margin: 0; }
+.text:empty, .title:empty { display: none; }
+
+/* Акварельные пятна — позади всего */
+.blob { position: absolute; z-index: -1; height: auto; pointer-events: none; }
+
+/* ============================================================
+   АНИМАЦИЯ ПОЯВЛЕНИЯ ПРИ ПРОКРУТКЕ (как в других шаблонах)
+   .rv       — текст: всплывает и проявляется из лёгкой дымки;
+   .rv-write — строки «пишутся» слева направо;
+   .rv-soft  — картинки: проявляются;
+   .rv-line  — орнаменты: «прорастают» из середины;
+   .rv-pop   — платья: появляются по очереди.
+   Класс .in ставит script.js, когда блок доходит до экрана.
+   ============================================================ */
+.rv {
+  opacity: 0;
+  transform: translateY(calc(40 * var(--u)));
+  filter: blur(5px);
+  transition: opacity .9s ease, transform 1s cubic-bezier(.2, .7, .2, 1), filter .9s ease;
+  transition-delay: var(--d, 0ms);
+}
+.rv.in { opacity: 1; transform: none; filter: none; }
+
+.rv-soft {
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  transition-delay: var(--d, 0ms);
+}
+.rv-soft.in { opacity: var(--o, 1); }
+
+.rv-write {
+  opacity: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+          mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+.rv-write.in { animation: write 1.8s cubic-bezier(.35, .45, .25, 1) var(--d, 0ms) both; }
+.rv-write.done { opacity: 1; -webkit-mask-image: none; mask-image: none; animation: none; }
+@keyframes write {
+  from { opacity: 0; -webkit-mask-position: 100% 0; mask-position: 100% 0; }
+  12%  { opacity: 1; }
+  to   { opacity: 1; -webkit-mask-position: 0 0; mask-position: 0 0; }
+}
+
+.rv-line {
+  clip-path: inset(0 50% 0 50%);
+  transition: clip-path 1.6s cubic-bezier(.45, .05, .25, 1) var(--d, 0ms);
+}
+.rv-line.in { clip-path: inset(0 0 0 0); }
+
+.rv-pop > * {
+  opacity: 0;
+  transform: translateY(calc(30 * var(--u))) scale(.82);
+  transition: opacity .6s ease, transform .8s cubic-bezier(.3, 1.45, .5, 1);
+}
+.rv-pop > *:nth-child(2) { transition-delay: .1s; }
+.rv-pop > *:nth-child(3) { transition-delay: .2s; }
+.rv-pop > *:nth-child(4) { transition-delay: .3s; }
+.rv-pop > *:nth-child(5) { transition-delay: .4s; }
+.rv-pop > *:nth-child(6) { transition-delay: .5s; }
+.rv-pop > *:nth-child(7) { transition-delay: .6s; }
+.rv-pop > *:nth-child(8) { transition-delay: .7s; }
+.rv-pop > *:nth-child(9) { transition-delay: .8s; }
+.rv-pop.in > * { opacity: 1; transform: none; }
+
+/* Вещицы «дышат», букет финала слегка покачивается */
+.float { display: block; animation: float 6s ease-in-out infinite alternate; }
+.float--slow { animation-duration: 7.5s; animation-delay: -2.5s; }
+@keyframes float {
+  from { transform: translateY(calc(-10 * var(--u))) rotate(-1.2deg); }
+  to   { transform: translateY(calc(10 * var(--u))) rotate(1.2deg); }
+}
+.swing { transform-origin: 50% 0; animation: swing 5.5s ease-in-out infinite alternate; }
+@keyframes swing {
+  from { transform: rotate(-2deg); }
+  to   { transform: rotate(2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv, .rv-soft, .rv-write, .rv-line, .rv-pop > * {
+    opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important;
+    -webkit-mask-image: none !important; mask-image: none !important;
+    transition: none !important; animation: none !important;
+  }
+  .rv-soft { opacity: var(--o, 1) !important; }
+  .float, .swing { animation: none !important; }
+}
+
+/* ============================================================
+   1 — ОБЛОЖКА (макет: 0–2338)
+   ============================================================ */
+.cover { height: calc(2338 * var(--u)); overflow: hidden; }
+.cover > img { position: absolute; height: auto; display: block; }
+.cover__blob    { left: calc(142 * var(--u)); top: calc(899 * var(--u)); width: calc(740 * var(--u)); z-index: 0; }
+.cover__flowers { left: calc(865 * var(--u)); top: calc(6 * var(--u)); width: calc(501 * var(--u)); z-index: 1; }
+.cover__arch    { left: calc(547 * var(--u)); top: calc(550 * var(--u)); width: calc(819 * var(--u)); z-index: 1; }
+.cover__couple  { left: calc(508.25 * var(--u)); top: calc(765.8 * var(--u)); width: calc(813.9 * var(--u)); z-index: 2; }
+.cover__garland { left: 0; top: calc(2122 * var(--u)); width: calc(1366 * var(--u)); z-index: 2; }
+
+.cover__label {
+  position: absolute; left: calc(141 * var(--u)); top: calc(69.6 * var(--u)); z-index: 3;
+  width: calc(640 * var(--u));
+  margin: 0;
+  font-weight: 600;
+  font-size: calc(59.2 * var(--u));
+  line-height: calc(67 * var(--u));
+  letter-spacing: .217em;
+  text-transform: uppercase;
+  color: var(--taupe);
+}
+
+/* Имена: «Невеста &» и ниже «Жених», как в макете. Кегль --nfs уменьшает
+   script.js, если имя длинное. Поля .35em — росчерки Great Vibes выходят за
+   строку, а маска «письма» режет всё за рамкой блока */
+.cover__names {
+  --nfs: 232;
+  position: absolute; left: calc(40 * var(--u)); top: calc(298.3 * var(--u)); z-index: 4;
+  margin: calc(-.35em) 0 0 calc(-.35em);
+  padding: .35em;
+  font-family: var(--f-script);
+  font-weight: 400;
+  font-size: calc(var(--nfs) * var(--u));
+  line-height: calc(175 * var(--u));
+  color: var(--pink);
+  white-space: nowrap;
+}
+.cover__line { display: block; width: max-content; }
+/* «&» — знак из макета (рукописный шрифт его не повторяет): маска цвета текста */
+.amp {
+  display: inline-block;
+  width: .7915em; height: .9003em;
+  margin-left: .11em;
+  vertical-align: -.3246em;
+  background: currentColor;
+  -webkit-mask: url("assets/amp.svg") center / 100% 100% no-repeat;
+          mask: url("assets/amp.svg") center / 100% 100% no-repeat;
+}
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.cover__line--1 { margin-left: calc(26 * var(--u)); }
+
+/* Дата: «30 | воскресенье / июля | 12:30» — блок 160…620 × 850…1080 */
+.cover__date {
+  position: absolute; left: calc(160 * var(--u)); top: calc(850 * var(--u)); z-index: 3;
+  width: calc(460 * var(--u)); height: calc(230 * var(--u));
+  color: var(--taupe);
+}
+.cover__date > * { position: absolute; margin: 0; white-space: nowrap; }
+.cover__save {
+  left: calc(11 * var(--u)); top: calc(8.8 * var(--u));
+  font-weight: 600;
+  font-size: calc(27.2 * var(--u)); line-height: calc(33 * var(--u));
+  letter-spacing: .172em;
+  text-transform: uppercase;
+  color: var(--pink);
+}
+.cover__save:empty { display: none; }
+.cover__day {
+  left: 0; top: calc(57.8 * var(--u)); width: calc(124 * var(--u));
+  text-align: right;
+  font-size: calc(98 * var(--u)); line-height: calc(98 * var(--u));
+}
+.cover__rule { left: calc(142 * var(--u)); top: calc(89 * var(--u)); width: calc(2.4 * var(--u)); height: calc(124 * var(--u)); background: var(--pink); }
+.cover__wday, .cover__month, .cover__time {
+  font-weight: 600;
+  font-size: calc(32 * var(--u)); line-height: calc(38.4 * var(--u));
+  text-transform: uppercase;
+}
+.cover__wday  { left: calc(157 * var(--u)); top: calc(129.6 * var(--u)); letter-spacing: .177em; }
+.cover__month { left: 0; top: calc(174.6 * var(--u)); width: calc(131 * var(--u)); text-align: right; letter-spacing: .12em; }
+.cover__time  { left: calc(170 * var(--u)); top: calc(172.6 * var(--u)); letter-spacing: .15em; }
+
+.cover__addr {
+  position: absolute; left: calc(169 * var(--u)); top: calc(1103.2 * var(--u)); z-index: 3;
+  width: calc(370 * var(--u));
+  margin: 0;
+  font-weight: 600;
+  font-size: calc(30 * var(--u)); line-height: calc(34 * var(--u));
+  letter-spacing: .14em;
+  color: var(--pink);
+}
+.cover__addr:empty { display: none; }
+.cover__text {
+  position: absolute; left: calc(72 * var(--u)); top: calc(1562.5 * var(--u)); z-index: 3;
+  width: calc(430 * var(--u));
+  margin: 0;
+  font-size: calc(31 * var(--u)); line-height: calc(38 * var(--u));
+  color: var(--pink);
+}
+.cover__text:empty { display: none; }
+
+/* Анимация обложки (у гостя, если входит в тариф): арка и пара проявляются
+   снизу вверх, цветы распускаются, имена пишутся слева направо */
+.hero-in {
+  opacity: 0;
+  transform: translateY(calc(36 * var(--u)));
+  transition: opacity 1.3s ease, transform 1.6s cubic-bezier(.2, .7, .2, 1);
+}
+.hero-soft { opacity: 0; transition: opacity 2s ease; }
+.hero-in--1 { transition-delay: .1s; }
+.hero-in--2 { transition-delay: .5s; }
+.hero-in--3 { transform: scale(.88) rotate(-4deg); transform-origin: 85% 15%; transition-delay: .9s; transition-duration: 1.6s, 2.2s; }
+.hero-in--4 { transition-delay: 2.1s; }
+.hero-in--5 { transition-delay: 2.5s; }
+.cover__label.hero-in { transition-delay: .3s; }
+.hero-go .hero-in, .hero-go .hero-soft { opacity: 1; transform: none; }
+
+.cover__names {
+  opacity: 0;
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+          mask-image: linear-gradient(90deg, #000 40%, transparent 60%);
+  -webkit-mask-size: 300% 100%; mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: 100% 0; mask-position: 100% 0;
+}
+.hero-go .cover__names { animation: write 2.4s cubic-bezier(.35, .45, .25, 1) 1.1s both; }
+.cover__names.done { opacity: 1; -webkit-mask-image: none; mask-image: none; animation: none; }
+
+/* Редактор, анимация не в тарифе, «меньше движения»: сразу финал */
+html.no-anim .hero-in, html.no-anim .hero-soft, html.no-anim .cover__names { transition: none !important; animation: none !important; }
+html.no-anim .cover__names { opacity: 1; -webkit-mask-image: none; mask-image: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hero-in, .hero-soft { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .cover__names { opacity: 1 !important; -webkit-mask-image: none !important; mask-image: none !important; animation: none !important; }
+}
+
+/* ============================================================
+   2 — ДОРОГИЕ ГОСТИ (макет: 2338–3110)
+   ============================================================ */
+.greet { padding: calc(158.8 * var(--u)) calc(40 * var(--u)) calc(183.5 * var(--u)); }
+.greet__blob-l { left: 0; top: calc(-165 * var(--u)); width: calc(469 * var(--u)); }
+.greet__blob-r { left: calc(1151 * var(--u)); top: calc(-131 * var(--u)); width: calc(215 * var(--u)); }
+.greet__title {
+  font-size: calc(68 * var(--u));
+  line-height: calc(78 * var(--u));
+  letter-spacing: .247em;
+  padding-left: .247em;
+}
+.greet__text { max-width: calc(690 * var(--u)); margin-top: calc(104.2 * var(--u)); }
+
+/* ============================================================
+   3 — МЕСТО (макет: 3110–4591)
+   ============================================================ */
+.venue { padding: 0 calc(40 * var(--u)) calc(120 * var(--u)); text-align: center; }
+.divider { display: block; width: calc(1181 * var(--u)); height: auto; margin: 0 auto; }
+.venue__name, .venue__addr {
+  margin: 0;
+  font-size: calc(44.8 * var(--u));
+  line-height: calc(50 * var(--u));
+  letter-spacing: .206em;
+  padding-left: .206em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.venue__name { margin-top: calc(187.7 * var(--u)); }
+.venue__name:empty, .venue__addr:empty { display: none; }
+
+/* Кнопка-«жемчужина»: светлая, с розовым кантом и мягким свечением */
+.pill {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: calc(118 * var(--u));
+  padding: 0 calc(54 * var(--u)) 0 calc(54 * var(--u) + .207em);
+  border: calc(2.5 * var(--u)) solid #f3c6d0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffafb, #fff4f6);
+  box-shadow:
+    inset 0 0 calc(14 * var(--u)) rgba(255, 185, 202, .55),
+    0 calc(8 * var(--u)) calc(22 * var(--u)) rgba(232, 160, 178, .32);
+  font-family: var(--f-text);
+  font-weight: 500;
+  font-size: calc(44.8 * var(--u));
+  letter-spacing: .207em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--pink);
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.pill:hover { transform: translateY(-2px); box-shadow: inset 0 0 calc(14 * var(--u)) rgba(255, 185, 202, .7), 0 calc(12 * var(--u)) calc(26 * var(--u)) rgba(232, 160, 178, .42); }
+.venue__btn { margin-top: calc(124 * var(--u)); }
+.venue__btn[hidden] { display: none; }
+.powder-map {
+  --wc-map-width: calc(1074 * var(--u));
+  --wc-map-h: calc(690 * var(--u));
+  --wc-map-radius: calc(6 * var(--u));
+  --wc-map-border: 0;
+  --wc-map-shadow: 0 calc(10 * var(--u)) calc(34 * var(--u)) rgba(200, 120, 120, .16);
+  --wc-map-accent: var(--pink);
+  --wc-map-accent-ink: #fff;
+  --wc-map-font: var(--f-text);
+  margin: calc(46 * var(--u)) auto 0;
+}
+.powder-map .wc-map__route {
+  margin-top: calc(34 * var(--u));
+  font-size: max(13px, calc(44 * var(--u)));
+}
+
+/* ============================================================
+   4 — ФОТО В РАМКЕ-СЕРДЦЕ (макет: 4591–5769): рамка 1012×915,
+   фото под ней — по маске проёма 702×630
+   ============================================================ */
+.heart { padding-top: calc(40.2 * var(--u)); text-align: center; }
+.heart__blob { left: 0; top: calc(844 * var(--u)); width: calc(401 * var(--u)); }
+.heart__title {
+  max-width: calc(640 * var(--u));
+  margin: 0 auto;
+  font-size: calc(44.8 * var(--u));
+  line-height: calc(47 * var(--u));
+  letter-spacing: .171em;
+  padding-left: .171em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.heart__title:empty { display: none; }
+.heart__box {
+  position: relative;
+  width: calc(1012 * var(--u)); height: calc(915 * var(--u));
+  margin: calc(81.8 * var(--u)) 0 0 calc(202 * var(--u));
+}
+.heart__photo {
+  position: absolute; left: calc(154 * var(--u)); top: calc(136 * var(--u));
+  width: calc(702 * var(--u)); height: calc(630 * var(--u));
+}
+.heart__photo img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 40%;
+  background-color: #f7e6e3;
+  -webkit-mask: url("assets/heart-mask.png") center / 100% 100% no-repeat;
+          mask: url("assets/heart-mask.png") center / 100% 100% no-repeat;
+}
+.heart__frame { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+
+/* ============================================================
+   5 — ИСТОРИЯ ПАРЫ (макет: 5769–7098)
+   ============================================================ */
+.story { padding: calc(131 * var(--u)) calc(40 * var(--u)) calc(130 * var(--u)); text-align: center; }
+.story__blob { left: calc(1087 * var(--u)); top: calc(561 * var(--u)); width: calc(279 * var(--u)); }
+.story__title {
+  max-width: calc(760 * var(--u));
+  margin: 0 auto;
+  font-weight: 500;
+  font-size: calc(59.2 * var(--u));
+  line-height: calc(66 * var(--u));
+  letter-spacing: .208em;
+  padding-left: .208em;
+  text-transform: uppercase;
+  color: var(--pink);
+}
+.story__title:empty { display: none; }
+.story__text {
+  max-width: calc(1075 * var(--u));
+  margin: calc(74.3 * var(--u)) auto 0;
+  font-size: calc(35.2 * var(--u));
+  line-height: calc(38.8 * var(--u));
+  letter-spacing: .19em;
+  padding-left: .19em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.story__text p { margin: 0; }
+.story__text:empty { display: none; }
+.story__bow { display: block; width: calc(552 * var(--u)); height: auto; margin: calc(301.6 * var(--u)) auto 0; }
+
+/* ============================================================
+   6–7 — МАЛЕНЬКИЕ ДЕТАЛИ, РОЗЫ, МЕНЮ на розовой акварели (7098–11085)
+   ============================================================ */
+.paper { position: relative; background: #fbe9ea url("assets/details-bg.jpg") center top / 100% 100% no-repeat; }
+.details { padding: calc(195.8 * var(--u)) 0 0; text-align: center; }
+.details__quote {
+  max-width: calc(1240 * var(--u));
+  margin: 0 auto;
+  font-size: calc(38.4 * var(--u));
+  line-height: calc(44 * var(--u));
+  letter-spacing: .22em;
+  padding-left: .22em;
+  text-transform: uppercase;
+}
+.details__quote:empty { display: none; }
+.details__grid {
+  display: grid;
+  grid-template-columns: repeat(2, calc(480 * var(--u)));
+  justify-content: center;
+  column-gap: 0;
+  row-gap: calc(19 * var(--u));
+  margin-top: calc(134.2 * var(--u));
+}
+.fc { display: flex; flex-direction: column; align-items: center; }
+.fc__pic { display: flex; align-items: flex-end; justify-content: center; height: calc(500 * var(--u)); }
+.fc__pic img { height: auto; }
+.fc:nth-child(1) .fc__pic img { width: calc(328 * var(--u)); }
+.fc:nth-child(2) .fc__pic img { width: calc(405 * var(--u)); }
+.fc:nth-child(3) .fc__pic img { width: calc(422 * var(--u)); max-height: calc(490 * var(--u)); object-fit: contain; }
+.fc:nth-child(4) .fc__pic img { width: calc(445 * var(--u)); }
+.fc__title {
+  max-width: calc(440 * var(--u));
+  min-height: calc(96 * var(--u));
+  margin: calc(25.2 * var(--u)) 0 0;
+  font-size: calc(43.2 * var(--u));
+  line-height: calc(48 * var(--u));
+  letter-spacing: .18em;
+  padding-left: .18em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.fc__text {
+  max-width: calc(390 * var(--u));
+  min-height: calc(60 * var(--u));
+  margin: calc(23.1 * var(--u)) 0 0;
+  font-size: calc(27.2 * var(--u));
+  line-height: calc(30 * var(--u));
+  letter-spacing: .193em;
+  padding-left: .193em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.fc__title:empty { visibility: hidden; }
+.fc__text:empty { display: none; }
+
+.roses { display: block; width: calc(1356 * var(--u)); height: auto; margin-top: calc(114 * var(--u)); }
+
+.menu { padding: calc(230 * var(--u)) calc(40 * var(--u)) calc(186.5 * var(--u)); text-align: center; }
+.menu__cloche { display: block; width: calc(375 * var(--u)); height: auto; margin-left: calc(490 * var(--u)); }
+.menu__title { margin-top: calc(70.7 * var(--u)); }
+.menu__text { max-width: calc(1080 * var(--u)); margin-top: calc(63.3 * var(--u)); }
+
+/* ============================================================
+   8 — ПРОГРАММА ДНЯ (макет: 11085–14617): линия вьётся между текстом
+   и картинками, сердце едет по ней за прокруткой
+   ============================================================ */
+.program { padding: calc(574.6 * var(--u)) 0 calc(60 * var(--u)); text-align: center; }
+.program__blob-l { left: 0; top: calc(796 * var(--u)); width: calc(722 * var(--u)); }
+.program__blob-r { left: calc(915 * var(--u)); top: calc(2277 * var(--u)); width: calc(450 * var(--u)); }
+.program__title { color: var(--ink); letter-spacing: .239em; padding-left: .239em; }
+.prog { position: relative; margin-top: calc(151 * var(--u)); }
+.prog__row {
+  position: relative; z-index: 1;
+  display: flex;
+  align-items: center;
+  min-height: calc(380 * var(--u));
+  margin-bottom: calc(170 * var(--u));
+}
+.prog__row:last-child { margin-bottom: 0; }
+.prog__text { width: calc(600 * var(--u)); margin-left: calc(90 * var(--u)); text-align: center; color: var(--ink); }
+.prog__icon-box {
+  display: flex; align-items: center; justify-content: center;
+  width: calc(360 * var(--u)); height: calc(380 * var(--u));
+  margin-left: auto; margin-right: calc(186 * var(--u));
+}
+.prog__row.is-right { flex-direction: row-reverse; }
+.prog__row.is-right .prog__text { margin-left: 0; margin-right: calc(206 * var(--u)); }
+.prog__row.is-right .prog__icon-box { margin-left: calc(110 * var(--u)); margin-right: auto; }
+.prog__time {
+  margin: 0;
+  font-family: var(--f-script);
+  font-size: calc(105 * var(--u));
+  line-height: 1.05;
+  letter-spacing: calc(12 * var(--u));
+  font-variant-numeric: lining-nums;
+}
+.prog__title {
+  margin: calc(14 * var(--u)) 0 0;
+  font-family: var(--f-script);
+  font-size: calc(85 * var(--u));
+  line-height: calc(80 * var(--u));
+  overflow-wrap: anywhere;
+}
+.prog__icon {
+  display: block;
+  max-width: calc(330 * var(--u)); max-height: calc(360 * var(--u));
+  width: auto; height: auto;
+  object-fit: contain;
+}
+.prog__icon--emoji { font-size: calc(200 * var(--u)); line-height: 1; }
+.prog__svg {
+  position: absolute; left: 0; top: 0; z-index: 0;
+  width: 100%; height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0; transition: opacity .8s ease;
+}
+.prog.is-ready .prog__svg { opacity: 1; }
+.prog__base, .prog__path { fill: none; stroke: var(--pink); stroke-width: calc(10 * var(--u)); stroke-linecap: round; }
+.prog__base { opacity: .25; }
+.prog__heart { fill: #d89b92; }
+
+/* ============================================================
+   9 — ДРЕСС-КОД (макет: 14617–18153): платья в цветах палитры,
+   коллаж образов, пожелание
+   ============================================================ */
+.dress {
+  padding: calc(70.6 * var(--u)) calc(38 * var(--u)) calc(332 * var(--u));
+  text-align: center;
+  background: #fff url("assets/dress-bg.jpg") center top / 100% auto no-repeat;
+}
+.dress__blob { left: calc(1011 * var(--u)); bottom: calc(106 * var(--u)); width: calc(355 * var(--u)); }
+.dress__title { letter-spacing: .239em; padding-left: .239em; }
+.dress__text { max-width: calc(920 * var(--u)); margin-top: calc(110 * var(--u)); }
+.dress__grid {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: calc(104 * var(--u)) calc(45 * var(--u));
+  max-width: calc(870 * var(--u));
+  margin: calc(72 * var(--u)) auto 0;
+}
+/* Платье: силуэт закрашен цветом палитры, бант — тем же оттенком темнее (--b),
+   линии и тени — поверх (multiply) */
+.dress__item {
+  position: relative;
+  isolation: isolate;
+  width: calc(258 * var(--u));
+  aspect-ratio: 257 / 308;
+  background: var(--c);
+  -webkit-mask: url("assets/dress-mask.png") center / 100% 100% no-repeat;
+          mask: url("assets/dress-mask.png") center / 100% 100% no-repeat;
+}
+.dress__item::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--b, var(--c));
+  -webkit-mask: url("assets/dress-bow.png") center / 100% 100% no-repeat;
+          mask: url("assets/dress-bow.png") center / 100% 100% no-repeat;
+}
+.dress__item i {
+  position: absolute; inset: 0;
+  background: url("assets/dress-shade.png") center / 100% 100% no-repeat;
+  mix-blend-mode: multiply;
+}
+.looks { display: flex; justify-content: center; gap: calc(18 * var(--u)); margin-top: calc(158 * var(--u)); }
+.looks__col { display: flex; flex-direction: column; width: calc(636 * var(--u)); }
+.look { margin: 0; overflow: hidden; background: #f7e7e5; }
+.look img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.look--a { height: calc(1024 * var(--u)); }
+.look--d { height: calc(394 * var(--u)); margin-top: calc(24 * var(--u)); }
+.look--b { height: calc(534 * var(--u)); }
+.look--c { height: calc(890 * var(--u)); margin-top: calc(18 * var(--u)); }
+.dress__note {
+  max-width: calc(1000 * var(--u));
+  margin: calc(158.7 * var(--u)) auto 0;
+  font-size: calc(48 * var(--u));
+  line-height: calc(54 * var(--u));
+  letter-spacing: .204em;
+  padding-left: .204em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.dress__note:empty { display: none; }
+
+/* ============================================================
+   10 — ДЕТАЛИ: розовый мрамор и светлая арка (макет: 18153–20013)
+   ============================================================ */
+.rules {
+  min-height: calc(1860 * var(--u));
+  padding: calc(71 * var(--u)) 0 calc(376 * var(--u));
+  background: #f3d6d2 url("assets/marble.jpg") center / cover no-repeat;
+}
+.rules__arch {
+  width: calc(1064 * var(--u));
+  min-height: calc(1413 * var(--u));
+  margin: 0 auto;
+  padding: calc(234.6 * var(--u)) calc(60 * var(--u)) calc(260 * var(--u));
+  background: var(--blush);
+  border-radius: calc(532 * var(--u)) calc(532 * var(--u)) 0 0;
+  text-align: center;
+}
+.rules__text { max-width: calc(920 * var(--u)); margin-top: calc(109 * var(--u)); }
+.rules__bouquet { position: absolute; left: calc(78 * var(--u)); bottom: calc(123 * var(--u)); width: calc(378 * var(--u)); height: auto; z-index: 1; }
+
+/* ============================================================
+   11–13 — ПОДАРКИ, АНКЕТА, ФИНАЛ на акварели (макет: 20013–24721)
+   ============================================================ */
+.tail { position: relative; background: #fcecec url("assets/tail-bg.jpg") center top / 100% 100% no-repeat; }
+.gifts { padding: calc(196 * var(--u)) calc(40 * var(--u)) calc(158 * var(--u)); text-align: center; }
+.gifts__box { width: calc(394 * var(--u)); height: auto; margin: 0 auto; }
+.gifts__title { margin-top: calc(101.6 * var(--u)); }
+.gifts__text { max-width: calc(900 * var(--u)); margin-top: calc(58 * var(--u)); }
+.gifts__text p + p { margin-top: calc(49.5 * var(--u)); }
+
+.rsvp { padding: 0 calc(40 * var(--u)); text-align: center; }
+.rsvp__title { margin-top: calc(112.6 * var(--u)); }
+.rsvp__lead {
+  max-width: calc(980 * var(--u));
+  margin: calc(60 * var(--u)) auto 0;
+  font-size: calc(40 * var(--u));
+  line-height: calc(48 * var(--u));
+  letter-spacing: .16em;
+  padding-left: .16em;
+  text-transform: uppercase;
+}
+.rsvp__lead:empty { display: none; }
+.rsvp__form {
+  margin: calc(90 * var(--u)) auto 0;
+  padding: calc(100 * var(--u)) calc(100 * var(--u)) calc(110 * var(--u));
+  max-width: calc(1180 * var(--u));
+  display: flex; flex-direction: column;
+  gap: calc(70 * var(--u));
+  text-align: left;
+  background: rgba(255, 255, 255, .72);
+  border: calc(2.5 * var(--u)) solid #f3d2d8;
+  border-radius: calc(36 * var(--u));
+  box-shadow: 0 calc(14 * var(--u)) calc(40 * var(--u)) rgba(214, 140, 140, .14);
+}
+/* display: flex выше перекрывает атрибут hidden — без этого после отправки
+   анкеты форма остаётся на экране рядом с «Спасибо». */
+.rsvp__form[hidden] { display: none; }
+/* Поле имени — образец и для полей ответов, которые добавляет rsvp-count.js.
+   Не меньше 16px: иначе iPhone приближает страницу при вводе. */
+.rsvp__name {
+  width: 100%;
+  padding: calc(18 * var(--u)) calc(4 * var(--u));
+  border: 0;
+  border-bottom: calc(3 * var(--u)) solid rgba(204, 124, 114, .5);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--f-text);
+  font-weight: 500;
+  font-size: max(16px, calc(54 * var(--u)));
+  line-height: 1.3;
+  color: var(--taupe);
+  outline: none;
+  -webkit-appearance: none; appearance: none;
+}
+.rsvp__name::placeholder { color: rgba(204, 124, 114, .6); }
+.rsvp__name:focus { border-bottom-color: var(--pink); }
+.rsvp__group { margin: 0; padding: 0; border: 0; min-width: 0; }
+.rsvp__group legend {
+  padding: 0;
+  margin: 0 0 calc(30 * var(--u));
+  font-family: var(--f-text);
+  font-weight: 600;
+  font-size: calc(54 * var(--u));
+  line-height: 1.2;
+  color: var(--pink);
+}
+.form-option {
+  position: relative;
+  display: flex; align-items: center; gap: calc(30 * var(--u));
+  margin: 0 0 calc(24 * var(--u)) calc(30 * var(--u));
+  font-family: var(--f-text);
+  font-weight: 500;
+  font-size: calc(50 * var(--u));
+  line-height: 1.25;
+  color: var(--taupe);
+  cursor: pointer;
+}
+.form-option:last-child { margin-bottom: 0; }
+.form-option input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.custom-radio, .custom-check {
+  flex: none;
+  width: calc(46 * var(--u)); height: calc(46 * var(--u));
+  min-width: 14px; min-height: 14px;
+  border: calc(4 * var(--u)) solid var(--pink);
+  background: rgba(255, 255, 255, .8);
+  transition: background .25s ease, box-shadow .25s ease;
+}
+.custom-radio { border-radius: 50%; }
+.custom-check { border-radius: calc(10 * var(--u)); }
+.custom-radio.checked { background: var(--pink); box-shadow: inset 0 0 0 calc(9 * var(--u)) #fff; }
+.custom-check.checked { background: var(--pink); box-shadow: inset 0 0 0 calc(8 * var(--u)) #fff; }
+.form-option:focus-within .custom-radio,
+.form-option:focus-within .custom-check { outline: 2px solid rgba(204, 124, 114, .45); outline-offset: 2px; }
+.rsvp__group .wc-count { font-family: var(--f-text); font-size: max(16px, calc(54 * var(--u))); color: var(--taupe); margin-left: calc(30 * var(--u)); }
+.rsvp__submit { align-self: center; margin-top: calc(10 * var(--u)); font-size: max(14px, calc(44.8 * var(--u))); }
+.rsvp__submit:disabled { opacity: .55; cursor: default; transform: none; }
+.rsvp__error {
+  margin: calc(-30 * var(--u)) 0 0;
+  text-align: center;
+  font-size: max(14px, calc(44 * var(--u)));
+  color: #a83a3a;
+}
+.rsvp__error:empty { display: none; }
+.rsvp__thanks {
+  margin: calc(70 * var(--u)) 0 0;
+  font-family: var(--f-script);
+  font-size: calc(120 * var(--u));
+  line-height: 1.3;
+  color: var(--pink);
+}
+
+.fin { padding: calc(200 * var(--u)) calc(40 * var(--u)) calc(69 * var(--u)); text-align: center; }
+.fin__title { max-width: calc(620 * var(--u)); margin: 0 auto; line-height: calc(66 * var(--u)); }
+/* Подпись: «Невеста &» / «Жених» рукописным, как на обложке; своя строка
+   пары — одной строкой. Поля .35em — под маску «письма» (см. обложку) */
+.fin__sign {
+  --sfs: 230;
+  margin: calc(194 * var(--u) - .35em) calc(-.35em) calc(-.35em);
+  padding: .35em;
+  font-family: var(--f-script);
+  font-weight: 400;
+  font-size: calc(var(--sfs) * var(--u));
+  line-height: calc(175 * var(--u));
+  color: var(--pink);
+  overflow-wrap: anywhere;
+}
+.fin__line { display: block; width: max-content; margin: 0 auto; white-space: nowrap; }
+.fin__bouquet { display: block; width: calc(346 * var(--u)); height: auto; margin: calc(38 * var(--u)) 0 0 calc(526 * var(--u)); }

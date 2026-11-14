@@ -9,7 +9,7 @@ const path = require('node:path');
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'C:/Users/Asus/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
 const base = process.env.GUEST_BASE_URL || 'http://localhost:3000';
 const shots = process.env.SHOTS_DIR || '';
-const TEMPLATES = ['tenderness', 'ivory', 'calla', 'forest', 'garden-evening', 'sketch', 'vadimdarya',
+const TEMPLATES = ['tenderness', 'powder', 'ivory', 'calla', 'forest', 'garden-evening', 'sketch', 'vadimdarya',
   'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral'];
 const routeFor = id => `/invite/${id === 'mediterranean' ? '' : `${id}/`}index.html?intro=0`;
 
