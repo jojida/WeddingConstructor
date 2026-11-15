@@ -11,10 +11,12 @@ import styles from './FeatureDemo.module.css';
    Как у Seatory: слева обычной прокруткой идут пункты с крупными заголовками,
    справа сцена стоит на месте (sticky) и при смене пункта перетекает в
    следующую через размытие; вкладки сверху прилипают под шапкой и подсвечивают
-   пункт в фокусе, полоска под вкладкой — сколько до следующего. На телефоне
-   прилипают вкладки и сцена, пункты листаются под ними. Пока блок не на
-   экране — всё стоит. При «уменьшении движения» сцена сразу показывает
-   итоговый кадр. */
+   пункт в фокусе, полоска под вкладкой — сколько до следующего.
+   На телефоне и планшете (до 900px) — без прокрутки: блок стоит на месте,
+   пункт меняется нажатием на вкладку, свайпом по сцене или точкой под ней
+   (листание с прилипшей сценой пары называли «интуитивно непонятным»).
+   Пока блок не на экране — всё стоит. При «уменьшении движения» сцена сразу
+   показывает итоговый кадр. */
 
 const W = 640, H = 440;
 const IMG = '/landing/demo';
@@ -445,6 +447,7 @@ export default function FeatureDemo() {
   useEffect(() => {
     let raf = 0;
     const update = () => {
+      if (stacked()) return;   // телефон и планшет — пункты меняются нажатием
       const blocks = blockRefs.current.filter(Boolean) as HTMLElement[];
       if (!blocks.length) return;
       const focus = focusLine(stageRef.current?.getBoundingClientRect().bottom || 0);
@@ -482,8 +485,22 @@ export default function FeatureDemo() {
     strip.scrollTo({ left: btn.offsetLeft - 20, behavior: 'smooth' });
   }, [tab]);
 
-  // Клик по вкладке — плавно к её пункту
+  // Свайп по сцене на телефоне — соседний пункт
+  const swipe = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: React.TouchEvent) => { const t = e.touches[0]; swipe.current = { x: t.clientX, y: t.clientY }; };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const s = swipe.current;
+    swipe.current = null;
+    if (!s || !stacked()) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - s.x, dy = t.clientY - s.y;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    setTab(v => (v + (dx < 0 ? 1 : -1) + SCENES.length) % SCENES.length);
+  };
+
+  // Клик по вкладке — плавно к её пункту (на телефоне — сразу сменить пункт)
   const go = (i: number) => {
+    if (stacked()) { setTab(i); return; }
     const b = blockRefs.current[i];
     if (!b) return;
     const r = b.getBoundingClientRect();
@@ -522,7 +539,7 @@ export default function FeatureDemo() {
         <div className={styles.scroller}>
           <div className={styles.blocks}>
             {SCENES.map((sc, i) => (
-              <article key={sc.tab} ref={el => { blockRefs.current[i] = el; }} className={styles.block}>
+              <article key={sc.tab} ref={el => { blockRefs.current[i] = el; }} className={`${styles.block} ${i === tab ? styles.blockOn : ''}`}>
                 <h3 className={styles.blockTitle}>{sc.head[0]} <em>{sc.head[1]}</em></h3>
                 <p className={styles.copyText}>{sc.text}</p>
                 {sc.plan && <span className={styles.plan}>Тариф «{sc.plan}»</span>}
@@ -531,7 +548,8 @@ export default function FeatureDemo() {
             ))}
           </div>
 
-          <div className={styles.stage} ref={stageRef} style={{ top: stageTop }} aria-hidden="true">
+          <div className={styles.stage} ref={stageRef} style={{ top: stageTop }} aria-hidden="true"
+            onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
             <div className={styles.view} ref={viewRef} style={{ height: H * scale }}>
               {layers.map((l, j) => {
                 const Scene = SCENES[l.idx].Scene;
@@ -543,6 +561,13 @@ export default function FeatureDemo() {
                   </div>
                 );
               })}
+            </div>
+            {/* Телефон: какой пункт из пяти и куда листать (на компьютере скрыто) */}
+            <div className={styles.pager}>
+              {SCENES.map((sc, i) => (
+                <button key={sc.tab} type="button" tabIndex={-1} className={`${styles.pagerDot} ${i === tab ? styles.pagerDotOn : ''}`}
+                  onClick={() => setTab(i)} />
+              ))}
             </div>
           </div>
         </div>

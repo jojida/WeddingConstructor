@@ -300,38 +300,57 @@
   .scroller { gap: 32px; }
   .blockTitle { font-size: 36px; }
 }
-/* Планшет и телефон: прилипают вкладки и сцена под ними, пункты листаются ниже */
+/* Точки под сценой — только на телефоне и планшете */
+.pager { display: none; }
+
+/* Планшет и телефон: без прокрутки — блок стоит на месте, пункт меняется
+   нажатием на вкладку, свайпом по сцене или точкой. Все пять текстов лежат
+   в одной ячейке сетки: высота блока — по самому длинному, при смене пункта
+   ничего не прыгает */
 @media (max-width: 900px) {
+  /* вкладки не прилипают — полоса-подложка под ними не нужна */
+  .tabsWrap { position: static; background: none; box-shadow: none; clip-path: none; }
   .scroller { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .stage {
-    order: -1; z-index: 2;
-    padding: 12px 0 18px;
-    background: linear-gradient(#1d1b18 86%, rgba(29, 27, 24, 0));
-  }
+  .stage { order: -1; position: relative; top: auto !important; padding: 18px 0 0; touch-action: pan-y; }
   .view { max-width: 640px; margin: 0 auto; }
-  .blocks { padding: 2vh 0 8vh; }
-  .block { min-height: 0; padding: 36px 0 44px; justify-content: flex-start; align-items: center; text-align: center; }
+  /* полоски прокрутки нет — активная вкладка подчёркнута целиком */
+  .tabBar i { display: none; }
+  .tabOn .tabBar { background: #c9a96e; }
+  .blocks { display: grid; padding: 6px 0 0; }
+  .block {
+    grid-area: 1 / 1; min-height: 0; padding: 16px 0 0;
+    justify-content: flex-start; align-items: center; text-align: center;
+    transition: opacity .35s ease, visibility .35s;
+  }
+  .block:not(.blockOn) { visibility: hidden; opacity: 0; }
   .copyText { margin: 0 auto; }
+  .pager { display: flex; justify-content: center; gap: 4px; margin-top: 10px; }
+  .pagerDot {
+    width: 26px; height: 26px; padding: 0; border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .pagerDot::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(243, 238, 230, 0.28); transition: background .25s, transform .25s;
+  }
+  .pagerDotOn::before { background: #c9a96e; transform: scale(1.25); }
 }
 @media (max-width: 768px) {
   .section { padding: 64px 0 72px; }
   .inner { padding: 0 20px; }
   .title { font-size: 30px; }
   .head { margin-bottom: 24px; }
-  .tabsWrap { margin: 0 -20px; padding: 8px 0; }
-  .tabs {
-    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
-    padding: 0 20px; border-bottom: none;
-    scroll-snap-type: x mandatory;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
+  .tabsWrap { padding: 0; }
+  /* все вкладки видны сразу — переносом в 2–3 ряда, без ленты-прокрутки */
+  .tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; border-bottom: none; }
   .tab {
-    flex: 0 0 auto; scroll-snap-align: start;
-    padding: 9px 14px 11px; border-radius: 999px; border: 1px solid rgba(243, 238, 230, 0.16);
+    flex: 0 0 auto; align-items: center;
+    padding: 8px 13px; border-radius: 999px; border: 1px solid rgba(243, 238, 230, 0.16);
   }
   .tabOn { border-color: rgba(201, 169, 110, 0.7); background: rgba(201, 169, 110, 0.12); }
+  .tabNum { display: none; }
   .tabName { font-size: 13px; }
-  .tabBar { left: 14px; right: 14px; bottom: 4px; border-radius: 2px; }
+  .tabBar { display: none; }
   .blockTitle { font-size: 30px; }
   .copyText { font-size: 16px; }
 }
