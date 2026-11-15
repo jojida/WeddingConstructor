@@ -25,15 +25,39 @@
 }
 .back:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
 .back svg { flex: none; width: 18px; height: 18px; }
+/* Главная кнопка: светлое «шампанское» с переливом, белый текст с тёплой тенью
+   (на светлом фоне иначе не читается), мягкое свечение и редкий блик */
 .cta {
+  position: relative; overflow: hidden; isolation: isolate;
   display: inline-flex; align-items: center;
   padding: 11px 18px; border-radius: 12px;
-  background: #c9a96e; color: #1d1b18; text-decoration: none;
-  font-family: var(--font-inter); font-size: 15px; font-weight: 600; line-height: 1.2;
-  transition: background .2s;
+  background: linear-gradient(135deg, #ecd5a4 0%, #d9bb82 45%, #c7a064 100%);
+  color: #fff; text-decoration: none;
+  font-family: var(--font-inter); font-size: 15px; font-weight: 700; line-height: 1.2; letter-spacing: .01em;
+  text-shadow: 0 1px 2px rgba(110, 76, 28, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(120, 84, 34, 0.25), 0 6px 18px rgba(217, 187, 130, 0.35);
+  transition: filter .2s, box-shadow .2s, transform .2s;
   -webkit-tap-highlight-color: transparent;
 }
-.cta:hover { background: #d8bb84; }
+.cta::after {
+  content: ""; position: absolute; z-index: -1; top: 0; bottom: 0; left: -60%; width: 45%;
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+  transform: skewX(-20deg);
+  animation: ctaShine 5s ease-in-out 1.2s infinite;
+  pointer-events: none;
+}
+@keyframes ctaShine {
+  0%, 72% { left: -60%; }
+  100% { left: 130%; }
+}
+.cta:hover {
+  filter: brightness(1.06) saturate(1.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -1px 0 rgba(120, 84, 34, 0.25), 0 8px 26px rgba(217, 187, 130, 0.55);
+}
+.cta:active { transform: scale(0.98); }
+@media (prefers-reduced-motion: reduce) {
+  .cta::after { animation: none; display: none; }
+}
 
 /* Телефон: приглашение во всю ширину, кнопка музыки шаблона — в правом нижнем
    углу экрана (44px в 16px от края). Панель встаёт над ней, иначе закрыла бы её */
