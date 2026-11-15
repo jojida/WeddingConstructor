@@ -78,9 +78,14 @@ function startCounter(page: string): void {
     script.src = src;
     document.head.appendChild(script);
   }
+  /* accurateTrackBounce — «точный показатель отказов»: через 15 секунд на странице счётчик
+     сообщает, что человек не ушёл. Без него любой визит в одну страницу считался отказом
+     с временем 0 с, и по статьям блога нельзя было понять, читают их или закрывают сразу
+     (разбор 14.11.26). Личных данных не добавляет: это таймер, а не запись действий.
+     Вебвизор, карта кликов и trackLinks по-прежнему выключены (tests/privacy.cjs). */
   window.ym(METRIKA_ID, 'init', {
     ssr: true, defer: true, webvisor: false, clickmap: false,
-    trackLinks: false, accurateTrackBounce: false,
+    trackLinks: false, accurateTrackBounce: true,
     url: page, referrer: analyticsReferrer(document.referrer),
   });
   active = true;

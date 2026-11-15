@@ -38,6 +38,7 @@ function Header() {
           <Link href="/print" className={styles.navLink}>Для печати</Link>
           <a href="#features" className={styles.navLink}>Возможности</a>
           <a href="#rsvp" className={styles.navLink}>Управление</a>
+          <Link href="/blog" className={styles.navLink}>Статьи</Link>
           <a href="#pricing" className={styles.navLink}>Цены</a>
         </nav>
 
@@ -68,6 +69,7 @@ function Header() {
           <Link href="/print" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Печатные приглашения · 290 ₽</Link>
           <a href="#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</a>
           <a href="#rsvp" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Управление</a>
+          <Link href="/blog" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Статьи</Link>
           <a href="#pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Цены</a>
           <div className={styles.mobileDivider} />
           {user ? (

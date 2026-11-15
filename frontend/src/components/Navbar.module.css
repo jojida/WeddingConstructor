@@ -51,8 +51,12 @@
   cursor: pointer;
   font-family: var(--font-inter);
   padding: 0;
+  white-space: nowrap;
 }
 .link:hover, .active { color: var(--primary); }
+/* С пунктом «Статьи» их шесть: на узком экране компьютера (1101–1280 px) «Для печати»
+   переносилось на вторую строку. Пункты не переносим, промежутки там делаем уже. */
+@media (max-width: 1280px) { .links { gap: 26px; } }
 
 /* ── Desktop actions ───────────────────────────────────────────────────── */
 .actions { margin-left: auto; display: flex; align-items: center; gap: 24px; }

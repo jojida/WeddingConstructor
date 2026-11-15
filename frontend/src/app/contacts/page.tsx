@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LEGAL, SITE_URL } from '@/lib/constants';
+import { socialMeta } from '@/lib/social-meta';
 import styles from '../legal.module.css';
+
+const DESCRIPTION = 'Контакты сервиса WeddingCraft: Москва, работаем по России и странам СНГ. Поддержка по email, реквизиты ИП.';
 
 export const metadata: Metadata = {
   title: 'Контакты',
-  description: 'Контакты сервиса WeddingCraft: Москва, работаем по России и странам СНГ. Поддержка по email, реквизиты ИП.',
+  description: DESCRIPTION,
   alternates: { canonical: `${SITE_URL}/contacts` },
+  ...socialMeta('/contacts', 'Контакты — WeddingCraft', DESCRIPTION),
 };
 
 export default function ContactsPage() {

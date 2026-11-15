@@ -33,6 +33,8 @@ export default function Navbar() {
           <Link href="/#features" className={styles.link}>Возможности</Link>
           <Link href="/print" className={`${styles.link} ${pathname.startsWith('/print') ? styles.active : ''}`}>Для печати</Link>
           <Link href="/#examples" className={styles.link}>Примеры</Link>
+          {/* Статьи были доступны только из подвала главной — в шапке их видно с любой страницы */}
+          <Link href="/blog" className={`${styles.link} ${pathname.startsWith('/blog') ? styles.active : ''}`}>Статьи</Link>
           <Link href="/#pricing" className={styles.link}>Цены</Link>
         </nav>
 
@@ -61,6 +63,7 @@ export default function Navbar() {
           <Link href="/#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</Link>
           <Link href="/print" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Печатные приглашения · 290 ₽</Link>
           <Link href="/#examples" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Примеры</Link>
+          <Link href="/blog" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Статьи</Link>
           <Link href="/#pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Цены</Link>
           <div className={styles.mobileDivider} />
           {user ? (

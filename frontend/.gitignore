@@ -21,6 +21,8 @@
 
 # production
 /build
+# IndexNow: что уже отправлено поисковикам (пишет сервер, см. src/lib/indexnow.ts)
+/.indexnow-sent.json
 
 # misc
 .DS_Store

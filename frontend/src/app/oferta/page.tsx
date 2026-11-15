@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LEGAL, PLANS, SITE_URL } from '@/lib/constants';
+import { socialMeta } from '@/lib/social-meta';
 import styles from '../legal.module.css';
+
+const DESCRIPTION = 'Договор-оферта на оказание услуг сервиса WeddingCraft — создание сайтов-приглашений на свадьбу.';
 
 export const metadata: Metadata = {
   title: 'Публичная оферта',
-  description: 'Договор-оферта на оказание услуг сервиса WeddingCraft — создание сайтов-приглашений на свадьбу.',
+  description: DESCRIPTION,
   alternates: { canonical: `${SITE_URL}/oferta` },
+  ...socialMeta('/oferta', 'Публичная оферта — WeddingCraft', DESCRIPTION),
 };
 
 export default function OfertaPage() {

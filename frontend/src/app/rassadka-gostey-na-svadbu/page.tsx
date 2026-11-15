@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { SITE_URL } from '@/lib/constants';
 import { PLANS } from '@/lib/plans';
+import { socialMeta } from '@/lib/social-meta';
 import styles from '../blog/blog.module.css';
 
 /* Посадочная под запрос «рассадка гостей на свадьбу онлайн» (30.10.26). Сама рассадка —
@@ -21,14 +22,8 @@ export const metadata: Metadata = {
   title: `${TITLE}: схема столов, карточки и таблички`,
   description: DESCRIPTION,
   alternates: { canonical: PATH },
-  openGraph: {
-    type: 'website',
-    siteName: 'WeddingCraft',
-    locale: 'ru_RU',
-    url: PATH,
-    title: TITLE,
-    description: DESCRIPTION,
-  },
+  // С картинкой: без неё ссылка на страницу в мессенджере приходила без превью
+  ...socialMeta(PATH, TITLE, DESCRIPTION),
 };
 
 const FAQ = [

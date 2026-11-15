@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { LEGAL, SITE_URL } from '@/lib/constants';
+import { socialMeta } from '@/lib/social-meta';
 import styles from '../legal.module.css';
+
+const DESCRIPTION = 'Политика обработки персональных данных сервиса WeddingCraft.';
 
 export const metadata: Metadata = {
   title: 'Политика конфиденциальности',
-  description: 'Политика обработки персональных данных сервиса WeddingCraft.',
+  description: DESCRIPTION,
   alternates: { canonical: `${SITE_URL}/privacy` },
+  ...socialMeta('/privacy', 'Политика конфиденциальности — WeddingCraft', DESCRIPTION),
 };
 
 export default function PrivacyPage() {

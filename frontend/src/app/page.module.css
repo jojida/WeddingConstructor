@@ -74,8 +74,12 @@
   color: var(--on-surface-variant);
   text-decoration: none;
   transition: color 0.3s;
+  white-space: nowrap;
 }
 .navLink:hover { color: var(--primary); }
+/* С пунктом «Статьи» их шесть: на узком экране компьютера (1101–1280 px) «Для печати»
+   переносилось на вторую строку. Пункты не переносим, промежутки там делаем уже. */
+@media (max-width: 1280px) { .nav { gap: 26px; } }
 
 .headerActions { display: flex; align-items: center; gap: 24px; }
 .btnLogin {
