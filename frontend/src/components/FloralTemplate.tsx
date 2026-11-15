@@ -163,11 +163,18 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
     );
   }
 
-  /* ── Карточка-превью ──────────────────────────────────── */
+  /* ── Карточка-превью: обложка шаблона (public/invite/floral, .cover) ──
+     Та же композиция, что у страницы шириной 480px (как в телефоне), целиком
+     ужатая в K раз, чтобы обложка (763px) вошла в открытку A6 (480×677).
+     Размеры — в долях ширины карточки (cqw) из styles.css: c(px) переводит
+     пиксели страницы при ширине 480. Раньше имена и подписи были вдвое мельче
+     страницы, а отступы — свои. */
   const bg   = '#d5d0c8';
-  const sec  = '#a29b88';
   const text = '#3d3d3d';
   const gold = '#947f57';
+  const K = 0.887;
+  const c = (px: number) => `${(px * K / 4.8).toFixed(3)}cqw`;
+  const raleway = "var(--font-raleway,'Raleway',sans-serif)";
 
   const cover = data.coverPhoto || '/invite/floral/assets/photos/cover.jpg';
 
@@ -177,24 +184,28 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       width: '100%',
       height: '100%',
       overflow: 'hidden',
+      containerType: 'inline-size',
       background: bg,
       fontFamily: "'Cormorant Garamond', Georgia, serif",
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
     }}>
 
       {/* Угловые ветки */}
       <img src="/invite/floral/assets/decor/branch_corner.png" alt=""
-        style={{ position:'absolute', top:0, left:0, width:'35%', pointerEvents:'none', zIndex:5, transform:'scaleX(-1)' }} />
+        style={{ position:'absolute', top:0, left:0, width:c(165), pointerEvents:'none', zIndex:8, transform:'scaleX(-1)' }} />
       <img src="/invite/floral/assets/decor/branch_corner.png" alt=""
-        style={{ position:'absolute', top:0, right:0, width:'35%', pointerEvents:'none', zIndex:5 }} />
+        style={{ position:'absolute', top:0, right:0, width:c(165), pointerEvents:'none', zIndex:8 }} />
+
+      {/* Поля — у внутреннего блока: cqw считаются от ширины корня без полей */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+        height: '100%', boxSizing: 'border-box', padding: `${c(70)} ${c(24)} 0`,
+      }}>
 
       {/* Фото в арке */}
       <div style={{
         position: 'relative',
-        width: '55%',
-        marginTop: '18%',
+        flex: 'none',
+        width: c(300),
         zIndex: 3,
         aspectRatio: '572.25 / 900',
       }}>
@@ -216,25 +227,23 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
           <path d="M 15.675781 883.371094 L 15.675781 280.964844 C 17.082031 169.953125 89.511719 69.601562 195.90625 31.277344 C 196.367188 31.148438 197.132812 30.929688 198.042969 30.558594 C 226.234375 21.089844 255.730469 16.265625 285.582031 16.265625 L 285.890625 16.265625 C 315.757812 16.265625 345.242188 21.089844 373.433594 30.558594 C 374.34375 30.929688 375.109375 31.148438 375.570312 31.277344 C 481.960938 69.589844 554.378906 169.941406 555.800781 280.964844 L 555.800781 883.371094 Z"
             fill="none" stroke={gold} strokeWidth="5"/>
         </svg>
-        {/* Букет TL */}
+        {/* Букеты — как .arch-bouquet-tl / -br */}
         <img src="/invite/floral/assets/decor/bouquet_color.png" alt=""
-          style={{ position:'absolute', width:'55%', left:'-14%', top:'-4%', zIndex:5, pointerEvents:'none' }} />
-        {/* Букет BR */}
+          style={{ position:'absolute', width:'57%', left:'-15%', top:'-4%', zIndex:5, pointerEvents:'none' }} />
         <img src="/invite/floral/assets/decor/bouquet_color.png" alt=""
-          style={{ position:'absolute', width:'58%', right:'-18%', bottom:'-8%', zIndex:5, transform:'scale(-1,-1)', pointerEvents:'none' }} />
+          style={{ position:'absolute', width:'60%', right:'-20%', bottom:'-10%', zIndex:5, transform:'scale(-1,-1)', pointerEvents:'none' }} />
       </div>
 
-      {/* Имена */}
-      <div style={{ position:'relative', zIndex:4, textAlign:'center', marginTop:'8%', padding:'0 8%' }}>
-        <p style={{ fontFamily:"var(--font-raleway,'Raleway',sans-serif)", fontSize:'6px', fontWeight:300, letterSpacing:'0.38em', color: text, marginBottom:'2px' }}>
-          СВАДЬБА
-        </p>
-        <h2 style={{ fontFamily:"var(--font-great-vibes,'Great Vibes',cursive)", fontSize:'22px', fontWeight:400, color: text, lineHeight:1.1, margin:0 }}>
-          {data.brideName || 'Оливия'} и {data.groomName || 'Себастьян'}
-        </h2>
-        <p style={{ fontFamily:"var(--font-raleway,'Raleway',sans-serif)", fontSize:'6px', fontWeight:300, letterSpacing:'0.5em', color: text, marginTop:'3px' }}>
-          ПРИГЛАШЕНИЕ
-        </p>
+      {/* Имена — как .the-wedding-of / .couple-names / .invite-label */}
+      <p style={{ position:'relative', zIndex:2, margin:`${c(80)} 0 ${c(4)}`, fontFamily:raleway, fontSize:c(12), fontWeight:300, letterSpacing:'0.38em', textTransform:'uppercase', color:text, lineHeight:'normal' }}>
+        СВАДЬБА
+      </p>
+      <h2 style={{ position:'relative', zIndex:2, margin:`0 0 ${c(12)}`, fontFamily:"var(--font-great-vibes,'Great Vibes',cursive)", fontSize:c(44), fontWeight:400, color:text, lineHeight:1.1 }}>
+        {data.brideName || 'Оливия'} и {data.groomName || 'Себастьян'}
+      </h2>
+      <p style={{ position:'relative', zIndex:2, margin:0, fontFamily:raleway, fontSize:c(11), fontWeight:300, letterSpacing:'0.5em', textTransform:'uppercase', color:text, lineHeight:'normal' }}>
+        ПРИГЛАШЕНИЕ
+      </p>
       </div>
 
     </div>

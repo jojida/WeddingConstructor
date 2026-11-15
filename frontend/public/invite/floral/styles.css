@@ -121,7 +121,7 @@ img.corner-br { bottom: 0; right: 0; transform: scale(-1,-1); }
 .the-wedding-of {
   font-family: 'Raleway', sans-serif; font-size: 12px; font-weight: 300;
   letter-spacing: 0.38em; text-transform: uppercase;
-  color: var(--text); margin-top: 120px; margin-bottom: 4px;
+  color: var(--text); margin-top: 80px; margin-bottom: 4px;
   position: relative; z-index: 2;
 }
 .couple-names {
@@ -716,7 +716,7 @@ span.sched-emoji {
   .couple-names { font-size: 38px; }
   img.corner { width: 140px; }
   .arch-block { width: 74%; }
-  .the-wedding-of { margin-top: 95px; }
+  .the-wedding-of { margin-top: 65px; }
 }
 
 /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
