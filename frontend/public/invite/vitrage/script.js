@@ -133,7 +133,7 @@
   }
 
   // Имена — внутри витражной арки (≈ 960 единиц): длинные ужимаем
-  var NAME_FS = 155, NAME_ROOM = 960;
+  var NAME_FS = 220, NAME_ROOM = 960;
   function fitNames() {
     var hero = document.getElementById('hero');
     var box = document.getElementById('heroNames');

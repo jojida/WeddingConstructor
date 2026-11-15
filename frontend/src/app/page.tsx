@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/auth';
 import api from '@/lib/api';
 import { TEMPLATES, SITE_URL, VK_URL, YANDEX_REVIEWS_URL, LEGAL, PLANS, sampleWeddingDate, templateSampleDate } from '@/lib/constants';
+import { templateCardData } from '@/lib/template-card';
 import TemplateShowcase from '@/components/TemplateShowcase';
 import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
 import HeroPhone from '@/components/landing/HeroPhone';
@@ -199,15 +200,7 @@ function TemplatesSection() {
               onClick={() => reachGoal(GOAL.templatePreview, { template: tpl.name, from: 'home' })}>
               {/* Слева открытка для печати, справа телефон — TemplateShowcase */}
               <TemplateShowcase
-                data={withPreviewNames({
-                  ...SAMPLE_DATA,
-                  brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                  groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                  templateId: tpl.id,
-                  weddingDate: templateSampleDate(tpl),
-                  coverPhoto: tpl.defaultCover,
-                  galleryPhotos: tpl.defaultGallery
-                }, shown)}
+                data={withPreviewNames(templateCardData(SAMPLE_DATA, tpl, templateSampleDate(tpl)), shown)}
                 apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
               />
               <h3 className={styles.mosaicTitle}>{tpl.name}</h3>

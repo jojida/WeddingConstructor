@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef } from 'react';
 import { InviteData } from './TemplatePreview';
 import { hasIntro } from '@/lib/plans';
 
@@ -110,130 +110,69 @@ export default function MediterraneanTemplate({ data, apiBase, fullPage, slug, e
     );
   }
 
-  /* ── Preview card thumbnail — always shows the real invitation design ── */
+  /* ── Карточка-превью: обложка как на странице (/invite/index.html, .hero) ──
+     Окно window.jpg (1080×1439) — во всю карточку (cover). Плашка с именами,
+     цветы по бокам и размеры — как на странице, где окно 4:5 во всю ширину:
+     плашка 56 % ширины окна, по центру обрезанной картинки (675 px картинки от
+     верха), имена Gogol 6 % ширины окна, цветы на 51 % высоты окна. --s —
+     пикселей карточки на пиксель картинки, поэтому плашка стоит на том же месте
+     картинки при любой форме карточки. Держать в согласии с .name-card,
+     .couple-names и .hero-deco в /invite/styles.css. */
+  const S = (n: number) => `calc(${n} * var(--s))`;
+  const k = 1080 / 480;          // страница шириной 480: px макета → px картинки
+  const ink = '#354366';
+  const frame = 'M 31 5 L 269 5 A 26 26 0 0 0 295 31 L 295 145 A 26 26 0 0 0 269 171 L 31 171 A 26 26 0 0 0 5 145 L 5 31 A 26 26 0 0 0 31 5 Z';
+  const flower = (side: 'left' | 'right'): CSSProperties => ({
+    position: 'absolute', top: `calc(50% - ${S(31)})`, [side]: `calc(50% - ${S(383.4)})`,
+    width: S(108), height: 'auto', pointerEvents: 'none', filter: 'url(#rm-blk-prev)',
+    transform: side === 'left' ? 'rotate(-25deg)' : 'rotate(25deg) scaleX(-1)',
+  });
   return (
     <div style={{
-      position: 'relative',
-      width: '100%',
-      height: '100%',
-      overflow: 'hidden',
-      background: '#dbeeff',
-      fontFamily: "'Georgia', serif",
-    }}>
-      {/* SVG filter: removes black backgrounds from PNG botanical assets */}
+      position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#dbeeff',
+      containerType: 'size', ['--s' as string]: 'max(100cqw / 1080, 100cqh / 1439)',
+    } as CSSProperties}>
+      {/* Цветы у плашки — PNG с чёрным фоном: убираем чёрное, как на странице */}
       <svg width="0" height="0" style={{ position: 'absolute', overflow: 'hidden' }}>
         <defs>
-          <filter id="rm-blk-prev" colorInterpolationFilters="sRGB"
-                  x="0%" y="0%" width="100%" height="100%">
-            <feColorMatrix type="matrix"
-              values="1 0 0 0 0
-                      0 1 0 0 0
-                      0 0 1 0 0
-                      1 1 1 0 0"/>
+          <filter id="rm-blk-prev" colorInterpolationFilters="sRGB" x="0%" y="0%" width="100%" height="100%">
+            <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  1 1 1 0 0" />
           </filter>
         </defs>
       </svg>
 
-      {/* Actual hero background from the invitation */}
-      <img
-        src="/invite/assets/window.jpg"
-        alt="Средиземноморье"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-      />
+      <img src="/invite/assets/window.jpg" alt="Средиземноморье"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
 
-      {/* Watercolour botanical overlay — top-left (from real design) */}
-      <img
-        src="/invite/assets/branch.webp"
-        alt=""
-        style={{
-          position: 'absolute', top: 0, left: 0,
-          width: '42%', opacity: .9,
-          filter: 'url(#rm-blk-prev)',
-          pointerEvents: 'none',
-        }}
-      />
-
-      {/* Name card — повторяет плашку из реального приглашения: декоративная
-          рамка (вогнутые угловые вырезы + двойная обводка) и шрифт Gogol.
-          Держать в согласии с .name-card в /invite/styles.css. */}
       <div style={{
-        position: 'absolute',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -50%)',
-        padding: '11px 26px',
-        textAlign: 'center',
-        minWidth: '128px',
-        whiteSpace: 'nowrap',
+        position: 'absolute', top: `calc(50% - ${S(44.5)})`, left: '50%', transform: 'translate(-50%, -50%)',
+        width: S(604.8), textAlign: 'center',
       }}>
-        {/* Рамка — фоновый слой под именами */}
-        <svg
-          viewBox="0 0 300 176"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0 }}
-        >
-          <path
-            d="M 31 5 L 269 5 A 26 26 0 0 0 295 31 L 295 145 A 26 26 0 0 0 269 171 L 31 171 A 26 26 0 0 0 5 145 L 5 31 A 26 26 0 0 0 31 5 Z"
-            fill="rgba(233,242,252,0.94)"
-          />
-          <path
-            d="M 31 5 L 269 5 A 26 26 0 0 0 295 31 L 295 145 A 26 26 0 0 0 269 171 L 31 171 A 26 26 0 0 0 5 145 L 5 31 A 26 26 0 0 0 31 5 Z"
-            fill="none" stroke="#114e88" strokeWidth="2.4"
-            vectorEffect="non-scaling-stroke" strokeLinejoin="round"
-          />
-          <path
-            d="M 33 13 L 267 13 A 20 20 0 0 0 287 33 L 287 143 A 20 20 0 0 0 267 163 L 33 163 A 20 20 0 0 0 13 143 L 13 33 A 20 20 0 0 0 33 13 Z"
-            fill="none" stroke="#114e88" strokeWidth="1" opacity={0.85}
-            vectorEffect="non-scaling-stroke" strokeLinejoin="round"
-          />
+        <svg viewBox="0 0 300 176" preserveAspectRatio="none" aria-hidden="true"
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', zIndex: 0, filter: `drop-shadow(0 ${S(6 * k)} ${S(16 * k)} rgba(17, 78, 136, 0.18))` }}>
+          <path d={frame} fill="rgba(233,242,252,0.94)" />
+          <path d={frame} fill="none" stroke="#114e88" strokeWidth="2.4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+          <path d="M 33 13 L 267 13 A 20 20 0 0 0 287 33 L 287 143 A 20 20 0 0 0 267 163 L 33 163 A 20 20 0 0 0 13 143 L 13 33 A 20 20 0 0 0 33 13 Z"
+            fill="none" stroke="#114e88" strokeWidth="1" opacity={0.85} vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
         </svg>
-
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <span style={{ display: 'block', color: '#114e88', marginBottom: 1 }} aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="10" height="10" focusable="false" style={{ display: 'inline-block' }}>
+        <div style={{ position: 'relative', zIndex: 1, padding: `${S(11 * k)} ${S(26 * k)}` }}>
+          <span aria-hidden="true" style={{ display: 'block', color: ink, marginBottom: S(1 * k), lineHeight: 0 }}>
+            <svg viewBox="0 0 24 24" focusable="false" style={{ display: 'inline-block', width: S(12 * k), height: S(12 * k) }}>
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor" />
             </svg>
           </span>
-          <p style={{
-            fontFamily: "'Gogol', 'Marck Script', cursive, Georgia, serif",
-            fontSize: '18px', color: '#354366',
-            letterSpacing: '.04em', margin: 0, lineHeight: 1.02,
-          }}>
-            {data?.brideName || 'Катерина'}
-          </p>
-          <p style={{
-            fontFamily: "'Gogol', 'Marck Script', cursive, Georgia, serif",
-            fontSize: '13px', color: '#354366', margin: '-2px 0', lineHeight: 1.02,
-          }}>
-            и
-          </p>
-          <p style={{
-            fontFamily: "'Gogol', 'Marck Script', cursive, Georgia, serif",
-            fontSize: '18px', color: '#354366',
-            letterSpacing: '.04em', margin: 0, lineHeight: 1.02,
-          }}>
+          <p style={{ margin: 0, fontFamily: "'Gogol', 'Marck Script', cursive", fontWeight: 400, fontSize: S(64.8), lineHeight: 1.02, color: ink }}>
+            {data?.brideName || 'Катерина'}<br />
+            <span style={{ fontSize: '0.7em', display: 'inline-block', margin: `${S(-2 * k)} 0` }}>и</span><br />
             {data?.groomName || 'Максим'}
           </p>
-          {/* Small wavy flourish */}
-          <svg width="60" height="12" viewBox="0 0 60 12" fill="none" style={{ marginTop: 3 }}>
-            <path d="M3 6 Q10 1 17 6 Q24 11 31 6 Q38 1 45 6 Q52 11 57 6"
-              stroke="#354366" strokeWidth="1" strokeLinecap="round" fill="none"/>
+          <svg viewBox="0 0 90 18" fill="none" style={{ display: 'block', margin: `${S(3 * k)} auto 0`, width: S(90 * k), height: S(18 * k) }}>
+            <path d="M5 9 Q15 3 25 9 Q35 15 45 9 Q55 3 65 9 Q75 15 85 9" stroke={ink} strokeWidth="1.2" strokeLinecap="round" fill="none" />
           </svg>
         </div>
       </div>
-
-      {/* Flower cluster bottom-right */}
-      <img
-        src="/invite/assets/flower-cluster.webp"
-        alt=""
-        style={{
-          position: 'absolute', bottom: 0, right: 0,
-          width: '40%', opacity: .88,
-          filter: 'url(#rm-blk-prev)',
-          pointerEvents: 'none',
-          transform: 'scaleX(-1)',
-        }}
-      />
+      <img src="/invite/assets/flower-single.lossless.webp" alt="" style={flower('left')} />
+      <img src="/invite/assets/flower-single.lossless.webp" alt="" style={flower('right')} />
     </div>
   );
 }

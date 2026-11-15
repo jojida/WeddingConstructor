@@ -141,7 +141,7 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
       <img src={cover} alt=""
         style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: y(765), objectFit: 'cover', objectPosition: '50% 20%' }} />
       <span style={{
-        position: 'absolute', left: u(128), top: `calc(${y(383)} - ${u(40)})`, zIndex: 1, fontFamily: "'Script Thin Pen', 'Pinyon Script', cursive",
+        position: 'absolute', left: u(128), top: `calc(${y(298)} - ${u(40)})`, zIndex: 1, fontFamily: "'Script Thin Pen', 'Pinyon Script', cursive",
         fontSize: u(200), lineHeight: 'normal', color: 'rgba(255,255,255,.77)',
       }}>&amp;</span>
       <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,0) 24%), linear-gradient(176deg, rgba(102,102,102,0) 31.6%, rgba(0,0,0,.68) 82.5%)' }} />
@@ -149,8 +149,8 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
         position: 'absolute', left: 0, right: 0, top: y(63), margin: 0, zIndex: 3, textAlign: 'center',
         fontFamily: "'Cormorant Garamond', Georgia, serif", fontVariant: 'small-caps', fontSize: u(22), color: '#fff',
       }}>Приглашение на свадьбу</p>
-      <span style={{ ...name, left: u(41), top: `calc(${y(473)} - ${lift(30)})` }}>{groom}</span>
-      <span style={{ ...name, left: u(199), top: `calc(${y(582)} - ${lift(24)})` }}>{bride}</span>
+      <span style={{ ...name, left: u(41), top: `calc(${y(388)} - ${lift(30)})` }}>{groom}</span>
+      <span style={{ ...name, left: u(199), top: `calc(${y(497)} - ${lift(24)})` }}>{bride}</span>
       <p style={{
         position: 'absolute', left: 0, right: 0, top: `calc(${y(772)} - ${u(10)})`, margin: 0, zIndex: 3,
         display: 'flex', justifyContent: 'center', gap: u(40),

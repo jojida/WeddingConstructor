@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { InviteData } from './TemplatePreview';
 import { hasIntro } from '@/lib/plans';
 import WeddingEnvelope from './WeddingEnvelope';
@@ -120,7 +120,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
             ref={iframeRef}
             src={initialSrc}
             style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#d5d0c8' }}
-            title="Превью «Флоральный»"
+            title="Превью «Цветущий»"
           />
           {intro && (
             <div style={{
@@ -157,23 +157,22 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
           ref={iframeRef}
           src={initialSrc}
           style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
-          title="Флоральное приглашение"
+          title="Приглашение «Цветущий»"
         />
       </div>
     );
   }
 
   /* ── Карточка-превью: обложка шаблона (public/invite/floral, .cover) ──
-     Та же композиция, что у страницы шириной 480px (как в телефоне), целиком
-     ужатая в K раз, чтобы обложка (763px) вошла в открытку A6 (480×677).
-     Размеры — в долях ширины карточки (cqw) из styles.css: c(px) переводит
-     пиксели страницы при ширине 480. Раньше имена и подписи были вдвое мельче
-     страницы, а отступы — свои. */
+     Та же композиция, что у страницы шириной 480px: c(px) — пиксели страницы
+     при этой ширине. Единица e = min(ширина/480, высота/763): в телефоне
+     обложка в масштабе страницы, как у гостя; в открытке A6 (480×677) вся
+     обложка (763px) ужимается, по бокам — фон. Раньше имена и подписи были
+     вдвое мельче страницы, а отступы — свои. */
   const bg   = '#d5d0c8';
   const text = '#3d3d3d';
   const gold = '#947f57';
-  const K = 0.887;
-  const c = (px: number) => `${(px * K / 4.8).toFixed(3)}cqw`;
+  const c = (px: number) => `calc(${px} * var(--e))`;
   const raleway = "var(--font-raleway,'Raleway',sans-serif)";
 
   const cover = data.coverPhoto || '/invite/floral/assets/photos/cover.jpg';
@@ -184,10 +183,11 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       width: '100%',
       height: '100%',
       overflow: 'hidden',
-      containerType: 'inline-size',
+      containerType: 'size',
+      ['--e' as string]: 'min(100cqw / 480, 100cqh / 763)',
       background: bg,
       fontFamily: "'Cormorant Garamond', Georgia, serif",
-    }}>
+    } as CSSProperties}>
 
       {/* Угловые ветки */}
       <img src="/invite/floral/assets/decor/branch_corner.png" alt=""
@@ -195,7 +195,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       <img src="/invite/floral/assets/decor/branch_corner.png" alt=""
         style={{ position:'absolute', top:0, right:0, width:c(165), pointerEvents:'none', zIndex:8 }} />
 
-      {/* Поля — у внутреннего блока: cqw считаются от ширины корня без полей */}
+      {/* Поля — у внутреннего блока: cqw/cqh считаются от корня без полей */}
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
         height: '100%', boxSizing: 'border-box', padding: `${c(70)} ${c(24)} 0`,

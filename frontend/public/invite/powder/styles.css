@@ -230,52 +230,62 @@ section { position: relative; }
 .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .cover__line--1 { margin-left: calc(26 * var(--u)); }
 
-/* Дата: «30 | воскресенье / июля | 12:30» — блок 160…620 × 850…1080 */
+/* Дата: «30 | воскресенье / июля | 12:30». В макете блок 160…620 × 850…1080;
+   увеличен в --dk раз вокруг черты (x 302): число и месяц растут влево, день
+   недели и время — вправо, к розам арки (их край ~600). Длинный день недели
+   («воскресенье», «понедельник») — чуть мельче и плотнее (.is-long) */
 .cover__date {
-  position: absolute; left: calc(160 * var(--u)); top: calc(850 * var(--u)); z-index: 3;
-  width: calc(460 * var(--u)); height: calc(230 * var(--u));
+  --dk: 1.2;
+  position: absolute; left: calc((302 - 142 * var(--dk)) * var(--u)); top: calc(850 * var(--u)); z-index: 3;
+  width: calc(460 * var(--dk) * var(--u)); height: calc(230 * var(--dk) * var(--u));
   color: var(--taupe);
 }
 .cover__date > * { position: absolute; margin: 0; white-space: nowrap; }
 .cover__save {
-  left: calc(11 * var(--u)); top: calc(8.8 * var(--u));
+  left: calc(11 * var(--dk) * var(--u)); top: calc(8.8 * var(--dk) * var(--u));
   font-weight: 600;
-  font-size: calc(27.2 * var(--u)); line-height: calc(33 * var(--u));
+  font-size: calc(27.2 * var(--dk) * var(--u)); line-height: calc(33 * var(--dk) * var(--u));
   letter-spacing: .172em;
   text-transform: uppercase;
   color: var(--pink);
 }
 .cover__save:empty { display: none; }
 .cover__day {
-  left: 0; top: calc(57.8 * var(--u)); width: calc(124 * var(--u));
+  left: 0; top: calc(57.8 * var(--dk) * var(--u)); width: calc(124 * var(--dk) * var(--u));
   text-align: right;
-  font-size: calc(98 * var(--u)); line-height: calc(98 * var(--u));
+  font-size: calc(98 * var(--dk) * var(--u)); line-height: calc(98 * var(--dk) * var(--u));
 }
-.cover__rule { left: calc(142 * var(--u)); top: calc(89 * var(--u)); width: calc(2.4 * var(--u)); height: calc(124 * var(--u)); background: var(--pink); }
+.cover__rule {
+  left: calc(142 * var(--dk) * var(--u)); top: calc(89 * var(--dk) * var(--u));
+  width: calc(2.4 * var(--dk) * var(--u)); height: calc(124 * var(--dk) * var(--u)); background: var(--pink);
+}
 .cover__wday, .cover__month, .cover__time {
   font-weight: 600;
-  font-size: calc(32 * var(--u)); line-height: calc(38.4 * var(--u));
+  font-size: calc(32 * var(--dk) * var(--u)); line-height: calc(38.4 * var(--dk) * var(--u));
   text-transform: uppercase;
 }
-.cover__wday  { left: calc(157 * var(--u)); top: calc(129.6 * var(--u)); letter-spacing: .177em; }
-.cover__month { left: 0; top: calc(174.6 * var(--u)); width: calc(131 * var(--u)); text-align: right; letter-spacing: .12em; }
-.cover__time  { left: calc(170 * var(--u)); top: calc(172.6 * var(--u)); letter-spacing: .15em; }
+.cover__wday  { left: calc(157 * var(--dk) * var(--u)); top: calc(129.6 * var(--dk) * var(--u)); letter-spacing: .177em; }
+.cover__wday.is-long { font-size: calc(30 * var(--dk) * var(--u)); letter-spacing: .06em; }
+.cover__month { left: 0; top: calc(174.6 * var(--dk) * var(--u)); width: calc(131 * var(--dk) * var(--u)); text-align: right; letter-spacing: .12em; }
+.cover__time  { left: calc(170 * var(--dk) * var(--u)); top: calc(172.6 * var(--dk) * var(--u)); letter-spacing: .15em; }
 
+/* Адрес — под выросшей датой, по левому краю «Save the date», тоже в 1,2 раза */
 .cover__addr {
-  position: absolute; left: calc(169 * var(--u)); top: calc(1103.2 * var(--u)); z-index: 3;
-  width: calc(370 * var(--u));
+  position: absolute; left: calc(145 * var(--u)); top: calc(1153.8 * var(--u)); z-index: 3;
+  width: calc(444 * var(--u));
   margin: 0;
   font-weight: 600;
-  font-size: calc(30 * var(--u)); line-height: calc(34 * var(--u));
+  font-size: calc(36 * var(--u)); line-height: calc(40.8 * var(--u));
   letter-spacing: .14em;
   color: var(--pink);
 }
 .cover__addr:empty { display: none; }
+/* Ширина прежняя: справа подол платья */
 .cover__text {
   position: absolute; left: calc(72 * var(--u)); top: calc(1562.5 * var(--u)); z-index: 3;
   width: calc(430 * var(--u));
   margin: 0;
-  font-size: calc(31 * var(--u)); line-height: calc(38 * var(--u));
+  font-size: calc(37.2 * var(--u)); line-height: calc(45.6 * var(--u));
   color: var(--pink);
 }
 .cover__text:empty { display: none; }

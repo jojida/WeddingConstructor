@@ -28,6 +28,9 @@
 
   --f-text: "Lora", Georgia, "Times New Roman", serif;
   --f-script: "HamiltoneSHA", "Great Vibes", cursive;
+  /* Имена на обложке — Comforter: у HamiltoneSHA строчные крошечные (x 0,24 кегля),
+     имена выглядели мелкими. У Comforter x 0,39, заглавные 0,82, буква ~0,35 кегля */
+  --f-names: "Comforter", "Great Vibes", cursive;
 }
 
 * { box-sizing: border-box; }
@@ -210,7 +213,7 @@ p, h1, h2 { margin: 0; font-weight: 500; }
   color: var(--blue);
 }
 /* Имена: строки стоят по базовым линиям макета (1080 / 1262 / 1445).
-   У HamiltoneSHA при line-height:1 базовая линия на 0,612 кегля ниже верха */
+   У Comforter при line-height:1 базовая линия на 0,72 кегля ниже верха */
 .cover__names {
   left: 0; top: 0; width: 100%; height: 100%;
   margin: 0;
@@ -226,14 +229,14 @@ p, h1, h2 { margin: 0; font-weight: 500; }
   transform: translateX(calc(-50% + var(--x, 0) * var(--u)));
 }
 .cover__name {
-  font-family: var(--f-script);
-  font-size: calc(var(--nfs, 155) * var(--u));
+  font-family: var(--f-names);
+  font-size: calc(var(--nfs, 220) * var(--u));
   /* запас под заглавные и хвосты букв: маска «письма» режет всё за краями блока */
   padding: .45em .3em;
   margin-top: -.45em;
 }
-.cover__name--g { --x: -30; top: calc((1080 - .612 * var(--nfs, 155)) * var(--u)); }
-.cover__name--b { --x: 18; top: calc((1445.3 - .612 * var(--nfs, 155)) * var(--u)); }
+.cover__name--g { --x: -30; top: calc((1080 - .72 * var(--nfs, 220)) * var(--u)); }
+.cover__name--b { --x: 18; top: calc((1445.3 - .72 * var(--nfs, 220)) * var(--u)); }
 /* у HamiltoneSHA нет «&» — амперсанд курсивом Lora */
 .cover__amp {
   --x: -6;

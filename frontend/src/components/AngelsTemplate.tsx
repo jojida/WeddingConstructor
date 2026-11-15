@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useRef } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef } from 'react';
 import { InviteData } from './TemplatePreview';
 import { hasIntro } from '@/lib/plans';
 
@@ -112,25 +112,46 @@ export default function AngelsTemplate({ data, apiBase, fullPage, slug, editing 
     );
   }
 
-  /* ── Карточка-превью: обложка (фото пары, облака, Купидон, лента) с живыми
-     именами на ленте. Картинка — обложка с 450-й единицы макета (1366px),
-     поэтому центр надписи — (749; 1993 − 450). Длинные имена — мельче:
-     на прямом участке ленты помещается ~15 знаков кеглем 131. */
+  /* ── Карточка-превью: обложка из тех же слоёв, что .hero на странице ──
+     Фото пары (своё, если загружено), облака, Купидон, лента с именами, ангел
+     с арфой и голубь — по координатам макета (1366 единиц в ширину). Если
+     карточка ниже обложки, верх фото срезается (--off) ровно настолько, чтобы
+     лента (до 2400 единиц) осталась целиком: в телефоне обложка с самого верха,
+     как у гостя, в открытке A6 — без части неба. Длинные имена — мельче: на
+     прямом участке ленты помещается ~15 знаков кеглем 131. */
   const u = (n: number) => `calc(${n} * 100cqw / 1366)`;
+  const at = (n: number) => `calc(${n} * 100cqw / 1366 - var(--off))`;
   const groom = data.groomName || 'Алексей';
   const bride = data.brideName || 'Ангелина';
   const text = `${groom} и ${bride}`;
   const fs = Math.min(131, (131 * 15.5) / Math.max(text.length, 1));
+  const photo = !data.coverPhoto ? '/invite/angels/assets/hero.jpg'
+    : data.coverPhoto.startsWith('/uploads') ? `${apiBase}${data.coverPhoto}` : data.coverPhoto;
+  const A = '/invite/angels/assets/';
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#ddf3ff', containerType: 'inline-size' }}>
-      <img src="/invite/angels/assets/preview.webp" alt=""
-        style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', display: 'block' }} />
-      <p style={{
-        position: 'absolute', left: u(749), top: u(1543), margin: 0, whiteSpace: 'nowrap',
-        transform: 'translate(-50%, -50%) rotate(-6.04deg)',
-        fontFamily: "'Great Vibes', cursive", fontSize: u(fs), lineHeight: 1.2, color: '#526c9f',
-      }}>{text}</p>
+    <div style={{
+      position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#ddf3ff',
+      containerType: 'size', ['--off' as string]: 'max(0px, 2400 * 100cqw / 1366 - 100cqh)',
+    } as CSSProperties}>
+      <div style={{
+        position: 'absolute', left: 0, top: at(0), width: '100%', height: u(1732), overflow: 'hidden',
+        WebkitMaskImage: 'linear-gradient(180deg, #000 86%, transparent 100%)', maskImage: 'linear-gradient(180deg, #000 86%, transparent 100%)',
+      }}>
+        <img src={photo} alt="" style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 30%' }} />
+      </div>
+      <img src={A + 'cloud-hero.webp'} alt="" style={{ position: 'absolute', left: u(-12), top: at(1370), width: `calc(100% + ${u(24)})`, height: 'auto', display: 'block' }} />
+      <img src={A + 'cupid-bow.webp'} alt="" style={{ position: 'absolute', left: u(896), top: at(1299), width: u(423), height: 'auto', display: 'block' }} />
+      <div style={{ position: 'absolute', left: u(232), top: at(1633), width: u(1134), height: u(760) }}>
+        <img src={A + 'ribbon.webp'} alt="" style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', display: 'block' }} />
+        <p style={{
+          position: 'absolute', left: u(517), top: u(360), margin: 0, whiteSpace: 'nowrap',
+          transform: 'translate(-50%, -50%) rotate(-6.04deg)',
+          fontFamily: "'Great Vibes', 'Marck Script', cursive", fontWeight: 400, fontSize: u(fs), lineHeight: 1.2, color: '#526c9f',
+        }}>{text}</p>
+      </div>
+      <img src={A + 'cherub-harp.webp'} alt="" style={{ position: 'absolute', left: 0, top: at(2069), width: u(519), height: 'auto', display: 'block' }} />
+      <img src={A + 'dove-rays.webp'} alt="" style={{ position: 'absolute', left: u(427), top: at(2497), width: u(548), height: 'auto', display: 'block' }} />
     </div>
   );
 }

@@ -30,9 +30,6 @@ const PHONE_COVER: Record<string, number> = {
   powder: 822,
   forest: 763,
   'garden-evening': 776,
-  vitrage: 738,
-  angels: 764,
-  floral: 677,
   sketch: 677,
 };
 

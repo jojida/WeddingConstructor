@@ -219,7 +219,7 @@
     var wd = new Date(y, m - 1, d).getDay();
     var el;
     if ((el = document.getElementById('dateDay'))) el.textContent = String(d);
-    if ((el = document.getElementById('dateWday'))) el.textContent = WEEKDAYS[wd];
+    if ((el = document.getElementById('dateWday'))) { el.textContent = WEEKDAYS[wd]; el.classList.toggle('is-long', WEEKDAYS[wd].length > 8); }
     if ((el = document.getElementById('dateMonth'))) el.textContent = MONTHS[m - 1];
     if ((el = document.getElementById('dateTime'))) el.textContent = STATE.time.length === 4 ? '0' + STATE.time : STATE.time;
   }

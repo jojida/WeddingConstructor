@@ -5,6 +5,7 @@ import TemplateShowcase from '@/components/TemplateShowcase';
 import { LEGAL, TEMPLATES, templateSampleDate } from '@/lib/constants';
 import { NAME_MAX, withPreviewNames } from '@/lib/preview-names';
 import { usePreviewNames } from '@/lib/use-preview-names';
+import { templateCardData } from '@/lib/template-card';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import styles from './page.module.css';
 
@@ -74,15 +75,7 @@ export default function TemplatesCatalog({ sampleFrom }: { sampleFrom: number })
             <div className={styles.cardImageWrapper}>
               <TemplateShowcase
                 initialVisible={i < 4}
-                data={withPreviewNames({
-                  ...SAMPLE_DATA,
-                  brideName: (tpl as any).sampleBride || SAMPLE_DATA.brideName,
-                  groomName: (tpl as any).sampleGroom || SAMPLE_DATA.groomName,
-                  templateId: tpl.id,
-                  weddingDate: templateSampleDate(tpl, sampleFrom),
-                  coverPhoto: tpl.defaultCover,
-                  galleryPhotos: tpl.defaultGallery
-                }, shown)}
+                data={withPreviewNames(templateCardData(SAMPLE_DATA, tpl, templateSampleDate(tpl, sampleFrom)), shown)}
                 apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
               />
             </div>

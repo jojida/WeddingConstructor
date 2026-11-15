@@ -180,7 +180,7 @@ export default function TendernessTemplate({ data, apiBase, fullPage, slug, edit
         <div style={{ position: 'absolute', left: u(476), top: u(1303), width: u(752), display: 'flex', fontFamily: "'Alice', serif", color: ink }}>
           {cd.map((c, i) => (
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <span style={{ fontSize: u(73.5), lineHeight: 1.1 }}>{c.n}</span>
+              <span style={{ fontSize: u(73.5), lineHeight: 1.1 }}>{i ? String(c.n).padStart(2, '0') : c.n}</span>
               <span style={{ marginTop: u(18.5), fontSize: u(33.3), lineHeight: 1.2, textTransform: 'uppercase' }}>{c.l}</span>
             </div>
           ))}

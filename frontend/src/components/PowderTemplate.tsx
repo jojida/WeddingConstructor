@@ -130,12 +130,16 @@ export default function PowderTemplate({ data, apiBase, fullPage, slug, editing 
   const fs = Math.min(232, 800 / (bride.length * 0.5 + 0.9), 830 / (groom.length * 0.5));
 
   const [y, m, d] = (data.weddingDate || '').split('-').map(Number);
+  const wday = y && m && d ? WEEKDAYS[new Date(y, m - 1, d).getDay()] : '';
   const time = /^\d{1,2}:\d{2}/.test(data.weddingTime || '') ? data.weddingTime.slice(0, 5).padStart(5, '0') : '12:30';
   const at = (left: number, top: number, extra: CSSProperties): CSSProperties => ({
     position: 'absolute', left: u(left), top: u(top), margin: 0, whiteSpace: 'nowrap', ...extra,
   });
-  const small = (ls: number): CSSProperties => ({
-    fontFamily: serif, fontWeight: 600, fontSize: u(32), lineHeight: u(38.4), letterSpacing: `${ls}em`, textTransform: 'uppercase',
+  // Блок даты увеличен в DK раз вокруг черты (x 302), как .cover__date в styles.css
+  const DK = 1.2;
+  const k = (n: number) => n * DK;
+  const small = (ls: number, size = 32): CSSProperties => ({
+    fontFamily: serif, fontWeight: 600, fontSize: u(k(size)), lineHeight: u(k(38.4)), letterSpacing: `${ls}em`, textTransform: 'uppercase',
   });
   const label = typeof custom.heroTitle === 'string' && custom.heroTitle.trim() ? custom.heroTitle : 'Приглашение на свадьбу';
   const save = typeof custom.saveDate === 'string' ? custom.saveDate.trim() : 'Save the date';
@@ -163,23 +167,23 @@ export default function PowderTemplate({ data, apiBase, fullPage, slug, editing 
         <span style={{ display: 'block' }}>{groom}</span>
       </div>
       {y && m && d ? (
-        <div style={at(160, 850, { width: u(460), height: u(230), color: taupe })}>
-          {save ? <p style={at(11, 8.8, { fontFamily: serif, fontWeight: 600, fontSize: u(27.2), lineHeight: u(33), letterSpacing: '.172em', textTransform: 'uppercase', color: pink })}>{save}</p> : null}
-          <span style={at(0, 57.8, { width: u(124), textAlign: 'right', fontFamily: serif, fontWeight: 400, fontSize: u(98), lineHeight: u(98) })}>{d}</span>
-          <span style={at(142, 89, { width: u(2.4), height: u(124), background: pink })} />
-          <span style={at(157, 129.6, small(.177))}>{WEEKDAYS[new Date(y, m - 1, d).getDay()]}</span>
-          <span style={at(0, 174.6, { ...small(.12), width: u(131), textAlign: 'right' })}>{MONTHS[m - 1]}</span>
-          <span style={at(170, 172.6, small(.15))}>{time}</span>
+        <div style={at(302 - k(142), 850, { width: u(k(460)), height: u(k(230)), color: taupe })}>
+          {save ? <p style={at(k(11), k(8.8), { fontFamily: serif, fontWeight: 600, fontSize: u(k(27.2)), lineHeight: u(k(33)), letterSpacing: '.172em', textTransform: 'uppercase', color: pink })}>{save}</p> : null}
+          <span style={at(0, k(57.8), { width: u(k(124)), textAlign: 'right', fontFamily: serif, fontWeight: 400, fontSize: u(k(98)), lineHeight: u(k(98)) })}>{d}</span>
+          <span style={at(k(142), k(89), { width: u(k(2.4)), height: u(k(124)), background: pink })} />
+          <span style={at(k(157), k(129.6), wday.length > 8 ? small(.06, 30) : small(.177))}>{wday}</span>
+          <span style={at(0, k(174.6), { ...small(.12), width: u(k(131)), textAlign: 'right' })}>{MONTHS[m - 1]}</span>
+          <span style={at(k(170), k(172.6), small(.15))}>{time}</span>
         </div>
       ) : null}
       {data.venueAddress ? (
-        <p style={at(169, 1103.2, {
-          width: u(370), whiteSpace: 'normal', fontFamily: serif, fontWeight: 600, fontSize: u(30), lineHeight: u(34),
+        <p style={at(145, 1153.8, {
+          width: u(444), whiteSpace: 'normal', fontFamily: serif, fontWeight: 600, fontSize: u(36), lineHeight: u(40.8),
           letterSpacing: '.14em', color: pink,
         })}>{data.venueAddress}</p>
       ) : null}
       {heroText ? (
-        <p style={at(72, 1562.5, { width: u(430), whiteSpace: 'normal', fontFamily: serif, fontWeight: 600, fontSize: u(31), lineHeight: u(38), color: pink })}>{heroText}</p>
+        <p style={at(72, 1562.5, { width: u(430), whiteSpace: 'normal', fontFamily: serif, fontWeight: 600, fontSize: u(37.2), lineHeight: u(45.6), color: pink })}>{heroText}</p>
       ) : null}
     </div>
   );
