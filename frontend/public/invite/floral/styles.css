@@ -72,6 +72,8 @@ img.corner-br { bottom: 0; right: 0; transform: scale(-1,-1); }
    ОБЛОЖКА
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .cover {
+  /* кнопка «▶ Посмотреть, как откроется» в редакторе — ниже подписи «Приглашение» */
+  --wc-ip-bottom: 3%;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -124,8 +126,11 @@ img.corner-br { bottom: 0; right: 0; transform: scale(-1,-1); }
   color: var(--text); margin-top: 80px; margin-bottom: 4px;
   position: relative; z-index: 2;
 }
+/* Имена — в долях ширины (12,8vw, не больше 64px): раньше кегль скачком менялся
+   на 480px (64 → 44 → 38px), и на компьютере имена были в 1,5 раза крупнее,
+   чем на телефоне и в превью карточки. Теперь имена везде ~85 % ширины */
 .couple-names {
-  font-family: 'Great Vibes', cursive; font-size: 64px; font-weight: 400;
+  font-family: 'Great Vibes', cursive; font-size: min(64px, 12.8vw); font-weight: 400;
   color: var(--text); line-height: 1.1; margin-bottom: 12px;
   position: relative; z-index: 2;
 }
@@ -708,12 +713,10 @@ span.sched-emoji {
   body { background: var(--bg); }
   .card { box-shadow: none; }
   :root { --pad-x: 24px; }
-  .couple-names { font-size: 44px; }
   img.corner { width: 165px; }
 }
 @media (max-width: 390px) {
   :root { --pad-x: 18px; }
-  .couple-names { font-size: 38px; }
   img.corner { width: 140px; }
   .arch-block { width: 74%; }
   .the-wedding-of { margin-top: 65px; }

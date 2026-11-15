@@ -1,5 +1,5 @@
 'use client';
-import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { InviteData } from './TemplatePreview';
 import { hasIntro } from '@/lib/plans';
 import WeddingEnvelope from './WeddingEnvelope';
@@ -26,6 +26,23 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
   const [revealed, setRevealed] = useState(!hasIntro(data.plan));
 
   const live = !!(fullPage || editing);
+
+  // Карточка-превью: сколько строк заняли имена (длинные переносятся, как на
+  // странице) — в --lines, чтобы в низкой открытке арка уступила место строке.
+  // Пишем прямо в стиль, без перерисовки; заново — когда загрузится шрифт.
+  const cardRef = useRef<HTMLDivElement>(null);
+  const namesRef = useRef<HTMLHeadingElement>(null);
+  useLayoutEffect(() => {
+    if (live) return;
+    const measure = () => {
+      const root = cardRef.current, h = namesRef.current;
+      if (!root || !h) return;
+      const line = parseFloat(getComputedStyle(h).fontSize) * 1.1;
+      if (line) root.style.setProperty('--lines', String(Math.max(1, Math.round(h.offsetHeight / line))));
+    };
+    measure();
+    document.fonts?.ready.then(measure).catch(() => {});
+  }, [live, data.brideName, data.groomName]);
 
   const initialSrc = useMemo(() => {
     const p = new URLSearchParams();
@@ -164,27 +181,29 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
   }
 
   /* ── Карточка-превью: обложка шаблона (public/invite/floral, .cover) ──
-     Та же композиция, что у страницы шириной 480px: c(px) — пиксели страницы
-     при этой ширине. Единица e = min(ширина/480, высота/763): в телефоне
-     обложка в масштабе страницы, как у гостя; в открытке A6 (480×677) вся
-     обложка (763px) ужимается, по бокам — фон. Раньше имена и подписи были
-     вдвое мельче страницы, а отступы — свои. */
+     Та же композиция, что у страницы шириной 480px: c(px)/t(px) — пиксели
+     страницы при этой ширине. Надписи (t) — всегда от ширины, как на странице:
+     имена 12,8 % ширины (~85 % строки). Арка, поля и ветки (c) — от ширины, но
+     в низкой открытке A6 ужимаются, чтобы обложка (782px при 480) вошла по
+     высоте: --f = min(ширина/480, (высота − надписи)/671,8), надписи = 43 +
+     67,6 px на строку имён (--lines). В телефоне всё в масштабе страницы. */
   const bg   = '#d5d0c8';
   const text = '#3d3d3d';
   const gold = '#947f57';
-  const c = (px: number) => `calc(${px} * var(--e))`;
+  const c = (px: number) => `calc(${px} * var(--f))`;
+  const t = (px: number) => `calc(${px} * 100cqw / 480)`;
   const raleway = "var(--font-raleway,'Raleway',sans-serif)";
 
   const cover = data.coverPhoto || '/invite/floral/assets/photos/cover.jpg';
 
   return (
-    <div style={{
+    <div ref={cardRef} style={{
       position: 'relative',
       width: '100%',
       height: '100%',
       overflow: 'hidden',
       containerType: 'size',
-      ['--e' as string]: 'min(100cqw / 480, 100cqh / 763)',
+      ['--f' as string]: 'min(100cqw / 480, (100cqh - (43 + 67.6 * var(--lines, 1)) * 100cqw / 480) / 671.8)',
       background: bg,
       fontFamily: "'Cormorant Garamond', Georgia, serif",
     } as CSSProperties}>
@@ -198,7 +217,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       {/* Поля — у внутреннего блока: cqw/cqh считаются от корня без полей */}
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-        height: '100%', boxSizing: 'border-box', padding: `${c(70)} ${c(24)} 0`,
+        height: '100%', boxSizing: 'border-box', padding: `${c(70)} ${t(24)} 0`,
       }}>
 
       {/* Фото в арке */}
@@ -235,13 +254,13 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       </div>
 
       {/* Имена — как .the-wedding-of / .couple-names / .invite-label */}
-      <p style={{ position:'relative', zIndex:2, margin:`${c(80)} 0 ${c(4)}`, fontFamily:raleway, fontSize:c(12), fontWeight:300, letterSpacing:'0.38em', textTransform:'uppercase', color:text, lineHeight:'normal' }}>
+      <p style={{ position:'relative', zIndex:2, margin:`${c(80)} 0 ${t(4)}`, fontFamily:raleway, fontSize:t(12), fontWeight:300, letterSpacing:'0.38em', textTransform:'uppercase', color:text, lineHeight:'normal' }}>
         СВАДЬБА
       </p>
-      <h2 style={{ position:'relative', zIndex:2, margin:`0 0 ${c(12)}`, fontFamily:"var(--font-great-vibes,'Great Vibes',cursive)", fontSize:c(44), fontWeight:400, color:text, lineHeight:1.1 }}>
+      <h2 ref={namesRef} style={{ position:'relative', zIndex:2, margin:`0 0 ${t(12)}`, fontFamily:"var(--font-great-vibes,'Great Vibes',cursive)", fontSize:t(61.44), fontWeight:400, color:text, lineHeight:1.1 }}>
         {data.brideName || 'Оливия'} и {data.groomName || 'Себастьян'}
       </h2>
-      <p style={{ position:'relative', zIndex:2, margin:0, fontFamily:raleway, fontSize:c(11), fontWeight:300, letterSpacing:'0.5em', textTransform:'uppercase', color:text, lineHeight:'normal' }}>
+      <p style={{ position:'relative', zIndex:2, margin:0, fontFamily:raleway, fontSize:t(11), fontWeight:300, letterSpacing:'0.5em', textTransform:'uppercase', color:text, lineHeight:'normal' }}>
         ПРИГЛАШЕНИЕ
       </p>
       </div>
