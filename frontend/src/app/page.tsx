@@ -37,7 +37,7 @@ function Header() {
         <nav className={styles.nav}>
           <Link href="/templates" className={styles.navLink}>Шаблоны</Link>
           <Link href="/print" className={styles.navLink}>Для печати</Link>
-          <a href="#features" className={styles.navLink}>Возможности</a>
+          <a href="#how" className={styles.navLink}>Возможности</a>
           <a href="#rsvp" className={styles.navLink}>Управление</a>
           <Link href="/blog" className={styles.navLink}>Статьи</Link>
           <a href="#pricing" className={styles.navLink}>Цены</a>
@@ -68,7 +68,7 @@ function Header() {
         <div className={styles.mobileMenu}>
           <Link href="/templates" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Шаблоны</Link>
           <Link href="/print" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Печатные приглашения · 290 ₽</Link>
-          <a href="#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</a>
+          <a href="#how" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</a>
           <a href="#rsvp" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Управление</a>
           <Link href="/blog" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Статьи</Link>
           <a href="#pricing" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Цены</a>
@@ -216,61 +216,6 @@ function TemplatesSection() {
   );
 }
 
-// ─── Features ─────────────────────────────────────────────────────────────────
-function Features() {
-  const features = [
-    {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 36, height: 36 }}>
-          <path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-        </svg>
-      ),
-      title: 'Ответы без обзвона',
-      text: 'Гости подтвердят участие, а вы увидите ответы в кабинете.',
-    },
-    {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 36, height: 36 }}>
-          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
-        </svg>
-      ),
-      title: 'Детали под рукой',
-      text: 'Карта и программа дня помогут гостям спланировать поездку.',
-    },
-    {
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ width: 36, height: 36 }}>
-          <path d="M2 22l1-1h3l9-9" /><path d="M3 21v-3l9-9" />
-          <path d="M15 6l3.5-3.5a2.121 2.121 0 0 1 3 3L18 9l.5.5-3 3-.5-.5-9-9" />
-        </svg>
-      ),
-      title: 'Правки без перепечатки',
-      text: 'Обновляйте тексты и фото — ссылка останется прежней.',
-    },
-  ];
-
-  return (
-    <section id="features" className={styles.featuresSection}>
-      <div className={styles.sectionInner}>
-        <div className={styles.howHeader} data-animate>
-          <h2 className={styles.sectionTitle}>Всё, что нужно в приглашении</h2>
-          <p className={styles.howSubtitle}>Всё, что гостям важно знать, — в одной ссылке</p>
-        </div>
-
-        <div className={styles.featuresGrid}>
-          {features.map((f, i) => (
-            <div key={i} className={styles.featureCard} data-animate data-delay={String(i * 150)}>
-              <div className={styles.featureIcon}>{f.icon}</div>
-              <h3 className={styles.featureTitle}>{f.title}</h3>
-              <p className={styles.featureText}>{f.text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 // ─── Pricing ──────────────────────────────────────────────────────────────────
 /* Тарифы берём из constants — там же их читают страница оплаты и бэкенд.
    Своя копия на лендинге уже приводила к расхождению текстов. */
@@ -385,7 +330,7 @@ function Footer() {
             <h5 className={styles.footerHeading}>Компания</h5>
             <ul className={styles.footerLinks}>
               <li><Link href="/dashboard" className={styles.footerLink}>Личный кабинет</Link></li>
-              <li><a href="#features" className={styles.footerLink}>Возможности</a></li>
+              <li><a href="#how" className={styles.footerLink}>Возможности</a></li>
               <li><Link href="/auth" className={styles.footerLink}>Войти</Link></li>
               {/* Отзывы — в карточке Яндекс Бизнеса (онлайн-компания: на Картах адреса нет,
                   жилое помещение Яндекс на Картах не публикует). Как у weddingpost — ссылкой, без своей формы */}
@@ -425,6 +370,10 @@ function Footer() {
 }
 
 // ─── RSVP / управление гостями ──────────────────────────────────────────────
+/* С 16.11.26 сюда слит блок «Всё, что нужно в приглашении»: его пункты повторяли
+   соседей — ответы есть в этом блоке, карта и правки после рассылки — в «Как
+   пригласить гостей?». От него остался подзаголовок «Ответы без обзвона». Заголовок
+   «Анкета для гостей на свадьбу» — поисковый запрос, его не менять. */
 function RsvpSection() {
   const simple = [
     'Участие и напитки — в одной анкете',
@@ -448,7 +397,7 @@ function RsvpSection() {
       <div className={styles.sectionInner}>
         <div className={styles.howHeader} data-animate>
           <h2 className={styles.sectionTitle}>Анкета для гостей на свадьбу</h2>
-          <p className={styles.howSubtitle}>Меньше переписок перед свадьбой</p>
+          <p className={styles.howSubtitle}>Ответы без обзвона и лишних переписок</p>
         </div>
 
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', maxWidth: 920, margin: '0 auto' }} data-animate>
@@ -538,9 +487,10 @@ function ReviewsSection() {
   useEffect(() => {
     if (reviews.length && window.location.hash === '#reviews') document.getElementById('reviews')?.scrollIntoView();
   }, [reviews.length]);
-  // Опубликованных отзывов нет (или сервер не ответил) — блок с кнопкой «Оставить отзыв».
-  // Он же рисуется на сервере, так что страница не прыгает, пока грузятся отзывы.
-  if (reviews.length === 0) return <ReviewsInvite />;
+  // Опубликованных отзывов нет (или сервер не ответил) — секции нет. Блок «Оставить
+  // отзыв» с пустыми звёздами (13–16.11.26) говорил новым посетителям «здесь ещё никого
+  // не было»; отзыв просим там, где есть клиенты: кабинет, письма, ссылка в подвале.
+  if (reviews.length === 0) return null;
   const card: React.CSSProperties = {
     background: '#fff', border: '1px solid rgba(206,197,186,0.5)', borderRadius: 18,
     padding: '26px 24px', flex: '1 1 280px', maxWidth: 360,
@@ -575,29 +525,6 @@ function ReviewsSection() {
             Отзывы на Яндексе — и оставить свой
           </a>
         </p>
-      </div>
-    </section>
-  );
-}
-
-/* Пока опубликованных отзывов нет — отдельный блок с кнопкой «Оставить отзыв»
-   (решение владельца 13.11.26, по примеру блоков отзывов у конкурентов, но без цифр,
-   которых у нас нет). Звёзды пустые: рейтинга пока нет, а полные читались бы как «5,0».
-   Отзыв — в карточке Яндекс Бизнеса; без скидок и просьб написать «только хороший». */
-function ReviewsInvite() {
-  return (
-    <section id="reviews" className={styles.featuresSection}>
-      <div className={styles.sectionInner}>
-        <div className={styles.reviewsInvite}>
-          <div className={styles.reviewsInviteStars} aria-hidden="true">☆☆☆☆☆</div>
-          <h2 className={styles.sectionTitle}>Отзывы о WeddingCraft</h2>
-          <p className={styles.reviewsInviteText}>
-            Делали приглашение у нас? Расскажите, как всё прошло, — ваш отзыв поможет парам, которые сейчас выбирают.
-          </p>
-          <a href={YANDEX_REVIEWS_URL} target="_blank" rel="noopener noreferrer" className={styles.ctaBtn}>
-            Оставить отзыв на Яндексе
-          </a>
-        </div>
       </div>
     </section>
   );
@@ -816,10 +743,11 @@ export default function HomePage() {
       <Header />
       <Hero />
       <TemplatesSection />
+      {/* Старые ссылки «/#features» (закладки, поиск) — к «Как это работает» */}
+      <span id="features" className={styles.anchor} aria-hidden="true" />
       <FeatureDemo />
       <PrintInvitationsTeaser />
       <CompareSection />
-      <Features />
       <RsvpSection />
       <ReviewsSection />
       <Pricing />

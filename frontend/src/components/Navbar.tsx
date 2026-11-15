@@ -30,7 +30,7 @@ export default function Navbar() {
           <Link href="/templates" className={`${styles.link} ${pathname === '/templates' ? styles.active : ''}`}>
             Шаблоны
           </Link>
-          <Link href="/#features" className={styles.link}>Возможности</Link>
+          <Link href="/#how" className={styles.link}>Возможности</Link>
           <Link href="/print" className={`${styles.link} ${pathname.startsWith('/print') ? styles.active : ''}`}>Для печати</Link>
           <Link href="/#examples" className={styles.link}>Примеры</Link>
           {/* Статьи были доступны только из подвала главной — в шапке их видно с любой страницы */}
@@ -60,7 +60,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className={styles.mobileMenu}>
           <Link href="/templates" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Шаблоны</Link>
-          <Link href="/#features" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</Link>
+          <Link href="/#how" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Возможности</Link>
           <Link href="/print" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Печатные приглашения · 290 ₽</Link>
           <Link href="/#examples" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Примеры</Link>
           <Link href="/blog" className={styles.mobileLink} onClick={() => setMenuOpen(false)}>Статьи</Link>

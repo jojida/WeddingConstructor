@@ -446,31 +446,10 @@
   color: var(--on-surface-variant); font-family: var(--font-inter);
 }
 
-/* ── Features ────────────────────────────────────────────────────────────────── */
+/* ── Секции с заголовком и карточками (анкета, сравнение, FAQ…) ─────────────── */
 .featuresSection { padding: 64px 0; }
-.featuresGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-.featureCard {
-  padding: 40px;
-  background: rgba(255,255,255,0.7);
-  backdrop-filter: blur(12px);
-  border: 0.5px solid rgba(212,163,163,0.3);
-  border-radius: 16px;
-  box-shadow: 0 30px 60px -12px rgba(14,29,38,0.05);
-  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
-}
-.featureCard:hover { transform: translateY(-8px); }
-.featureIcon { color: var(--secondary); margin-bottom: 24px; }
-.featureTitle {
-  font-family: var(--font-playfair);
-  font-size: 22px; font-weight: 500;
-  color: var(--on-surface);
-  margin-bottom: 14px;
-}
-.featureText {
-  font-size: 15px; line-height: 1.6;
-  color: var(--on-surface-variant);
-  font-family: var(--font-inter);
-}
+/* Невидимый якорь для старых ссылок «/#features» — под шапкой, как у секций */
+.anchor { display: block; height: 0; scroll-margin-top: 60px; }
 
 /* ── Pricing ─────────────────────────────────────────────────────────────────── */
 .pricingSection { padding: 64px 0; }
@@ -624,31 +603,6 @@
 }
 .ctaBtn:hover { opacity: 0.88; transform: translateY(-2px); }
 
-/* ── Отзывы: блок-приглашение, пока опубликованных отзывов нет ─────────────── */
-.reviewsInvite {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 56px 48px;
-  text-align: center;
-  background: rgba(255,255,255,0.7);
-  border: 0.5px solid rgba(212,163,163,0.3);
-  border-radius: 28px;
-  box-shadow: 0 10px 40px rgba(14,29,38,0.05);
-}
-.reviewsInviteStars { color: #c9a96e; font-size: 26px; letter-spacing: 0.3em; margin-bottom: 18px; }
-.reviewsInviteText {
-  max-width: 520px;
-  margin: 16px auto 32px;
-  font-family: var(--font-inter);
-  font-size: 16px;
-  line-height: 1.65;
-  color: var(--on-surface-variant, #6b655c);
-}
-@media (max-width: 600px) {
-  .reviewsInvite { padding: 40px 22px; border-radius: 22px; }
-  .reviewsInviteText { font-size: 15px; }
-}
-
 /* ── Footer ──────────────────────────────────────────────────────────────────── */
 .footer {
   padding: 80px 0 40px;
@@ -734,7 +688,6 @@
   .howStep:last-child .howCard { padding-bottom: 0; }
   .howCardRow { display: none; }
   .howMobileLabel { display: flex; align-items: center; margin-bottom: 6px; }
-  .featuresGrid { grid-template-columns: 1fr; }
   .templatesScroll { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .homeNames { margin: -24px 0 20px; gap: 8px; }
   .homeNamesTitle { font-size: 14px; }
