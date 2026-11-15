@@ -1,7 +1,7 @@
 /* ── Секция ─────────────────────────────────────────────────────────────── */
 .section {
   position: relative;
-  padding: 96px 0 104px;
+  padding: 72px 0;
   background:
     radial-gradient(60% 50% at 75% 45%, rgba(201, 169, 110, 0.14), rgba(201, 169, 110, 0) 70%),
     radial-gradient(40% 40% at 10% 90%, rgba(201, 169, 110, 0.08), rgba(201, 169, 110, 0) 70%),
@@ -336,7 +336,7 @@
   .pagerDotOn::before { background: #c9a96e; transform: scale(1.25); }
 }
 @media (max-width: 768px) {
-  .section { padding: 64px 0 72px; }
+  .section { padding: 48px 0; }
   .inner { padding: 0 20px; }
   .title { font-size: 30px; }
   .head { margin-bottom: 24px; }

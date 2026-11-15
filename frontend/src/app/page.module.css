@@ -307,7 +307,8 @@
 }
 
 /* ── Templates Section ─────────────────────────────────────────────────────── */
-.templatesSection { padding: 120px 0; }
+/* Отступы секций главной: 120px давали между блоками 240–300px пустоты (15.11.26) */
+.templatesSection { padding: 64px 0; }
 
 .sectionHeader {
   display: flex;
@@ -376,7 +377,7 @@
 .templatesCta { text-align: center; margin-top: 60px; }
 
 /* ── How It Works ────────────────────────────────────────────────────────────── */
-.howSection { padding: 120px 0; }
+.howSection { padding: 64px 0; }
 
 .howHeader { text-align: center; margin-bottom: 64px; }
 .howLabelRow {
@@ -446,7 +447,7 @@
 }
 
 /* ── Features ────────────────────────────────────────────────────────────────── */
-.featuresSection { padding: 120px 0; }
+.featuresSection { padding: 64px 0; }
 .featuresGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
 .featureCard {
   padding: 40px;
@@ -472,7 +473,7 @@
 }
 
 /* ── Pricing ─────────────────────────────────────────────────────────────────── */
-.pricingSection { padding: 120px 0; }
+.pricingSection { padding: 64px 0; }
 /* Три тарифа: сколько влезет по ширине — три, два или один.
    Так не приходится держать по правилу на каждую ширину экрана. */
 .pricingGrid {
@@ -573,7 +574,7 @@
 .planBtnOutline:hover { border-color: var(--primary); background: var(--primary-container); }
 
 /* ── CTA Section ─────────────────────────────────────────────────────────────── */
-.ctaSection { padding: 120px 0; }
+.ctaSection { padding: 64px 0; }
 .ctaBox {
   background: rgba(247,231,206,0.22);
   border: 1px solid rgba(206,197,186,0.4);
@@ -720,7 +721,9 @@
   .heroCtas { justify-content: center; }
   .heroPerks { justify-content: center; gap: 8px; }
   .heroPerks li { padding: 7px 12px; font-size: 12px; }
-  .templatesSection { padding-top: 48px; }
+  /* телефон: секции плотнее — на узком экране пустота заметнее */
+  .templatesSection, .howSection, .featuresSection, .pricingSection, .ctaSection { padding: 44px 0; }
+  .templatesSection { padding-top: 40px; }
   .heroHeadline { font-size: 36px; }
   .sectionTitle { font-size: 30px; }
   .howSteps { display: flex; flex-direction: column; gap: 0; }
