@@ -5,31 +5,33 @@ import Link from 'next/link';
 import ChooseTemplateLink from './ChooseTemplateLink';
 import styles from './DemoActions.module.css';
 
-/* Крестик сверху справа — на всех экранах. Демо открывается из каталога в
-   новой вкладке — крестик её закрывает. Если на демо пришли в той же вкладке,
-   закрывать нечего — крестик возвращает на предыдущую страницу. Если браузер
-   вкладку не закрыл, ссылка ведёт в каталог. */
-function closeDemo(e: React.MouseEvent) {
+/* Панель демо внизу: «← Все шаблоны» и «Создать приглашение» (в редактор с
+   этим шаблоном, цель template_choose).
+   «Все шаблоны»: демо открыли с нашего сайта в новой вкладке (каталог и главная
+   открывают его так) — закрываем её, гость возвращается туда же, на то же место.
+   Иначе (или если браузер вкладку не закрыл) — ссылка в каталог. Адреса
+   страницы в referrer нет — у сайта Referrer-Policy: strict-origin, только домен. */
+function toTemplates(e: React.MouseEvent) {
   if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-  if (window.history.length > 1) {
-    e.preventDefault();
-    window.history.back();
-    return;
-  }
-  window.close();
+  let fromSite = false;
+  try {
+    fromSite = !!document.referrer && new URL(document.referrer).origin === window.location.origin;
+  } catch { /* битый referrer — обычный переход */ }
+  if (fromSite && window.history.length <= 1) window.close();
 }
 
 export default function DemoActions({ templateId, templateName }: { templateId: string; templateName: string }) {
   return (
-    <>
-      <Link href="/templates" className={styles.close} aria-label="Закрыть" onClick={closeDemo}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-          <path d="M6 6l12 12M18 6L6 18" />
+    <nav className={styles.bar} aria-label="Шаблон">
+      <Link href="/templates" className={styles.back} onClick={toTemplates}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M19 12H5M11 18l-6-6 6-6" />
         </svg>
+        Все шаблоны
       </Link>
-      <ChooseTemplateLink templateId={templateId} templateName={templateName} className={styles.choose}>
-        Выбрать этот шаблон
+      <ChooseTemplateLink templateId={templateId} templateName={templateName} className={styles.cta}>
+        Создать приглашение
       </ChooseTemplateLink>
-    </>
+    </nav>
   );
 }

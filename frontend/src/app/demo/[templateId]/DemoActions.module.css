@@ -1,42 +1,52 @@
-/* Кнопки демо-страницы — одинаковые на всех экранах: крестик сверху справа
-   и «Выбрать этот шаблон» внизу по центру. Справа внизу — кнопка музыки
-   шаблона (44px в 16px от края): кнопку выбора ставим по центру, её не задеваем. */
-.close {
-  position: fixed; z-index: 100;
-  top: max(20px, env(safe-area-inset-top)); right: 20px;
-  width: 44px; height: 44px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  color: #fff;
-  transition: background .2s, transform .2s;
-  -webkit-tap-highlight-color: transparent;
-}
-.close:hover { background: rgba(0, 0, 0, 0.6); transform: scale(1.05); }
-.close svg { display: block; width: 20px; height: 20px; }
-
-.choose {
+/* Панель демо-страницы: тёмная плашка внизу по центру — «← Все шаблоны»
+   и «Создать приглашение». На компьютере и планшете приглашение — колонка
+   500px, панель по её центру и кнопку музыки шаблона (справа внизу колонки)
+   не задевает. */
+.bar {
   position: fixed; z-index: 100;
   left: 50%; bottom: max(24px, env(safe-area-inset-bottom));
   transform: translateX(-50%);
-  max-width: calc(100vw - 150px);
-  padding: 12px 28px; border-radius: 999px;
-  background: linear-gradient(135deg, #d3c5ad, #685d4a);
-  color: #fff; text-decoration: none; text-align: center;
-  font-family: Inter, sans-serif; font-size: 15px; font-weight: 600; line-height: 1.25;
+  display: flex; align-items: center; gap: 4px;
+  max-width: calc(100vw - 24px);
+  padding: 6px; border-radius: 16px;
+  background: rgba(29, 27, 24, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(60, 48, 32, 0.35);
-  transition: box-shadow .2s, filter .2s;
+}
+.back {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border-radius: 12px;
+  color: rgba(243, 238, 230, 0.72); text-decoration: none;
+  font-family: var(--font-inter); font-size: 14px; font-weight: 500; line-height: 1.2;
+  transition: color .2s, background .2s;
   -webkit-tap-highlight-color: transparent;
 }
-.choose:hover { filter: brightness(1.06); box-shadow: 0 6px 22px rgba(60, 48, 32, 0.45); }
+.back:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
+.back svg { flex: none; width: 18px; height: 18px; }
+.cta {
+  display: inline-flex; align-items: center;
+  padding: 11px 18px; border-radius: 12px;
+  background: #c9a96e; color: #1d1b18; text-decoration: none;
+  font-family: var(--font-inter); font-size: 15px; font-weight: 600; line-height: 1.2;
+  transition: background .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cta:hover { background: #d8bb84; }
 
-@media (max-width: 767px) {
-  .close { top: max(12px, env(safe-area-inset-top)); right: 12px; width: 40px; height: 40px; }
-  .close svg { width: 18px; height: 18px; }
-  .choose { bottom: max(16px, env(safe-area-inset-bottom)); padding: 10px 20px; font-size: 14px; }
+/* Телефон: приглашение во всю ширину, кнопка музыки шаблона — в правом нижнем
+   углу экрана (44px в 16px от края). Панель встаёт над ней, иначе закрыла бы её */
+@media (max-width: 520px) {
+  .bar { bottom: calc(max(16px, env(safe-area-inset-bottom)) + 56px); }
+  .cta { padding: 11px 16px; }
+}
+@media (max-width: 374px) {
+  .cta { padding: 10px 14px; font-size: 14px; }
 }
 @media (max-width: 340px) {
-  .choose { font-size: 13px; padding: 9px 16px; max-width: calc(100vw - 132px); }
+  .bar { gap: 2px; padding: 5px; }
+  .back { gap: 4px; padding: 9px 9px; font-size: 13px; }
+  .back svg { width: 16px; height: 16px; }
+  .cta { padding: 10px 11px; font-size: 13px; }
 }
