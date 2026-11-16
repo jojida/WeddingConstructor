@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Алексей и Ангелина — приглашение на свадьбу</title>
   <link href="/invite/assets/fonts/google/09cf634f97cd1e649801.css" rel="stylesheet" />
-  <link rel="preload" as="image" href="assets/hero.jpg" />
+  <link rel="preload" as="image" href="assets/hero-bg.jpg" />
   <link rel="stylesheet" href="styles.css" />
   <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
   <noscript><style>
@@ -27,26 +27,34 @@
 
   <main class="invite" id="invite">
 
-    <!-- 1 — ОБЛОЖКА: фото пары, под ним облака; Купидон, лента с именами,
-         ангел с арфой и голубь в лучах. При открытии облака поднимаются,
-         Купидон прилетает, лента разворачивается и пишутся имена -->
+    <!-- 1 — ОБЛОЖКА (исправленный макет 16.11.26): акварельная бумага,
+         «Приглашение», имена с «&», дата; Купидон, ангел с арфой, розовые
+         облака и руки, как на «Сотворении Адама». При открытии облака
+         поднимаются, руки тянутся друг к другу, пишутся имена -->
     <section class="hero" id="hero" data-wc-section="cover">
-      <div class="hero__photo-wrap hero-in">
-        <img class="hero__photo" src="assets/hero.jpg" data-edit="coverPhoto" alt="Фото пары" />
-      </div>
-      <img class="hero__cloud hero-in" src="assets/cloud-hero.webp" alt="" />
+      <img class="hero__bg" src="assets/hero-bg.jpg" alt="" />
+      <img class="hero__clouds hero-in" src="assets/hero-clouds.webp" alt="" />
+      <img class="hero__hand hero__hand--l hero-in" src="assets/hand-l.webp" alt="" />
+      <img class="hero__hand hero__hand--r hero-in" src="assets/hand-r.webp" alt="" />
       <div class="hero__cupid hero-in"><img class="float" src="assets/cupid-bow.webp" alt="" /></div>
-      <div class="hero__ribbon hero-in">
-        <img class="hero__ribbon-img" src="assets/ribbon.webp" alt="" />
-        <h1 class="hero__names" id="heroNames"><span data-name="groom">Алексей</span> и <span data-name="bride">Ангелина</span></h1>
-      </div>
-      <div class="hero__harp hero-in"><img class="float float--slow" src="assets/cherub-harp.webp" alt="" /></div>
+      <div class="hero__harp hero-in"><img class="float float--slow" src="assets/hero-harp.webp" alt="" /></div>
+      <p class="hero__label hero-in" data-edit="heroTitle">Приглашение</p>
+      <h1 class="hero__names" id="heroNames">
+        <span class="hero__name hero__name--g" data-name="groom">Алексей</span>
+        <span class="hero__amp" aria-hidden="true"></span><span class="vh"> и </span>
+        <span class="hero__name hero__name--b" data-name="bride">Ангелина</span>
+      </h1>
+      <p class="hero__date hero-in" id="heroDate">12 июля 2027</p>
       <img class="hero__dove hero-in" src="assets/dove-rays.webp" alt="" />
     </section>
 
     <!-- 2 — ДОРОГИЕ ГОСТИ: свиток разворачивается сверху вниз -->
     <section class="greet" id="greeting" data-wc-section="greeting">
       <div class="scroll" id="scroll">
+        <img class="scroll__orn scroll__orn--tl" src="assets/orn-tl.webp" alt="" loading="lazy" decoding="async" />
+        <img class="scroll__orn scroll__orn--tr" src="assets/orn-tr.webp" alt="" loading="lazy" decoding="async" />
+        <img class="scroll__orn scroll__orn--bl" src="assets/orn-bl.webp" alt="" loading="lazy" decoding="async" />
+        <img class="scroll__orn scroll__orn--br" src="assets/orn-br.webp" alt="" loading="lazy" decoding="async" />
         <h2 class="title rv-write" data-edit="greetingTitle">Дорогие гости!</h2>
         <div class="greet__text rv" data-edit="inviteText">
           <p>Скоро у нашей истории начнётся новая глава. Хотим разделить её первый день с вами!</p>
@@ -54,10 +62,10 @@
       </div>
     </section>
 
-    <!-- 3 — ПОРТИК: колонны, полароид с фото пары, цветочная дорожка -->
+    <!-- 3 — КОЛОННЫ: полароид с фото пары, цветочная дорожка -->
     <section class="portico" id="photo" data-wc-section="photos">
       <img class="portico__aisle rv-soft" src="assets/aisle.webp" alt="" loading="lazy" decoding="async" />
-      <img class="portico__arch rv-soft" src="assets/portico.webp" alt="" loading="lazy" decoding="async" />
+      <img class="portico__arch rv-soft" src="assets/columns.webp" alt="" loading="lazy" decoding="async" />
       <figure class="polaroid" id="polaroid">
         <img class="polaroid__img" src="assets/polaroid.jpg" data-edit="polaroidPhoto" alt="Наше фото" loading="lazy" decoding="async" />
       </figure>
@@ -92,7 +100,7 @@
              transform при прокрутке, без CSS-переходов (как в других шаблонах) -->
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
           <path id="progPath" class="prog__path" d="" />
-          <image id="progCupid" class="prog__cupid" href="assets/cupid-blue.webp" width="277" height="181" />
+          <image id="progCupid" class="prog__cupid" href="assets/cupid-cream.webp" width="277" height="180" />
         </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
@@ -165,7 +173,7 @@
       <div class="dress__cherub rv-soft"><img class="float" src="assets/cherub-bell.webp" alt="" loading="lazy" decoding="async" /></div>
       <h2 class="title dress__title rv-write" data-edit="dressTitle">Дресс-код</h2>
       <div class="palette rv-pop" data-edit="palette">
-        <span style="--c:#f4dec2"></span><span style="--c:#c2a07d"></span><span style="--c:#867c5e"></span><span style="--c:#d69a67"></span>
+        <span style="--c:#f4dec2"></span><span style="--c:#526c9f"></span><span style="--c:#867c5e"></span><span style="--c:#d69a67"></span>
       </div>
       <p class="dress__text rv" data-edit="dressText">Добавьте в ваш образ нежные оттенки нашей палитры.</p>
       <div class="looks rv">

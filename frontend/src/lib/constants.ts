@@ -171,11 +171,11 @@ const HANDMADE_TEMPLATES = [
   {
     id: 'angels',
     name: 'Ангелы',
-    description: 'Ангелы, облака и небесно-голубые оттенки для романтичной свадьбы.',
-    tags: ['Ангелы', 'Облака', 'Голубой', 'Романтика', 'Анимация'],
-    colors: ['#ddf3ff', '#526c9f', '#f2efdd'],
+    description: 'Ангелы, облака и тёплая акварель для романтичной свадьбы.',
+    tags: ['Ангелы', 'Облака', 'Бежевый', 'Романтика', 'Анимация'],
+    colors: ['#d6b799', '#3c3333', '#f2f1eb'],
     preview: '/invite/angels/assets/preview.jpg',
-    defaultCover: '/invite/angels/assets/hero.jpg',
+    defaultCover: '/invite/angels/assets/polaroid.jpg',
     defaultGallery: [] as string[],
     sampleBride: 'Ангелина',
     sampleGroom: 'Алексей',
@@ -1250,7 +1250,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Обложка', icon: '🖼',
       fields: [
-        { id: 'coverPhoto', type: 'image', label: 'Фото на обложке', hint: 'Лучше вертикальное: снизу его закрывают облака с лентой', scope: 'data' },
+        { id: 'heroTitle', type: 'text', label: 'Надпись над именами', hint: 'Например: Приглашение. Пусто — без надписи', scope: 'custom', maxLength: 24 },
       ],
     },
     {
@@ -2151,7 +2151,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { time: '20:00', title: 'Торт', icon: '/invite/angels/assets/icon-cake.webp' },
       { time: '22:00', title: 'Фотосессия', icon: '/invite/angels/assets/icon-camera.webp' },
     ],
-    dressCodeColors: ['#f4dec2', '#c2a07d', '#867c5e', '#d69a67'],
+    dressCodeColors: ['#f4dec2', '#526c9f', '#867c5e', '#d69a67'],
     dressCodePhoto: '/invite/angels/assets/dress-w1.jpg',
     drinks: [
       { value: 'sparkling',  label: 'Игристое' },
@@ -2162,6 +2162,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
     ],
     custom: {
       sealColor:     'beige',
+      heroTitle:     'Приглашение',
       greetingTitle: 'Дорогие гости!',
       polaroidPhoto: '/invite/angels/assets/polaroid.jpg',
       dressPhoto2:   '/invite/angels/assets/dress-w2.jpg',

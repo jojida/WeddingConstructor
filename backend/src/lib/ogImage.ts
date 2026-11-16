@@ -15,7 +15,7 @@ interface Palette { bg: string; ink: string; accent: string }
 const PALETTES: Record<string, Palette> = {
   vitrage:          { bg: '#eaf1fa', ink: '#2a3b55', accent: '#556f95' },
   calla:            { bg: '#f3f1ec', ink: '#3a3631', accent: '#9c8f7a' },
-  angels:           { bg: '#f2f6fb', ink: '#3d4a5c', accent: '#b8935a' },
+  angels:           { bg: '#f3e8dc', ink: '#3c3333', accent: '#a5805f' },
   tenderness:       { bg: '#f6efe9', ink: '#4a3b32', accent: '#b08968' },
   powder:           { bg: '#fdf3f3', ink: '#735e59', accent: '#cc7c72' },
   velvet:           { bg: '#f4ece6', ink: '#3d0d17', accent: '#7a1f2e' },

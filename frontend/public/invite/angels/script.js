@@ -147,7 +147,7 @@
     }
   }
 
-  /* ─── Имена: лента на обложке и подпись финала ───── */
+  /* ─── Имена: обложка и подпись финала ───────────── */
   function autoSign() { return STATE.groom + ' и ' + STATE.bride; }
 
   function applyNames(groom, bride) {
@@ -162,27 +162,47 @@
     fitNames();
   }
 
-  // Имена — на прямом участке ленты (≈ 820 единиц макета): длинные ужимаем
-  var NAME_FS = 131, NAME_ROOM = 820;
+  // Имена на обложке — две строки по центру своих мест в макете (654 и 713
+  // из 1366 единиц). У каждой строки — свободная полоса: справа от жениха
+  // нога Купидона (x ≥ 1258), слева от невесты арфа (x ≤ 333). Длинное имя
+  // сначала сдвигаем от ангела, не помещается — ужимаем обе строки одинаково
+  var NAME_FS = 163.4;
+  var NAME_LINES = [
+    { sel: '.hero__name--g', cx: 654, lo: 40, hi: 1240, prop: '--gx' },
+    { sel: '.hero__name--b', cx: 713, lo: 350, hi: 1326, prop: '--bx' }
+  ];
   function fitNames() {
-    var el = document.getElementById('heroNames');
+    var box = document.getElementById('heroNames');
     var hero = document.getElementById('hero');
-    if (!el || !hero) return;
+    if (!box || !hero) return;
     var u = hero.clientWidth / 1366;
     if (!u) return;
-    el.style.setProperty('--nfs', NAME_FS);
-    var w = el.offsetWidth / u;
-    if (w > NAME_ROOM) el.style.setProperty('--nfs', (NAME_FS * NAME_ROOM / w).toFixed(1));
+    box.style.setProperty('--nfs', NAME_FS);
+    var k = 1, widths = [];
+    NAME_LINES.forEach(function (L) {
+      var el = box.querySelector(L.sel);
+      var w = el ? el.offsetWidth / u : 0;
+      widths.push(w);
+      if (w > L.hi - L.lo) k = Math.min(k, (L.hi - L.lo) / w);
+    });
+    if (k < 1) box.style.setProperty('--nfs', (NAME_FS * k).toFixed(1));
+    NAME_LINES.forEach(function (L, i) {
+      var w = widths[i] * k;
+      box.style.setProperty(L.prop, Math.min(Math.max(L.cx, L.lo + w / 2), L.hi - w / 2).toFixed(1));
+    });
   }
 
-  /* ─── Дата: строка «12 июля 2027» и отсчёт ─────────── */
+  /* ─── Дата: на обложке, строка «12 июля 2027» и отсчёт ── */
   function applyDate(dateStr, timeStr) {
     if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateStr)) STATE.date = dateStr.slice(0, 10);
     if (typeof timeStr === 'string' && /^\d{1,2}:\d{2}/.test(timeStr)) STATE.time = timeStr.slice(0, 5);
     var p = STATE.date.split('-').map(Number), y = p[0], m = p[1], d = p[2];
     if (!y || !m || !d) return;
+    var text = d + ' ' + MONTHS_GEN[m - 1] + ' ' + y;
     var line = document.getElementById('dateLine');
-    if (line) line.textContent = d + ' ' + MONTHS_GEN[m - 1] + ' ' + y;
+    if (line) line.textContent = text;
+    var hero = document.getElementById('heroDate');
+    if (hero) hero.textContent = text;
     restartCountdown();
   }
 
@@ -512,13 +532,22 @@
   }
 
   /* ─── Обложка ─────────────────────────────────────────
-     Ждём шрифт имён и фото (не дольше 2,5 с), потом облака поднимаются,
-     Купидон прилетает, лента разворачивается. В редакторе и при
-     «меньше движения» — сразу финал. */
+     Ждём шрифты и фон обложки (не дольше 2,5 с), потом облака поднимаются,
+     руки тянутся друг к другу, Купидон прилетает, пишутся имена. В редакторе
+     и при «меньше движения» — сразу финал. */
+  function namesDone() {
+    var names = document.getElementById('heroNames');
+    if (names) names.classList.add('done');
+  }
+
   function startHero() {
     if (ROOT.classList.contains('hero-go')) return;
     fitNames();
     ROOT.classList.add('hero-go');
+    if (ROOT.classList.contains('no-anim')) { namesDone(); return; }
+    var names = document.getElementById('heroNames');
+    if (names) names.addEventListener('animationend', namesDone, { once: true });
+    setTimeout(namesDone, 4000);   // вкладка была в фоне — анимация не шла
   }
 
   function initHero() {
@@ -539,7 +568,7 @@
   function waitAndStartHero() {
     var waits = [];
     if (document.fonts && document.fonts.ready) waits.push(document.fonts.ready);
-    var photo = document.querySelector('.hero__photo');
+    var photo = document.querySelector('.hero__bg');
     if (photo && !(photo.complete && photo.naturalWidth)) {
       waits.push(photo.decode ? photo.decode().catch(function () {}) : new Promise(function (res) {
         photo.addEventListener('load', res, { once: true });
@@ -582,6 +611,10 @@
     applyNames(d.groomName, d.brideName);
     applyDate(d.weddingDate, d.weddingTime);
 
+    // Надпись над именами: пустая строка убирает её (CSS :empty)
+    if (typeof d.heroTitle === 'string') {
+      document.querySelectorAll('[data-edit="heroTitle"]').forEach(function (el) { el.textContent = d.heroTitle.trim(); });
+    }
     setRichText('greetingTitle', d.greetingTitle);
     setParagraphs('inviteText', d.inviteText);
     applyVenue(d);
@@ -593,7 +626,6 @@
       STATE.storySig = d.story;
     }
 
-    setImg('coverPhoto', d.coverPhoto);
     setImg('polaroidPhoto', d.polaroidPhoto);
     // Образы гостей: в редакторе замену фото сразу видно — открываем его
     // вкладку (первые данные после загрузки вкладку не переключают)
