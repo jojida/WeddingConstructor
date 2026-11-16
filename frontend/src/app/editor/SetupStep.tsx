@@ -1,20 +1,22 @@
 'use client';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Maximize, X } from 'lucide-react';
+import { ArrowDown, X } from 'lucide-react';
 import TemplatePreview, { type InviteData as PreviewData } from '@/components/TemplatePreview';
 import { TEMPLATES } from '@/lib/constants';
 import { readPreviewNames } from '@/lib/preview-names';
-import { DEVICES, DeviceSwitch, FullPreview, fitScale, useMediaQuery, useStoredDevice, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
+import { FullPreview, useMediaQuery, type FullPreviewMode } from './PreviewDevice';
 import styles from './SetupStep.module.css';
 
 /* Первый шаг нового приглашения — «Расскажите о вашей свадьбе».
-   С 16.11.26 — как у конкурентов: слева живой шаблон (в рамке телефона,
-   планшета или компьютера, как в редакторе), справа анкета. Имена, дата и
-   место, которые пара вводит, сразу появляются в приглашении слева. Раньше
-   анкета была отдельной страницей без шаблона, а посмотреть шаблон можно было
-   только в демо — пара выбирала «вслепую» или ходила туда-обратно.
-   На телефоне шаблон — над анкетой, поменьше; нажатие открывает его целиком. */
+   С 16.11.26 — как у конкурентов: слева сам сайт-приглашение, как на странице
+   демо (колонка во всю высоту, без рамки телефона — «превью сайта осталось,
+   просто сместилось влево»), справа анкета. Имена, дата и место, которые пара
+   вводит, сразу появляются в приглашении слева. Раньше анкета была отдельной
+   страницей без шаблона, а посмотреть шаблон можно было только в демо.
+   Превью — в режиме редактора (editing): сразу обложка, анимация открытия —
+   кнопкой «▶ Посмотреть, как откроется»; этот режим рассчитан на правки на лету.
+   На телефоне сайт — весь первый экран, анкета под ним. */
 
 export interface SetupData {
   groomName: string;
@@ -110,82 +112,48 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
     };
   }, [previewBase, groomName, brideName, weddingDate, weddingTime, venue, venueAddress]);
 
-  // Устройство превью — общее с редактором (помнится в браузере); на телефоне только телефон
-  const [device, setDevice] = useStoredDevice();
   const small = useMediaQuery('(max-width: 768px)');
-  const shownDevice: PreviewDevice = small ? 'phone' : device;
-  const stageRef = useRef<HTMLElement>(null);
-  const [scale, setScale] = useState<number | null>(null);
-  useLayoutEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    const fit = () => {
-      if (window.matchMedia('(max-width: 768px)').matches) {
-        // Над анкетой — телефон шириной в половину экрана: анкета начинается
-        // уже на первом экране. От высоты окна не зависит — у мобильных
-        // браузеров она «прыгает» вместе с адресной строкой.
-        setScale(Math.min(0.62, Math.floor((window.innerWidth * 0.52 / DEVICES.phone.w) * 100) / 100));
-        return;
-      }
-      // Сверху — строка с переключателем устройства, 64 px (как у превью в редакторе)
-      setScale(fitScale(shownDevice, el.clientWidth - 48, el.clientHeight - 88));
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [shownDevice]);
+  // Телефон: нажатие на сайт открывает его во весь экран — листается, с анимацией открытия
+  const [full, setFull] = useState(false);
+  const [fullMode, setFullMode] = useState<FullPreviewMode>('phone');
 
-  // Во весь экран — то же приглашение «как у гостя», с анимацией открытия
-  const [fullMode, setFullMode] = useState<FullPreviewMode | null>(null);
-  const openFull = () => setFullMode(shownDevice);
+  // Телефон: сайт занимает первый экран, анкета под ним. Пока анкету не видно,
+  // внизу висит кнопка к ней — как «Изменить тексты и фото» в редакторе
+  const panelRef = useRef<HTMLElement>(null);
+  const [panelInView, setPanelInView] = useState(true);
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => setPanelInView(e.isIntersecting), { rootMargin: '0px 0px -30% 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
-  const dev = DEVICES[shownDevice];
   const close = onClose
     ? <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть и вернуться в редактор" title="Вернуться в редактор"><X size={22} strokeWidth={1.8} aria-hidden /></button>
     : <Link href="/templates" className={styles.close} aria-label="Закрыть и вернуться к шаблонам" title="Все шаблоны"><X size={22} strokeWidth={1.8} aria-hidden /></Link>;
 
   return (
     <div className={styles.page}>
-      {fullMode && (
-        <FullPreview mode={fullMode} onMode={m => { setFullMode(m); setDevice(m); }} onClose={() => setFullMode(null)}>
-          <TemplatePreview key={fullMode} data={preview} apiBase={apiBase} fullPage />
+      {full && (
+        <FullPreview mode={fullMode} onMode={setFullMode} onClose={() => setFull(false)}>
+          <TemplatePreview data={preview} apiBase={apiBase} fullPage />
         </FullPreview>
       )}
 
-      {/* ── Слева: шаблон ── */}
-      <main className={styles.stage} ref={stageRef} aria-label={`Шаблон «${template.name}»`}>
-        <div className={styles.stageBar}>
-          <button type="button" className={styles.fullBtn} onClick={openFull} title="Открыть во весь экран">
-            <Maximize size={15} aria-hidden />
-            <span>Во весь экран</span>
-          </button>
-          <DeviceSwitch value={device} options={['phone', 'tablet', 'desktop'] as const} onChange={setDevice} className={styles.deviceSwitch} />
+      {/* ── Слева: сайт, как в демо ── */}
+      <main className={styles.stage} aria-label={`Шаблон «${template.name}»`}>
+        {/* На телефоне сайт не ловит касания (свайп листал бы приглашение, а не
+            страницу к анкете) — нажатие открывает его во весь экран */}
+        <div className={styles.site} onClick={() => { if (small) setFull(true); }}>
+          <TemplatePreview data={preview} apiBase={apiBase} editing />
         </div>
-        {/* На телефоне превью не ловит касания (свайп листал бы приглашение, а не
-            страницу) — нажатие открывает его во весь экран. */}
-        <div className={styles.phoneBox}
-          style={scale ? { width: dev.w * scale, height: dev.h * scale } : { visibility: 'hidden' }}
-          onClick={() => { if (window.matchMedia('(max-width: 768px)').matches) openFull(); }}>
-          <div className={`${styles.phone} ${shownDevice === 'tablet' ? styles.tablet : ''} ${shownDevice === 'desktop' ? styles.desktop : ''}`}
-            style={{ width: dev.w, height: dev.h, transform: `scale(${scale ?? 1})` }}>
-            <div className={styles.screen}>
-              <div className={styles.content}>
-                {/* Другое устройство — шаблон грузится заново под его ширину */}
-                <TemplatePreview key={shownDevice} data={preview} apiBase={apiBase} editing />
-              </div>
-            </div>
-          </div>
-        </div>
-        <button type="button" className={styles.tapHint} onClick={openFull}>
-          <Maximize size={14} aria-hidden /> Посмотреть целиком
-        </button>
       </main>
 
       {close}
 
       {/* ── Справа: анкета ── */}
-      <section className={styles.panel} aria-labelledby="setup-title">
+      <section ref={panelRef} className={styles.panel} aria-labelledby="setup-title">
         <div className={styles.panelInner}>
           <p className={styles.eyebrow}>Шаблон: {template.name}</p>
           <h1 id="setup-title" className={styles.title}>Расскажите о вашей свадьбе</h1>
@@ -241,6 +209,13 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
           </button>
         </div>
       </section>
+
+      {small && !panelInView && !full && (
+        <button type="button" className={styles.toForm}
+          onClick={() => panelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+          Ввести имена и дату <ArrowDown size={16} aria-hidden />
+        </button>
+      )}
     </div>
   );
 }

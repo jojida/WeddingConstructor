@@ -1,63 +1,35 @@
-/* «Расскажите о вашей свадьбе»: слева шаблон, справа анкета (SetupStep.tsx).
-   Рамки устройств и сцена — как у превью в редакторе (page.module.css),
-   чтобы переход из анкеты в редактор не менял вид шаблона. */
+/* «Расскажите о вашей свадьбе»: слева сайт-приглашение, справа анкета (SetupStep.tsx).
+   Сайт — как на странице демо (/demo/<id>): колонка до 500 px во всю высоту
+   на сером фоне, без рамки телефона. */
 .page {
   position: relative;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
   display: flex;
-  background: #f4f2ef;
+  background: #ececec;
   color: #1f1c19;
   font-family: var(--font-inter);
 }
 
-/* ─── Слева: шаблон ─────────────────────────────────────────────────────────── */
+/* ─── Слева: сайт ───────────────────────────────────────────────────────────── */
 .stage {
-  flex: 1 1 auto; min-width: 0; position: relative; overflow: hidden;
-  display: flex; align-items: center; justify-content: center;
-  margin: 16px 0 16px 16px; border-radius: 24px;
-  /* Сверху — строка с «Во весь экран» и выбором устройства: рамка встаёт под неё */
-  padding: 64px 24px 24px;
-  background: radial-gradient(120% 90% at 50% 32%, #fdfcfa 0%, #f0ece6 58%, #e6e0d7 100%);
+  flex: 1 1 auto; min-width: 0; position: relative;
+  display: flex; justify-content: center;
+  background: #ececec;
 }
-.stageBar {
-  position: absolute; top: 14px; left: 16px; right: 16px; height: 40px; z-index: 20;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+/* Колонка сайта — как в демо: ширина 500 px, тень, во всю высоту окна.
+   Шаблон в режиме редактора заполняет её целиком (iframe 100 % × 100 %). */
+.site {
+  position: relative; z-index: 0; isolation: isolate;
+  width: 100%; max-width: 500px; height: 100%;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 50px rgba(60, 48, 32, 0.18);
 }
-.fullBtn {
-  display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px;
-  background: rgba(255, 255, 255, .78); backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 0, 0, .06); border-radius: 999px; cursor: pointer;
-  color: #3a352f; font: 500 13px var(--font-inter);
-}
-.fullBtn:hover { background: #fff; color: #1f1c19; }
-.deviceSwitch { flex: none; }
 
-.phoneBox { position: relative; z-index: 10; flex: none; }
-.phone {
-  transform-origin: 0 0;
-  background: #17140f; border-radius: 48px; padding: 12px;
-  box-shadow: 0 44px 80px -36px rgba(48, 36, 22, .5), 0 0 0 1px rgba(0, 0, 0, .04);
-  border: 2px solid #2b2722;
-}
-/* Планшет и компьютер: рамка тоньше, камера посередине верхней рамки */
-.tablet, .desktop { position: relative; }
-.tablet { border-radius: 40px; padding: 22px; }
-.desktop { border-radius: 22px; padding: 14px; }
-.tablet::before, .desktop::before {
-  content: ''; position: absolute; top: 8px; left: 50%; width: 6px; height: 6px; margin-left: -3px;
-  border-radius: 50%; background: #3b362f;
-}
-.desktop::before { top: 5px; width: 5px; height: 5px; margin-left: -2.5px; }
-.screen { width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #111827; }
-.tablet .screen { border-radius: 18px; }
-.desktop .screen { border-radius: 6px; }
-.content { width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; }
-.content::-webkit-scrollbar { display: none; }
-
-/* Подсказка «Посмотреть целиком» — только на телефоне */
-.tapHint { display: none; }
+/* Кнопка к анкете — только на телефоне */
+.toForm { display: none; }
 
 /* ─── Крестик: к шаблонам (или обратно в редактор) ─────────────────────────── */
 /* В правом верхнем углу страницы: на компьютере это угол анкеты, на телефоне — угол сцены */
@@ -73,7 +45,8 @@
 
 /* ─── Справа: анкета ─────────────────────────────────────────────────────────── */
 .panel {
-  flex: 0 0 min(600px, 46%); min-width: 0;
+  /* не уже 460 px: заголовок анкеты в одну строку и на ноутбуке 1024 px */
+  flex: 0 0 clamp(460px, 40vw, 580px); min-width: 0;
   overflow-y: auto;
   display: flex; flex-direction: column;
   background: #fff;
@@ -143,33 +116,39 @@
   .submit { margin-top: 22px; }
 }
 
-/* ─── Телефон: шаблон сверху, анкета под ним, листается страница ─────────── */
+/* ─── Телефон: сайт — весь первый экран, анкета под ним, листается страница ── */
 @media (max-width: 768px) {
   /* Фон белый, как у анкеты на компьютере: кремовые поля на кремовом фоне не видны */
   .page { flex-direction: column; height: auto; min-height: 100vh; min-height: 100dvh; overflow: visible; background: #fff; }
 
-  .stage {
-    flex: none; flex-direction: column; gap: 12px;
-    margin: 0; border-radius: 0 0 24px 24px;
-    padding: 20px 16px 16px;
-  }
-  .stageBar { display: none; }
-  .phoneBox { cursor: pointer; }
-  /* Свайп по превью листал бы приглашение, а не страницу */
-  .content { overflow: hidden; pointer-events: none; }
-  .tapHint {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px; border: 0; border-radius: 999px; cursor: pointer;
-    background: rgba(255, 255, 255, .7); color: #5f574c;
-    font: 500 13px var(--font-inter);
-  }
+  /* Сайт — первый экран целиком, как в демо на телефоне */
+  .stage { flex: none; display: block; height: 100vh; height: 100svh; }
+  .site { max-width: none; box-shadow: none; cursor: pointer; }
+  /* Свайп по сайту листал бы приглашение, а не страницу к анкете */
+  .site :global(iframe) { pointer-events: none; }
 
-  .close { top: 10px; right: 10px; background: rgba(255, 255, 255, .78); backdrop-filter: blur(8px); }
+  .close { top: 10px; right: 10px; background: rgba(255, 255, 255, .82); backdrop-filter: blur(8px); }
 
-  .panel { flex: none; overflow: visible; padding: 24px 16px 40px; }
+  /* Анкета наезжает на низ сайта листом со скруглёнными углами */
+  .panel {
+    position: relative; z-index: 2; flex: none; overflow: visible;
+    margin-top: -24px; border-radius: 24px 24px 0 0;
+    padding: 28px 16px 40px;
+    box-shadow: 0 -10px 30px rgba(31, 28, 25, .08);
+  }
   .panelInner { max-width: none; margin: 0; }
   .title { font-size: 28px; }
   .lead { margin-bottom: 22px; }
+
+  .toForm {
+    display: inline-flex; align-items: center; gap: 8px;
+    position: fixed; left: 50%; transform: translateX(-50%);
+    bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40;
+    padding: 13px 20px; border: 0; border-radius: 999px; cursor: pointer;
+    background: #1f1c19; color: #fff; white-space: nowrap;
+    font-family: var(--font-inter); font-size: 15px; font-weight: 600; line-height: 1.2;
+    box-shadow: 0 10px 28px rgba(31, 28, 25, 0.28);
+  }
 }
 
 @media (max-width: 380px) {
