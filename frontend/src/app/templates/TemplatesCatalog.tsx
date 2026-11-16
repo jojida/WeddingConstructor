@@ -71,14 +71,18 @@ export default function TemplatesCatalog({ sampleFrom }: { sampleFrom: number })
             data-animate
             className={styles.card}
           >
-            {/* Слева открытка для печати, справа телефон — TemplateShowcase */}
-            <div className={styles.cardImageWrapper}>
+            {/* Слева открытка для печати, справа телефон — TemplateShowcase.
+                Нажатие на шаблон — сразу к анкете «Расскажите о вашей свадьбе»:
+                слева шаблон, справа поля (app/editor/SetupStep.tsx), как «Выбрать» */}
+            <Link href={`/editor?template=${tpl.id}`} prefetch={false} className={styles.cardImageWrapper}
+              aria-label={`Выбрать шаблон «${tpl.name}»`}
+              onClick={() => reachGoal(GOAL.templateChoose, { template: tpl.name, from: 'catalog' })}>
               <TemplateShowcase
                 initialVisible={i < 4}
                 data={withPreviewNames(templateCardData(SAMPLE_DATA, tpl, templateSampleDate(tpl, sampleFrom)), shown)}
                 apiBase={process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}
               />
-            </div>
+            </Link>
 
             <div className={styles.cardInfo}>
               <h2 className={styles.cardTitle}>{tpl.name}</h2>

@@ -292,18 +292,18 @@
    приближает страницу при касании поля), высокое поле на мягкой кремовой
    заливке без рамки, при наборе — белое с золотой рамкой. Шрифт и цвета сайта.
    Общий класс .input-field остаётся у остальных страниц прежним. */
-.page :global(.input-field), .setup :global(.input-field) {
+.page :global(.input-field) {
   min-height: 56px; padding: 15px 18px;
   border: 1.5px solid transparent; border-radius: 14px;
   background: #f6f2ec; color: #1d1b18;
   font: 400 17px/1.45 var(--font-inter);
   transition: background .15s, border-color .15s, box-shadow .15s;
 }
-.page :global(.input-field):hover, .setup :global(.input-field):hover { background: #f1ebe2; }
-.page :global(.input-field):focus, .setup :global(.input-field):focus {
+.page :global(.input-field):hover { background: #f1ebe2; }
+.page :global(.input-field):focus {
   background: #fff; border-color: #c9a96e; box-shadow: 0 0 0 4px rgba(201, 169, 110, .2);
 }
-.page :global(.input-field)::placeholder, .setup :global(.input-field)::placeholder { color: #a39b8e; }
+.page :global(.input-field)::placeholder { color: #a39b8e; }
 .page textarea:global(.input-field) { min-height: 150px; padding: 16px 18px; line-height: 1.55; resize: vertical; }
 .charCounter { margin-top: 6px; text-align: right; font: 12px var(--font-inter); color: #a39b8e; }
 .charCounterFull { color: #c0392b; }
