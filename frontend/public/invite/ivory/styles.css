@@ -854,3 +854,46 @@ html.hero-go .hero__date { animation: heroFade 1.4s ease 1.8s both; }
   line-height: .7;
   color: rgba(255, 255, 255, .5);
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   КОМПЬЮТЕР — на всю ширину экрана, без полей (17.11.26)
+   «В компьютерной версии адаптируй приглашения на всю ширину экрана, без
+   полей, как на видео» (wedwed: фон во всю ширину, содержимое по центру).
+   · Обложка во всю высоту окна, на две половины: слева фото пары на всю
+     высоту (край растворяется в чёрном), справа на чёрном — надпись, имена
+     и дата той же композицией, что на телефоне. Длинные имена подгоняет
+     fitNames (script.js) — от ширины этой колонки, а не всей обложки.
+   · Разделы — во всю ширину (бумага, белые и чёрные полосы), содержимое
+     — колонкой пошире телефона (--wide).
+   Планшет и окна уже 1025 px — как раньше.
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) and (orientation: landscape) {
+  :root {
+    --wide: min(640px, 46vw);                 /* колонка разделов */
+    --u: calc(var(--wide) / 411);
+    --cover-h: min(100vh, 1080px);            /* обложка — во всю высоту окна */
+  }
+  .invite { max-width: none; }
+  .invite > section:not(.hero) > * { max-width: var(--wide); margin-left: auto; margin-right: auto; }
+
+  /* ── Обложка: фото слева, надписи справа на чёрном ── */
+  .hero {
+    --u: calc(var(--cover-h) / 700);         /* надписи крупнее телефонных: 700 единиц на высоту окна */
+    --hx: calc(75% - 205.5 * var(--u));      /* левый край колонки надписей (411 единиц) */
+    aspect-ratio: auto; height: var(--cover-h);
+    box-shadow: none;
+  }
+  .hero__photo {
+    width: 50%; height: 100%;
+    -webkit-mask-image: linear-gradient(to right, #000 82%, transparent 100%);
+            mask-image: linear-gradient(to right, #000 82%, transparent 100%);
+  }
+  .hero__shade { right: 50%; }
+  /* надпись — ближе к именам: на телефоне она у верха фото, на чёрном половине пустота сверху лишняя */
+  .hero__label { left: calc(var(--hx) + 16 * var(--u)); right: auto; width: calc(379 * var(--u)); top: calc(200 * var(--u)); }
+  .hero__amp { left: calc(var(--hx) + 128 * var(--u)); }
+  .hero__name--groom { left: calc(var(--hx) + 41 * var(--u)); }
+  .hero__name--bride { left: calc(var(--hx) + 199 * var(--u)); }
+  /* дата — сразу под именами (на телефоне она на чёрной полосе под фото) */
+  .hero__date { left: var(--hx); right: auto; width: calc(411 * var(--u)); top: calc(640 * var(--u)); }
+}

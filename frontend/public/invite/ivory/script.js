@@ -99,7 +99,12 @@
   function fitNames() {
     var hero = document.getElementById('hero');
     if (!hero) return;
-    var W = hero.clientWidth;
+    // Ширина и левый край текстовой колонки обложки (411 единиц): на телефоне —
+    // вся обложка, на компьютере — правая половина (styles.css, «КОМПЬЮТЕР»).
+    // По строке даты: она всегда во всю ширину этой колонки.
+    var ref = hero.querySelector('.hero__date');
+    var W = ref ? ref.offsetWidth : hero.clientWidth;
+    var X = ref ? ref.offsetLeft : 0;
     if (!W) return;
     var u = W / 411, edge = 14 * u;
     [['groom', 41], ['bride', 199]].forEach(function (pair) {
@@ -116,7 +121,7 @@
       }
       var left = pair[1] * u;
       if (left + textW > W - edge) left = Math.max(edge, W - edge - textW);
-      el.style.left = left.toFixed(2) + 'px';
+      el.style.left = (X + left).toFixed(2) + 'px';
     });
   }
 
