@@ -1,4 +1,4 @@
-/* Сайт слева от настроек (SitePreview.tsx): серый фон и колонка — как на странице демо */
+/* Сайт слева от настроек (SitePreview.tsx): серый фон, как на странице демо */
 .area {
   position: relative;
   width: 100%; height: 100%;
@@ -7,7 +7,7 @@
   background: #ececec;
 }
 
-/* «Телефон» — колонка как в демо: до 500 px, во всю высоту, с тенью.
+/* «Окно» — колонка как в демо: до 500 px, во всю высоту, с тенью.
    Шаблон в режиме редактора заполняет её целиком (iframe 100 % × 100 %). */
 .column {
   position: relative; z-index: 0; isolation: isolate;
@@ -17,7 +17,7 @@
   box-shadow: 0 10px 50px rgba(60, 48, 32, 0.18);
 }
 
-/* «Планшет» и «Компьютер» — окно сайта, уменьшенное под место, без рамки устройства */
+/* «Компьютер» — окно сайта 1440×900, уменьшенное под место, без рамки */
 .window {
   position: relative; flex: none;
   overflow: hidden;
@@ -25,7 +25,26 @@
   background: #fff;
   box-shadow: 0 24px 60px -24px rgba(60, 48, 32, .45), 0 0 0 1px rgba(0, 0, 0, .06);
 }
-.windowScreen { transform-origin: 0 0; }
+.scaled { transform-origin: 0 0; }
+
+/* «Телефон» и «Планшет» — в рамке устройства (как было до 16.11.26) */
+.frameBox { position: relative; flex: none; }
+.frame {
+  position: relative; transform-origin: 0 0;
+  background: #17140f; border-radius: 48px; padding: 12px;
+  box-shadow: 0 44px 80px -36px rgba(48, 36, 22, .5), 0 0 0 1px rgba(0, 0, 0, .04);
+  border: 2px solid #2b2722;
+}
+/* Планшет: экран 768×1024, рамка потоньше, камера посередине верхней рамки */
+.frameTablet { border-radius: 40px; padding: 22px; }
+.frameTablet::before {
+  content: ''; position: absolute; top: 8px; left: 50%; width: 6px; height: 6px; margin-left: -3px;
+  border-radius: 50%; background: #3b362f;
+}
+.frameScreen { width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #111827; }
+.frameTablet .frameScreen { border-radius: 18px; }
+.frameContent { width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; }
+.frameContent::-webkit-scrollbar { display: none; }
 
 @media (max-width: 768px) {
   .column { max-width: none; box-shadow: none; cursor: pointer; }

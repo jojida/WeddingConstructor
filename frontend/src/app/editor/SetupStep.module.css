@@ -22,9 +22,10 @@
 .toForm { display: none; }
 
 /* ─── Крестик: к шаблонам (или обратно в редактор) ─────────────────────────── */
-/* В правом верхнем углу страницы: на компьютере это угол анкеты, на телефоне — угол сцены */
+/* На компьютере — в строке над анкетой (.panelBar), на телефоне — в углу
+   страницы поверх сайта (.closeCorner) */
 .close {
-  position: absolute; top: 18px; right: 18px; z-index: 30;
+  flex: none;
   display: inline-flex; align-items: center; justify-content: center;
   width: 44px; height: 44px; border-radius: 50%;
   border: 0; background: transparent; color: #3a352f; cursor: pointer; text-decoration: none;
@@ -32,6 +33,7 @@
 }
 .close:hover { background: #f1ede7; color: #1f1c19; }
 .close:focus-visible { outline: 2px solid #c9a96e; outline-offset: 2px; }
+.closeCorner { display: none; position: absolute; top: 18px; right: 18px; z-index: 30; }
 
 /* ─── Справа: анкета ─────────────────────────────────────────────────────────── */
 .panel {
@@ -40,7 +42,25 @@
   overflow-y: auto;
   display: flex; flex-direction: column;
   background: #fff;
-  padding: 64px 56px 40px;
+  padding: 0 56px 40px;
+}
+/* Над анкетой: переключатель «Окно / Телефон / Планшет / Компьютер» и крестик
+   в 18 px от края (как раньше в углу страницы) */
+.panelBar {
+  flex: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin: 0 -38px 8px 0;
+  padding-top: 16px;
+}
+/* В строке мало места — только значки, подпись — в подсказке и для чтения с экрана */
+.deviceSwitch button { padding: 0 11px; }
+.deviceSwitch button span {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+@media (min-width: 1420px) {
+  .deviceSwitch button { padding: 0 14px; }
+  .deviceSwitch button span { position: static; width: auto; height: auto; overflow: visible; clip: auto; clip-path: none; }
 }
 /* Анкета по центру высоты, а если не помещается — листается с начала */
 .panelInner { width: 100%; max-width: 480px; margin: auto; }
@@ -88,14 +108,14 @@
 /* Узкая анкета (ноутбук 1024–1200): поля по одному в строке не нужны,
    но отступы поменьше */
 @media (max-width: 1200px) {
-  .panel { padding: 64px 32px 32px; }
+  .panel { padding: 0 32px 32px; }
+  .panelBar { margin-right: -14px; }
 }
 
 /* Невысокий экран ноутбука (1280×800 и ниже): анкета плотнее, чтобы кнопка
    «Продолжить» была видна без прокрутки */
 @media (min-width: 769px) and (max-height: 860px) {
-  /* сверху — место под крестик (до 62 px), заголовок под ним не заезжает */
-  .panel { padding-top: 48px; padding-bottom: 28px; }
+  .panel { padding-bottom: 28px; }
   .eyebrow { margin-bottom: 8px; }
   /* 28 px — заголовок в одну строку и в узкой анкете ноутбука 1024 px */
   .title { font-size: 28px; margin-bottom: 6px; }
@@ -114,7 +134,8 @@
   /* Сайт — первый экран целиком, как в демо на телефоне */
   .stage { flex: none; display: block; height: 100vh; height: 100svh; }
 
-  .close { top: 10px; right: 10px; background: rgba(255, 255, 255, .82); backdrop-filter: blur(8px); }
+  .panelBar { display: none; }
+  .closeCorner { display: inline-flex; top: 10px; right: 10px; background: rgba(255, 255, 255, .82); backdrop-filter: blur(8px); }
 
   /* Анкета наезжает на низ сайта листом со скруглёнными углами */
   .panel {

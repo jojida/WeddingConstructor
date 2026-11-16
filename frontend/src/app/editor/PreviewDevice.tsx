@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { Monitor, Smartphone, Tablet, X } from 'lucide-react';
+import { AppWindow, Monitor, Smartphone, Tablet, X } from 'lucide-react';
 import { readStorage, writeStorage } from '@/lib/browser-storage';
 import s from './PreviewDevice.module.css';
 
@@ -10,12 +10,19 @@ import s from './PreviewDevice.module.css';
    332 px (макет 360×720 с рамкой), у планшета — 768×1024, как iPad в портрете,
    у компьютера — 1440×900, частое окно ноутбука. Под нужную ширину шаблон
    перерисовывается сам: iframe получает эту ширину, а уменьшает рамку под
-   место только transform. */
-export type PreviewDevice = 'phone' | 'tablet' | 'desktop';
-/** Во весь экран: те же устройства, «Компьютер» там — на всю ширину окна, без рамки */
-export type FullPreviewMode = PreviewDevice;
+   место только transform.
 
-export const DEVICES: Record<PreviewDevice, { w: number; h: number; min: number; max: number; label: string }> = {
+   «Окно» (с 16.11.26) — сайт без рамки, как на странице демо: колонка до
+   500 px во всю высоту. С него начинают новые пары. */
+export type PreviewDevice = 'window' | 'phone' | 'tablet' | 'desktop';
+/** Устройства в рамке (и «Компьютер» — окно 1440×900) */
+export type FramedDevice = Exclude<PreviewDevice, 'window'>;
+/** Во весь экран: те же варианты, «Компьютер» там — на всю ширину окна, без рамки */
+export type FullPreviewMode = PreviewDevice;
+/** Порядок вариантов в переключателе */
+export const DEVICE_OPTIONS = ['window', 'phone', 'tablet', 'desktop'] as const;
+
+export const DEVICES: Record<FramedDevice, { w: number; h: number; min: number; max: number; label: string }> = {
   phone: { w: 360, h: 720, min: 0.45, max: 1.15, label: 'Телефон' },
   // 768×1024 экран + рамка 22 px и обводка 2 px с каждой стороны
   tablet: { w: 816, h: 1072, min: 0.3, max: 1, label: 'Планшет' },
@@ -28,11 +35,11 @@ const STORAGE_KEY = 'wc_editor_device';
 /** Выбранное устройство помнится в браузере (удобство, не данные приглашения).
     Читается после монтирования: в dev редактор рендерится и на сервере. */
 export function useStoredDevice(): [PreviewDevice, (d: PreviewDevice) => void] {
-  const [device, setDevice] = useState<PreviewDevice>('phone');
+  const [device, setDevice] = useState<PreviewDevice>('window');
   useEffect(() => {
     const saved = readStorage('localStorage', STORAGE_KEY);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- разовое чтение после монтирования, см. выше
-    if (saved === 'tablet' || saved === 'desktop') setDevice(saved);
+    if (saved === 'phone' || saved === 'tablet' || saved === 'desktop') setDevice(saved);
   }, []);
   const choose = (d: PreviewDevice) => {
     setDevice(d);
@@ -42,7 +49,7 @@ export function useStoredDevice(): [PreviewDevice, (d: PreviewDevice) => void] {
 }
 
 /** Масштаб рамки под место: сколько помещается по ширине и высоте, в пределах устройства. */
-export function fitScale(device: PreviewDevice, width: number, height: number): number {
+export function fitScale(device: FramedDevice, width: number, height: number): number {
   const d = DEVICES[device];
   const k = Math.min(height / d.h, width / d.w, d.max);
   return Math.max(d.min, Math.floor(k * 100) / 100);
@@ -61,8 +68,14 @@ export function useMediaQuery(query: string): boolean {
   );
 }
 
-const ICONS: Record<FullPreviewMode, typeof Smartphone> = { phone: Smartphone, tablet: Tablet, desktop: Monitor };
-const LABELS: Record<FullPreviewMode, string> = { phone: 'Телефон', tablet: 'Планшет', desktop: 'Компьютер' };
+const ICONS: Record<FullPreviewMode, typeof Smartphone> = { window: AppWindow, phone: Smartphone, tablet: Tablet, desktop: Monitor };
+const LABELS: Record<FullPreviewMode, string> = { window: 'Окно', phone: 'Телефон', tablet: 'Планшет', desktop: 'Компьютер' };
+const TITLES: Record<FullPreviewMode, string> = {
+  window: 'Сайт без рамки, как в демо',
+  phone: 'Как на телефоне',
+  tablet: 'Как на планшете',
+  desktop: 'Как на компьютере',
+};
 
 /** Переключатель устройств — «таблетка» с вариантами. */
 export function DeviceSwitch<T extends FullPreviewMode>({ value, options, onChange, className }: {
@@ -75,7 +88,7 @@ export function DeviceSwitch<T extends FullPreviewMode>({ value, options, onChan
         const on = o === value;
         return (
           <button key={o} type="button" role="radio" aria-checked={on} className={s.switchBtn}
-            title={`Как на ${o === 'phone' ? 'телефоне' : o === 'tablet' ? 'планшете' : 'компьютере'}`}
+            title={TITLES[o as FullPreviewMode]}
             onClick={() => onChange(o)}>
             <Icon size={16} strokeWidth={1.8} aria-hidden />
             <span>{LABELS[o]}</span>
@@ -117,24 +130,26 @@ export function FullPreview({ mode, onMode, onClose, children }: {
     };
   }, [onClose]);
 
-  const framed = !small && mode !== 'desktop';
+  const framed = !small && (mode === 'phone' || mode === 'tablet');
+  // «Окно» — колонка сайта по центру, как на странице демо
+  const column = !small && mode === 'window';
   const stageRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
   useLayoutEffect(() => {
     const el = stageRef.current;
     if (!framed || !el) return;
-    const fit = () => setScale(fitScale(mode as PreviewDevice, el.clientWidth, el.clientHeight));
+    const fit = () => setScale(fitScale(mode as FramedDevice, el.clientWidth, el.clientHeight));
     fit();
     const ro = new ResizeObserver(fit);
     ro.observe(el);
     return () => ro.disconnect();
   }, [framed, mode]);
 
-  const dev = framed ? DEVICES[mode as PreviewDevice] : null;
+  const dev = framed ? DEVICES[mode as FramedDevice] : null;
   return (
     <div ref={overlayRef} className={`${s.overlay} ${framed ? s.overlayFramed : ''}`} role="dialog" aria-modal="true" aria-label="Предпросмотр приглашения">
       <div className={s.bar}>
-        {!small && <DeviceSwitch value={mode} options={['phone', 'tablet', 'desktop'] as const} onChange={onMode} />}
+        {!small && <DeviceSwitch value={mode} options={DEVICE_OPTIONS} onChange={onMode} />}
         <button type="button" className={s.close} onClick={onClose}>
           <X size={16} strokeWidth={2} aria-hidden /> Закрыть
         </button>
@@ -148,6 +163,8 @@ export function FullPreview({ mode, onMode, onClose, children }: {
             </div>
           </div>
         </div>
+      ) : column ? (
+        <div className={s.column}>{children}</div>
       ) : children}
     </div>
   );

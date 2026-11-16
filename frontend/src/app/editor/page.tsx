@@ -23,7 +23,7 @@ import { ownPlace, quotePlace } from '@/lib/own-place';
 import dynamic from 'next/dynamic';
 import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import type { PhotoCutout } from './BackgroundRemovalEditor';
-import { DeviceSwitch, FullPreview, useMediaQuery, useStoredDevice, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
+import { DEVICE_OPTIONS, DeviceSwitch, FullPreview, useMediaQuery, useStoredDevice, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
 import SitePreview from './SitePreview';
 import TextVariants from './TextVariants';
 import SetupStep from './SetupStep';
@@ -277,13 +277,13 @@ function EditorContent() {
     return () => window.removeEventListener('message', onReady);
   }, [envelopeSelected, step, draftChecked]);
 
-  // Превью — сайт без рамки устройства (SitePreview.tsx, с 16.11.26 — как в демо):
-  // «Телефон» — колонка до 500 px во всю высоту, «Планшет» и «Компьютер» — окно
-  // 768×1024 / 1440×900, уменьшенное под место. На телефоне только телефон.
+  // Превью (SitePreview.tsx): «Окно» — сайт без рамки, как в демо (колонка до
+  // 500 px во всю высоту), «Телефон» и «Планшет» — в рамке, «Компьютер» — окно
+  // 1440×900, уменьшенное под место. На телефоне — только «Окно» во всю ширину.
   const [device, setDevice] = useStoredDevice();
   const phoneScreen = useMediaQuery('(max-width: 768px)');
-  const shownDevice: PreviewDevice = phoneScreen ? 'phone' : device;
-  const [fullMode, setFullMode] = useState<FullPreviewMode>('phone');
+  const shownDevice: PreviewDevice = phoneScreen ? 'window' : device;
+  const [fullMode, setFullMode] = useState<FullPreviewMode>('window');
 
   // Вход в редактор — вторая ступень воронки после галереи шаблонов.
   // Реф защищает от двойного вызова: в разработке StrictMode прогоняет
@@ -773,6 +773,7 @@ function EditorContent() {
   if (step === 'setup') {
     return (
       <SetupStep templateId={data.templateId} initialData={data} previewBase={setupPreviewBase} apiBase={apiBase}
+        device={device} onDevice={setDevice}
         onComplete={handleSetupComplete} onClose={setupFromEditor ? () => setStep('editor') : undefined} />
     );
   }
@@ -901,8 +902,8 @@ function EditorContent() {
                 <div className={styles.sidebarTitle}>Редактор</div>
                 <div className={styles.sidebarSubtitle}>{template.name}</div>
               </div>
-              {/* Как смотреть превью слева: телефон, планшет или компьютер */}
-              <DeviceSwitch value={device} options={['phone', 'tablet', 'desktop'] as const} onChange={chooseDevice}
+              {/* Как смотреть превью слева: окно (без рамки), телефон, планшет или компьютер */}
+              <DeviceSwitch value={device} options={DEVICE_OPTIONS} onChange={chooseDevice}
                 className={styles.deviceSwitch} />
             </div>
 

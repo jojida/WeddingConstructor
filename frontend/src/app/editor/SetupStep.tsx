@@ -5,7 +5,7 @@ import { ArrowDown, X } from 'lucide-react';
 import TemplatePreview, { type InviteData as PreviewData } from '@/components/TemplatePreview';
 import { TEMPLATES } from '@/lib/constants';
 import { readPreviewNames } from '@/lib/preview-names';
-import { FullPreview, useMediaQuery, type FullPreviewMode } from './PreviewDevice';
+import { DEVICE_OPTIONS, DeviceSwitch, FullPreview, useMediaQuery, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
 import SitePreview from './SitePreview';
 import styles from './SetupStep.module.css';
 
@@ -31,12 +31,15 @@ export interface SetupData {
 
 type SetupKey = 'groomName' | 'brideName' | 'weddingDate' | 'weddingTime';
 
-export default function SetupStep({ templateId, initialData, previewBase, apiBase, onComplete, onClose }: {
+export default function SetupStep({ templateId, initialData, previewBase, apiBase, device, onDevice, onComplete, onClose }: {
   templateId: string;
   initialData?: Partial<SetupData>;
   /** Приглашение слева: пример шаблона (lib/demo-invite.ts) или уже начатое — если анкету открыли из редактора */
   previewBase: PreviewData;
   apiBase: string;
+  /** Как смотреть сайт слева — общий выбор с редактором (useStoredDevice в нём) */
+  device: PreviewDevice;
+  onDevice: (d: PreviewDevice) => void;
   onComplete: (d: SetupData) => void;
   /** Анкету открыли из редактора («Имена и дата»): крестик возвращает туда. Без него — к шаблонам */
   onClose?: () => void;
@@ -114,9 +117,13 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
   }, [previewBase, groomName, brideName, weddingDate, weddingTime, venue, venueAddress]);
 
   const small = useMediaQuery('(max-width: 768px)');
-  // Телефон: нажатие на сайт открывает его во весь экран — листается, с анимацией открытия
+  // Как смотреть сайт слева — тот же переключатель и тот же выбор, что в редакторе
+  // (помнится в браузере). На телефоне — только «Окно» во всю ширину.
+  const shownDevice: PreviewDevice = small ? 'window' : device;
+  // Нажатие на сайт на телефоне — во весь экран: листается, с анимацией открытия
   const [full, setFull] = useState(false);
-  const [fullMode, setFullMode] = useState<FullPreviewMode>('phone');
+  const [fullMode, setFullMode] = useState<FullPreviewMode>('window');
+  const openFull = () => { setFullMode(shownDevice); setFull(true); };
 
   // Телефон: сайт занимает первый экран, анкета под ним. Пока анкету не видно,
   // внизу висит кнопка к ней — как «Изменить тексты и фото» в редакторе
@@ -130,15 +137,17 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
     return () => io.disconnect();
   }, []);
 
-  const close = onClose
-    ? <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть и вернуться в редактор" title="Вернуться в редактор"><X size={22} strokeWidth={1.8} aria-hidden /></button>
-    : <Link href="/templates" className={styles.close} aria-label="Закрыть и вернуться к шаблонам" title="Все шаблоны"><X size={22} strokeWidth={1.8} aria-hidden /></Link>;
+  // Крестик: на компьютере — в строке над анкетой рядом с переключателем,
+  // на телефоне — в углу страницы поверх сайта (CSS показывает один из двух)
+  const close = (className: string) => onClose
+    ? <button type="button" className={className} onClick={onClose} aria-label="Закрыть и вернуться в редактор" title="Вернуться в редактор"><X size={22} strokeWidth={1.8} aria-hidden /></button>
+    : <Link href="/templates" className={className} aria-label="Закрыть и вернуться к шаблонам" title="Все шаблоны"><X size={22} strokeWidth={1.8} aria-hidden /></Link>;
 
   return (
     <div className={styles.page}>
       {full && (
-        <FullPreview mode={fullMode} onMode={setFullMode} onClose={() => setFull(false)}>
-          <TemplatePreview data={preview} apiBase={apiBase} fullPage />
+        <FullPreview mode={fullMode} onMode={m => { setFullMode(m); onDevice(m); }} onClose={() => setFull(false)}>
+          <TemplatePreview key={fullMode} data={preview} apiBase={apiBase} fullPage />
         </FullPreview>
       )}
 
@@ -147,15 +156,21 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
         {/* Тот же вид, что в редакторе (SitePreview.tsx). На телефоне сайт не ловит
             касания (свайп листал бы приглашение, а не страницу к анкете) —
             нажатие открывает его во весь экран */}
-        <SitePreview device="phone" onTap={() => setFull(true)}>
-          <TemplatePreview data={preview} apiBase={apiBase} editing />
+        <SitePreview device={shownDevice} onTap={openFull}>
+          {/* Другое устройство — шаблон грузится заново под его ширину */}
+          <TemplatePreview key={shownDevice} data={preview} apiBase={apiBase} editing />
         </SitePreview>
       </main>
 
-      {close}
+      {close(`${styles.close} ${styles.closeCorner}`)}
 
       {/* ── Справа: анкета ── */}
       <section ref={panelRef} className={styles.panel} aria-labelledby="setup-title">
+        {/* Над анкетой: как смотреть сайт слева и крестик (только на компьютере) */}
+        <div className={styles.panelBar}>
+          <DeviceSwitch value={device} options={DEVICE_OPTIONS} onChange={onDevice} className={styles.deviceSwitch} />
+          {close(styles.close)}
+        </div>
         <div className={styles.panelInner}>
           <p className={styles.eyebrow}>Шаблон: {template.name}</p>
           <h1 id="setup-title" className={styles.title}>Расскажите о вашей свадьбе</h1>
