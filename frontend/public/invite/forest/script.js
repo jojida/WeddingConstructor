@@ -500,8 +500,8 @@
     if (!url) return;
     document.querySelectorAll('[data-edit="venue"], [data-edit="venueAddress"]').forEach(function (el) {
       el.__wcMapUrl = url;
-      if (el.dataset.wcMap) return;
-      el.dataset.wcMap = '1';
+      if (el.dataset.wcMapBound) return;
+      el.dataset.wcMapBound = '1';
       el.style.cursor = 'pointer';
       el.style.textDecoration = 'underline dotted';
       el.style.textUnderlineOffset = '0.25em';
