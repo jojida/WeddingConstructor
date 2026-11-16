@@ -839,3 +839,72 @@ html.no-anim .cover__names { opacity: 1; -webkit-mask-image: none; mask-image: n
 }
 .fin__line { display: block; width: max-content; margin: 0 auto; white-space: nowrap; }
 .fin__bouquet { display: block; width: calc(346 * var(--u)); height: auto; margin: calc(38 * var(--u)) 0 0 calc(526 * var(--u)); }
+
+/* ════════════════════════════════════════════════════════════════════
+   КОМПЬЮТЕР — на всю ширину экрана, без полей (17.11.26)
+   «В компьютерной версии адаптируй приглашения на всю ширину экрана, без
+   полей, как на видео» (wedwed: фон во всю ширину, содержимое по центру).
+   · Обложка — во всю высоту окна, по центру; гирлянда роз внизу — через
+     весь экран (garland-wide.webp: зеркало | гирлянда, стык без шва — scripts/wide-mirror-strip.py).
+   · Акварельные пятна, что на телефоне у края колонки, — у края окна.
+   · Акварель деталей, дресс-кода и низа страницы, мрамор «Деталей» — во
+     всю ширину; содержимое — колонкой пошире телефона (--wide).
+   · «Маленькие детали» — в ряд.
+   Планшет и окна уже 1025 px — как раньше.
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) and (orientation: landscape) {
+  :root {
+    --wide: min(640px, 46vw);                 /* колонка разделов */
+    --wide-u: calc(var(--wide) / 1366);
+    --cover-h: min(100vh, 1080px);            /* обложка — во всю высоту окна */
+    --edge: calc((var(--wide) - 100vw) / 2);  /* от края колонки к краю окна */
+  }
+  body { background: #fff; }
+  /* по бокам обложки — большие пятна акварели у краёв окна, как у разделов ниже */
+  .invite {
+    max-width: none; box-shadow: none;
+    background:
+      url("assets/blob-prog-l.webp") left 0 top calc(var(--cover-h) * .1) / auto calc(var(--cover-h) * .62) no-repeat,
+      url("assets/blob-prog-r.webp") right 0 top calc(var(--cover-h) * .34) / auto calc(var(--cover-h) * .58) no-repeat,
+      #fff;
+  }
+  .invite > *, .paper > *, .tail > * { max-width: var(--wide); margin-left: auto; margin-right: auto; --u: var(--wide-u); }
+
+  /* ── Обложка: во всю высоту окна; гирлянда через весь экран ── */
+  .cover {
+    --u: calc(var(--cover-h) / 2338);
+    max-width: none; width: calc(1366 * var(--u));
+    overflow: visible;
+  }
+  .cover::before, .cover::after {
+    content: ""; position: absolute; z-index: 2; top: calc(2122 * var(--u));
+    width: calc(50vw - 50%); height: calc(216 * var(--u));
+    background: url("assets/garland-wide.webp") 0 0 / calc(2732 * var(--u)) 100% repeat-x;
+    pointer-events: none;
+  }
+  /* слева к колонке прилегает правый край зеркала, справа — левый край зеркала */
+  .cover::before { right: 100%; background-position: calc(100% + 1366 * var(--u)) 0; }
+  .cover::after { left: 100%; }
+
+  /* ── Пятна акварели — у края окна ── */
+  .greet__blob-l, .heart__blob, .program__blob-l { left: var(--edge); }
+  .greet__blob-r, .story__blob, .program__blob-r { left: auto; right: var(--edge); }
+
+  /* ── Акварель во всю ширину, содержимое по центру ── */
+  .paper, .tail { max-width: none; background-size: cover; background-position: center; }
+  .details { max-width: min(1180px, 92vw); }
+  .details__grid { grid-template-columns: repeat(4, calc(480 * var(--u))); column-gap: calc(40 * var(--u)); }
+  .dress {
+    max-width: none;
+    padding-left: calc((100% - var(--wide)) / 2 + 38 * var(--u));
+    padding-right: calc((100% - var(--wide)) / 2 + 38 * var(--u));
+  }
+  .dress__blob { left: auto; right: 0; }
+  /* платья палитры — в один ряд */
+  /* шире колонки, по её центру: ширина вкладки может отличаться от колонки — считаем от 50 % */
+  .dress__grid { max-width: none; width: calc(1900 * var(--u)); margin-left: calc(50% - 950 * var(--u)); }
+
+  /* ── «Детали»: мрамор во всю ширину, арка по центру ── */
+  .rules { max-width: none; }
+  .rules__bouquet { left: calc((100% - 1366 * var(--u)) / 2 + 78 * var(--u)); }
+}
