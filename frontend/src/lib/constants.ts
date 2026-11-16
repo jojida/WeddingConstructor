@@ -289,10 +289,12 @@ const HANDMADE_TEMPLATES = [
    шаблоны пары выбирают (приглашения 10–18.10.26: «Нежность» 10, «Айвори» 7,
    «Каллы» 6…). На телефоне до восьмого шаблона было пять-шесть экранов, а первым
    стоял зимний «Витраж», который выбрали один раз. «Витраж» — ближе к зиме
-   поднять. Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
+   поднять. Новый шаблон первые недели стоит в первом ряду, чтобы его заметили
+   («Пудра» — 15.11.26, «Бархат» — 16.11.26), потом его место — по спросу.
+   Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
 const CATALOG_ORDER = [
-  'tenderness', 'powder', 'ivory', 'calla', 'forest', 'garden-evening', 'sketch',
-  'vadimdarya', 'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral', 'velvet',
+  'tenderness', 'powder', 'velvet', 'ivory', 'calla', 'forest', 'garden-evening', 'sketch',
+  'vadimdarya', 'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral',
 ];
 const catalogRank = (id: string) => {
   const i = CATALOG_ORDER.indexOf(id);
