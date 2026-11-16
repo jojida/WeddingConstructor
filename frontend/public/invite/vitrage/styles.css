@@ -1027,3 +1027,102 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
 .fin__flowers--r { right: 0; width: calc(615 * var(--u)); }
 
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ════════════════════════════════════════════════════════════════════
+   КОМПЬЮТЕР — на всю ширину экрана, без полей (16.11.26)
+   «В компьютерной версии адаптируй приглашения на всю ширину экрана, без
+   полей, как на видео» (wedwed: фон во всю ширину, содержимое по центру).
+   · Фон страницы — во всю ширину (он и так однотонный голубой).
+   · Обложка — во всю высоту окна, три витражных окна: в центральном имена,
+     боковые — тот же витраж поменьше, снег идёт по всему экрану.
+   · Разделы — колонкой пошире телефона (--wide), их композиция та же:
+     единица --u у каждого раздела своя, от его ширины.
+   · Ветки и цветы, что на телефоне выходят из края экрана, — и здесь у края
+     окна, а не у края колонки; жемчужная гирлянда — через весь экран.
+   · Меню — в ряд, «Жених и невеста» — рядом в широкой капсуле, фото места
+     и фото пары — крупнее.
+   Планшет и окна уже 1025 px — колонкой, как раньше.
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) and (orientation: landscape) {
+  :root {
+    --wide: min(640px, 46vw);                 /* колонка разделов */
+    --wide-u: calc(var(--wide) / 1366);
+    --cover-h: min(100vh, 1080px);            /* обложка — во всю высоту окна */
+    --edge: calc((var(--wide) - 100vw) / 2);  /* сдвиг от края колонки к краю окна */
+  }
+  body { background: var(--page); }
+  .invite { max-width: none; box-shadow: none; }
+  .invite > * { max-width: var(--wide); margin-left: auto; margin-right: auto; --u: var(--wide-u); }
+
+  /* ── Обложка: три витражных окна ── */
+  .cover {
+    --u: calc(var(--cover-h) / 2601);
+    max-width: none; width: calc(1366 * var(--u));
+    overflow: visible;
+  }
+  .cover::before, .cover::after {
+    content: ""; position: absolute; top: 8%; z-index: 0;
+    width: 84%; height: 84%;
+    background: url("assets/cover.jpg") center / 100% 100% no-repeat;
+    opacity: 0;
+    transition: opacity 1.8s ease .4s;
+    pointer-events: none;
+  }
+  .cover::before { right: calc(100% + min(5vw, 96px)); }
+  .cover::after { left: calc(100% + min(5vw, 96px)); }
+  /* боковые окна видны сразу, пока закрыты двери центрального, — по бокам не пусто */
+  html.hero-go .cover::before, html.hero-go .cover::after,
+  html.no-anim .cover::before, html.no-anim .cover::after,
+  html.has-doors .cover::before, html.has-doors .cover::after { opacity: 1; }
+  .cover__snow { left: calc(50% - 50vw); right: calc(50% - 50vw); }
+  /* двери открываются в центральном окне */
+  .doors {
+    --u: calc(var(--cover-h) / 2601);
+    max-width: none;
+    left: 50%; width: calc(1366 * var(--u)); margin-left: calc(-683 * var(--u));
+  }
+
+  /* ── Украшения у края окна ── */
+  .greet__branch { right: var(--edge); }
+  .lux__branch { left: var(--edge); }
+  .lux::before { left: var(--edge); right: var(--edge); }
+  .fin__flowers--l { left: var(--edge); }
+  .fin__flowers--r { right: var(--edge); }
+  /* жемчуг продолжается по обе стороны колонки той же дугой */
+  .garland::before, .garland::after {
+    content: ""; position: absolute; top: calc(138 * var(--u));
+    width: calc(50vw - 50%); height: calc(596 * var(--u));
+    background: url("assets/pearls.webp") 0 0 / calc(1366 * var(--u)) 100% repeat-x;
+    opacity: 0; transition: opacity 1.4s ease .6s;
+    pointer-events: none;
+  }
+  .garland::before { right: 100%; background-position: right 0; }
+  .garland::after { left: 100%; }
+  .garland:has(.garland__pearls.in)::before, .garland:has(.garland__pearls.in)::after,
+  html.no-anim .garland::before, html.no-anim .garland::after { opacity: 1; }
+
+  /* ── Меню: четыре картинки в ряд ── */
+  .menu { max-width: min(1180px, 92vw); }
+  .menu__title, .menu__text { max-width: calc(var(--wide) - 220 * var(--u)); margin-left: auto; margin-right: auto; }
+  .menu__grid {
+    grid-template-columns: repeat(4, calc(470 * var(--u)));
+    column-gap: calc(90 * var(--u));
+    margin: calc(185 * var(--u)) auto 0;
+  }
+
+  /* ── Жених и невеста: рядом в широкой капсуле ── */
+  .couple { max-width: min(1180px, 92vw); padding-top: calc(160 * var(--u)); }
+  .couple__panel {
+    display: grid; grid-template-columns: 1fr 1fr; align-items: start;
+    column-gap: calc(140 * var(--u));
+    padding: calc(300 * var(--u)) calc(260 * var(--u)) calc(330 * var(--u));
+    border-radius: calc(560 * var(--u));
+  }
+  .couple__half + .couple__half { margin: 0; padding: 0; }
+  .couple__roses--tr { left: auto; right: calc(-120 * var(--u)); top: calc(-40 * var(--u)); }
+  .couple__roses--bl { left: calc(-80 * var(--u)); bottom: calc(-120 * var(--u)); }
+
+  /* ── Фото места и фото пары — крупнее, подпись — как у остальных ── */
+  .hall, .photo { max-width: min(1000px, 78vw); --u: calc(min(1000px, 78vw) / 1366); }
+  .hall__title { font-size: calc(58.6 * var(--wide-u)); }
+}
