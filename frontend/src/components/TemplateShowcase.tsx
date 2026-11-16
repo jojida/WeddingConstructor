@@ -28,6 +28,7 @@ import styles from './TemplateShowcase.module.css';
 const PHONE_COVER: Record<string, number> = {
   tenderness: 711,
   powder: 822,
+  velvet: 876,
   forest: 763,
   'garden-evening': 776,
   sketch: 677,

@@ -4,4 +4,5 @@ module.exports = {
   vitrage: 'Витраж', forest: 'Туманный лес', tenderness: 'Нежность', angels: 'Ангелы', calla: 'Каллы',
   'garden-evening': 'Вечер в саду', floral: 'Цветущий', powder: 'Пудра', ivory: 'Айвори', sketch: 'Скетч',
   mediterranean: 'Средиземноморье', 'garden-arch': 'Цветущая арка', vadimdarya: 'Тёмная элегантность',
+  velvet: 'Бархат',
 };

@@ -10,7 +10,7 @@ const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'C:/Users/Asus/.cach
 const base = process.env.GUEST_BASE_URL || 'http://localhost:3000';
 const shots = process.env.SHOTS_DIR || '';
 const TEMPLATES = ['tenderness', 'powder', 'ivory', 'calla', 'forest', 'garden-evening', 'sketch', 'vadimdarya',
-  'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral'];
+  'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral', 'velvet'];
 const routeFor = id => `/invite/${id === 'mediterranean' ? '' : `${id}/`}index.html?intro=0`;
 
 (async () => {

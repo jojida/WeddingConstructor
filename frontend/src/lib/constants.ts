@@ -156,6 +156,19 @@ const HANDMADE_TEMPLATES = [
     sampleDaysAhead: 241,
   },
   {
+    id: 'velvet',
+    name: 'Бархат',
+    description: 'Бордовый бархат, кружево и конверт с сургучом в руках в атласных перчатках.',
+    tags: ['Бордовый', 'Бархат', 'Конверт', 'Элегантный', 'Анимация'],
+    colors: ['#480c19', '#f2e7dd', '#c9ab94'],
+    preview: '/invite/velvet/assets/preview.jpg',
+    defaultCover: '/invite/velvet/assets/preview.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Анастасия',
+    sampleGroom: 'Михаил',
+    sampleDaysAhead: 167,
+  },
+  {
     id: 'angels',
     name: 'Ангелы',
     description: 'Ангелы, облака и небесно-голубые оттенки для романтичной свадьбы.',
@@ -279,7 +292,7 @@ const HANDMADE_TEMPLATES = [
    поднять. Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
 const CATALOG_ORDER = [
   'tenderness', 'powder', 'ivory', 'calla', 'forest', 'garden-evening', 'sketch',
-  'vadimdarya', 'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral',
+  'vadimdarya', 'mediterranean', 'garden-arch', 'vitrage', 'angels', 'floral', 'velvet',
 ];
 const catalogRank = (id: string) => {
   const i = CATALOG_ORDER.indexOf(id);
@@ -510,6 +523,7 @@ export const TEMPLATE_GREETING_KEY: Record<string, string> = {
   vitrage: 'greetingTitle',
   tenderness: 'greetingTitle',
   powder: 'greetingTitle',
+  velvet: 'greetingTitle',
   angels: 'greetingTitle',
   forest: 'greetingTitle',
   'garden-evening': 'greetingTitle',
@@ -776,6 +790,7 @@ const TEMPLATE_MUSIC: Record<string, string> = {
   vitrage: 'clair',
   tenderness: 'nocturne',
   powder: 'canon',
+  velvet: 'nocturne',
   angels: 'air',
   forest: 'thousand',
   'garden-evening': 'canon',
@@ -1155,6 +1170,67 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Завершение', icon: '💍',
       fields: [
         { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
+  velvet: [
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'heroTitle', type: 'text', label: 'Надпись над конвертом', hint: 'Например: Приглашение', scope: 'custom', maxLength: 24 },
+        { id: 'heroSub',   type: 'text', label: 'Строка под надписью', hint: 'Пусто — без строки', scope: 'custom', maxLength: 30 },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения (абзацы с новой строки)', scope: 'data', maxLength: 300 },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venueTitle',  type: 'text', label: 'Заголовок карточки', hint: 'Пусто — без заголовка', scope: 'custom', maxLength: 30 },
+        { id: 'venueLabel',  type: 'text', label: 'Подпись над названием', hint: 'Например: ресторан, усадьба. Пусто — без подписи', scope: 'custom', maxLength: 24 },
+        { id: 'venue',       type: 'text', label: 'Название места', hint: 'Например: Кусково', scope: 'data', maxLength: 40 },
+        MAP_ADDRESS, MAP_LINK,
+        { id: 'gatherLabel', type: 'text', label: 'Подпись над временем', hint: 'Время берётся из настроек свадьбы. Пусто — без подписи', scope: 'custom', maxLength: 24 },
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', noIcon: true },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета палитры', scope: 'data' },
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', scope: 'custom', maxLength: 160 },
+      ],
+    },
+    {
+      title: 'Пожелания', icon: '💌',
+      fields: [
+        { id: 'story', type: 'textarea', label: 'Пожелания по подаркам (абзацы с новой строки)', scope: 'data', maxLength: 400 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingTitle', type: 'text', label: 'Финальная надпись', scope: 'custom', maxLength: 70 },
         { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
       ],
     },
@@ -1844,7 +1920,7 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
     if (id === 'venue') {
       result.push({ id: 'map', title: 'Карта', icon: '🗺', fields: [MAP_LINK], previewFields: ['venueAddress'] });
     }
-    if (id === 'schedule' && templateId !== 'sketch' && templateId !== 'powder') {
+    if (id === 'schedule' && templateId !== 'sketch' && templateId !== 'powder' && templateId !== 'velvet') {
       result.push({ id: 'countdown', title: 'Таймер', icon: '⏳', fields: [], previewFields: ['countdownTitle'] });
     }
   }
@@ -2010,6 +2086,51 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       rsvpQuestions:  ['menu'],
       closingTitle:   'С любовью, ваши',
       closingSign:    '', // Пустое поле — имена пары.
+    },
+  },
+
+  velvet: {
+    inviteText:
+      'Приглашаем Вас разделить с нами радость особенного для нас события и стать частью нашей семейной истории!',
+    venue: 'Кусково',
+    venueAddress: 'Москва, ул. Юности, 2',
+    story:
+      'Мы не успеем насладиться красотой живых цветов, поэтому будем рады получить бутылочку приятного напитка для нашего бара ' +
+      'и записку о событии, на котором мы его откроем.\n' +
+      'Лучшим подарком станет Ваше присутствие на нашей свадьбе и пожелания в конвертах, с помощью которых мы сможем осуществить наши мечты.',
+    schedule: [
+      { time: '13:00', title: 'Сбор гостей', icon: '' },
+      { time: '13:30', title: 'Торжественная регистрация', icon: '' },
+      { time: '14:30', title: 'Начало банкета', icon: '' },
+      { time: '21:00', title: 'Окончание вечера', icon: '' },
+    ],
+    dressCodeColors: ['#5a1220', '#7d5560', '#c9ab94', '#ece0d2'],
+    drinks: [
+      { value: 'red',        label: 'Вино красное' },
+      { value: 'white',      label: 'Вино белое' },
+      { value: 'champagne',  label: 'Шампанское' },
+      { value: 'beer',       label: 'Пиво' },
+      { value: 'vodka',      label: 'Водка' },
+      { value: 'whisky',     label: 'Виски' },
+      { value: 'no_alcohol', label: 'Не пью алкоголь' },
+    ],
+    custom: {
+      heroTitle:     'Приглашение',
+      heroSub:       'на свадьбу',
+      greetingTitle: 'Дорогие родные и друзья!',
+      venueTitle:    'Праздник состоится',
+      addressLabel:  'по адресу:',
+      venueLabel:    'усадьба',
+      mapButton:     'Посмотреть на карте',
+      gatherLabel:   'сбор гостей',
+      programTitle:  'Программа дня',
+      dressTitle:    'Дресс-код',
+      dressText:     'Будем благодарны, если Вы придёте в нарядах, соответствующих стилю нашей свадьбы:',
+      wishTitle:     'Пожелания',
+      surveyTitle:   'Анкета гостя',
+      surveyText:    'Пожалуйста, заполните форму до {{rsvpDate}} — это поможет нам в организации торжества',
+      closingTitle:  'С нетерпением ждём встречи на нашей свадьбе!',
+      closingSign:   '', // Пустое поле — имена пары.
     },
   },
 

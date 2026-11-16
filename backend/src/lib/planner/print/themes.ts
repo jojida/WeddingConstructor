@@ -23,7 +23,7 @@ export const THEMES: Theme[] = [
 
 // Шаблон приглашения → ближайшая по духу печатная тема
 const BY_TEMPLATE: Record<string, string> = {
-  calla: 'classic', ivory: 'classic', vadimdarya: 'classic', etalon: 'classic',
+  calla: 'classic', ivory: 'classic', vadimdarya: 'classic', etalon: 'classic', velvet: 'classic',
   angels: 'romance', tenderness: 'romance', powder: 'romance', sketch: 'romance',
   floral: 'garden', 'garden-arch': 'garden', 'garden-evening': 'garden', forest: 'garden',
   mediterranean: 'modern',
