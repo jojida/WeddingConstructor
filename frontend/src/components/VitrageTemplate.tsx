@@ -133,9 +133,12 @@ export default function VitrageTemplate({ data, apiBase, fullPage, slug, editing
   /* ── Карточка-превью: обложка как на странице (.cover в styles.css) ──
      Фон — тот же cover.jpg (без текста), поверх живым текстом «Свадьба», имена,
      «&», приглашение и дата — по координатам макета (1366 единиц в ширину).
-     Единица e подгоняет обложку под карточку: в телефоне — во всю ширину, как
-     у гостя (видно до даты включительно); в низкой открытке A6 обложка чуть
-     уменьшается, чтобы влезла дата (до 2170 единиц), по бокам — фон страницы. */
+     Обложка всегда во всю ширину карточки: в телефоне — как у гостя (видно до
+     даты включительно). Низкая открытка A6 (~1925 единиц) не вмещает обложку до
+     даты (2170 единиц) — обложка поднимается, срезается верх витража над аркой.
+     Раньше она ужималась по высоте, и по бокам открытки оставались полосы фона
+     страницы (16.11.26 «убери полосу на карточке витраж»). Ужимается только
+     совсем низкая рамка (меньше 1800 единиц) — чтобы не срезать «Свадьбу». */
   const custom = data.customData || {};
   const label = typeof custom.heroTitle === 'string' && custom.heroTitle.trim() ? custom.heroTitle : 'Свадьба';
   const heroText = typeof custom.heroText === 'string' ? custom.heroText.trim() : 'Самый тёплый день этой зимы — вместе с вами';
@@ -159,10 +162,13 @@ export default function VitrageTemplate({ data, apiBase, fullPage, slug, editing
   return (
     <div style={{
       position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#f0f7ff',
-      containerType: 'size', ['--e' as string]: 'min(100cqw / 1366, 100cqh / 2170)',
+      containerType: 'size', ['--e' as string]: 'min(100cqw / 1366, 100cqh / 1800)',
     } as CSSProperties}>
       <style>{CARD_FONTS}</style>
-      <div style={{ position: 'absolute', left: '50%', top: 0, width: u(1366), height: u(2601), transform: 'translateX(-50%)' }}>
+      <div style={{
+        position: 'absolute', left: '50%', top: 'min(0px, calc(100cqh - 2170 * var(--e)))',
+        width: u(1366), height: u(2601), transform: 'translateX(-50%)',
+      }}>
         <img src="/invite/vitrage/assets/cover.jpg" alt=""
           style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: 'auto', display: 'block' }} />
         <p style={{
