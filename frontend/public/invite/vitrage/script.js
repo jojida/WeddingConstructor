@@ -132,8 +132,9 @@
     layoutMono();
   }
 
-  // Имена — внутри витражной арки (≈ 960 единиц): длинные ужимаем
-  var NAME_FS = 220, NAME_ROOM = 960;
+  // Имена — внутри витражной арки: длинные ужимаем до 900 единиц (проём ≈ 1050,
+  // строка невесты сдвинута вправо на 18 — с запасом до колонны)
+  var NAME_FS = 300, NAME_ROOM = 900;
   function fitNames() {
     var hero = document.getElementById('hero');
     var box = document.getElementById('heroNames');
@@ -829,7 +830,8 @@
   function heroWhenReady() {
     var waits = [];
     if (document.fonts && document.fonts.load) {
-      waits.push(document.fonts.load('100px "HamiltoneSHA"', STATE.groom + STATE.bride));
+      // имена пишутся шрифтом Caravan (--f-names в styles.css) — ждём его, чтобы «письмо» не началось запасным
+      waits.push(document.fonts.load('100px "Caravan"', STATE.groom + STATE.bride));
       waits.push(document.fonts.ready);
     }
     var bg = new Image();

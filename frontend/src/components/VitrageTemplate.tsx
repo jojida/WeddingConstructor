@@ -19,8 +19,8 @@ interface Props {
    Данные: URL-параметры + postMessage('wc:data') без перезагрузки iframe.
    Превью-карточка → обложка живым текстом поверх cover.jpg (как на странице).
 ───────────────────────────────────────────────────────── */
-/* Шрифты миниатюры — те же локальные файлы, что у шаблона: Comforter (имена,
-   /invite/assets/fonts/google/9366f3663b0f7d918f93.css) и Lora — прямой и курсив
+/* Шрифты миниатюры — те же локальные файлы, что у шаблона: Caravan (имена,
+   /invite/assets/fonts/Caravan.woff2) и Lora — прямой и курсив
    (423708c44a2a7900fd37.css, переменный шрифт: один файл на все веса).
    Только кириллица и латиница — больше на обложке ничего нет. */
 const G = '/invite/assets/fonts/google/';
@@ -29,8 +29,7 @@ const LAT = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0
 const face = (family: string, style: string, weight: string, file: string, range: string) =>
   `@font-face{font-family:'${family}';font-style:${style};font-weight:${weight};font-display:swap;src:url('${G}${file}') format('woff2');unicode-range:${range}}`;
 const CARD_FONTS = [
-  face('Comforter', 'normal', '400', 'ccd262cc8f3463a69ab8.woff2', CYR),
-  face('Comforter', 'normal', '400', '9de90d6401a9cc2ce354.woff2', LAT),
+  "@font-face{font-family:'Caravan';font-style:normal;font-weight:400;font-display:swap;src:url('/invite/assets/fonts/Caravan.woff2') format('woff2')}",
   face('Lora', 'normal', '400 700', 'c57d9ca3bd42e6bc093b.woff2', CYR),
   face('Lora', 'normal', '400 700', 'ddb8c66035104e233fc0.woff2', LAT),
   face('Lora', 'italic', '400', 'aaeb039ba0ecdbc75108.woff2', CYR),
@@ -142,18 +141,18 @@ export default function VitrageTemplate({ data, apiBase, fullPage, slug, editing
   const heroText = typeof custom.heroText === 'string' ? custom.heroText.trim() : 'Самый тёплый день этой зимы — вместе с вами';
   const groom = data.groomName || 'Григорий';
   const bride = data.brideName || 'Александра';
-  // Как fitNames в script.js: Comforter ~0,36 кегля на букву, строка не шире 960 единиц
+  // Как fitNames в script.js: Caravan ~0,24–0,32 кегля на букву, строка не шире 900 единиц
   const longest = Math.max(groom.length, bride.length, 1);
-  const fs = Math.min(220, 960 / (longest * 0.36));
+  const fs = Math.min(300, 900 / (longest * 0.3));
   const [y, m, d] = (data.weddingDate || '').split('-').map(Number);
   const time = /^\d{1,2}:\d{2}/.test(data.weddingTime || '') ? data.weddingTime.slice(0, 5).padStart(5, '0') : '15:00';
   const u = (n: number) => `calc(${n} * var(--e))`;
   const blue = '#556f95';
   const lora = "'Lora', Georgia, 'Times New Roman', serif";
   const name = (baseline: number, x: number): CSSProperties => ({
-    position: 'absolute', left: '50%', top: u(baseline - 0.72 * fs), margin: 0, whiteSpace: 'nowrap',
+    position: 'absolute', left: '50%', top: u(baseline - 0.75 * fs), margin: 0, whiteSpace: 'nowrap',
     transform: `translateX(calc(-50% + ${u(x)}))`,
-    fontFamily: "'Comforter', 'Great Vibes', cursive", fontWeight: 400, fontSize: u(fs), lineHeight: 1, color: blue,
+    fontFamily: "'Caravan', cursive", fontWeight: 400, fontSize: u(fs), lineHeight: 1, color: blue,
   });
   const rule: CSSProperties = { flex: 'none', width: u(70), height: u(2.5), margin: `0 ${u(28)}`, background: 'currentColor', opacity: 0.55 };
 
