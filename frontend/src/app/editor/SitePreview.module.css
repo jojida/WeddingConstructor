@@ -1,0 +1,33 @@
+/* Сайт слева от настроек (SitePreview.tsx): серый фон и колонка — как на странице демо */
+.area {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  background: #ececec;
+}
+
+/* «Телефон» — колонка как в демо: до 500 px, во всю высоту, с тенью.
+   Шаблон в режиме редактора заполняет её целиком (iframe 100 % × 100 %). */
+.column {
+  position: relative; z-index: 0; isolation: isolate;
+  width: 100%; max-width: 500px; height: 100%;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 50px rgba(60, 48, 32, 0.18);
+}
+
+/* «Планшет» и «Компьютер» — окно сайта, уменьшенное под место, без рамки устройства */
+.window {
+  position: relative; flex: none;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 24px 60px -24px rgba(60, 48, 32, .45), 0 0 0 1px rgba(0, 0, 0, .06);
+}
+.windowScreen { transform-origin: 0 0; }
+
+@media (max-width: 768px) {
+  .column { max-width: none; box-shadow: none; cursor: pointer; }
+  .column :global(iframe) { pointer-events: none; }
+}

@@ -6,6 +6,7 @@ import TemplatePreview, { type InviteData as PreviewData } from '@/components/Te
 import { TEMPLATES } from '@/lib/constants';
 import { readPreviewNames } from '@/lib/preview-names';
 import { FullPreview, useMediaQuery, type FullPreviewMode } from './PreviewDevice';
+import SitePreview from './SitePreview';
 import styles from './SetupStep.module.css';
 
 /* Первый шаг нового приглашения — «Расскажите о вашей свадьбе».
@@ -143,11 +144,12 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
 
       {/* ── Слева: сайт, как в демо ── */}
       <main className={styles.stage} aria-label={`Шаблон «${template.name}»`}>
-        {/* На телефоне сайт не ловит касания (свайп листал бы приглашение, а не
-            страницу к анкете) — нажатие открывает его во весь экран */}
-        <div className={styles.site} onClick={() => { if (small) setFull(true); }}>
+        {/* Тот же вид, что в редакторе (SitePreview.tsx). На телефоне сайт не ловит
+            касания (свайп листал бы приглашение, а не страницу к анкете) —
+            нажатие открывает его во весь экран */}
+        <SitePreview device="phone" onTap={() => setFull(true)}>
           <TemplatePreview data={preview} apiBase={apiBase} editing />
-        </div>
+        </SitePreview>
       </main>
 
       {close}

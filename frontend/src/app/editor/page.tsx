@@ -1,10 +1,10 @@
 'use client';
-import { useEffect, useLayoutEffect, useMemo, useState, useRef, useCallback, Suspense } from 'react';
+import { useEffect, useMemo, useState, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import {
-  Save, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Maximize, Plus, X, ArrowUp, ArrowDown,
+  Save, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Plus, X, ArrowUp, ArrowDown,
   Mail, DoorOpen, ImageIcon, PenLine, CalendarDays, MapPin, MapIcon, Camera, UtensilsCrossed, Clock,
   Hourglass, Shirt, Heart, ClipboardList, Gem, Music, Users, Landmark, Phone,
 } from 'lucide-react';
@@ -23,7 +23,8 @@ import { ownPlace, quotePlace } from '@/lib/own-place';
 import dynamic from 'next/dynamic';
 import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import type { PhotoCutout } from './BackgroundRemovalEditor';
-import { DEVICES, DeviceSwitch, FullPreview, fitScale, useMediaQuery, useStoredDevice, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
+import { DeviceSwitch, FullPreview, useMediaQuery, useStoredDevice, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
+import SitePreview from './SitePreview';
 import TextVariants from './TextVariants';
 import SetupStep from './SetupStep';
 import { demoInviteData } from '@/lib/demo-invite';
@@ -276,28 +277,13 @@ function EditorContent() {
     return () => window.removeEventListener('message', onReady);
   }, [envelopeSelected, step, draftChecked]);
 
-  // Превью — в рамке телефона (360×720), планшета (экран 768×1024) или монитора
-  // (экран 1440×900): шаблон верстается под ширину выбранного устройства. На невысоком экране рамка
-  // обрезалась снизу — масштаб подбирается под место (над рамкой — строка с
-  // кнопкой «Во весь экран», 64 px). На телефоне только телефон, размер задаёт CSS — null.
+  // Превью — сайт без рамки устройства (SitePreview.tsx, с 16.11.26 — как в демо):
+  // «Телефон» — колонка до 500 px во всю высоту, «Планшет» и «Компьютер» — окно
+  // 768×1024 / 1440×900, уменьшенное под место. На телефоне только телефон.
   const [device, setDevice] = useStoredDevice();
   const phoneScreen = useMediaQuery('(max-width: 768px)');
   const shownDevice: PreviewDevice = phoneScreen ? 'phone' : device;
   const [fullMode, setFullMode] = useState<FullPreviewMode>('phone');
-  const stageRef = useRef<HTMLElement>(null);
-  const [phoneScale, setPhoneScale] = useState<number | null>(1);
-  useLayoutEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    const fit = () => {
-      if (window.matchMedia('(max-width: 768px)').matches) { setPhoneScale(null); return; }
-      setPhoneScale(fitScale(shownDevice, el.clientWidth - 48, el.clientHeight - 88));
-    };
-    fit();
-    const ro = new ResizeObserver(fit);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [step, draftChecked, shownDevice]);
 
   // Вход в редактор — вторая ступень воронки после галереи шаблонов.
   // Реф защищает от двойного вызова: в разработке StrictMode прогоняет
@@ -364,6 +350,13 @@ function EditorContent() {
     if (draftChecked && step === 'setup') funnelGoal(GOAL.editorForm);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftChecked, step]);
+
+  // Анкета и редактор — разные экраны: при переходе между ними страница
+  // начинается сверху. На телефоне анкета лежит под сайтом, и редактор
+  // открывался прокрученным туда, где была кнопка «Продолжить», — мимо превью.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
 
   // Рамки фото в превью: пропорции и исходное положение (шлёт photo-frame.js
   // шаблона) — по ним рисуется окно кадрирования у каждого поля с фото.
@@ -879,37 +872,15 @@ function EditorContent() {
         <div className={styles.editorBody}>
 
           {/* ── CANVAS (LEFT) ─────────────────────────────────────────────── */}
-          <main className={styles.canvas} ref={stageRef}>
-            {/* Полноэкранный предпросмотр. Выбор телефона или планшета — справа,
-                над настройками (на телефоне его нет — там только телефон). */}
-            <div className={styles.canvasControls}>
-              <button className={styles.zoomBtn} onClick={openPreview}
-                title="Открыть во весь экран">
-                <Maximize size={15} aria-hidden />
-                <span>Во весь экран</span>
-              </button>
-            </div>
-            {/* На телефоне превью не ловит касания (иначе свайп листал бы
-                приглашение вместо страницы), зато тап по нему открывает
-                полноэкранный просмотр. На большом экране всё как было. */}
-            <div
-              className={styles.phoneContainer}
-              style={phoneScale ? { width: DEVICES[shownDevice].w * phoneScale, height: DEVICES[shownDevice].h * phoneScale } : undefined}
-              onClick={() => {
-                if (window.matchMedia('(max-width: 768px)').matches) openPreview();
-              }}
-            >
-              <div className={`${styles.phoneMockup} ${shownDevice === 'tablet' ? styles.tabletMockup : ''} ${shownDevice === 'desktop' ? styles.desktopMockup : ''}`}
-                style={phoneScale ? { transform: `scale(${phoneScale})` } : undefined}>
-                <div className={styles.phoneScreen}>
-                  <div className={styles.phoneContent} ref={previewRef}>
-                    {/* Другое устройство — шаблон грузится заново под его ширину:
-                        часть шаблонов раскладывает блоки скриптом один раз */}
-                    <TemplatePreview key={shownDevice} data={data} apiBase={apiBase} editing />
-                  </div>
-                </div>
-              </div>
-            </div>
+          <main className={styles.canvas}>
+            {/* На телефоне сайт не ловит касания (иначе свайп листал бы
+                приглашение вместо страницы), зато нажатие на него открывает
+                полноэкранный просмотр. */}
+            <SitePreview device={shownDevice} innerRef={previewRef} onTap={openPreview}>
+              {/* Другое устройство — шаблон грузится заново под его ширину:
+                  часть шаблонов раскладывает блоки скриптом один раз */}
+              <TemplatePreview key={shownDevice} data={data} apiBase={apiBase} editing />
+            </SitePreview>
           </main>
 
           {sections && !navInView && (
