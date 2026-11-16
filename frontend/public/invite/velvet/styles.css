@@ -152,7 +152,8 @@ p { margin: 0; }
 /* ============================================================
    1 — ОБЛОЖКА
    ============================================================ */
-.cover { padding: calc(150 * var(--u)) 0 calc(150 * var(--u)); text-align: center; }
+/* --wc-ip-bottom — кнопка «▶ Посмотреть, как откроется» в редакторе: ниже имён, не на них */
+.cover { --wc-ip-bottom: 3%; padding: calc(150 * var(--u)) 0 calc(150 * var(--u)); text-align: center; }
 .cover__lace {
   position: absolute; right: 0; top: 0; z-index: 0;
   width: calc(540 * var(--u)); height: auto;

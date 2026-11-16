@@ -54,9 +54,10 @@
     } catch (_) { return '#'; }
   }
 
-  function mediaUrl(url) {
+  // Адрес картинки или мелодии из данных пары — та же проверка, что у остальных шаблонов
+  function imageUrl(url) {
     if (typeof url !== 'string' || /[<>"\x00-\x20]/.test(url)) return '';
-    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:)/i.test(url)) return '';
+    if (/^[a-z][a-z0-9+.-]*:/i.test(url) && !/^(https?:|blob:|data:image\/(png|jpeg|gif|webp);base64,)/i.test(url)) return '';
     if (!url) return '';
     if (/^https?:\/\//.test(url) || url.indexOf('data:') === 0 || url.indexOf('blob:') === 0) return url;
     if (url.indexOf('/invite/') === 0) return url;
@@ -376,8 +377,8 @@
     if (!url) return;
     document.querySelectorAll('[data-edit="venue"], [data-edit="venueAddress"]').forEach(function (el) {
       el.__wcMapUrl = url;
-      if (el.dataset.wcMap) return;
-      el.dataset.wcMap = '1';
+      if (el.dataset.wcMapBound) return;
+      el.dataset.wcMapBound = '1';
       el.style.cursor = 'pointer';
       el.style.textDecoration = 'underline dotted';
       el.style.textUnderlineOffset = '0.25em';
@@ -509,7 +510,7 @@
     applyMapLink(d.mapLink);
     // Карта места (Яндекс) по адресу — общий модуль ../assets/venue-map.js
     if (window.WCMap) window.WCMap.set({ address: d.venueAddress, venue: d.venue, mapLink: d.mapLink, point: d.mapPoint, show: d.enabledSections && typeof d.enabledSections.map === 'boolean' ? d.enabledSections.map : d.showMap !== false });
-    if (window.WCMusic) window.WCMusic.set(mediaUrl(d.musicUrl));
+    if (window.WCMusic) window.WCMusic.set(imageUrl(d.musicUrl));
 
     if (typeof d.closingSign === 'string') {
       var own = d.closingSign.trim();
