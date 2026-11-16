@@ -798,3 +798,63 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
 .fin__sign span { display: block; line-height: .72; }
 .fin__sign .fin__amp { font-size: .867em; line-height: .85; }
 .fin__wreath { display: block; width: calc(462.5 * var(--u)); height: auto; margin: calc(112 * var(--u)) auto 0; }
+
+/* ════════════════════════════════════════════════════════════════════
+   КОМПЬЮТЕР — на всю ширину экрана, без полей (16.11.26)
+   «В компьютерной версии адаптируй приглашения на всю ширину экрана, без
+   полей, как на видео» (wedwed: фон во всю ширину, содержимое по центру).
+   · Обложка — во всю высоту окна: мрамор во всю ширину, арка с именами,
+     датой и таймером — по центру.
+   · Бумага — пятна акварели у краёв окна (paper-l/r.jpg — края плитки,
+     внутрь переходят в цвет страницы; scripts/wide-halves.py), середина
+     ровная.
+   · Разделы — колонкой пошире телефона (--wide), композиция та же;
+     «Маленькие детали» — в ряд, платья палитры — в ряд.
+   · Пожелания — мрамор во всю ширину, арка по центру.
+   Планшет и окна уже 1025 px — как раньше.
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) and (orientation: landscape) {
+  :root {
+    --wide: min(640px, 46vw);                 /* колонка разделов */
+    --wide-u: calc(var(--wide) / 1366);
+    --cover-h: min(100vh, 1080px);            /* обложка — во всю высоту окна */
+  }
+  body { background: var(--page); }
+  .invite { max-width: none; box-shadow: none; }
+  .invite > *, .paper > * { max-width: var(--wide); margin-left: auto; margin-right: auto; --u: var(--wide-u); }
+
+  /* ── Обложка: мрамор во всю ширину, арка по центру ── */
+  .cover {
+    --u: calc(var(--cover-h) / 2025);
+    max-width: none; width: calc(1366 * var(--u));
+    background: none;
+  }
+  .cover::before {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
+    left: calc((1366 * var(--u) - 100vw) / 2); right: calc((1366 * var(--u) - 100vw) / 2);
+    background: var(--page) url("assets/cover-bg.jpg") center top / cover no-repeat;
+  }
+
+  /* ── Бумага: пятна у краёв окна, середина ровная ── */
+  .paper {
+    max-width: none;
+    background:
+      url("assets/paper-l.jpg") left top / calc(682 * var(--u)) auto repeat-y,
+      url("assets/paper-r.jpg") right top / calc(682 * var(--u)) auto repeat-y,
+      var(--page);
+  }
+
+  /* ── «Маленькие детали» — в ряд; колье на розах — по центру ── */
+  .forecast { max-width: min(1180px, 92vw); }
+  .forecast__grid { grid-template-columns: repeat(4, calc(460 * var(--u))); column-gap: calc(70 * var(--u)); }
+  .hang--paper { margin-left: auto; margin-right: auto; }
+
+  /* ── Дресс-код: платья палитры в ряд ── */
+  .dress { max-width: min(1180px, 92vw); }
+  .dress__grid { grid-template-columns: repeat(auto-fit, calc(var(--cell, 313) * var(--u))); min-height: calc(380 * var(--u)); }   /* один ряд вместо двух */
+
+  /* ── Пожелания: мрамор во всю ширину, арка по центру ── */
+  .wish { max-width: none; }
+  .wish__arch { max-width: calc(1174 * var(--u)); margin-left: auto; margin-right: auto; }
+  .wish__bouquet { left: calc((100% - 1366 * var(--u)) / 2 + 16.5 * var(--u)); }
+}
