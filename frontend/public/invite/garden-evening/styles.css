@@ -745,3 +745,104 @@ html.hero-live.hero-go .hero__names { animation-delay: 1.3s; }
   overflow-wrap: anywhere;
 }
 .fin__couple { display: block; width: calc(635 * var(--u)); height: auto; margin: calc(8 * var(--u)) auto 0; }
+
+/* ════════════════════════════════════════════════════════════════════
+   КОМПЬЮТЕР — на всю ширину экрана, без полей (17.11.26)
+   «В компьютерной версии адаптируй приглашения на всю ширину экрана, без
+   полей, как на видео» (wedwed: фон во всю ширину, содержимое по центру).
+   · Обложка — по высоте окна по центру; края картины сада растворяются в
+     кремовом фоне.
+   · Бежевые полосы («Место», «Дресс-код») — во всю ширину; их рваные края и
+     продолжаются к краям окна лентами из середины той же картинки
+     (*-side.webp, scripts/wide-side-strip.py): картинка остаётся по центру,
+     лента — фоном её же <img> слева и справа, стык прячется под мимозой.
+     Гирлянда огоньков — сплошной зеркальной лентой (lights-wide.webp).
+   · Ветка с табличкой «Дней до свадьбы» — концы растворяются.
+   · Разделы — колонкой пошире телефона (--wide).
+   Планшет и окна уже 1025 px — как раньше.
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) and (orientation: landscape) {
+  :root {
+    --wide: min(640px, 46vw);                 /* колонка разделов */
+    --wide-u: calc(var(--wide) / 1366);
+    --cover-h: min(100vh, 1080px);
+    --pad: calc((100vw - var(--wide)) / 2);    /* поле от колонки до края окна (НЕ через --u: здесь она ещё телефонная) */
+  }
+  body { background: var(--cream); }
+  /* по бокам обложки вверху — гирлянда огоньков с цветами (та же, что в
+     финале), будто продолжается за картиной сада */
+  .invite {
+    max-width: none; box-shadow: none;
+    background: url("assets/lights-wide.webp") center 0 / auto calc(var(--cover-h) * .46) repeat-x, var(--cream);
+  }
+  .invite > * { max-width: var(--wide); margin-left: auto; margin-right: auto; --u: var(--wide-u); }
+
+  /* ── Обложка: по высоте окна, края сада растворяются ── */
+  .hero { --u: calc(var(--cover-h) / 2208); max-width: calc(1366 * var(--u)); }
+  .hero__scene, .hero__live, .hero__dim {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 9%, #000 91%, transparent 100%);
+  }
+
+  /* ── Картинка во всю ширину колонки + ленты к краям окна ──
+     <img> растянут на всё окно, своё изображение — в середине (поля = --pad),
+     ленты — фоном слева (кончается у колонки) и справа (начинается у неё) */
+  .letter__edge, .venue__bottom, .dress__plate, .dress__bottom, .fin__lights {
+    box-sizing: border-box;
+    width: 100vw; max-width: none;
+    padding: 0 var(--pad);
+    background-repeat: no-repeat;
+  }
+  .letter__edge {
+    left: calc(-1 * var(--pad));
+    background-image: url("assets/letter-edge-side.webp"), url("assets/letter-edge-side.webp");
+    background-size: calc(2298 * var(--u)) 100%;
+    background-position: calc(var(--pad) - 2298 * var(--u)) 0, calc(var(--pad) + 1366 * var(--u)) 0;
+  }
+  .venue__bottom {
+    margin-left: calc(-1 * var(--pad) - 100 * var(--u)); margin-right: 0;   /* −100 — поле самого «Места» */
+    background-image: url("assets/venue-bottom-side.webp"), url("assets/venue-bottom-side.webp");
+    background-size: calc(2184 * var(--u)) 100%;   /* лента из левой части — без машинки */
+    background-position: calc(var(--pad) - 2184 * var(--u)) 0, calc(var(--pad) + 1366 * var(--u)) 0;
+  }
+  /* .dress уже во всю ширину — сдвигать к краю окна не нужно */
+  .dress__plate {
+    background-image: url("assets/dress-top-side.webp"), url("assets/dress-top-side.webp");
+    background-size: calc(2298 * var(--u)) 100%;
+    background-position: calc(var(--pad) - 2298 * var(--u)) 0, calc(var(--pad) + 1366 * var(--u)) 0;
+  }
+  .dress__bottom {
+    background-image: url("assets/dress-bottom-side.webp"), url("assets/dress-bottom-side.webp");
+    background-size: calc(2298 * var(--u)) 100%;
+    background-position: calc(var(--pad) - 2298 * var(--u)) 0, calc(var(--pad) + 1366 * var(--u)) 0;
+  }
+  /* огоньки — одной лентой без швов: зеркальные повторы всей картинки
+     (lights-wide.webp: зеркало | оригинал), оригинал — ровно в колонке;
+     своё изображение <img> уведено за рамку, рисует фон */
+  .fin__lights {
+    margin-left: calc(-1 * var(--pad));
+    object-position: -100000px 0;
+    background-image: url("assets/lights-wide.webp");
+    background-size: calc(2732 * var(--u)) 100%;
+    background-position: calc(var(--pad) - 1366 * var(--u)) 0;
+    background-repeat: repeat-x;
+  }
+
+  /* ── Бежевые полосы — во всю ширину, содержимое по центру ── */
+  .venue {
+    max-width: none;
+    padding-left: calc(var(--pad) + 100 * var(--u));
+    padding-right: calc(var(--pad) + 100 * var(--u));
+  }
+  .dress { max-width: none; }
+  .dress__body {
+    padding-left: calc(var(--pad) + 90 * var(--u));
+    padding-right: calc(var(--pad) + 90 * var(--u));
+  }
+
+  /* ── «Дней до свадьбы»: концы ветки растворяются ── */
+  .cd__img {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+  }
+}
