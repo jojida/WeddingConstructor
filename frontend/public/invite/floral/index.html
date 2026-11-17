@@ -394,11 +394,12 @@
             io.unobserve(e.target);
           }
         });
-      }, { threshold: 0.12 });
+      }, { threshold: 0, rootMargin: '0px 0px 10% 0px' });
 
       document.querySelectorAll('.fu').forEach(function (el) { io.observe(el); });
     })();
   </script>
+  <script src="../assets/preload.js"></script>
   <script src="/invite/assets/sections.js"></script>
   <script src="../assets/music.js"></script>
   <script src="../assets/photo-frame.js"></script>

@@ -37,7 +37,7 @@ export default function PrintPhotoPicker({ data, templateId, onChange, onBusy }:
       context.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
       const jpeg = await new Promise<Blob>((resolve, reject) => canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('image')), 'image/jpeg', .94));
       const form = new FormData(); form.append('image', jpeg, 'print-photo.jpg');
-      const response = await api.post<{ url: string }>('/api/upload/image', form);
+      const response = await api.post<{ url: string }>('/api/upload/image?purpose=print', form);
       if (generation.current === job) onChange({ photo: response.data.url, photoPosition: 'xMidYMid', photoFrame: { x: 50, y: 50, z: 1, r: 0 } });
     } catch {
       if (generation.current === job) setError('Не удалось загрузить фотографию. Попробуйте ещё раз или выберите другой файл.');

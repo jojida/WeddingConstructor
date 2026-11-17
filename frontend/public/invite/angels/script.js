@@ -515,11 +515,11 @@
         obs.unobserve(e.target);
       });
     };
-    io = new IntersectionObserver(enter, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    io = new IntersectionObserver(enter, { threshold: 0, rootMargin: '0px 0px 10% 0px' });
     // Свиток до раскрытия обрезан clip-path до верхнего валика (~5% высоты),
-    // а Chrome считает видимость с учётом clip-path: порог 0.12 не набирался
-    // никогда, и свиток оставался свёрнутым. Ему — порог 0.
-    ioClip = new IntersectionObserver(enter, { threshold: 0, rootMargin: '0px 0px -12% 0px' });
+    // а Chrome считает видимость с учётом clip-path. Ему — порог 0 и без запаса:
+    // остальное проявляется заранее, а свиток раскрывается на глазах у гостя.
+    ioClip = new IntersectionObserver(enter, { threshold: 0, rootMargin: '0px' });
     observeReveal(document);
   }
 

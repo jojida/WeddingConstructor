@@ -25,6 +25,7 @@ import { initTelegram } from './lib/telegram';
 import { ensureSchema } from './lib/ensureSchema';
 import { startLifecycleEmails } from './lib/lifecycleEmails';
 import { startReminders } from './lib/reminders';
+import { startUploadCompression } from './lib/compressUploads';
 import remindersRouter from './routes/reminders';
 import maxRouter from './routes/max';
 import { initMax } from './lib/maxBot';
@@ -136,6 +137,8 @@ if (require.main === module) {
       startLifecycleEmails();
       // Напоминание гостям перед свадьбой (Telegram, SMS) — тоже только на проде.
       startReminders();
+      // Разовое сжатие фото, загруженных в исходном размере (до 17.11.26), — тоже на проде.
+      startUploadCompression();
     }))
     .catch(async () => {
       console.error('Проверка схемы БД не удалась. API не запущен.');

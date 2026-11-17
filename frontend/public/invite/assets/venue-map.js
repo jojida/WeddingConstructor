@@ -32,6 +32,17 @@
   var state = { address: '', venue: '', mapLink: '', point: null, show: true };
   var timer = 0;
 
+  // Гостю карта грузится заранее: когда preload.js догрузил картинки страницы
+  // (раньше нельзя — первый экран и фото важнее), иначе — за 1200 px до экрана.
+  // В редакторе — только у экрана (400 px): там адрес меняется по букве.
+  var preloaded = false;
+  if (!EDITING) window.addEventListener('wc:preloaded', function () {
+    preloaded = true;
+    document.querySelectorAll('[data-wc-map]').forEach(function (box) {
+      if (box.__wcMapEarly) box.__wcMapEarly();
+    });
+  });
+
   // Базовый вид — обычными классами (сильнее сброса шаблона вида * { margin:0;
   // padding:0 }), но в начале <head>: правила шаблона с тем же весом идут позже
   // и побеждают, поэтому шаблон донастраивает всё своими классами.
@@ -168,15 +179,23 @@
       var frame = box.querySelector('iframe');
       var src = widgetUrl(q, point);
       if (!('IntersectionObserver' in window)) { frame.src = src; return; }
+      var start = function () {
+        frame.loading = 'eager';
+        frame.src = src;
+        observer.disconnect();
+        box.__wcMapEarly = null;
+      };
       var observer = new IntersectionObserver(function (entries) {
         if (box.__wcMapObserver !== observer) return;
-        if (entries.some(function (entry) { return entry.isIntersecting; }) && !box.hidden) {
-          frame.src = src;
-          observer.disconnect();
-        }
-      }, { rootMargin: '400px' });
+        if (entries.some(function (entry) { return entry.isIntersecting; }) && !box.hidden) start();
+      }, { rootMargin: EDITING ? '400px' : '1200px' });
       box.__wcMapObserver = observer;
+      // Гостю — заранее, как только preload.js догрузил картинки страницы
+      box.__wcMapEarly = function () {
+        if (box.__wcMapObserver === observer && !box.hidden && box.getClientRects().length) start();
+      };
       observer.observe(box);
+      if (preloaded) box.__wcMapEarly();
     });
   }
 

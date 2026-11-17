@@ -128,6 +128,25 @@ test('security and functional regressions on an isolated migrated database', asy
       assert.equal((await fetch(base + '/uploads/' + name)).status, 404);
     }
   });
+  await t.test('heavy opaque PNG photos are published as lighter JPEG, nothing left behind', async () => {
+    const width = 1800, height = 1200, raw = Buffer.alloc(width * height * 3);
+    for (let i = 0; i < raw.length; i++) raw[i] = ((i % 5400) / 22 + Math.random() * 60) & 255;
+    const png = await sharp(raw, { raw: { width, height, channels: 3 } }).png().toBuffer();
+    assert.ok(png.length > 512 * 1024);
+    const incoming = path.join(root, 'uploads', '.incoming');
+    const before = new Set(fs.readdirSync(incoming));
+    const form = new FormData(); form.append('image', new Blob([png], { type: 'image/png' }), 'photo.png');
+    const result = await fetch(base + '/api/upload/image', { method: 'POST', body: form });
+    assert.equal(result.status, 200);
+    const { url } = await result.json();
+    assert.match(url, /^\/uploads\/[0-9a-f-]{36}\.jpg$/);
+    uploaded.push(path.join(root, 'uploads', path.basename(url)));
+    const served = Buffer.from(await (await fetch(base + url)).arrayBuffer());
+    const meta = await sharp(served).metadata();
+    assert.equal(meta.format, 'jpeg'); assert.equal(meta.width, 1800);
+    assert.ok(served.length < png.length / 2);
+    assert.deepEqual(fs.readdirSync(incoming).filter(name => !before.has(name)), []);
+  });
   await t.test('CORS only trusts a verified, published customer domain', async () => {
     const origin = 'https://privacy-audit.example';
     const cors = async () => (await fetch(base + '/api/health', { headers: { Origin: origin } })).headers.get('access-control-allow-origin');

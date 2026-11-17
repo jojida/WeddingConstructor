@@ -538,17 +538,18 @@
         revealNow(e.target);
         io.unobserve(e.target);
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px 10% 0px' });
     observeReveal(document);
     // Гирлянда свёрнута clip-path до середины: Chrome считает пересечение
-    // с учётом своего clip-path, видимая доля почти нулевая — для неё порог 0
+    // с учётом своего clip-path, видимая доля почти нулевая — для неё порог 0.
+    // И без запаса: остальное проявляется заранее, а гирлянда — на глазах.
     var ioClip = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (!e.isIntersecting) return;
         revealNow(e.target);
         ioClip.unobserve(e.target);
       });
-    }, { threshold: 0, rootMargin: '0px 0px -8% 0px' });
+    }, { threshold: 0, rootMargin: '0px' });
     document.querySelectorAll('.rv-line').forEach(function (el) { io.unobserve(el); ioClip.observe(el); });
   }
 

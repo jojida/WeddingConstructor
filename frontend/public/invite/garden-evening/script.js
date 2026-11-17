@@ -448,7 +448,7 @@
         revealNow(e.target);
         io.unobserve(e.target);
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    }, { threshold: 0, rootMargin: '0px 0px 10% 0px' });
     observeReveal(document);
 
     // Конверт: бумага с датой выезжает, когда конверт почти целиком на экране

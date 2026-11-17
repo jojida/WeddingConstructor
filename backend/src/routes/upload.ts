@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import { authMiddleware } from '../middleware/auth';
 import { rateLimit } from '../middleware/rateLimit';
 import { BackgroundRemovalError, removeBackground, warmBackgroundRemoval } from '../lib/backgroundRemoval';
-import { InvalidUploadImage, normalizeUploadImage } from '../lib/uploadImage';
+import { InvalidUploadImage, PRINT_MAX_SIDE, normalizeUploadImage } from '../lib/uploadImage';
 import { uploadsDir } from '../lib/storage';
 
 const router = Router();
@@ -97,8 +97,20 @@ function receive(kind: 'image' | 'audio', field: string, count: number, cutout =
           }
           // Background removal already decodes and produces a clean image.
           if (kind === 'image' && !cutout) {
-            const normalized = await normalizeUploadImage(file.path, file.mimetype);
-            await fs.promises.writeFile(file.path, normalized);
+            const normalized = await normalizeUploadImage(file.path, file.mimetype,
+              req.query.purpose === 'print' ? { maxSide: PRINT_MAX_SIDE, quality: 90 } : {});
+            const ext = path.extname(file.filename);
+            if (normalized.ext === ext) {
+              await fs.promises.writeFile(file.path, normalized.data);
+            } else {
+              // An opaque PNG photo was re-encoded as JPEG: publish it under .jpg.
+              const filename = path.basename(file.filename, ext) + normalized.ext;
+              const converted = path.join(incomingDir, filename);
+              await fs.promises.writeFile(converted, normalized.data);
+              await fs.promises.unlink(file.path).catch(() => {});
+              file.path = converted;
+              file.filename = filename;
+            }
           }
         }
         if (cutout) {
