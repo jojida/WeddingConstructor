@@ -99,9 +99,11 @@
     STATE.paraSig[key] = value;
   }
 
-  function unit() {
-    var inv = document.getElementById('invite') || document.body;
-    return inv.clientWidth / 1080;
+  // Единица макета (1080 на ширину колонки) — от ширины раздела: на телефоне
+  // это вся страница, на компьютере страница во всю ширину, а разделы — по центру
+  function unit(el) {
+    var box = (el && el.closest && el.closest('section')) || document.getElementById('invite') || document.body;
+    return box.clientWidth / 1080;
   }
 
   /* ─── Имена: обложка, монограмма на печати, подпись финала ─── */
@@ -143,7 +145,7 @@
   // колонки. rooms — ширина в единицах макета для 1-й и 3-й строки
   function fitLines(box, prop, base, rooms) {
     if (!box) return;
-    var u = unit();
+    var u = unit(box);
     if (!u) return;
     box.style.setProperty(prop, base);
     var k = 1;

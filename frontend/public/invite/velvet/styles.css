@@ -646,3 +646,52 @@ html.no-anim .cal__heart path { animation: none !important; stroke-dashoffset: 0
 .fin__line--1 { transform: translateX(calc(-60 * var(--u))); }
 .fin__line--and { font-size: .79em; line-height: 1.1; transform: translateX(calc(-120 * var(--u))); }
 .fin__line--2 { transform: translateX(calc(40 * var(--u))); }
+
+/* ════════════════════════════════════════════════════════════════════
+   КОМПЬЮТЕР — на всю ширину экрана, без полей (17.11.26)
+   «В компьютерной версии адаптируй приглашения на всю ширину экрана, без
+   полей, как на видео» (wedwed: фон во всю ширину, содержимое по центру).
+   · Бархат — во всю ширину (та же плитка, крупнее).
+   · Разделы — колонкой пошире телефона (--wide); обложка — по высоте окна.
+   · Руки с конвертом на обложке: концы рукавов растворяются в бархате (на
+     телефоне их срезает край экрана, здесь срез был бы виден).
+   · Кружево — у края окна; атласные драпировки — через весь экран
+     волнами (drape-wide.webp: зеркало | драпировка, стык без шва,
+     scripts/wide-mirror-strip.py): картинка рисуется фоном самого <img>,
+     её собственное изображение уведено за рамку.
+   · Имена подгоняет fitLines (script.js) от ширины своего раздела.
+   Планшет и окна уже 1025 px — как раньше.
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) and (orientation: landscape) {
+  :root {
+    --wide: min(640px, 46vw);                 /* колонка разделов */
+    --wide-u: calc(var(--wide) / 1080);
+    --cover-h: min(100vh, 1080px);
+  }
+  body { background: var(--wine); }
+  .invite { max-width: none; box-shadow: none; }
+  .invite > * { max-width: var(--wide); margin-left: auto; margin-right: auto; --u: var(--wide-u); }
+
+  /* ── Обложка: по высоте окна (макет обложки ~1970 единиц) ── */
+  .cover {
+    --u: min(var(--wide-u), calc(var(--cover-h) / 1970));
+    max-width: calc(1080 * var(--u));
+  }
+  .cover__lace { right: calc((1080 * var(--u) - 100vw) / 2); }
+  .cover__envelope {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+  }
+  .letter__lace { left: calc((var(--wide) - 100vw) / 2); }
+
+  /* ── Драпировки — через весь экран ── */
+  .drape {
+    box-sizing: border-box;
+    width: 100vw; max-width: none;
+    margin-left: calc(50% - 50vw);
+    padding: 0 calc((100vw - 1080 * var(--u)) / 2);
+    object-position: -100000px 0;              /* своё изображение — за рамкой, рисует фон */
+    background: url("assets/drape-wide.webp") calc(50vw - 1620 * var(--u)) 0 / calc(2160 * var(--u)) 100% repeat-x;
+  }
+  .drape--flip { margin-left: calc(50% - 50vw); }
+}
