@@ -838,3 +838,61 @@ html.no-anim .hero__names { opacity: 1; -webkit-mask-image: none; mask-image: no
   overflow-wrap: anywhere;
 }
 .fin__cherub { width: calc(842 * var(--u)); margin: calc(40 * var(--u)) auto 0; }
+
+/* ════════════════════════════════════════════════════════════════════
+   КОМПЬЮТЕР — на всю ширину экрана, без полей (17.11.26)
+   «В компьютерной версии адаптируй приглашения на всю ширину экрана, без
+   полей, как на видео» (wedwed: фон во всю ширину, содержимое по центру).
+   · Акварельная бумага — во всю ширину (та же плитка, крупнее), под обложкой.
+   · Обложка — по высоте окна: акварель неба во всю ширину, розовые облака
+     под руками — лентой через весь экран (hero-clouds-wide.webp: зеркало |
+     облака, рисуется фоном самого <img>), концы рук растворяются (на
+     телефоне их срезает край экрана).
+   · Облака и ангелы, что на телефоне выходят из-за края экрана, — у края
+     окна. Разделы — колонкой пошире телефона (--wide).
+   Планшет и окна уже 1025 px — как раньше.
+   ════════════════════════════════════════════════════════════════════ */
+@media (min-width: 1025px) and (orientation: landscape) {
+  :root {
+    --wide: min(640px, 46vw);                 /* колонка разделов */
+    --wide-u: calc(var(--wide) / 1366);
+    --cover-h: min(100vh, 1080px);
+    --edge: calc((var(--wide) - 100vw) / 2);  /* от края колонки к краю окна */
+  }
+  body { background: var(--paper); }
+  .invite {
+    max-width: none; box-shadow: none;
+    background: var(--paper) url("assets/paper.jpg") center var(--cover-h) / 100% auto repeat-y;
+  }
+  .invite > * { max-width: var(--wide); margin-left: auto; margin-right: auto; --u: var(--wide-u); }
+
+  /* ── Обложка ── */
+  .hero {
+    --u: calc(var(--cover-h) / 2125);
+    --hpad: calc((100vw - 1366 * var(--u)) / 2);   /* от обложки до края окна */
+    max-width: calc(1366 * var(--u));
+  }
+  /* на 8 px шире окна с каждой стороны: у самой картинки по краю тёмная полоска в пару пикселей */
+  .hero__bg { left: calc(-1 * var(--hpad) - 8px); width: calc(100vw + 16px); }
+  .hero__clouds {
+    box-sizing: border-box;
+    left: calc(-1 * var(--hpad)); width: 100vw;
+    padding: 0 var(--hpad);
+    object-position: -100000px 0;              /* своё изображение — за рамкой, рисует фон */
+    background: url("assets/hero-clouds-wide.webp") calc(var(--hpad) - 1366 * var(--u)) 0 / calc(2732 * var(--u)) 100% repeat-x;
+  }
+  .hero__hand--l {
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 32%);
+            mask-image: linear-gradient(90deg, transparent 0, #000 32%);
+  }
+  .hero__hand--r {
+    -webkit-mask-image: linear-gradient(270deg, transparent 0, #000 32%);
+            mask-image: linear-gradient(270deg, transparent 0, #000 32%);
+  }
+
+  /* ── Облака и ангелы — у края окна ── */
+  .cloud--a, .cloud--c, .cloud--e { left: calc(var(--edge) - 30 * var(--u)); }
+  .cloud--b, .cloud--d, .cloud--f { left: auto; right: calc(var(--edge) - 30 * var(--u)); }
+  .wish__cherub { left: var(--edge); }
+  .dress__cherub { left: auto; right: var(--edge); }
+}
