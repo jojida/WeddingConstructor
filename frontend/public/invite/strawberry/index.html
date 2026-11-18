@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Дарья и Вадим — приглашение на свадьбу</title>
+  <!-- Анимация обложки: в редакторе, без анимации в тарифе и при «меньше движения» —
+       сразу готовая обложка, без мигания до загрузки скриптов -->
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      if (q.get('editing') === '1' || q.get('intro') === '0' ||
+          (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        document.documentElement.classList.add('no-anim', 'hero-go');
+      }
+    })();
+  </script>
+  <link rel="preload" as="font" type="font/woff2" href="../assets/fonts/alegreya-italic-cyrillic.woff2" crossorigin />
+  <link rel="preload" as="image" href="assets/polaroid.webp" />
+  <link rel="preload" as="image" href="assets/title.webp" />
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Без скриптов анимации не запустятся — показываем приглашение сразу -->
+  <noscript><style>
+    .st, .hero-in, .pol, .rv, .rv-soft, .rv-pop > *, .bubble {
+      opacity: 1 !important; transform: none !important; filter: none !important;
+    }
+    .pol { transform: rotate(0) !important; }
+  </style></noscript>
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="../assets/intro-preview.js"></script>
+</head>
+<body>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА: полароид с фото, «Дальше вместе», стикеры вокруг.
+         У гостя полароид падает на стол, стикеры прилепляются по одному -->
+    <section class="cover" id="hero" data-wc-section="cover">
+      <img width="297" height="221" class="st st--8 cover__gingham-tl" src="assets/gingham-tl.webp" alt="" />
+      <img width="359" height="264" class="st st--3 cover__lips" src="assets/lips.webp" alt="" />
+      <div class="pol" id="polaroid">
+        <div class="pol__photo"><img src="assets/cover.jpg" data-edit="coverPhoto" alt="Наше фото" /></div>
+        <img width="1094" height="1259" class="pol__frame" src="assets/polaroid.webp" alt="" />
+        <h1 class="pol__names" id="heroNames"><span class="pol__line"><span data-name="groom">Вадим</span> + <span data-name="bride">Дарья</span></span></h1>
+      </div>
+      <img width="1150" height="523" class="st st--1 cover__title" src="assets/title.webp" alt="Дальше вместе" />
+      <img width="362" height="291" class="st st--4 cover__camera" src="assets/camera.webp" alt="" />
+      <img width="471" height="482" class="st st--5 cover__disco" src="assets/disco.webp" alt="" />
+      <img width="369" height="447" class="st st--6 cover__money" src="assets/money.webp" alt="" />
+      <img width="288" height="386" class="st st--7 cover__rose" src="assets/rose.webp" alt="" />
+      <img width="122" height="351" class="st st--8 cover__gingham-r" src="assets/gingham-r.webp" alt="" />
+      <!-- дата — обязательный блок -->
+      <p class="cover__date hero-in" id="heroDate" data-wc-section="date" data-edit="heroDate">19 июня 2027</p>
+      <img width="1366" height="135" class="cover__strip" src="assets/strip-berries.webp" alt="" />
+    </section>
+
+    <!-- Облако: приветствие и место. Верх и низ облака — картинки,
+         середина тянется под текст любой длины -->
+    <div class="cloud">
+
+      <!-- 2 — ДОРОГИЕ ГОСТИ -->
+      <section class="greet" id="greeting" data-wc-section="greeting">
+        <img width="392" height="495" class="greet__hearts rv-soft" src="assets/hearts.webp" alt="" loading="lazy" decoding="async" />
+        <h2 class="title greet__title rv" data-edit="greetingTitle">Дорогие гости!</h2>
+        <div class="text greet__text rv" data-edit="inviteText">
+          <p>Мы рады сообщить Вам, что состоится самое главное торжество в нашей жизни — день нашей свадьбы!</p>
+          <p>Приглашаем Вас разделить с нами радость этого незабываемого дня.</p>
+        </div>
+      </section>
+
+      <!-- 3 — МЕСТО: фото в оранжевой рамке, время, место, адрес, котёнок, карта -->
+      <section class="venue" id="venue" data-wc-section="venue">
+        <div class="venue__row">
+          <div class="venue__pic rv-soft">
+            <div class="venue__photo"><img src="assets/venue.jpg" data-edit="venuePhoto" alt="Фото" loading="lazy" decoding="async" /></div>
+            <img width="646" height="640" class="venue__frame" src="assets/frame-orange.webp" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="venue__info">
+            <p class="venue__time rv" id="venueTime">12:00</p>
+            <p class="venue__name rv" data-edit="venue">Дворец бракосочетания №1</p>
+            <p class="venue__addr rv" data-edit="venueAddress">Санкт-Петербург, Английская наб., 28</p>
+            <img width="497" height="682" class="venue__kitten rv-soft" src="assets/kitten.webp" alt="" loading="lazy" decoding="async" />
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Кнопка карты и карта (Яндекс) по адресу — ../assets/venue-map.js;
+         карточкой на розовом, под облаком (котёнок свисает с облака, как в макете) -->
+    <div class="venue-map" data-wc-section="venue">
+      <a class="pill venue__btn rv" id="mapBtn" href="#" target="_blank" rel="noopener" data-edit="mapButton">Открыть карту</a>
+      <div class="wc-map berry-map" data-wc-map hidden></div>
+    </div>
+
+    <!-- 4 — УЗНАЛИ ЭТИХ МАЛЫШЕЙ? Детские фото пары в жёлтых рамках -->
+    <section class="kids" id="story" data-wc-section="story">
+      <div class="kids__deco" aria-hidden="true">
+        <img width="493" height="616" class="kids__ring rv-pop-one" src="assets/ring.webp" alt="" loading="lazy" decoding="async" />
+        <img width="648" height="729" class="kids__gingham rv-soft" src="assets/gingham-story.webp" alt="" loading="lazy" decoding="async" />
+        <img width="794" height="324" class="kids__love rv-pop-one" src="assets/iloveyou.webp" alt="" loading="lazy" decoding="async" />
+        <img width="185" height="185" class="kids__sparkle twinkle" src="assets/sparkle.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+      <div class="kids__pics">
+        <div class="kid kid--bride rv-soft">
+          <div class="kid__photo"><img src="assets/kid-bride.jpg" data-edit="kidPhotoBride" alt="Невеста в детстве" loading="lazy" decoding="async" /></div>
+          <img width="634" height="626" class="kid__frame" src="assets/frame-yellow-1.webp" alt="" loading="lazy" decoding="async" />
+        </div>
+        <div class="kid kid--groom rv-soft">
+          <div class="kid__photo"><img src="assets/kid-groom.jpg" data-edit="kidPhotoGroom" alt="Жених в детстве" loading="lazy" decoding="async" /></div>
+          <img width="630" height="624" class="kid__frame" src="assets/frame-yellow-2.webp" alt="" loading="lazy" decoding="async" />
+        </div>
+      </div>
+      <div class="kids__caps">
+        <p class="kids__cap kids__cap--bride rv" data-edit="kidCaptionBride">— Интересно, кто будет моим мужем, когда я вырасту?</p>
+        <p class="kids__cap kids__cap--groom rv" data-edit="kidCaptionGroom" id="capGroom">— Им буду я</p>
+      </div>
+      <h2 class="title kids__title rv" data-edit="storyTitle">Узнали этих малышей?</h2>
+      <div class="text kids__text rv" data-edit="loveStory">
+        <p>Теперь они создают свою семью! Время пролетело незаметно. И вот наступил момент, когда наши детские мечты стали реальностью. Разделите с нами этот счастливый день — подарите нам своё внимание и поддержку!</p>
+      </div>
+      <img width="571" height="123" class="kids__strip" src="assets/strip-gingham.webp" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 5 — ПЕРЕПИСКА: чат пары в телефоне на фоне клубники. Сообщения пара
+         пишет в редакторе (поле chat), у гостя они приходят по очереди.
+         Ниже — коллаж-стикеры и записка с таймером до свадьбы -->
+    <section class="chat" id="chat" data-wc-section="chat">
+      <div class="chat__berries">
+        <div class="phone" id="phone">
+          <div class="phone__status" aria-hidden="true">
+            <svg viewBox="0 0 34 22" class="phone__signal"><rect x="0" y="14" width="6" height="8" rx="1.5"/><rect x="9" y="10" width="6" height="12" rx="1.5"/><rect x="18" y="5" width="6" height="17" rx="1.5"/><rect x="27" y="0" width="6" height="22" rx="1.5"/></svg>
+            <svg viewBox="0 0 30 22" class="phone__wifi"><path d="M15 21.5 10.6 16.8a6.4 6.4 0 0 1 8.8 0Z"/><path d="M6.2 12.3a12.6 12.6 0 0 1 17.6 0l-2.6 2.8a8.8 8.8 0 0 0-12.4 0Z"/><path d="M1.8 7.6a18.8 18.8 0 0 1 26.4 0l-2.6 2.8a15 15 0 0 0-21.2 0Z"/></svg>
+            <svg viewBox="0 0 50 24" class="phone__battery"><rect x="1.2" y="1.2" width="42" height="21.6" rx="6" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".4"/><rect x="4.6" y="4.6" width="35.2" height="14.8" rx="3.4"/><path d="M46.4 8.4v7.2a3.8 3.8 0 0 0 0-7.2Z" opacity=".45"/></svg>
+          </div>
+          <div class="phone__head">
+            <span class="phone__back" aria-hidden="true"><svg viewBox="0 0 14 24"><path d="M12 2 3 12l9 10" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="chatBadge">19</span></span>
+            <span class="phone__avatar" id="chatAvatar" aria-hidden="true">В</span>
+            <p class="phone__name"><span id="chatName" data-edit="chatName">Вадим</span> <span aria-hidden="true">🎀</span> <i aria-hidden="true">›</i></p>
+          </div>
+          <div class="phone__msgs" id="chatMsgs" data-edit="chat" role="log" aria-label="Переписка">
+            <svg class="phone__doodle phone__doodle--heart" viewBox="0 0 64 60" aria-hidden="true"><path d="M32 56C16 44 4 33 4 19 4 10 11 4 19 4c6 0 10 3 13 8 3-5 7-8 13-8 8 0 15 6 15 15 0 14-12 25-28 37Z" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linejoin="round"/><path d="M16 15c-2 2-3 5-2 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+            <!-- сообщения строит script.js; ниже — те же, что по умолчанию (без скриптов) -->
+            <div class="msg msg--him"><p class="bubble">Ты не спишь?</p></div>
+            <div class="msg msg--her"><p class="bubble">Нет 🙂 Что-то случилось?</p><span class="msg__status">Доставлено</span></div>
+            <div class="msg msg--him"><p class="bubble">Я тут подумал…</p></div>
+            <div class="msg msg--him"><p class="bubble">Хочу просыпаться рядом с тобой каждое утро</p></div>
+            <div class="msg msg--him"><p class="bubble">Выйдешь за меня? 💍</p></div>
+            <div class="msg msg--her"><p class="bubble">Да! Тысячу раз да 💗</p><span class="msg__status">Доставлено</span></div>
+            <svg class="phone__doodle phone__doodle--spark" viewBox="0 0 60 72" aria-hidden="true"><path d="M30 3c2 17 9 27 27 33-18 6-25 16-27 33-2-17-9-27-27-33 18-6 25-16 27-33Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="phone__bar" aria-hidden="true">
+            <svg viewBox="0 0 48 40" class="phone__cam"><path d="M16 3h16l4 6h7a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H5a4 4 0 0 1-4-4V13a4 4 0 0 1 4-4h7Z"/><circle cx="24" cy="23" r="9" fill="#fbf7f4"/><circle cx="24" cy="23" r="6"/></svg>
+            <span class="phone__plus"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg></span>
+            <span class="phone__input">Сообщение<svg viewBox="0 0 24 34" class="phone__mic"><rect x="6" y="1" width="12" height="21" rx="6"/><path d="M2 15a10 10 0 0 0 20 0M12 25v7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="collage">
+        <div class="collage__photo"><img src="assets/sunset.jpg" data-edit="chatPhoto" alt="" loading="lazy" decoding="async" /></div>
+        <img width="505" height="459" class="collage__heart rv-pop-one" src="assets/glitter-heart.webp" alt="" loading="lazy" decoding="async" />
+        <img width="765" height="327" class="collage__love rv-pop-one" src="assets/love-note.webp" alt="" loading="lazy" decoding="async" />
+        <img width="544" height="593" class="collage__kitten rv-pop-one" src="assets/kitten-glasses.webp" alt="" loading="lazy" decoding="async" />
+        <div class="collage__note rv-pop-one">
+          <img width="711" height="510" src="assets/note.webp" alt="" loading="lazy" decoding="async" />
+          <!-- Таймер до свадьбы на записке -->
+          <div class="cd" data-wc-section="countdown" aria-live="off">
+            <p class="cd__title" data-edit="countdownTitle">До свадьбы</p>
+            <div class="cd__row">
+              <div class="cd__cell"><span class="cd__num" id="cdD">213</span><span class="cd__lbl" id="cdDl">дней</span></div>
+              <div class="cd__cell"><span class="cd__num" id="cdH">05</span><span class="cd__lbl" id="cdHl">часов</span></div>
+              <div class="cd__cell"><span class="cd__num" id="cdM">30</span><span class="cd__lbl" id="cdMl">минут</span></div>
+              <div class="cd__cell"><span class="cd__num" id="cdS">00</span><span class="cd__lbl" id="cdSl">секунд</span></div>
+            </div>
+          </div>
+        </div>
+        <img width="346" height="330" class="collage__bow rv-pop-one" src="assets/bow.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+    </section>
+
+    <!-- 6 — ПРОГРАММА ДНЯ: линия вьётся между текстом и стикерами,
+         ягода едет по ней за прокруткой -->
+    <section class="program" id="program" data-wc-section="schedule">
+      <h2 class="title program__title rv" data-edit="programTitle">Программа дня</h2>
+      <div class="prog" id="prog">
+        <svg class="prog__svg" id="progSvg" aria-hidden="true">
+          <path id="progBase" class="prog__base" d="" />
+          <path id="progPath" class="prog__path" d="" />
+          <image id="progBerry" class="prog__berry" href="assets/berry.webp" width="191" height="256" />
+        </svg>
+        <!-- пункты .prog__row строит script.js из расписания -->
+      </div>
+    </section>
+
+    <!-- 7 — СОВЕТЫ ГОСТЯМ: туфли, бокал, букет, диадема -->
+    <section class="tips" id="tips" data-wc-section="forecast">
+      <div class="tip rv">
+        <div class="tip__box"><img width="385" height="549" class="tip__pic float" src="assets/tip-heels.webp" alt="" loading="lazy" decoding="async" /></div>
+        <p class="tip__title" data-edit="forecast1Title">Блистайте</p>
+        <p class="tip__text" data-edit="forecast1Text">Вы на высоте</p>
+      </div>
+      <div class="tip rv">
+        <div class="tip__box"><img width="366" height="603" class="tip__pic float float--slow" src="assets/tip-coupe.webp" alt="" loading="lazy" decoding="async" /></div>
+        <p class="tip__title" data-edit="forecast2Title">Бокал игристого</p>
+        <p class="tip__text" data-edit="forecast2Text">Для хорошего настроения</p>
+      </div>
+      <div class="tip rv">
+        <div class="tip__box"><img width="479" height="582" class="tip__pic float float--slow" src="assets/tip-bouquet.webp" alt="" loading="lazy" decoding="async" /></div>
+        <p class="tip__title" data-edit="forecast3Title">Будьте разнообразны</p>
+        <p class="tip__text" data-edit="forecast3Text">Как пышный букет</p>
+      </div>
+      <div class="tip rv">
+        <div class="tip__box"><img width="477" height="436" class="tip__pic float" src="assets/tip-tiara.webp" alt="" loading="lazy" decoding="async" /></div>
+        <p class="tip__title" data-edit="forecast4Title">Будьте в центре внимания</p>
+        <p class="tip__text" data-edit="forecast4Text">Блистайте на этом вечере</p>
+      </div>
+    </section>
+
+    <!-- 8 — ДРЕСС-КОД: платья в цветах палитры пары -->
+    <section class="dress" id="dresscode" data-wc-section="dresscode">
+      <img width="1239" height="350" class="dress__title rv-soft" src="assets/title-dress.webp" alt="Дресс-код" loading="lazy" decoding="async" />
+      <div class="dress__grid rv-pop" data-edit="palette">
+        <span class="dress__item" style="--c:#f088a8"></span><span class="dress__item" style="--c:#ffffff"></span><span class="dress__item" style="--c:#ffa066"></span>
+      </div>
+      <p class="dress__text rv" data-edit="dressText">Будем рады, если вы поддержите цвета нашего праздника</p>
+    </section>
+
+    <!-- 9 — МЕНЮ: волнистая рамка с бантом -->
+    <section class="menu" id="menu" data-wc-section="menu">
+      <div class="menu__frame rv-soft">
+        <h2 class="title menu__title" data-edit="menuTitle">Меню</h2>
+        <img width="458" height="452" class="menu__cloche" src="assets/cloche.webp" alt="" loading="lazy" decoding="async" />
+        <div class="text menu__text" data-edit="menuText">
+          <p>Сообщите об аллергиях и пожеланиях к еде в анкете — учтём их в меню.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 — ПОЖЕЛАНИЯ: листок в клетку, корона и хомяк -->
+    <section class="wish" id="wishes" data-wc-section="wishes">
+      <div class="wish__board rv-soft">
+        <img width="350" height="287" class="wish__crown" src="assets/crown.webp" alt="" loading="lazy" decoding="async" />
+        <div class="wish__paper">
+          <h2 class="title wish__title" data-edit="wishTitle">Пожелания</h2>
+          <div class="wish__text" data-edit="story">
+            <p>Будем рады подарку в конверте — на мечты нашей семьи. Просим обойтись без букетов.</p>
+          </div>
+        </div>
+        <img width="320" height="385" class="wish__hamster" src="assets/hamster.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+    </section>
+
+    <!-- Кремовый низ: анкета и финал -->
+    <div class="tail">
+
+      <!-- 11 — АНКЕТА -->
+      <section class="rsvp" id="rsvp" data-wc-section="rsvp">
+        <h2 class="title rsvp__title rv" data-edit="surveyTitle">Анкета</h2>
+        <img width="302" height="245" class="rsvp__env rv-soft" src="assets/envelope.webp" alt="" loading="lazy" decoding="async" />
+        <p class="rsvp__lead rv" data-edit="surveyText">Пожалуйста, подтвердите своё присутствие</p>
+        <form class="rsvp__form rv" id="rsvpForm" novalidate>
+          <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+          <fieldset class="rsvp__group">
+            <legend>Будете ли вы на празднике?</legend>
+            <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, с радостью приду</label>
+            <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+          </fieldset>
+          <fieldset class="rsvp__group" data-rsvp-count>
+            <legend>Сколько вас будет?</legend>
+            <div class="wc-count" data-wc-count>
+              <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+              <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+              <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+            </div>
+          </fieldset>
+          <fieldset class="rsvp__group" data-edit="drinks">
+            <legend>Что вы предпочитаете из напитков?</legend>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Шампанское</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк или виски</label>
+            <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+          </fieldset>
+          <button class="pill rsvp__submit" type="submit">Отправить</button>
+          <p class="rsvp__error" id="rsvpError" role="alert"></p>
+        </form>
+        <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен 💗</p>
+      </section>
+
+      <!-- 12 — ДО ВСТРЕЧИ! -->
+      <section class="fin" id="final" data-wc-section="closing">
+        <img width="1337" height="305" class="fin__title rv-soft" src="assets/title-bye.webp" alt="До встречи!" loading="lazy" decoding="async" />
+        <p class="fin__sign rv" id="finSign" data-edit="closingSign"><span data-name="groom">Вадим</span> + <span data-name="bride">Дарья</span></p>
+      </section>
+
+    </div>
+
+  </main>
+
+  <script src="../assets/preload.js"></script>
+  <script src="/invite/assets/sections.js"></script>
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="../assets/brand.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -156,6 +156,19 @@ const HANDMADE_TEMPLATES = [
     sampleDaysAhead: 241,
   },
   {
+    id: 'strawberry',
+    name: 'Клубника',
+    description: 'Розовый скрапбук: полароид, стикеры, клубника и ваша переписка в телефоне.',
+    tags: ['Розовый', 'Яркий', 'Стикеры', 'Переписка', 'Анимация'],
+    colors: ['#f16298', '#f7f0ea', '#df3d74'],
+    preview: '/invite/strawberry/assets/preview.jpg',
+    defaultCover: '/invite/strawberry/assets/cover.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Дарья',
+    sampleGroom: 'Вадим',
+    sampleDaysAhead: 213,
+  },
+  {
     id: 'velvet',
     name: 'Бархат',
     description: 'Бордовый бархат, кружево и конверт с сургучом в руках в атласных перчатках.',
@@ -291,10 +304,11 @@ const HANDMADE_TEMPLATES = [
    стоял зимний «Витраж», который выбрали один раз. С 16.11.26 «Витраж» на зиму
    поднят четвёртым — весной вернуть по спросу. Новый шаблон первые недели ставим
    повыше, чтобы его заметили («Пудра» — 15.11.26, «Бархат» — 16.11.26, сразу после
-   «Витража»: оба осенне-зимние), потом его место — по спросу.
+   «Витража»: оба осенне-зимние; «Клубника» — 18.11.26, сразу после «Пудры»),
+   потом его место — по спросу.
    Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
 const CATALOG_ORDER = [
-  'tenderness', 'powder', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
+  'tenderness', 'powder', 'strawberry', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
   'sketch', 'vadimdarya', 'mediterranean', 'garden-arch', 'angels', 'floral',
 ];
 const catalogRank = (id: string) => {
@@ -526,6 +540,7 @@ export const TEMPLATE_GREETING_KEY: Record<string, string> = {
   vitrage: 'greetingTitle',
   tenderness: 'greetingTitle',
   powder: 'greetingTitle',
+  strawberry: 'greetingTitle',
   velvet: 'greetingTitle',
   angels: 'greetingTitle',
   forest: 'greetingTitle',
@@ -550,12 +565,15 @@ export const TEMPLATE_GREETING_KEY: Record<string, string> = {
 
 export interface ScheduleItem { time: string; title: string; icon: string; desc?: string; }
 export interface DrinkOption  { value: string; label: string; }
+/** Сообщение переписки пары («Клубника»): слева — он (собеседник в шапке чата), справа — она */
+export interface ChatMessage  { from: 'him' | 'her'; text: string; }
 
 export type FieldType =
   | 'text' | 'textarea' | 'image' | 'audio' | 'colorList' | 'schedule' | 'drinks'
   | 'toggle'                  // галочка: значение true/false, по умолчанию включено (см. defaultOff)
   | 'choice'                  // выбор одного варианта из options (кружки-образцы цвета)
-  | 'rsvpQuestions';          // список готовых вопросов анкеты (RSVP_QUESTIONS)
+  | 'rsvpQuestions'           // список готовых вопросов анкеты (RSVP_QUESTIONS)
+  | 'chat';                   // переписка пары: сообщения «он / она» (ChatMessage[])
 
 export interface ChoiceOption { value: string; label: string; color?: string; }
 
@@ -648,6 +666,24 @@ export const ICON_SETS: Record<string, string[]> = {
     '/invite/powder/assets/perfume.webp',
     '/invite/powder/assets/jewelbox.webp',
     '/invite/powder/assets/bag.webp',
+  ],
+  strawberry: [
+    '/invite/strawberry/assets/ic-rings.webp',
+    '/invite/strawberry/assets/ic-camera.webp',
+    '/invite/strawberry/assets/ic-champagne.webp',
+    '/invite/strawberry/assets/cloche.webp',
+    '/invite/strawberry/assets/ic-cake.webp',
+    '/invite/strawberry/assets/ic-disco.webp',
+    '/invite/strawberry/assets/ic-hat.webp',
+    '/invite/strawberry/assets/bow.webp',
+    '/invite/strawberry/assets/glitter-heart.webp',
+    '/invite/strawberry/assets/lips.webp',
+    '/invite/strawberry/assets/rose.webp',
+    '/invite/strawberry/assets/crown.webp',
+    '/invite/strawberry/assets/camera.webp',
+    '/invite/strawberry/assets/tip-coupe.webp',
+    '/invite/strawberry/assets/tip-heels.webp',
+    '/invite/strawberry/assets/berry.webp',
   ],
   angels: [
     '/invite/angels/assets/icon-rings.webp',
@@ -793,6 +829,7 @@ const TEMPLATE_MUSIC: Record<string, string> = {
   vitrage: 'clair',
   tenderness: 'nocturne',
   powder: 'canon',
+  strawberry: 'canon',
   velvet: 'nocturne',
   angels: 'air',
   forest: 'thousand',
@@ -1174,6 +1211,102 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
         { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
+  strawberry: [
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'coverPhoto', type: 'image', label: 'Фото в полароиде', hint: 'Лучше квадратное или горизонтальное', scope: 'data' },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения (абзацы с новой строки)', scope: 'data', maxLength: 300 },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venuePhoto', type: 'image', label: 'Фото рядом с адресом', hint: 'Фото места или ваше фото', scope: 'custom' },
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Дворец бракосочетания №1', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK,
+      ],
+    },
+    {
+      title: 'Детские фото', icon: '🧸',
+      fields: [
+        { id: 'kidPhotoBride',   type: 'image',    label: 'Фото невесты в детстве', scope: 'custom' },
+        { id: 'kidCaptionBride', type: 'text',     label: 'Подпись под фото невесты', hint: 'Пусто — без подписи', scope: 'custom', maxLength: 70 },
+        { id: 'kidPhotoGroom',   type: 'image',    label: 'Фото жениха в детстве', scope: 'custom' },
+        { id: 'kidCaptionGroom', type: 'text',     label: 'Подпись под фото жениха', hint: 'Пусто — без подписи', scope: 'custom', maxLength: 70 },
+        { id: 'storyTitle',      type: 'text',     label: 'Заголовок', hint: 'Пусто — без заголовка', scope: 'custom', maxLength: 40 },
+        { id: 'loveStory',       type: 'textarea', label: 'Текст (абзацы с новой строки)', scope: 'custom', maxLength: 400 },
+      ],
+    },
+    {
+      title: 'Переписка', icon: '💬',
+      fields: [
+        { id: 'chatName',  type: 'text',  label: 'Имя в шапке чата', hint: 'Пусто — имя жениха', scope: 'custom', maxLength: 24 },
+        { id: 'chat',      type: 'chat',  label: 'Сообщения', hint: 'Ваш настоящий диалог или история предложения. У гостя сообщения приходят по очереди', scope: 'custom' },
+        { id: 'chatPhoto', type: 'image', label: 'Фото под стикерами', hint: 'Видно частично — лучше пейзаж или закат', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'programTitle', type: 'text', label: 'Заголовок', scope: 'custom', maxLength: 30 },
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', iconSet: 'strawberry' },
+      ],
+    },
+    {
+      title: 'Советы гостям', icon: '👑',
+      fields: [
+        { id: 'forecast1Title', type: 'text', label: 'Туфли: заголовок', scope: 'custom', maxLength: 26 },
+        { id: 'forecast1Text',  type: 'text', label: 'Туфли: подпись', hint: 'Пусто — без подписи', scope: 'custom', maxLength: 40 },
+        { id: 'forecast2Title', type: 'text', label: 'Бокал: заголовок', scope: 'custom', maxLength: 26 },
+        { id: 'forecast2Text',  type: 'text', label: 'Бокал: подпись', scope: 'custom', maxLength: 40 },
+        { id: 'forecast3Title', type: 'text', label: 'Букет: заголовок', scope: 'custom', maxLength: 26 },
+        { id: 'forecast3Text',  type: 'text', label: 'Букет: подпись', scope: 'custom', maxLength: 40 },
+        { id: 'forecast4Title', type: 'text', label: 'Диадема: заголовок', scope: 'custom', maxLength: 26 },
+        { id: 'forecast4Text',  type: 'text', label: 'Диадема: подпись', scope: 'custom', maxLength: 40 },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета платьев', scope: 'data' },
+        { id: 'dressText',       type: 'textarea',  label: 'Текст под платьями', hint: 'Пусто — без текста', scope: 'custom', maxLength: 160 },
+      ],
+    },
+    {
+      title: 'Меню', icon: '🍽',
+      fields: [
+        { id: 'menuText', type: 'textarea', label: 'Текст о меню (абзацы с новой строки)', scope: 'custom', maxLength: 220 },
+      ],
+    },
+    {
+      title: 'Пожелания', icon: '💌',
+      fields: [
+        { id: 'story', type: 'textarea', label: 'Пожелания по подаркам (абзацы с новой строки)', scope: 'data', maxLength: 220 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingSign', type: 'text', label: 'Подпись под «До встречи!»', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
       ],
     },
     MUSIC_SECTION,
@@ -1909,6 +2042,7 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
     'Детали праздника': 'forecast', 'Наш вечер': 'menu', 'Меню': 'menu',
     'Фото места': 'hall', 'Жених и невеста': 'couple', 'Фото пары': 'photos', 'Витражные двери': 'envelope',
     'История пары': 'story', 'Детали': 'details',
+    'Детские фото': 'story', 'Переписка': 'chat', 'Советы гостям': 'forecast',
   };
   const result: TemplateSection[] = [];
   if (!sections.some(s => ids[s.title] === 'cover')) {
@@ -2089,6 +2223,65 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       rsvpQuestions:  ['menu'],
       closingTitle:   'С любовью, ваши',
       closingSign:    '', // Пустое поле — имена пары.
+    },
+  },
+
+  strawberry: {
+    inviteText:
+      'Мы рады сообщить Вам, что состоится самое главное торжество в нашей жизни — день нашей свадьбы!\n' +
+      'Приглашаем Вас разделить с нами радость этого незабываемого дня.',
+    venue: 'Дворец бракосочетания №1',
+    venueAddress: 'Санкт-Петербург, Английская наб., 28',
+    story: 'Будем рады подарку в конверте — на мечты нашей семьи. Просим обойтись без букетов.',
+    schedule: [
+      { time: '12:00', title: 'Регистрация брака', icon: '/invite/strawberry/assets/ic-rings.webp' },
+      { time: '13:30', title: 'Фотосессия', icon: '/invite/strawberry/assets/ic-camera.webp' },
+      { time: '15:00', title: 'Фуршет и поздравления', icon: '/invite/strawberry/assets/ic-champagne.webp' },
+      { time: '17:00', title: 'Праздничный ужин', icon: '/invite/strawberry/assets/cloche.webp' },
+      { time: '20:00', title: 'Свадебный торт', icon: '/invite/strawberry/assets/ic-cake.webp' },
+      { time: '21:00', title: 'Танцы до утра', icon: '/invite/strawberry/assets/ic-disco.webp' },
+    ],
+    dressCodeColors: ['#f088a8', '#ffffff', '#ffa066'],
+    drinks: [
+      { value: 'sparkling',  label: 'Шампанское' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'cognac',     label: 'Коньяк или виски' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      greetingTitle:   'Дорогие гости!',
+      venuePhoto:      '/invite/strawberry/assets/venue.jpg',
+      kidPhotoBride:   '/invite/strawberry/assets/kid-bride.jpg',
+      kidCaptionBride: '— Интересно, кто будет моим мужем, когда я вырасту?',
+      kidPhotoGroom:   '/invite/strawberry/assets/kid-groom.jpg',
+      kidCaptionGroom: '— Им буду я',
+      storyTitle:      'Узнали этих малышей?',
+      loveStory:
+        'Теперь они создают свою семью! Время пролетело незаметно. И вот наступил момент, когда наши детские мечты стали реальностью. ' +
+        'Разделите с нами этот счастливый день — подарите нам своё внимание и поддержку!',
+      chatName:        '', // Пустое поле — имя жениха.
+      chat: [
+        { from: 'him', text: 'Ты не спишь?' },
+        { from: 'her', text: 'Нет 🙂 Что-то случилось?' },
+        { from: 'him', text: 'Я тут подумал…' },
+        { from: 'him', text: 'Хочу просыпаться рядом с тобой каждое утро' },
+        { from: 'him', text: 'Выйдешь за меня? 💍' },
+        { from: 'her', text: 'Да! Тысячу раз да 💗' },
+      ],
+      chatPhoto:       '/invite/strawberry/assets/sunset.jpg',
+      countdownTitle:  'До свадьбы',
+      programTitle:    'Программа дня',
+      forecast1Title:  'Блистайте',                forecast1Text: 'Вы на высоте',
+      forecast2Title:  'Бокал игристого',          forecast2Text: 'Для хорошего настроения',
+      forecast3Title:  'Будьте разнообразны',      forecast3Text: 'Как пышный букет',
+      forecast4Title:  'Будьте в центре внимания', forecast4Text: 'Блистайте на этом вечере',
+      dressText:       'Будем рады, если вы поддержите цвета нашего праздника',
+      menuText:        'Сообщите об аллергиях и пожеланиях к еде в анкете — учтём их в меню.',
+      surveyText:      'Пожалуйста, подтвердите своё присутствие до {{rsvpDate}}.',
+      rsvpChildren:    true,
+      rsvpQuestions:   ['menu', 'allergy'],
+      closingSign:     '', // Пустое поле — имена пары.
     },
   },
 

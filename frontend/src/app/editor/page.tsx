@@ -7,6 +7,7 @@ import {
   Save, Eye, Share2, Copy, Type, Sparkles, LayoutGrid, Plus, X, ArrowUp, ArrowDown,
   Mail, DoorOpen, ImageIcon, PenLine, CalendarDays, MapPin, MapIcon, Camera, UtensilsCrossed, Clock,
   Hourglass, Shirt, Heart, ClipboardList, Gem, Music, Users, Landmark, Phone,
+  MessageCircle, Baby, Crown, BookOpen,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { readAuthToken, readStorage, writeStorage } from '@/lib/browser-storage';
@@ -16,7 +17,7 @@ import { isSectionEnabled } from '@/lib/section-visibility';
 import { withSketchDemoPhotos } from '@/lib/sketch-demo-photos';
 import { withSketchLocation } from '@/lib/sketch-location';
 import { useAuthStore } from '@/store/auth';
-import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, PLANS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_FIELDS, TEMPLATE_DEFAULTS, ICON_SETS, BUILTIN_GALLERY, RSVP_QUESTIONS, PLANS, TemplateField, TemplateSection, ScheduleItem, DrinkOption, ChatMessage, templateCustomDefaults, templateMusic, musicLibraryFor, musicTrackByUrl } from '@/lib/constants';
 import TemplatePreview from '@/components/TemplatePreview';
 import { reachGoal, GOAL } from '@/lib/metrika';
 import { ownPlace, quotePlace } from '@/lib/own-place';
@@ -120,6 +121,7 @@ const SECTION_ICONS: Record<string, typeof Mail> = {
   '📍': MapPin, '🗺': MapIcon, '📸': Camera, '📷': Camera, '✨': Sparkles,
   '🍽': UtensilsCrossed, '⏱': Clock, '⏳': Hourglass, '👗': Shirt, '💌': Heart,
   '📝': ClipboardList, '💍': Gem, '🎵': Music, '💑': Users, '🏛': Landmark, '📞': Phone,
+  '💬': MessageCircle, '🧸': Baby, '👑': Crown, '📖': BookOpen,
 };
 
 function SectionIcon({ icon, size }: { icon?: string; size: number }) {
@@ -1263,6 +1265,12 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, wedd
         apiBase={apiBase} uploadImage={uploadImage} customIcons={customIcons} onCustomIcons={onCustomIcons} />;
     case 'drinks':
       return <DrinksEditor value={value || []} onChange={onChange} />;
+    case 'chat':
+      return (
+        <Field label={field.label}>
+          <ChatEditor value={Array.isArray(value) ? value : []} onChange={onChange} hint={field.hint} />
+        </Field>
+      );
     case 'toggle': {
       // Не задано — включено: так поле работает и у пар, созданных до его появления.
       // defaultOff — наоборот: новая возможность сама не включается у готовых сайтов.
@@ -1781,6 +1789,66 @@ function DrinksEditor({ value, onChange }: {
       <button type="button" onClick={add} className={styles.addRowBtn}>
         + Добавить напиток
       </button>
+    </div>
+  );
+}
+
+/* Переписка пары («Клубника»): сообщения по порядку. У каждого — кто пишет
+   (он — слева, это собеседник в шапке чата; она — справа, розовым) и текст.
+   У гостя сообщения приходят по очереди, как в мессенджере. */
+const CHAT_MAX = 16;
+const CHAT_TEXT_MAX = 150;
+function ChatEditor({ value, onChange, hint }: {
+  value: ChatMessage[]; onChange: (v: ChatMessage[]) => void; hint?: string;
+}) {
+  const items = Array.isArray(value) ? value : [];
+  const set = (i: number, patch: Partial<ChatMessage>) => onChange(items.map((m, j) => (j === i ? { ...m, ...patch } : m)));
+  const remove = (i: number) => onChange(items.filter((_, j) => j !== i));
+  const move = (i: number, d: -1 | 1) => {
+    const j = i + d;
+    if (j < 0 || j >= items.length) return;
+    const next = items.slice();
+    [next[i], next[j]] = [next[j], next[i]];
+    onChange(next);
+  };
+  // Новое сообщение — ответ на последнее: сторона меняется
+  const add = () => onChange([...items, { from: items[items.length - 1]?.from === 'him' ? 'her' : 'him', text: '' }]);
+  const side = (her: boolean): React.CSSProperties => ({
+    minWidth: 58, height: 48, padding: '0 10px', borderRadius: 14, cursor: 'pointer',
+    border: `1.5px solid ${her ? '#f7a8c9' : 'rgba(206,197,186,0.8)'}`,
+    background: her ? '#ff59a9' : '#ecebea', color: her ? '#fff' : '#3a3530',
+    fontFamily: 'var(--font-inter)', fontSize: 14, fontWeight: 600,
+  });
+  return (
+    <div style={{ marginBottom: 4 }}>
+      {hint ? <div style={{ fontSize: 13, lineHeight: 1.45, color: '#8a8378', margin: '0 0 10px', fontFamily: 'var(--font-inter)' }}>{hint}</div> : null}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {items.map((m, i) => {
+          const her = m.from === 'her';
+          return (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: 8, alignItems: 'start' }}>
+              <button type="button" onClick={() => set(i, { from: her ? 'him' : 'her' })} style={side(her)}
+                title="Кто пишет — нажмите, чтобы поменять" aria-label={`Сообщение ${i + 1}: пишет ${her ? 'она' : 'он'}. Поменять`}>
+                {her ? 'Она' : 'Он'}
+              </button>
+              <div>
+                <textarea className="input-field" rows={2} maxLength={CHAT_TEXT_MAX} value={m.text || ''}
+                  onChange={e => set(i, { text: e.target.value })}
+                  placeholder={her ? 'Сообщение невесты' : 'Сообщение жениха'} aria-label={`Текст сообщения ${i + 1}`}
+                  style={{ minHeight: 48, resize: 'vertical' }} />
+                {(m.text || '').length > CHAT_TEXT_MAX - 30 ? <CharCounter value={m.text} max={CHAT_TEXT_MAX} /> : null}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <button type="button" onClick={() => move(i, -1)} disabled={i === 0} style={iconBtn(i === 0)} aria-label="Выше"><ArrowUp size={14} strokeWidth={2} aria-hidden /></button>
+                <button type="button" onClick={() => remove(i)} aria-label="Удалить сообщение" style={{ ...iconBtn(false), color: '#e74c3c' }}><X size={15} strokeWidth={2.2} aria-hidden /></button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {items.length < CHAT_MAX ? (
+        <button type="button" onClick={add} className={styles.addRowBtn}>+ Добавить сообщение</button>
+      ) : null}
     </div>
   );
 }

@@ -18,6 +18,7 @@ const ForestTemplate = dynamic(() => import('./ForestTemplate'));
 const AngelsTemplate = dynamic(() => import('./AngelsTemplate'));
 const TendernessTemplate = dynamic(() => import('./TendernessTemplate'));
 const PowderTemplate = dynamic(() => import('./PowderTemplate'));
+const StrawberryTemplate = dynamic(() => import('./StrawberryTemplate'));
 const VelvetTemplate = dynamic(() => import('./VelvetTemplate'));
 const VitrageTemplate = dynamic(() => import('./VitrageTemplate'));
 const StudioTemplate = dynamic(() => import('./StudioTemplate'));
@@ -90,6 +91,9 @@ export default function TemplatePreview({ data, apiBase, fullPage, slug, editing
   }
   if (data.templateId === 'powder') {
     return <PowderTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
+  }
+  if (data.templateId === 'strawberry') {
+    return <StrawberryTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
   }
   if (data.templateId === 'velvet') {
     return <VelvetTemplate data={data} apiBase={apiBase} fullPage={fullPage} slug={slug} editing={editing} />;
