@@ -106,11 +106,11 @@ export default function TendernessTemplate({ data, apiBase, fullPage, slug, edit
       );
     }
     return (
-      <div className="wc-guest-page" style={{ width: '100%', background: '#e7ddd3' }}>
+      <div className="wc-guest-page" style={{ width: '100%', minHeight: '100vh', background: '#e7ddd3' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
           title="Нежность — свадебное приглашение"
           allow="autoplay"
         />

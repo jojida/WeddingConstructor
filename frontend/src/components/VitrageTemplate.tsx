@@ -118,11 +118,11 @@ export default function VitrageTemplate({ data, apiBase, fullPage, slug, editing
       );
     }
     return (
-      <div className="wc-guest-page" style={{ width: '100%', background: '#dfe9f5' }}>
+      <div className="wc-guest-page" style={{ width: '100%', minHeight: '100vh', background: '#dfe9f5' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
           title="Витраж — свадебное приглашение"
           allow="autoplay"
         />

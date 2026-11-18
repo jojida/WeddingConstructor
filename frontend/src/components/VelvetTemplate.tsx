@@ -136,11 +136,11 @@ export default function VelvetTemplate({ data, apiBase, fullPage, slug, editing 
       );
     }
     return (
-      <div className="wc-guest-page" style={{ width: '100%', background: '#24040b' }}>
+      <div className="wc-guest-page" style={{ width: '100%', minHeight: '100vh', background: '#24040b' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
           title="Бархат — свадебное приглашение"
           allow="autoplay"
         />

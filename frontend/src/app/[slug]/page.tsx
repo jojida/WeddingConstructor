@@ -47,7 +47,7 @@ export default async function SiteBySlugPage({ params, searchParams }: Props) {
   }
 
   return (
-    <div className="wc-guest-page">
+    <div className="wc-guest-page" style={{ minHeight: '100vh' }}>
       <TemplatePreview data={invite} apiBase={API} fullPage slug={slug} />
       {seat && <GuestSeat view={seat} />}
     </div>

@@ -99,11 +99,11 @@ export default function ForestTemplate({ data, apiBase, fullPage, slug, editing 
       );
     }
     return (
-      <div className="wc-guest-page" style={{ width: '100%', background: '#d9dbd1' }}>
+      <div className="wc-guest-page" style={{ width: '100%', minHeight: '100vh', background: '#d9dbd1' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
           title="Туманный лес — свадебное приглашение"
           allow="autoplay"
         />

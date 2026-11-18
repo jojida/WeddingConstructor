@@ -273,6 +273,10 @@ html[data-anim] [data-animate][data-delay="500"] { transition-delay: 0.5s; }
    На телефоне 100vh — высота экрана БЕЗ панелей браузера: низ iframe уходил
    под нижнюю панель Safari и за край экрана в Chrome, а с ним кнопка музыки
    (fixed, 16px от низа iframe) и всё, что шаблон прижимает к низу. 100dvh —
-   ровно видимая часть экрана; 100vh остаётся для старых браузеров. */
-.wc-guest-page { min-height: 100vh; min-height: 100dvh; }
-.wc-guest-frame { height: 100vh; height: 100dvh; }
+   ровно видимая часть экрана. Запасная 100vh — в inline-стиле обёрток: пару
+   «100vh; 100dvh» здесь сборщик CSS схлопывает в одно 100dvh, и браузер без dvh
+   (iOS < 15.4) получил бы iframe высотой 150px. !important перебивает inline,
+   только где dvh понятен; рамки предпросмотра редактора перебивают его своим
+   более точным !important (PreviewDevice.module.css). */
+.wc-guest-page { min-height: 100dvh !important; }
+.wc-guest-frame { height: 100dvh !important; }
