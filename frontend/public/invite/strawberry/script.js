@@ -299,7 +299,9 @@
 
   function renderChat(list) {
     var items = cleanChat(list);
-    if (!items || !items.length) return;
+    // Нет поля (старый черновик) — остаётся переписка по умолчанию; пустой список —
+    // пара удалила все сообщения: телефон пустой (раздел можно выключить)
+    if (!items) return;
     var sig = JSON.stringify(items);
     if (sig === STATE.chatSig) return;
     STATE.chatSig = sig;
