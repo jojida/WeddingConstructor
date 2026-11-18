@@ -95,11 +95,11 @@ export default function GardenArchTemplate({ data, apiBase, fullPage, slug, edit
     }
     // Гость — сразу приглашение (без конверта)
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: '#ffffff' }}>
+      <div className="wc-guest-page" style={{ width: '100%', background: '#ffffff' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
           title="Приглашение «Цветущая арка»"
         />
       </div>

@@ -172,7 +172,7 @@ export default async function DemoPage({ params }: Props) {
 
   return (
     <>
-    <div style={{ minHeight: '100vh', background: '#ececec', position: 'relative', display: 'flex', justifyContent: 'center' }}>
+    <div className="wc-guest-page" style={{ background: '#ececec', position: 'relative', display: 'flex', justifyContent: 'center' }}>
       {/* Единая ширина превью для всех шаблонов (как у «Скетч» / «Цветущая арка»).
           На десктопе — центрированная колонка, на телефоне — на всю ширину экрана. */}
       <div style={{ width: '100%', maxWidth: 500, isolation: 'isolate', zIndex: 0, boxShadow: '0 10px 50px rgba(60,48,32,0.18)' }}>

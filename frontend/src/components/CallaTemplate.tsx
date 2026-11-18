@@ -83,11 +83,11 @@ export default function CallaTemplate({ data, apiBase, fullPage, slug, editing }
   if (live) {
     if (fullPage) {
       return (
-        <div style={{ width: '100%', minHeight: '100vh', background: '#d7d3cb' }}>
+        <div className="wc-guest-page" style={{ width: '100%', background: '#d7d3cb' }}>
           <iframe
             ref={iframeRef}
             src={initialSrc}
-            style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+            className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
             title="Каллы — свадебное приглашение"
             allow="autoplay"
           />

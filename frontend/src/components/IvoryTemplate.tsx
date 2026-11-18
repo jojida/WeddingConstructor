@@ -98,11 +98,11 @@ export default function IvoryTemplate({ data, apiBase, fullPage, slug, editing }
       );
     }
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: '#151515' }}>
+      <div className="wc-guest-page" style={{ width: '100%', background: '#151515' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
           title="Айвори — свадебное приглашение"
           allow="autoplay"
         />

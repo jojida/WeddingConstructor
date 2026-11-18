@@ -268,3 +268,11 @@ html[data-anim] [data-animate][data-delay="500"] { transition-delay: 0.5s; }
   border: 0.5px solid rgba(212, 163, 163, 0.3);
   border-radius: 16px;
 }
+
+/* ── Сайт пары во весь экран (iframe шаблона) ──────────────────────────────
+   На телефоне 100vh — высота экрана БЕЗ панелей браузера: низ iframe уходил
+   под нижнюю панель Safari и за край экрана в Chrome, а с ним кнопка музыки
+   (fixed, 16px от низа iframe) и всё, что шаблон прижимает к низу. 100dvh —
+   ровно видимая часть экрана; 100vh остаётся для старых браузеров. */
+.wc-guest-page { min-height: 100vh; min-height: 100dvh; }
+.wc-guest-frame { height: 100vh; height: 100dvh; }

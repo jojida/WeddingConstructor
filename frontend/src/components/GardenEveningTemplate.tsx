@@ -98,11 +98,11 @@ export default function GardenEveningTemplate({ data, apiBase, fullPage, slug, e
       );
     }
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: '#e9dfc8' }}>
+      <div className="wc-guest-page" style={{ width: '100%', background: '#e9dfc8' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
           title="Вечер в саду — свадебное приглашение"
           allow="autoplay"
         />

@@ -169,11 +169,11 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
       );
     }
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: '#d5d0c8' }}>
+      <div className="wc-guest-page" style={{ width: '100%', background: '#d5d0c8' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
           title="Приглашение «Цветущий»"
         />
       </div>

@@ -48,7 +48,7 @@ export default async function DomainInvitePage({ params, searchParams }: Props) 
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div className="wc-guest-page">
       <TemplatePreview data={invite} apiBase={API} fullPage slug={invite.slug} />
       {seat && <GuestSeat view={seat} />}
     </div>

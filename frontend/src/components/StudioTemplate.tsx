@@ -96,11 +96,11 @@ export default function StudioTemplate({ data, apiBase, fullPage, slug, editing 
   if (live) {
     if (fullPage) {
       return (
-        <div style={{ width: '100%', minHeight: '100vh', background }}>
+        <div className="wc-guest-page" style={{ width: '100%', background }}>
           <iframe
             ref={iframeRef}
             src={initialSrc}
-            style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+            className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
             title={`${title} — свадебное приглашение`}
             allow="autoplay"
           />

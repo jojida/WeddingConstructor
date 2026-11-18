@@ -101,11 +101,11 @@ export default function AngelsTemplate({ data, apiBase, fullPage, slug, editing 
       );
     }
     return (
-      <div style={{ width: '100%', minHeight: '100vh', background: '#b59576' }}>
+      <div className="wc-guest-page" style={{ width: '100%', background: '#b59576' }}>
         <iframe
           ref={iframeRef}
           src={initialSrc}
-          style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
+          className="wc-guest-frame" style={{ width: '100%', border: 'none', display: 'block' }}
           title="Ангелы — свадебное приглашение"
           allow="autoplay"
         />
