@@ -77,6 +77,7 @@ export default function StrawberryTemplate({ data, apiBase, fullPage, slug, edit
           story: d.story,
           schedule: d.schedule,
           dressCodeColors: d.dressCodeColors,
+          dressCodePhoto: d.dressCodePhoto,
           musicUrl: d.musicUrl,
         },
       },

@@ -520,6 +520,208 @@
     if (shown) box.classList.add('in');
   }
 
+  /* ─── Дресс-код: костюмы мужчин в цветах их палитры ── */
+  // Бабочка, платочек и пуговицы — тот же оттенок темнее (у тёмного костюма —
+  // светлее); к белому, серому и чёрному — розовый акцент шаблона, иначе
+  // бабочка потерялась бы
+  function suitAccent(c) {
+    var k = c.trim().toLowerCase(), m = k.match(/^#([0-9a-f]{6}|[0-9a-f]{3})(?:[0-9a-f]{2})?$/), r, g, b;
+    if (m) {
+      var hx = m[1].length === 3 ? m[1].replace(/./g, '$&$&') : m[1];
+      r = parseInt(hx.slice(0, 2), 16); g = parseInt(hx.slice(2, 4), 16); b = parseInt(hx.slice(4, 6), 16);
+    } else {
+      m = k.match(/rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/);
+      if (!m) return '#df3d74';
+      r = +m[1]; g = +m[2]; b = +m[3];
+    }
+    r /= 255; g /= 255; b /= 255;
+    var mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn, l = (mx + mn) / 2, h;
+    if (d < 0.1) return '#df3d74';
+    var s = d / (1 - Math.abs(2 * l - 1));
+    h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    h *= 60; if (h < 0) h += 360;
+    var L = l > 0.4 ? Math.max(0.28, l - 0.18) : Math.min(0.85, l + 0.28);
+    return 'hsl(' + h.toFixed(0) + ' ' + Math.min(100, s * 100).toFixed(0) + '% ' + (L * 100).toFixed(0) + '%)';
+  }
+
+  function rebuildSuits(colors) {
+    var list = cleanColors(colors);
+    var box = document.querySelector('[data-edit="menColors"]');
+    if (!box || !list.length) return;
+    var sig = list.join(',');
+    if (box.dataset.sig === sig) return;
+    box.dataset.sig = sig;
+    var shown = box.classList.contains('in');
+    box.innerHTML = '';
+    var NS = 'http://www.w3.org/2000/svg';
+    list.forEach(function (c) {
+      var svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('class', 'suit');
+      svg.setAttribute('viewBox', '0 0 257 308');
+      svg.setAttribute('aria-hidden', 'true');
+      svg.style.setProperty('--c', c.trim());
+      svg.style.setProperty('--b', suitAccent(c));
+      var use = document.createElementNS(NS, 'use');
+      use.setAttribute('href', '#st-suit');
+      svg.appendChild(use);
+      box.appendChild(svg);
+    });
+    if (shown) box.classList.add('in');
+  }
+
+  /* ─── Дресс-код: окно «Смотреть образы» ────────────── */
+  var LOOK_KEYS = { women: ['dressCodePhoto', 'dressPhoto2', 'dressPhoto3'], men: ['dressMan1', 'dressMan2', 'dressMan3'] };
+  var LOOK_TITLES = { women: 'Образы для женщин', men: 'Образы для мужчин' };
+  var LOOKS = { group: '', trigger: null, warm: false, sig: {}, closeTimer: 0 };
+
+  function looksModal() { return document.getElementById('looksModal'); }
+  function looksStrip() {
+    var m = looksModal();
+    return m && LOOKS.group ? m.querySelector('.looks-modal__strip[data-look-group="' + LOOKS.group + '"]') : null;
+  }
+
+  // Фото окна скрыты, и фоновая догрузка (preload.js) их пропускает. Когда
+  // дресс-код близко — грузим заранее, и окно открывается уже с фото
+  function warmLooks() {
+    if (LOOKS.warm) return;
+    var conn = navigator.connection;
+    if (conn && conn.saveData) return;
+    LOOKS.warm = true;
+    document.querySelectorAll('.looks-modal__card img').forEach(function (img) { img.loading = 'eager'; });
+  }
+
+  // Какое фото ленты сейчас по центру
+  function lookIndex(strip) {
+    var cards = strip.children, best = 0, bestD = Infinity;
+    var mid = strip.scrollLeft + strip.clientWidth / 2;
+    for (var i = 0; i < cards.length; i++) {
+      var dist = Math.abs(cards[i].offsetLeft + cards[i].offsetWidth / 2 - mid);
+      if (dist < bestD) { bestD = dist; best = i; }
+    }
+    return best;
+  }
+
+  function goLook(i) {
+    var strip = looksStrip();
+    if (!strip || !strip.children[i]) return;
+    var c = strip.children[i];
+    strip.scrollTo({ left: c.offsetLeft + c.offsetWidth / 2 - strip.clientWidth / 2, behavior: REDUCED ? 'auto' : 'smooth' });
+  }
+
+  function renderDots() {
+    var m = looksModal(), strip = looksStrip();
+    var dots = m && m.querySelector('.looks-modal__dots');
+    if (!dots || !strip) return;
+    var n = strip.children.length;
+    if (dots.children.length !== n) {
+      dots.innerHTML = '';
+      for (var i = 0; i < n; i++) {
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'looks-modal__dot';
+        dot.tabIndex = -1;
+        dot.addEventListener('click', goLook.bind(null, i));
+        dots.appendChild(dot);
+      }
+    }
+    var cur = lookIndex(strip);
+    for (var j = 0; j < dots.children.length; j++) dots.children[j].classList.toggle('is-active', j === cur);
+  }
+
+  // Странице вокруг (демо) — окно во весь экран открыто/закрыто: она прячет
+  // свою нижнюю панель, чтобы та не закрывала фото
+  function notifyOverlay(open) {
+    try {
+      if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'wc:overlay', open: open }, window.location.origin);
+    } catch (e) {}
+  }
+
+  function openLooks(group, trigger) {
+    var m = looksModal();
+    if (!m || !LOOK_KEYS[group]) return;
+    warmLooks();
+    clearTimeout(LOOKS.closeTimer);
+    var wasOpen = !m.hidden && m.classList.contains('is-open');
+    LOOKS.group = group;
+    if (trigger) LOOKS.trigger = trigger;
+    m.querySelectorAll('.looks-modal__strip').forEach(function (strip) {
+      strip.hidden = strip.getAttribute('data-look-group') !== group;
+    });
+    var title = document.getElementById('looksModalTitle');
+    if (title) title.textContent = LOOK_TITLES[group];
+    m.hidden = false;
+    ROOT.classList.add('looks-lock');
+    var strip = looksStrip();
+    if (strip) strip.scrollLeft = 0;
+    renderDots();
+    if (wasOpen) return;
+    notifyOverlay(true);
+    m.classList.remove('is-open');
+    requestAnimationFrame(function () { requestAnimationFrame(function () { m.classList.add('is-open'); }); });
+    var close = m.querySelector('.looks-modal__close');
+    if (close) try { close.focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  function closeLooks() {
+    var m = looksModal();
+    if (!m || m.hidden) return;
+    m.classList.remove('is-open');
+    ROOT.classList.remove('looks-lock');
+    notifyOverlay(false);
+    LOOKS.closeTimer = setTimeout(function () { m.hidden = true; }, REDUCED ? 0 : 280);
+    var back = LOOKS.trigger;
+    LOOKS.trigger = null;
+    if (back && back.isConnected) try { back.focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  function initLooks() {
+    var m = looksModal();
+    if (!m) return;
+    document.querySelectorAll('[data-looks]').forEach(function (btn) {
+      btn.addEventListener('click', function () { openLooks(btn.getAttribute('data-looks'), btn); });
+    });
+    // Закрыть: крестик или пустое место вокруг фото
+    m.addEventListener('click', function (e) {
+      var t = e.target;
+      if ((t.closest && t.closest('[data-looks-close]')) || t === m ||
+          (t.classList && (t.classList.contains('looks-modal__box') || t.classList.contains('looks-modal__strip')))) closeLooks();
+    });
+    m.querySelectorAll('.looks-modal__strip').forEach(function (strip) {
+      var raf = 0;
+      strip.addEventListener('scroll', function () {
+        if (raf) return;
+        raf = requestAnimationFrame(function () { raf = 0; renderDots(); });
+      }, { passive: true });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (m.hidden) return;
+      if (e.key === 'Escape') { e.preventDefault(); closeLooks(); return; }
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        var strip = looksStrip();
+        if (!strip) return;
+        e.preventDefault();
+        var next = lookIndex(strip) + (e.key === 'ArrowRight' ? 1 : -1);
+        goLook(Math.max(0, Math.min(strip.children.length - 1, next)));
+        return;
+      }
+      if (e.key === 'Tab') {
+        // фокус не уходит из окна: в нём одна кнопка — «Закрыть»
+        e.preventDefault();
+        var close = m.querySelector('.looks-modal__close');
+        if (close) close.focus();
+      }
+    });
+    var section = document.getElementById('dresscode');
+    if (section && 'IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (!entries.some(function (en) { return en.isIntersecting; })) return;
+        io.disconnect();
+        warmLooks();
+      }, { rootMargin: '100% 0px' });
+      io.observe(section);
+    }
+  }
+
   /* ─── Анкета: переключатели и напитки ─────────────── */
   function bindFormOption(label) {
     if (!label || label.dataset.bound) return;
@@ -761,11 +963,24 @@
     setImg('kidPhotoBride', d.kidPhotoBride);
     setImg('kidPhotoGroom', d.kidPhotoGroom);
     setImg('chatPhoto', d.chatPhoto);
+    // Фото образов (окно «Смотреть образы»). В редакторе новое фото сразу
+    // показываем: окно открывается на его группе (не при первой загрузке данных)
+    var lookChanged = '';
+    Object.keys(LOOK_KEYS).forEach(function (g) {
+      var keys = LOOK_KEYS[g];
+      if (!keys.some(function (k) { return k in d; })) return;
+      var sig = keys.map(function (k) { return typeof d[k] === 'string' ? d[k] : ''; }).join('|');
+      keys.forEach(function (k) { setImg(k, d[k]); });
+      if (LOOKS.sig[g] != null && LOOKS.sig[g] !== sig) lookChanged = g;
+      LOOKS.sig[g] = sig;
+    });
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);   // кадрирование фото в рамках
 
     rebuildDresses(d.dressCodeColors);
+    rebuildSuits(d.menColors);
     applySchedule(d.schedule);
     rebuildDrinks(d.drinks);
+    if (EDITING && lookChanged) openLooks(lookChanged);
   }
 
   function dataFromUrl() {
@@ -791,6 +1006,7 @@
       img.setAttribute('data-def', img.getAttribute('src') || '');
     });
     initReveal();
+    initLooks();
     renderChat(DEFAULT_CHAT);
     initChat();
     applySchedule(DEFAULT_SCHEDULE);   // базовое наполнение (сам по себе, без редактора)

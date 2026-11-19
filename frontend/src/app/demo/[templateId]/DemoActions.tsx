@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import ChooseTemplateLink from './ChooseTemplateLink';
 import styles from './DemoActions.module.css';
@@ -21,8 +21,19 @@ function toTemplates(e: React.MouseEvent) {
 }
 
 export default function DemoActions({ templateId, templateName }: { templateId: string; templateName: string }) {
+  // Шаблон открыл окно во весь экран (например, «Смотреть образы») — панель
+  // прячем, иначе она закрывала бы низ окна: его фото и точки листания
+  const [overlay, setOverlay] = useState(false);
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (e.origin !== window.location.origin || !e.data || e.data.type !== 'wc:overlay') return;
+      setOverlay(!!e.data.open);
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, []);
   return (
-    <nav className={styles.bar} aria-label="Шаблон">
+    <nav className={`${styles.bar} ${overlay ? styles.barHidden : ''}`} aria-label="Шаблон" aria-hidden={overlay || undefined}>
       <Link href="/templates" className={styles.back} onClick={toTemplates}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M19 12H5M11 18l-6-6 6-6" />

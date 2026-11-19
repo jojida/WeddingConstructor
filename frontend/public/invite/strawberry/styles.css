@@ -684,6 +684,128 @@ html.no-anim .pol, html.no-anim .pol__names, html.no-anim .st, html.no-anim .her
 }
 .dress__text:empty { display: none; }
 
+/* Подписи «Женщины» / «Мужчины», костюмы и кнопка «Смотреть образы» */
+.dress__label {
+  margin: calc(56 * var(--u)) 0 0;
+  font-family: var(--f-text);
+  font-style: italic;
+  font-weight: 500;
+  font-size: calc(100 * var(--u));
+  line-height: calc(116 * var(--u));
+  color: #fff;
+  text-shadow: 0 calc(4 * var(--u)) calc(16 * var(--u)) rgba(150, 20, 70, .3);
+}
+.dress__label + .dress__grid { margin-top: calc(34 * var(--u)); }
+.dress__grid + .dress__looks { margin-top: calc(64 * var(--u)); }
+.dress__looks + .dress__label { margin-top: calc(100 * var(--u)); }
+.dress__looks { background: #fff; color: var(--rose); }
+.dress__looks:hover { box-shadow: 0 calc(14 * var(--u)) calc(30 * var(--u)) rgba(160, 20, 80, .34); }
+.dress__grid--men { gap: calc(56 * var(--u)) calc(34 * var(--u)); }
+.suit { display: block; width: calc(300 * var(--u)); height: auto; aspect-ratio: 257 / 308; overflow: visible; }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ============================================================
+   ОКНО «СМОТРЕТЬ ОБРАЗЫ»: фото-примеры нарядов полароидами.
+   Телефон — лента с перелистыванием и точками, компьютер — все в ряд.
+   ============================================================ */
+html.looks-lock, html.looks-lock body { overflow: hidden; }
+.looks-modal {
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(118, 16, 58, .62);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity .28s ease;
+  overscroll-behavior: contain;
+}
+.looks-modal[hidden] { display: none; }
+.looks-modal.is-open { opacity: 1; }
+.looks-modal__box {
+  position: relative;
+  width: 100%; max-height: 100%;
+  padding: 64px 0 22px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.looks-modal__close {
+  position: fixed; top: 12px; right: 12px; z-index: 1;
+  width: 44px; height: 44px; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 50%;
+  background: #fff; color: var(--rose);
+  box-shadow: 0 6px 18px rgba(80, 0, 30, .28);
+  cursor: pointer;
+}
+.looks-modal__title {
+  margin: 0 56px 12px;
+  font-family: var(--f-text); font-style: italic; font-weight: 500;
+  font-size: clamp(26px, 7.4vw, 40px); line-height: 1.15;
+  color: #fff; text-align: center;
+  text-shadow: 0 2px 12px rgba(80, 0, 30, .35);
+}
+.looks-modal__strip {
+  --card: min(74vw, calc((100vh - 200px) / 1.62), 360px);
+  display: flex; gap: 18px;
+  width: 100%;
+  padding: 12px calc(50% - var(--card) / 2) 20px;
+  overflow-x: auto; overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+@supports (height: 100dvh) {
+  .looks-modal__strip { --card: min(74vw, calc((100dvh - 200px) / 1.62), 360px); }
+}
+.looks-modal__strip::-webkit-scrollbar { display: none; }
+.looks-modal__strip[hidden] { display: none; }
+.looks-modal__card {
+  flex: 0 0 var(--card);
+  margin: 0;
+  padding: 10px 10px 36px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 16px 36px rgba(80, 0, 30, .35);
+  scroll-snap-align: center;
+  opacity: 0;
+  transform: translateY(28px) rotate(var(--r, 0deg));
+  transition: opacity .45s ease, transform .6s cubic-bezier(.2, .8, .2, 1);
+  transition-delay: var(--d, 0ms);
+}
+.looks-modal__card:nth-child(3n+1) { --r: -1.6deg; }
+.looks-modal__card:nth-child(3n+2) { --r: 1.2deg; --d: 90ms; }
+.looks-modal__card:nth-child(3n)   { --r: -.7deg; --d: 180ms; }
+.looks-modal.is-open .looks-modal__card { opacity: 1; transform: rotate(var(--r, 0deg)); }
+.looks-modal__card img {
+  display: block;
+  width: 100%; height: auto; aspect-ratio: 2 / 3;
+  object-fit: cover; object-position: 50% 30%;
+  background: #fbe3eb;
+  border-radius: 2px;
+}
+.looks-modal__dots { display: flex; gap: 10px; justify-content: center; min-height: 10px; }
+.looks-modal__dot {
+  width: 9px; height: 9px; padding: 0;
+  border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, .45);
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
+}
+.looks-modal__dot.is-active { background: #fff; transform: scale(1.2); }
+/* Компьютер: все фото в ряд, без ленты */
+@media (min-width: 900px) and (min-height: 560px) {
+  .looks-modal__strip {
+    --card: min(300px, calc((100vw - 200px) / 3), calc((100vh - 220px) / 1.62));
+    justify-content: center; gap: 36px;
+    padding: 14px 40px 24px;
+    overflow: visible;
+  }
+  .looks-modal__dots { display: none; }
+  .looks-modal__close { top: 20px; right: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .looks-modal, .looks-modal__card { transition: none; }
+}
+
 /* ============================================================
    9 — МЕНЮ (макет: 17614–19283): волнистая рамка тянется под текст
    ============================================================ */

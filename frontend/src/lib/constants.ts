@@ -1280,8 +1280,15 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
     {
       title: 'Дресс-код', icon: '👗',
       fields: [
-        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета платьев', scope: 'data' },
-        { id: 'dressText',       type: 'textarea',  label: 'Текст под платьями', hint: 'Пусто — без текста', scope: 'custom', maxLength: 160 },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Женщины: цвета платьев', scope: 'data' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Женщины: образ 1', hint: 'Фото-примеры открываются кнопкой «Смотреть образы»', scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Женщины: образ 2', scope: 'custom' },
+        { id: 'dressPhoto3',     type: 'image',     label: 'Женщины: образ 3', scope: 'custom' },
+        { id: 'menColors',       type: 'colorList', label: 'Мужчины: цвета костюмов', scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Мужчины: образ 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Мужчины: образ 2', scope: 'custom' },
+        { id: 'dressMan3',       type: 'image',     label: 'Мужчины: образ 3', scope: 'custom' },
+        { id: 'dressText',       type: 'textarea',  label: 'Текст под образами', hint: 'Пусто — без текста', scope: 'custom', maxLength: 160 },
       ],
     },
     {
@@ -2242,6 +2249,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { time: '21:00', title: 'Танцы до утра', icon: '/invite/strawberry/assets/ic-disco.webp' },
     ],
     dressCodeColors: ['#f088a8', '#ffffff', '#ffa066'],
+    dressCodePhoto: '/invite/strawberry/assets/look-w1.jpg',
     drinks: [
       { value: 'sparkling',  label: 'Шампанское' },
       { value: 'white',      label: 'Белое вино' },
@@ -2276,6 +2284,12 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       forecast2Title:  'Бокал игристого',          forecast2Text: 'Для хорошего настроения',
       forecast3Title:  'Будьте разнообразны',      forecast3Text: 'Как пышный букет',
       forecast4Title:  'Будьте в центре внимания', forecast4Text: 'Блистайте на этом вечере',
+      dressPhoto2:     '/invite/strawberry/assets/look-w2.jpg',
+      dressPhoto3:     '/invite/strawberry/assets/look-w3.jpg',
+      menColors:       ['#ffffff', '#f2dfc4', '#f9b8cb'],
+      dressMan1:       '/invite/strawberry/assets/look-m1.jpg',
+      dressMan2:       '/invite/strawberry/assets/look-m2.jpg',
+      dressMan3:       '/invite/strawberry/assets/look-m3.jpg',
       dressText:       'Будем рады, если вы поддержите цвета нашего праздника',
       menuText:        'Сообщите об аллергиях и пожеланиях к еде в анкете — учтём их в меню.',
       surveyText:      'Пожалуйста, подтвердите своё присутствие до {{rsvpDate}}.',

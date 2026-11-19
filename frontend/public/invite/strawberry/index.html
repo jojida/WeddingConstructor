@@ -217,13 +217,56 @@
       </div>
     </section>
 
-    <!-- 8 — ДРЕСС-КОД: платья в цветах палитры пары -->
+    <!-- 8 — ДРЕСС-КОД: платья (женщины) и костюмы (мужчины) в цветах палитры пары;
+         «Смотреть образы» открывает окно с фото-примерами (#looksModal в конце страницы) -->
     <section class="dress" id="dresscode" data-wc-section="dresscode">
       <img width="1239" height="350" class="dress__title rv-soft" src="assets/title-dress.webp" alt="Дресс-код" loading="lazy" decoding="async" />
+      <p class="dress__label rv">Женщины</p>
       <div class="dress__grid rv-pop" data-edit="palette">
         <span class="dress__item" style="--c:#f088a8"></span><span class="dress__item" style="--c:#ffffff"></span><span class="dress__item" style="--c:#ffa066"></span>
       </div>
+      <button class="pill dress__looks rv" type="button" data-looks="women" aria-haspopup="dialog">Смотреть образы</button>
+      <p class="dress__label rv">Мужчины</p>
+      <div class="dress__grid dress__grid--men rv-pop" data-edit="menColors">
+        <svg class="suit" viewBox="0 0 257 308" aria-hidden="true" style="--c:#ffffff;--b:#df3d74"><use href="#st-suit" /></svg><svg class="suit" viewBox="0 0 257 308" aria-hidden="true" style="--c:#f2dfc4;--b:hsl(35 64% 68%)"><use href="#st-suit" /></svg><svg class="suit" viewBox="0 0 257 308" aria-hidden="true" style="--c:#f9b8cb;--b:hsl(343 84% 67%)"><use href="#st-suit" /></svg>
+      </div>
+      <button class="pill dress__looks rv" type="button" data-looks="men" aria-haspopup="dialog">Смотреть образы</button>
       <p class="dress__text rv" data-edit="dressText">Будем рады, если вы поддержите цвета нашего праздника</p>
+      <!-- Костюм в стиле платьев: пиджак — цвет палитры (--c), бабочка, платочек и
+           пуговицы — тот же оттенок темнее (--b), контур — как у платьев -->
+      <svg class="sprite" aria-hidden="true" width="0" height="0">
+        <symbol id="st-suit" viewBox="0 0 257 308">
+          <g stroke="#2a1a33" stroke-width="4.6" stroke-linejoin="round" stroke-linecap="round">
+            <path style="fill:var(--c)" d="M 58 50 C 44 62 36 92 32 128 C 28 168 25 210 23 246 C 33 250 46 251 57 249 C 60 212 64 170 68 132 C 70 112 72 98 72 92 Z" />
+            <path style="fill:var(--c)" d="M 199 50 C 213 62 221 92 225 128 C 229 168 232 210 234 246 C 224 250 211 251 200 249 C 197 212 193 170 189 132 C 187 112 185 98 185 92 Z" />
+            <path fill="#000" fill-opacity=".07" stroke="none" d="M 50 132 C 47 170 44 210 43 248 C 48 250 53 250 57 249 C 60 212 64 170 68 132 C 70 112 72 98 72 92 C 62 104 54 116 50 132 Z" />
+            <path fill="#000" fill-opacity=".07" stroke="none" d="M 207 132 C 210 170 213 210 214 248 C 209 250 204 250 200 249 C 197 212 193 170 189 132 C 187 112 185 98 185 92 C 195 104 203 116 207 132 Z" />
+            <path fill="none" stroke-width="2.8" d="M 24 234 C 34 237 46 238 57 236 M 233 234 C 223 237 211 238 200 236" />
+            <path style="fill:var(--c)" d="M 104 28 C 88 34 70 40 56 48 C 64 62 70 78 72 94 C 70 140 68 200 70 238 C 70 256 71 270 74 284 C 88 288 103 289 117 287 C 120 262 124 236 128.5 214 C 133 236 137 262 140 287 C 154 289 169 288 183 284 C 186 270 187 256 187 238 C 189 200 187 140 185 94 C 187 78 193 62 201 48 C 187 40 169 34 153 28 Z" />
+            <path fill="#000" fill-opacity=".06" stroke="none" d="M 162 150 C 172 196 176 240 178 285 C 171 287 162 288 152 288 C 150 248 151 204 150 168 Z" />
+            <path fill="#fff" d="M 106 29 C 114 36 122 40 128.5 40 C 135 40 143 36 151 29 L 128.5 166 Z" />
+            <path fill="none" stroke-width="2.4" d="M 128.5 52 L 128.5 160" />
+            <path fill="#fff" d="M 108 28 L 120 56 L 128.5 44 Z" />
+            <path fill="#fff" d="M 149 28 L 137 56 L 128.5 44 Z" />
+            <path style="fill:var(--c)" d="M 105 29 L 89 70 L 97 75 L 85 84 C 98 112 112 142 124 170 L 128.5 166 C 120 122 113 76 105 29 Z" />
+            <path style="fill:var(--c)" d="M 152 29 L 168 70 L 160 75 L 172 84 C 159 112 145 142 133 170 L 128.5 166 C 137 122 144 76 152 29 Z" />
+            <path fill="#000" fill-opacity=".08" stroke="none" d="M 168 70 L 160 75 L 172 84 C 159 112 145 142 133 170 C 149 140 161 112 168 88 Z" />
+            <path style="fill:var(--b)" d="M 122 42 C 114 33 103 28 96 31 C 92 39 92 49 96 57 C 103 59 114 54 122 48 Z" />
+            <path style="fill:var(--b)" d="M 135 42 C 143 33 154 28 161 31 C 165 39 165 49 161 57 C 154 59 143 54 135 48 Z" />
+            <rect style="fill:var(--b)" x="120.5" y="37" width="16" height="13" rx="4" />
+            <path style="fill:var(--b)" d="M 86 119 L 90 109 L 95 116 L 100 108 L 104 117 Z" />
+            <path fill="none" stroke-width="2.8" d="M 84 119 L 106 117" />
+            <path fill="none" stroke-width="2.8" d="M 79 232 C 89 234 100 234 110 232 M 178 232 C 168 234 157 234 147 232" />
+            <circle style="fill:var(--b)" stroke-width="2.2" cx="128.5" cy="184" r="4.4" />
+            <circle style="fill:var(--b)" stroke-width="2.2" cx="128.5" cy="203" r="4.4" />
+          </g>
+          <g fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="3.2" stroke-linecap="round">
+            <path d="M 46 104 C 41 132 38 168 36 214" />
+            <path d="M 81 110 C 80 150 79 196 81 262" />
+            <path d="M 97 82 C 104 104 111 124 117 142" />
+          </g>
+        </symbol>
+      </svg>
     </section>
 
     <!-- 9 — МЕНЮ: волнистая рамка с бантом -->
@@ -297,6 +340,29 @@
     </div>
 
   </main>
+
+  <!-- Окно «Смотреть образы»: фото-примеры нарядов полароидами. Открывают кнопки
+       дресс-кода; фото — поля редактора (как у других шаблонов: dressCodePhoto,
+       dressPhoto2–3, dressMan1–3), без своих фото — примеры шаблона (data-def) -->
+  <div class="looks-modal" id="looksModal" hidden>
+    <div class="looks-modal__box" role="dialog" aria-modal="true" aria-labelledby="looksModalTitle">
+      <button class="looks-modal__close" type="button" data-looks-close aria-label="Закрыть">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" /></svg>
+      </button>
+      <p class="looks-modal__title" id="looksModalTitle">Образы для женщин</p>
+      <div class="looks-modal__strip" data-look-group="women">
+        <figure class="looks-modal__card"><img src="assets/look-w1.jpg" data-def="assets/look-w1.jpg" data-edit="dressCodePhoto" alt="Образ для женщин 1" loading="lazy" decoding="async" /></figure>
+        <figure class="looks-modal__card"><img src="assets/look-w2.jpg" data-def="assets/look-w2.jpg" data-edit="dressPhoto2" alt="Образ для женщин 2" loading="lazy" decoding="async" /></figure>
+        <figure class="looks-modal__card"><img src="assets/look-w3.jpg" data-def="assets/look-w3.jpg" data-edit="dressPhoto3" alt="Образ для женщин 3" loading="lazy" decoding="async" /></figure>
+      </div>
+      <div class="looks-modal__strip" data-look-group="men" hidden>
+        <figure class="looks-modal__card"><img src="assets/look-m1.jpg" data-def="assets/look-m1.jpg" data-edit="dressMan1" alt="Образ для мужчин 1" loading="lazy" decoding="async" /></figure>
+        <figure class="looks-modal__card"><img src="assets/look-m2.jpg" data-def="assets/look-m2.jpg" data-edit="dressMan2" alt="Образ для мужчин 2" loading="lazy" decoding="async" /></figure>
+        <figure class="looks-modal__card"><img src="assets/look-m3.jpg" data-def="assets/look-m3.jpg" data-edit="dressMan3" alt="Образ для мужчин 3" loading="lazy" decoding="async" /></figure>
+      </div>
+      <div class="looks-modal__dots" aria-hidden="true"></div>
+    </div>
+  </div>
 
   <script src="../assets/preload.js"></script>
   <script src="/invite/assets/sections.js"></script>
