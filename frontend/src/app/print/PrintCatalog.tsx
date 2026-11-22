@@ -3,15 +3,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowDown, ArrowUpRight, Check, FileDown, Printer, Sparkles } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { PRINT_TEMPLATES, PRINT_PRICE, printDimensions, printPreview } from '@/lib/print';
+import { PRINT_FAQ, PRINT_TEMPLATES, PRINT_PRICE, printDimensions, printPreview } from '@/lib/print';
 import styles from './print.module.css';
 
 export default function PrintCatalog() {
   const [filter, setFilter] = useState('Все дизайны');
   return <><Navbar /><main className={styles.page}>
     <section className={styles.hero}>
-      <div className={styles.heroText}><span className={styles.eyebrow}>WEDDINGCRAFT · БУМАЖНАЯ КОЛЛЕКЦИЯ</span>
-        <h1>Ваша история.<br /><em>На красивой бумаге.</em></h1>
+      {/* H1 — строка над заголовком: в ней слова, по которым страницу ищут («печатные приглашения
+          на свадьбу»). Крупная строка «Ваша история…» осталась как была, но это уже не H1:
+          для поисковика в ней не было ни слова о том, что здесь продают. */}
+      <div className={styles.heroText}><h1 className={styles.eyebrow}>Печатные приглашения на свадьбу</h1>
+        <div className={styles.heroTitle}>Ваша история.<br /><em>На красивой бумаге.</em></div>
         <p>Приглашение на память о вашем дне.<br />Добавьте ваши слова и скачайте макет для печати.</p>
         <div className={styles.heroActions}><a className={styles.primary} href="#collection">Выбрать приглашение <ArrowDown size={17} /></a><span><b>{PRINT_PRICE} ₽</b> за готовый макет</span></div>
         <div className={styles.benefits}><span><Check size={14} /> PDF для печати</span><span><Check size={14} /> Без подписки</span><span><Check size={14} /> Любой тираж</span></div>
@@ -28,13 +31,7 @@ export default function PrintCatalog() {
       <div className={styles.grid}>{PRINT_TEMPLATES.filter(t => filter === 'Все дизайны' || t.category === filter).map(t => <Link href={`/print/editor?template=${t.id}`} key={t.id} className={styles.card}><div className={styles.cardArt} style={{ background: t.color }}><span className={styles.tag}>{t.category}</span><img {...printPreview(t.id)} alt={`Печатное приглашение «${t.name}»`} loading="lazy" /><span className={styles.cardHint}>Настроить приглашение <ArrowUpRight size={17} /></span></div><div className={styles.cardTitle}><h3>{t.name}</h3><span>{PRINT_PRICE} ₽</span></div><p>{t.description}</p><span className={styles.cardMeta}>A6 · {printDimensions(t.id)} · PDF <span>{String(PRINT_TEMPLATES.indexOf(t) + 1).padStart(2, '0')}</span></span></Link>)}</div>
     </section>
     <section className={styles.printNote}><Printer size={38} strokeWidth={1} /><div><span className={styles.eyebrow}>ОТ ЭКРАНА К ТЁПЛЫМ ВСТРЕЧАМ</span><h2>Красиво в руках.<br /><em>Просто в печати.</em></h2></div><div><p>Два PDF без водяного знака: A6 для дома и макет с вылетами 3 мм для типографии.</p><p>Текст можно менять, файлы — скачивать повторно. Бумага, печать и доставка оплачиваются отдельно.</p></div></section>
-    <section className={styles.faq}><h2>Осталось несколько вопросов?</h2>{[
-      ['Что входит в 290 ₽?', 'Один дизайн, правки текста и повторное скачивание PDF. Тираж для вашей свадьбы не ограничен.'],
-      ['Можно посмотреть до оплаты?', 'Да. Предпросмотр бесплатный; оплачивается скачивание PDF.'],
-      ['Какую бумагу выбрать?', 'Матовую, 250–300 г/м². Уточните допустимую плотность у типографии или в инструкции принтера и сделайте пробный отпечаток.'],
-      ['Как правильно распечатать?', 'Дома: A6, масштаб 100%, без подгонки. В типографии: PDF с вылетами 3 мм. Перед тиражом проверьте пробный отпечаток.'],
-      ['Нужно ли покупать сайт-приглашение?', 'Нет, макет покупается отдельно. Войдите по email, чтобы сохранить покупку и скачивать PDF повторно.'],
-    ].map(([q, a]) => <details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</section>
+    <section className={styles.faq}><h2>Осталось несколько вопросов?</h2>{PRINT_FAQ.map(([q, a]) => <details key={q}><summary>{q}<span>+</span></summary><p>{a}</p></details>)}</section>
     <footer className={styles.footer}><Link href="/">WeddingCraft</Link><Link href="/print/orders">Мои печатные приглашения</Link><Link href="/oferta">Оферта</Link><Link href="/contacts">Контакты</Link><a href="mailto:support@weddingcraft.ru">Помощь</a></footer>
   </main></>;
 }
