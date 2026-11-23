@@ -193,7 +193,7 @@ function render(st) {
   mover.setAttribute('transform', 'translate(0 ' + (SHIFT * Math.max(0, Math.min(1, st.b))).toFixed(2) + ')');
   if (svg.classList) { if (st.gem) svg.classList.add('is-gem'); else svg.classList.remove('is-gem'); }
 }
-var t0 = performance.now(), tL = null, capped = false, on = true, ending = false;
+var t0 = performance.now(), tL = null, capped = false, on = false, ending = false, killer = 0;
 function now() { return (performance.now() - t0) / 1000; }
 function markLoaded(cap) { if (tL === null) { tL = now(); capped = !!cap; } }
 function fontsReady() {
@@ -202,14 +202,20 @@ function fontsReady() {
   return Promise.race([fs.ready, new Promise(function (r) { setTimeout(r, 1500); })]);
 }
 function onLoad() { fontsReady().then(function () { markLoaded(false); }, function () { markLoaded(false); }); }
-if (document.readyState === 'complete') onLoad(); else window.addEventListener('load', onLoad);
-setTimeout(function () { markLoaded(true); }, CAP);
 var KEYS = { ' ': 1, Spacebar: 1, PageDown: 1, PageUp: 1, ArrowDown: 1, ArrowUp: 1, Home: 1, End: 1 };
 function block(e) { if (on && e.cancelable) e.preventDefault(); }
 function onKey(e) { if (on && KEYS[e.key] === 1) e.preventDefault(); }
-box.addEventListener('wheel', block, { passive: false });
-box.addEventListener('touchmove', block, { passive: false });
-window.addEventListener('keydown', onKey);
+function cleanup() {
+  if (!on) return;
+  on = false;
+  clearTimeout(killer);
+  box.classList.remove('is-on');
+  box.classList.remove('is-out');
+  box.removeEventListener('wheel', block);
+  box.removeEventListener('touchmove', block);
+  window.removeEventListener('keydown', onKey);
+  try { window.dispatchEvent(new Event('wc:boot-done')); } catch (err) {}
+}
 function videoReady() {
   return new Promise(function (res) {
     var v = document.querySelector('video[data-boot-wait]');
@@ -225,27 +231,29 @@ function finish() {
   ending = true;
   videoReady().then(function () {
     box.classList.add('is-out');
-    setTimeout(function () {
-      on = false;
-      box.classList.remove('is-on');
-      box.classList.remove('is-out');
-      box.removeEventListener('wheel', block);
-      box.removeEventListener('touchmove', block);
-      window.removeEventListener('keydown', onKey);
-      try { window.dispatchEvent(new Event('wc:boot-done')); } catch (err) {}
-    }, 480);
-  });
+    setTimeout(cleanup, 480);
+  }, cleanup);
 }
 function tick() {
-  if (box.isConnected === false && document.body && location.pathname === PATH0) document.body.appendChild(box);
-  if (calm && tL !== null) return finish();
-  var st = stateAt(now(), tL);
-  render(st);
-  if (st.done) return finish();
+  if (!on) return;
+  try {
+    if (box.isConnected === false && document.body && location.pathname === PATH0) document.body.appendChild(box);
+    if (calm && tL !== null) return finish();
+    var st = stateAt(now(), tL);
+    render(st);
+    if (st.done) return finish();
+  } catch (err) { return cleanup(); }
   requestAnimationFrame(tick);
 }
+try { render(stateAt(0, null)); } catch (err) { return; }
+on = true;
+box.addEventListener('wheel', block, { passive: false });
+box.addEventListener('touchmove', block, { passive: false });
+window.addEventListener('keydown', onKey);
+if (document.readyState === 'complete') onLoad(); else window.addEventListener('load', onLoad);
+setTimeout(function () { markLoaded(true); }, CAP);
+killer = setTimeout(cleanup, CAP + 9000);
 box.classList.add('is-on');
-render(stateAt(0, null));
 requestAnimationFrame(tick);
 })();
 `;
