@@ -1,5 +1,6 @@
 'use client';
 import { useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react';
+import RingsLoader from '@/components/RingsLoader';
 import { DEVICES, fitScale, type PreviewDevice } from './PreviewDevice';
 import s from './SitePreview.module.css';
 
@@ -12,7 +13,13 @@ import s from './SitePreview.module.css';
    Рамки и окно уменьшаются под место только transform: шаблон верстается под
    ширину своего экрана. На телефоне (≤768 px) редактор показывает только
    «Окно» во всю ширину; касания оно не ловит (свайп листал бы приглашение, а не
-   страницу), нажатие — onTap. */
+   страницу), нажатие — onTap.
+
+   Пока шаблон в окне грузится, поверх него — загрузка «бесконечность → кольца»,
+   как на главной (components/RingsLoader.tsx, 24.11.26). Шаблон загрузился —
+   это и его скрипт (сообщение wc:ready), и iframe с картинками первого экрана
+   (событие load). Другое устройство или другой шаблон — новый iframe, и
+   загрузка показывается заново. */
 const DESKTOP = { w: 1440, h: 900 };
 
 export default function SitePreview({ device, innerRef, onTap, children }: {
@@ -24,6 +31,7 @@ export default function SitePreview({ device, innerRef, onTap, children }: {
   children: ReactNode;
 }) {
   const areaRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState<number | null>(null);
   useLayoutEffect(() => {
     const el = areaRef.current;
@@ -44,15 +52,72 @@ export default function SitePreview({ device, innerRef, onTap, children }: {
     return () => ro.disconnect();
   }, [device]);
 
+  // Загрузка поверх сайта: gen — номер iframe шаблона (новый — загрузка заново)
+  const [boot, setBoot] = useState({ gen: 0, device, ready: false, on: true });
+  if (boot.device !== device) setBoot({ gen: boot.gen + 1, device, ready: false, on: true });
+  const gen = boot.gen;
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+    let frame: HTMLIFrameElement | null = null;
+    let said = false, loaded = false;
+    const ready = () => setBoot(b => (b.gen === gen && !b.ready ? { ...b, ready: true } : b));
+    const onLoad = () => { loaded = true; if (said) ready(); };
+    const onMsg = (e: MessageEvent) => {
+      if (!frame || e.source !== frame.contentWindow || e.data?.type !== 'wc:ready') return;
+      said = true;
+      if (loaded) ready();
+    };
+    const scan = () => {
+      const f = content.querySelector('iframe');
+      if (!f) {
+        // Шаблон нарисован прямо на странице, без iframe, — ждать нечего.
+        // Пустая обёртка — компонент шаблона ещё качается (next/dynamic).
+        if (content.childElementCount > 0) ready();
+        return;
+      }
+      if (f === frame) return;
+      if (frame) {
+        // Другой шаблон — новый iframe: загрузка заново
+        setBoot(b => (b.gen === gen ? { ...b, gen: b.gen + 1, ready: false, on: true } : b));
+        return;
+      }
+      frame = f;
+      f.addEventListener('load', onLoad);
+      try {
+        const doc = f.contentDocument;
+        if (doc && doc.readyState === 'complete' && doc.URL !== 'about:blank') loaded = true;
+      } catch { loaded = true; }
+    };
+    window.addEventListener('message', onMsg);
+    const mo = new MutationObserver(scan);
+    mo.observe(content, { childList: true, subtree: true });
+    scan();
+    return () => {
+      mo.disconnect();
+      window.removeEventListener('message', onMsg);
+      frame?.removeEventListener('load', onLoad);
+    };
+  }, [gen]);
+
   const tap = onTap
     ? () => { if (window.matchMedia('(max-width: 768px)').matches) onTap(); }
     : undefined;
+
+  // Шаблон — в обёртке display: contents (раскладку не меняет), загрузка — рядом с ней
+  const content = <div ref={contentRef} className={s.content}>{children}</div>;
+  // В уменьшенном окне знак крупнее в его пикселях — на экране он те же ~200 px
+  const loader = boot.on ? (
+    <RingsLoader key={gen} ready={boot.ready} size={device === 'window' ? 200 : 200 / (scale ?? 1)}
+      onDone={() => setBoot(b => (b.gen === gen ? { ...b, on: false } : b))} />
+  ) : null;
 
   if (device === 'window') {
     return (
       <div ref={areaRef} className={s.area}>
         <div ref={innerRef} className={s.column} onClick={tap}>
-          {children}
+          {content}
+          {loader}
         </div>
       </div>
     );
@@ -66,13 +131,13 @@ export default function SitePreview({ device, innerRef, onTap, children }: {
     <div ref={areaRef} className={s.area}>
       {device === 'desktop' ? (
         <div className={s.window} style={box}>
-          <div ref={innerRef} className={s.scaled} style={inner}>{children}</div>
+          <div ref={innerRef} className={s.scaled} style={inner}>{content}{loader}</div>
         </div>
       ) : (
         <div className={s.frameBox} style={box}>
           <div className={`${s.frame} ${device === 'tablet' ? s.frameTablet : ''}`} style={inner}>
             <div className={s.frameScreen}>
-              <div ref={innerRef} className={s.frameContent}>{children}</div>
+              <div ref={innerRef} className={s.frameContent}>{content}{loader}</div>
             </div>
           </div>
         </div>

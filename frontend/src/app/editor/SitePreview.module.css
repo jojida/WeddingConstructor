@@ -25,7 +25,12 @@
   background: #fff;
   box-shadow: 0 24px 60px -24px rgba(60, 48, 32, .45), 0 0 0 1px rgba(0, 0, 0, .06);
 }
-.scaled { transform-origin: 0 0; }
+.scaled { position: relative; transform-origin: 0 0; }
+
+/* Обёртка шаблона (SitePreview.tsx): своей коробки нет — iframe раскладывается,
+   как будто лежит прямо в колонке или окне; нужна, чтобы найти iframe шаблона
+   отдельно от загрузки поверх него */
+.content { display: contents; }
 
 /* «Телефон» и «Планшет» — в рамке устройства (как было до 16.11.26) */
 .frameBox { position: relative; flex: none; }
@@ -43,7 +48,7 @@
 }
 .frameScreen { width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #111827; }
 .frameTablet .frameScreen { border-radius: 18px; }
-.frameContent { width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; }
+.frameContent { position: relative; width: 100%; height: 100%; overflow-y: auto; scrollbar-width: none; }
 .frameContent::-webkit-scrollbar { display: none; }
 
 @media (max-width: 768px) {
