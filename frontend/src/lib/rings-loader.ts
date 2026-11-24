@@ -14,6 +14,11 @@
    режим сигнала — data-ready="1" на блоке или событие wc:boot-ready на нём),
    участок дорисовывает знак, петли округляются в два кольца, кольца
    сцепляются, появляются бриллиант, искра и два сердечка — и загрузка тает.
+   Таять она ждёт ещё одного: на главной — видео первого экрана (до 2,5 с),
+   в режиме сигнала — data-settled="1" / wc:boot-settled («догрузилось всё
+   на виду», до 5 с). Так кольца складываются, пока докачиваются картинки.
+   В режиме сигнала финал вдвое быстрее (~2 с вместо ~4 с: «сделай загрузку
+   короче в редакторе», 24.11.26), на главной — прежний.
    Конец — событие wc:boot-done на блоке (в режиме страницы — ещё и на window).
    Запас: через 10 с от начала перестаём ждать, даже если что-то повисло;
    любая ошибка в анимации сразу убирает загрузку, а через 19 с она снимается
@@ -61,6 +66,14 @@ const CSS = `
 .wc-boot .is-gem .wb-heart{opacity:1;transform:none;transition:opacity .25s,transform .5s cubic-bezier(.34,1.56,.64,1)}
 .wc-boot .is-gem .wb-h1{transition-delay:.62s}
 .wc-boot .is-gem .wb-h2{transition-delay:.8s}
+.wc-boot[data-wait=signal]{transition-duration:.3s}
+.wc-boot[data-wait=signal] .is-gem .wb-gem-line{transition-duration:.3s}
+.wc-boot[data-wait=signal] .is-gem .wb-l2{transition-delay:.1s}
+.wc-boot[data-wait=signal] .is-gem .wb-l3{transition-delay:.18s}
+.wc-boot[data-wait=signal] .is-gem .wb-spark{transition:opacity .15s .3s,transform .35s .3s cubic-bezier(.34,1.56,.64,1)}
+.wc-boot[data-wait=signal] .is-gem .wb-heart{transition:opacity .2s,transform .35s cubic-bezier(.34,1.56,.64,1)}
+.wc-boot[data-wait=signal] .is-gem .wb-h1{transition-delay:.35s}
+.wc-boot[data-wait=signal] .is-gem .wb-h2{transition-delay:.45s}
 `;
 
 /* Бриллиант стоит на правом кольце (низ камня — точка 0,0 его группы). Место
@@ -107,7 +120,8 @@ var A = 66, B = 52.8, W_LINE = 1.9, W_RING = 2.6, GAP = 2.4, R0 = A / 2, SHIFT =
 var FL = { x: -19, y: 8, r: 33 }, FR = { x: 20, y: 3, r: 30 };
 var PI = Math.PI, HALF = PI / 2, BASE = [HALF, PI, 3 * HALF, 0];
 var CIRC = [['L', 0, -PI], ['L', -PI, -PI], ['R', -PI, PI], ['R', 0, PI]], ORDER = [2, 1, 0, 3];
-var LAP = 1.5, D_FILL = 0.7, D_A = 0.6, D_B = 0.85, D_TAIL = 1.4, CAP = 10000, VIDEO_WAIT = 2500;
+var LAP = 1.5, CAP = 10000, VIDEO_WAIT = 2500, SETTLE_WAIT = 5000;
+var D_FILL = SIGNAL ? 0.35 : 0.7, D_A = SIGNAL ? 0.35 : 0.6, D_B = SIGNAL ? 0.55 : 0.85, D_TAIL = SIGNAL ? 0.45 : 1.4, FADE_MS = SIGNAL ? 320 : 480;
 var calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 function G(th) { return [A * Math.cos(th), B / 2 * Math.sin(2 * th)]; }
 function lerp(a, b, k) { return a + (b - a) * k; }
@@ -248,12 +262,19 @@ function videoReady() {
     timer = setTimeout(ok, VIDEO_WAIT);
   });
 }
+function settled() {
+  return new Promise(function (res) {
+    if (capped || box.getAttribute('data-settled')) return res();
+    var timer = setTimeout(res, SETTLE_WAIT);
+    box.addEventListener('wc:boot-settled', function () { clearTimeout(timer); res(); });
+  });
+}
 function finish() {
   if (ending) return;
   ending = true;
-  (SIGNAL ? Promise.resolve() : videoReady()).then(function () {
+  (SIGNAL ? settled() : videoReady()).then(function () {
     box.classList.add('is-out');
-    setTimeout(cleanup, 480);
+    setTimeout(cleanup, FADE_MS);
   }, cleanup);
 }
 function tick() {

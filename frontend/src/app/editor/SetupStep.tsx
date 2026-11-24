@@ -37,7 +37,8 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
   /** Приглашение слева: пример шаблона (lib/demo-invite.ts) или уже начатое — если анкету открыли из редактора */
   previewBase: PreviewData;
   apiBase: string;
-  /** Как смотреть сайт слева — общий выбор с редактором (useStoredDevice в нём) */
+  /** Как смотреть сайт слева — общий выбор с редактором (useStoredDevice в нём);
+      пока не выбирали — «Окно» (в редакторе по умолчанию «Телефон») */
   device: PreviewDevice;
   onDevice: (d: PreviewDevice) => void;
   onComplete: (d: SetupData) => void;

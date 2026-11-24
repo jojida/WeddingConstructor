@@ -282,7 +282,10 @@ function EditorContent() {
   // Превью (SitePreview.tsx): «Окно» — сайт без рамки, как в демо (колонка до
   // 500 px во всю высоту), «Телефон» и «Планшет» — в рамке, «Компьютер» — окно
   // 1440×900, уменьшенное под место. На телефоне — только «Окно» во всю ширину.
-  const [device, setDevice] = useStoredDevice();
+  // Пока вид не выбирали, редактор открывается «Телефоном», анкета — «Окном»
+  // (24.11.26); выбранный вручную помнится и общий для обоих.
+  const [chosenDevice, setDevice] = useStoredDevice();
+  const device: PreviewDevice = chosenDevice ?? 'phone';
   const phoneScreen = useMediaQuery('(max-width: 768px)');
   const shownDevice: PreviewDevice = phoneScreen ? 'window' : device;
   const [fullMode, setFullMode] = useState<FullPreviewMode>('window');
@@ -775,7 +778,7 @@ function EditorContent() {
   if (step === 'setup') {
     return (
       <SetupStep templateId={data.templateId} initialData={data} previewBase={setupPreviewBase} apiBase={apiBase}
-        device={device} onDevice={setDevice}
+        device={chosenDevice ?? 'window'} onDevice={setDevice}
         onComplete={handleSetupComplete} onClose={setupFromEditor ? () => setStep('editor') : undefined} />
     );
   }

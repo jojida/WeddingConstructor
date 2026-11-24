@@ -16,10 +16,11 @@ import s from './SitePreview.module.css';
    страницу), нажатие — onTap.
 
    Пока шаблон в окне грузится, поверх него — загрузка «бесконечность → кольца»,
-   как на главной (components/RingsLoader.tsx, 24.11.26). Шаблон загрузился —
-   это и его скрипт (сообщение wc:ready), и iframe с картинками первого экрана
-   (событие load). Другое устройство или другой шаблон — новый iframe, и
-   загрузка показывается заново. */
+   как на главной (components/RingsLoader.tsx, 24.11.26), только с быстрым
+   финалом. Кольца начинают складываться, когда ответил скрипт шаблона
+   (сообщение wc:ready), а тает загрузка, когда iframe догрузился с картинками
+   первого экрана (событие load). Другое устройство или другой шаблон — новый
+   iframe, и загрузка показывается заново. */
 const DESKTOP = { w: 1440, h: 900 };
 
 export default function SitePreview({ device, innerRef, onTap, children }: {
@@ -52,42 +53,42 @@ export default function SitePreview({ device, innerRef, onTap, children }: {
     return () => ro.disconnect();
   }, [device]);
 
-  // Загрузка поверх сайта: gen — номер iframe шаблона (новый — загрузка заново)
-  const [boot, setBoot] = useState({ gen: 0, device, ready: false, on: true });
-  if (boot.device !== device) setBoot({ gen: boot.gen + 1, device, ready: false, on: true });
+  // Загрузка поверх сайта: gen — номер iframe шаблона (новый — загрузка заново);
+  // ready — можно складывать кольца, settled — можно таять
+  const [boot, setBoot] = useState({ gen: 0, device, ready: false, settled: false, on: true });
+  if (boot.device !== device) setBoot({ gen: boot.gen + 1, device, ready: false, settled: false, on: true });
   const gen = boot.gen;
   useLayoutEffect(() => {
     const content = contentRef.current;
     if (!content) return;
     let frame: HTMLIFrameElement | null = null;
-    let said = false, loaded = false;
-    const ready = () => setBoot(b => (b.gen === gen && !b.ready ? { ...b, ready: true } : b));
-    const onLoad = () => { loaded = true; if (said) ready(); };
+    const mark = (settled: boolean) => setBoot(b => (
+      b.gen !== gen || (b.ready && (b.settled || !settled)) ? b : { ...b, ready: true, settled: b.settled || settled }
+    ));
+    const onLoad = () => mark(true);
     const onMsg = (e: MessageEvent) => {
-      if (!frame || e.source !== frame.contentWindow || e.data?.type !== 'wc:ready') return;
-      said = true;
-      if (loaded) ready();
+      if (frame && e.source === frame.contentWindow && e.data?.type === 'wc:ready') mark(false);
     };
     const scan = () => {
       const f = content.querySelector('iframe');
       if (!f) {
         // Шаблон нарисован прямо на странице, без iframe, — ждать нечего.
         // Пустая обёртка — компонент шаблона ещё качается (next/dynamic).
-        if (content.childElementCount > 0) ready();
+        if (content.childElementCount > 0) mark(true);
         return;
       }
       if (f === frame) return;
       if (frame) {
         // Другой шаблон — новый iframe: загрузка заново
-        setBoot(b => (b.gen === gen ? { ...b, gen: b.gen + 1, ready: false, on: true } : b));
+        setBoot(b => (b.gen === gen ? { ...b, gen: b.gen + 1, ready: false, settled: false, on: true } : b));
         return;
       }
       frame = f;
       f.addEventListener('load', onLoad);
       try {
         const doc = f.contentDocument;
-        if (doc && doc.readyState === 'complete' && doc.URL !== 'about:blank') loaded = true;
-      } catch { loaded = true; }
+        if (doc && doc.readyState === 'complete' && doc.URL !== 'about:blank') mark(true);
+      } catch { mark(true); }
     };
     window.addEventListener('message', onMsg);
     const mo = new MutationObserver(scan);
@@ -108,7 +109,7 @@ export default function SitePreview({ device, innerRef, onTap, children }: {
   const content = <div ref={contentRef} className={s.content}>{children}</div>;
   // В уменьшенном окне знак крупнее в его пикселях — на экране он те же ~200 px
   const loader = boot.on ? (
-    <RingsLoader key={gen} ready={boot.ready} size={device === 'window' ? 200 : 200 / (scale ?? 1)}
+    <RingsLoader key={gen} ready={boot.ready} settled={boot.settled} size={device === 'window' ? 200 : 200 / (scale ?? 1)}
       onDone={() => setBoot(b => (b.gen === gen ? { ...b, on: false } : b))} />
   ) : null;
 

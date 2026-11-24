@@ -6,7 +6,8 @@ import { RINGS_MARKUP, RINGS_SCRIPT } from '@/lib/rings-loader';
    главной) — сейчас поверх сайта в окне редактора (app/editor/SitePreview.tsx).
    Анимация — тот же движок lib/rings-loader.ts в «режиме сигнала»: пока
    ready=false, по бесконечности бегает участок; ready=true — знак превращается
-   в кольца, загрузка тает и зовёт onDone (тогда её можно убрать).
+   в кольца (быстрый финал, ~1,7 с); растаять загрузка ждёт settled (по
+   умолчанию = ready, не дольше 5 с), потом зовёт onDone — тогда её можно убрать.
 
    Родителю нужен position: relative — блок ложится на него целиком.
    size — размер знака в CSS-пикселях родителя: в уменьшенном окне (transform)
@@ -15,8 +16,11 @@ import { RINGS_MARKUP, RINGS_SCRIPT } from '@/lib/rings-loader';
    Блок рисуется сразу видимым (is-on) — шаблон под ним не мелькает, пока
    скрипт не запустился. Скрипт вставляется элементом <script>: так он
    выполняется (в innerHTML — нет) и находит свой блок через currentScript. */
-export default function RingsLoader({ ready, size = 200, onDone }: {
+export default function RingsLoader({ ready, settled = ready, size = 200, onDone }: {
+  /** Можно складывать кольца */
   ready: boolean;
+  /** Можно таять: всё, что под загрузкой на виду, догрузилось */
+  settled?: boolean;
   size?: number;
   onDone?: () => void;
 }) {
@@ -46,6 +50,13 @@ export default function RingsLoader({ ready, size = 200, onDone }: {
     box.setAttribute('data-ready', '1');
     box.dispatchEvent(new Event('wc:boot-ready'));
   }, [ready]);
+
+  useEffect(() => {
+    const box = ref.current;
+    if (!box || !settled) return;
+    box.setAttribute('data-settled', '1');
+    box.dispatchEvent(new Event('wc:boot-settled'));
+  }, [settled]);
 
   return (
     <div
