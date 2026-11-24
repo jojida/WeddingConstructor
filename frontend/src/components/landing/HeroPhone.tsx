@@ -35,14 +35,8 @@ export default function HeroPhone() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    /* Загрузка главной (BootLoader) перед тем как растаять ждёт, пока видео
-       заиграет (событие playing), — или этого сигнала, если играть оно не будет. */
-    const bootReady = () => {
-      if (video.dataset.bootReady) return;
-      video.dataset.bootReady = '1';
-      video.dispatchEvent(new Event('wc:boot-ready'));
-    };
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { bootReady(); return; }
+    // Без движения — видео не включаем, остаётся заставка-постер
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     let visible = true;
     const attach = () => {
@@ -51,8 +45,7 @@ export default function HeroPhone() {
       // Только H.264: WebM/VP9 в части сборок Chrome падает с ошибкой
       // декодирования, а на запасной источник браузер после неё не переходит.
       video.src = `${A}/invite-loop.mp4`;
-      if (visible) video.play().catch(bootReady /* энергосбережение iOS — останется заставка */);
-      else bootReady();
+      if (visible) video.play().catch(() => { /* энергосбережение iOS — останется заставка */ });
     };
     const io = new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
@@ -97,7 +90,6 @@ export default function HeroPhone() {
             loop
             playsInline
             preload="none"
-            data-boot-wait=""
             aria-label="Пример приглашения: конверт открывается, появляется обложка с парой"
           />
         </div>

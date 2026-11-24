@@ -9,7 +9,6 @@ import TemplateShowcase from '@/components/TemplateShowcase';
 import PrintInvitationsTeaser from '@/components/PrintInvitationsTeaser';
 import HeroPhone from '@/components/landing/HeroPhone';
 import FeatureDemo from '@/components/landing/FeatureDemo';
-import BootLoader from '@/components/landing/BootLoader';
 import { NAME_MAX, withPreviewNames } from '@/lib/preview-names';
 import { usePreviewNames } from '@/lib/use-preview-names';
 import { reachGoal, GOAL } from '@/lib/metrika';
@@ -741,10 +740,8 @@ function JsonLd() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   return (
-    <>
-    {/* Загрузка «бесконечность → кольца»: первой в разметке, чтобы её скрипт
-        запустился до отрисовки страницы (см. BootLoader.tsx) */}
-    <BootLoader />
+    // Загрузки «бесконечность → кольца» на главной больше нет (24.11.26, по просьбе
+    // владельца): страница показывается сразу. В окне сайта редактора она осталась.
     <div className={styles.page}>
       <JsonLd />
       <Header />
@@ -763,6 +760,5 @@ export default function HomePage() {
       <Cta />
       <Footer />
     </div>
-    </>
   );
 }
