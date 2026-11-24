@@ -1054,26 +1054,14 @@ html.no-anim .cover__name, html.no-anim .cover__amp { opacity: 1; -webkit-mask-i
   .invite { max-width: none; box-shadow: none; }
   .invite > * { max-width: var(--wide); margin-left: auto; margin-right: auto; --u: var(--wide-u); }
 
-  /* ── Обложка: три витражных окна ── */
+  /* ── Обложка: одно витражное окно по центру, во всю высоту экрана ──
+     Боковые окна-копии (.cover::before/::after) убраны 24.11.26 по просьбе
+     владельца: «не должно быть такого разделения» — по бокам фон страницы. */
   .cover {
     --u: calc(var(--cover-h) / 2601);
     max-width: none; width: calc(1366 * var(--u));
-    overflow: visible;
+    overflow: visible;                         /* снег — на всю ширину окна */
   }
-  .cover::before, .cover::after {
-    content: ""; position: absolute; top: 8%; z-index: 0;
-    width: 84%; height: 84%;
-    background: url("assets/cover.jpg") center / 100% 100% no-repeat;
-    opacity: 0;
-    transition: opacity 1.8s ease .4s;
-    pointer-events: none;
-  }
-  .cover::before { right: calc(100% + min(5vw, 96px)); }
-  .cover::after { left: calc(100% + min(5vw, 96px)); }
-  /* боковые окна видны сразу, пока закрыты двери центрального, — по бокам не пусто */
-  html.hero-go .cover::before, html.hero-go .cover::after,
-  html.no-anim .cover::before, html.no-anim .cover::after,
-  html.has-doors .cover::before, html.has-doors .cover::after { opacity: 1; }
   .cover__snow { left: calc(50% - 50vw); right: calc(50% - 50vw); }
   /* двери открываются в центральном окне */
   .doors {
