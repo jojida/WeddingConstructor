@@ -38,7 +38,7 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
   previewBase: PreviewData;
   apiBase: string;
   /** Как смотреть сайт слева — общий выбор с редактором (useStoredDevice в нём);
-      пока не выбирали — «Окно» (в редакторе по умолчанию «Телефон») */
+      пока не выбирали — «Телефон» */
   device: PreviewDevice;
   onDevice: (d: PreviewDevice) => void;
   onComplete: (d: SetupData) => void;

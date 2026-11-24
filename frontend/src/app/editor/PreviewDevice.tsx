@@ -13,9 +13,9 @@ import s from './PreviewDevice.module.css';
    место только transform.
 
    «Окно» (с 16.11.26) — сайт без рамки, как на странице демо: колонка до
-   500 px во всю высоту. С него начинается анкета «Расскажите о вашей
-   свадьбе», а редактор — с «Телефона» (24.11.26: «по умолчанию при загрузке
-   в редакторе — телефонная версия»). */
+   500 px во всю высоту. Анкета «Расскажите о вашей свадьбе» и редактор по
+   умолчанию открываются «Телефоном» (24.11.26: «по умолчанию при загрузке
+   в редакторе — телефонная версия», «анкета тоже в телефоне»). */
 export type PreviewDevice = 'window' | 'phone' | 'tablet' | 'desktop';
 /** Устройства в рамке (и «Компьютер» — окно 1440×900) */
 export type FramedDevice = Exclude<PreviewDevice, 'window'>;
@@ -32,20 +32,20 @@ export const DEVICES: Record<FramedDevice, { w: number; h: number; min: number; 
   desktop: { w: 1472, h: 932, min: 0.2, max: 1, label: 'Компьютер' },
 };
 
-/* Ключ сменён 24.11.26 (был wc_editor_device): там лежали выборы времён, когда
-   по умолчанию было «Окно», — с ними новое «по умолчанию» у многих не заработало бы. */
-const STORAGE_KEY = 'wc_preview_device';
+/* Ключ сменён 24.11.26 (были wc_editor_device, затем wc_preview_device): в
+   старых лежали выборы времён, когда по умолчанию было «Окно», — с ними новое
+   «по умолчанию» у многих не заработало бы. */
+const STORAGE_KEY = 'wc_preview_device_v2';
 
-/** Устройство, выбранное вручную (null — ещё не выбирали: у анкеты и редактора
-    свои «по умолчанию»). Выбор помнится в браузере (удобство, не данные
-    приглашения) и общий для обоих экранов. Читается после монтирования: в dev
-    редактор рендерится и на сервере. */
-export function useStoredDevice(): [PreviewDevice | null, (d: PreviewDevice) => void] {
-  const [device, setDevice] = useState<PreviewDevice | null>(null);
+/** Выбранное устройство помнится в браузере (удобство, не данные приглашения)
+    и общее для анкеты и редактора; пока не выбирали — «Телефон». Читается
+    после монтирования: в dev редактор рендерится и на сервере. */
+export function useStoredDevice(): [PreviewDevice, (d: PreviewDevice) => void] {
+  const [device, setDevice] = useState<PreviewDevice>('phone');
   useEffect(() => {
     const saved = readStorage('localStorage', STORAGE_KEY);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- разовое чтение после монтирования, см. выше
-    if (saved === 'window' || saved === 'phone' || saved === 'tablet' || saved === 'desktop') setDevice(saved);
+    if (saved === 'window' || saved === 'tablet' || saved === 'desktop') setDevice(saved);
   }, []);
   const choose = (d: PreviewDevice) => {
     setDevice(d);
