@@ -144,8 +144,8 @@ export default function PhotoboothTemplate({ data, apiBase, fullPage, slug, edit
   const head = "'Roboto Condensed', 'Arial Narrow', Arial, sans-serif";
   const text = "'Open Sans', 'Segoe UI', Arial, sans-serif";
   const custom = data.customData || {};
-  const groom = data.groomName || 'Михаил';
-  const bride = data.brideName || 'Анна';
+  const groom = data.groomName || 'Артём';
+  const bride = data.brideName || 'Вера';
   const names = `${bride} & ${groom}`;
   // Как fitNames в script.js: строка не шире 1240, ~0,68 кегля на знак с разрядкой
   const nfs = Math.min(78, 1240 / (names.length * 0.68));

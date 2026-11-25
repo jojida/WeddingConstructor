@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Анна и Михаил — приглашение на свадьбу</title>
+  <title>Вера и Артём — приглашение на свадьбу</title>
   <!-- До отрисовки: в редакторе заставка — слой на обложке (не поверх сайта),
        без анимации в тарифе (intro=0) и при «меньше движения» — сразу сайт -->
   <script>
@@ -83,7 +83,7 @@
       <img class="spark hero-in hero-in--2" style="--x:176;--y:1080;--w:123" src="assets/spark-black.webp" alt="" />
       <img class="spark hero-in hero-in--2" style="--x:92;--y:1374;--w:117" src="assets/spark-black.webp" alt="" />
       <img class="spark hero-in hero-in--2" style="--x:1029;--y:1279;--w:110" src="assets/spark-black.webp" alt="" />
-      <h1 class="hero__names hero-in hero-in--3" id="heroNames"><span data-name="bride">Анна</span> &amp; <span data-name="groom">Михаил</span></h1>
+      <h1 class="hero__names hero-in hero-in--3" id="heroNames"><span data-name="bride">Вера</span> &amp; <span data-name="groom">Артём</span></h1>
       <p class="hero__date hero-in hero-in--3" id="heroDate" data-edit="heroDate">12/06/2027</p>
     </section>
 
@@ -127,8 +127,10 @@
       <h2 class="title plans__title rv" data-edit="programTitle">Планы на эту ночь</h2>
       <p class="label plans__sub rv" data-edit="programSubtitle">Один день, тысяча воспоминаний</p>
       <div class="prog" id="prog">
-        <svg class="prog__svg" id="progSvg" aria-hidden="true"><path id="progPath" class="prog__path" d="" /></svg>
-        <img width="73" height="66" class="prog__heart" src="assets/heart-white.webp" alt="" />
+        <svg class="prog__svg" id="progSvg" aria-hidden="true">
+          <path id="progPath" class="prog__path" d="" />
+          <image id="progHeart" class="prog__heart" href="assets/heart-white.webp" width="73" height="66" x="-200" y="-200" />
+        </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
     </section>
@@ -142,7 +144,15 @@
         <span style="--c:#000000"></span><span style="--c:#ffffff"></span><span style="--c:#766a66"></span>
       </div>
       <div class="dress__rail"></div>
-      <img width="1261" height="1091" class="dress__clothes rv-soft" src="assets/clothes.webp" data-edit="dressCodePhoto" alt="Образы гостей" loading="lazy" decoding="async" />
+      <div class="dress__stage">
+        <div class="rack" id="rack" aria-hidden="true">
+          <span class="rack__item" style="--x:0;--w:180;--i:0"><img width="180" height="922" src="assets/rack-1.webp" alt="" loading="lazy" decoding="async" /></span>
+          <span class="rack__item" style="--x:199;--w:530;--i:1"><img width="530" height="1084" src="assets/rack-2.webp" alt="" loading="lazy" decoding="async" /></span>
+          <span class="rack__item" style="--x:748;--w:205;--i:2"><img width="205" height="1091" src="assets/rack-3.webp" alt="" loading="lazy" decoding="async" /></span>
+          <span class="rack__item" style="--x:992;--w:269;--i:3"><img width="269" height="926" src="assets/rack-4.webp" alt="" loading="lazy" decoding="async" /></span>
+        </div>
+        <img width="1261" height="1091" class="dress__clothes" src="assets/clothes.webp" data-edit="dressCodePhoto" alt="Образы гостей" loading="lazy" decoding="async" />
+      </div>
     </section>
 
     <!-- 7 — ЛОКАЦИЯ -->
@@ -168,7 +178,7 @@
       </div>
       <div class="wish rv">
         <p class="label wish__label"><img src="assets/spark-white.webp" alt="" /><span data-edit="wish3Title">Есть вопросы</span></p>
-        <div class="wish__text" data-edit="wish3Text"><p>Напишите нам — поможем со всеми деталями.</p><p>Анна · +7 (999) 123-45-67</p></div>
+        <div class="wish__text" data-edit="wish3Text"><p>Напишите нам — поможем со всеми деталями.</p><p>Вера · +7 (999) 123-45-67</p></div>
       </div>
     </section>
 
@@ -214,8 +224,8 @@
         <img class="spark" style="--x:109;--y:62;--w:127" src="assets/spark-black.webp" alt="" />
         <img class="spark" style="--x:1134;--y:582;--w:127" src="assets/spark-black.webp" alt="" />
         <h2 class="title fin__title rv" data-edit="closingTitle">До встречи на танцполе!</h2>
-        <div class="fin__photo rv-soft"><img src="assets/couple-dance.jpg" data-edit="closingPhoto" alt="Мы танцуем" loading="lazy" decoding="async" /></div>
-        <p class="title title--s fin__names rv" id="finNames"><span data-name="bride">Анна</span> &amp; <span data-name="groom">Михаил</span></p>
+        <div class="fin__photo rv-soft"><img width="1030" height="920" src="assets/dance.svg" data-edit="closingPhoto" alt="Жених и невеста танцуют" loading="lazy" decoding="async" /></div>
+        <p class="title title--s fin__names rv" id="finNames"><span data-name="bride">Вера</span> &amp; <span data-name="groom">Артём</span></p>
         <div class="cd rv" data-wc-section="countdown" aria-live="off">
           <p class="label cd__title" data-edit="countdownTitle">До нашей встречи</p>
           <div class="cd__row">

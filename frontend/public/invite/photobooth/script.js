@@ -18,7 +18,7 @@
   var STATE = {
     apiBase: '', slug: '', guestToken: '', guestName: '',
     date: '2027-06-12', time: '16:00',
-    groom: 'Михаил', bride: 'Анна',
+    groom: 'Артём', bride: 'Вера',
     scheduleSig: '',
     paraSig: {}
   };
@@ -325,6 +325,43 @@
     }
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     path.setAttribute('d', d);
+    TRACK.u = u;
+    try { TRACK.len = path.getTotalLength(); } catch (e) { TRACK.len = 0; }
+    TRACK.y0 = pts[0][1];
+    TRACK.y1 = pts[pts.length - 1][1];
+    var heart = document.getElementById('progHeart');
+    if (heart) { heart.setAttribute('width', (73 * u).toFixed(1)); heart.setAttribute('height', (66 * u).toFixed(1)); }
+    updateHeart();
+  }
+
+  // Сердце — на пунктире, вслед за прокруткой (позиция атрибутом, без переходов)
+  var TRACK = { len: 0, y0: 0, y1: 0, u: 1 };
+  function updateHeart() {
+    var prog = document.getElementById('prog');
+    var path = document.getElementById('progPath');
+    var heart = document.getElementById('progHeart');
+    if (!prog || !path || !heart || !TRACK.len) return;
+    var top = prog.getBoundingClientRect().top;
+    var span = TRACK.y1 - TRACK.y0;
+    var p = span > 0 ? (window.innerHeight * 0.55 - (top + TRACK.y0)) / span : 0;
+    p = Math.max(0, Math.min(1, p));
+    var pt;
+    try { pt = path.getPointAtLength(p * TRACK.len); } catch (e) { return; }
+    heart.setAttribute('x', (pt.x - 36.5 * TRACK.u).toFixed(1));
+    heart.setAttribute('y', (pt.y - 33 * TRACK.u).toFixed(1));
+  }
+
+  // Пластинка крутится вслед за прокруткой
+  var vinylEl = null;
+  function updateVinyl() {
+    if (!vinylEl || REDUCED) return;
+    vinylEl.style.transform = 'rotate(' + ((window.pageYOffset || 0) * 0.32).toFixed(1) + 'deg)';
+  }
+  var scrollQueued = false;
+  function onScroll() {
+    if (scrollQueued) return;
+    scrollQueued = true;
+    requestAnimationFrame(function () { scrollQueued = false; updateHeart(); updateVinyl(); });
   }
 
   /* ─── Дресс-код: цвета кружками ───────────────────── */
@@ -451,6 +488,17 @@
       });
     }, { threshold: 0, rootMargin: '0px 0px 10% 0px' });
     observeReveal(document);
+    var rack = document.getElementById('rack');
+    if (rack) {
+      var ioRack = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          rack.classList.add('in');
+          ioRack.disconnect();
+        });
+      }, { threshold: 0.25 });
+      ioRack.observe(rack);
+    }
   }
   function observeReveal(scope) {
     (scope || document).querySelectorAll(REVEAL).forEach(function (el) {
@@ -460,8 +508,9 @@
 
   /* ─── Пластинка: нажатие включает и выключает музыку ── */
   function initVinyl() {
-    var v = document.getElementById('vinyl');
+    var v = vinylEl = document.getElementById('vinyl');
     if (!v) return;
+    updateVinyl();
     v.addEventListener('click', function () {
       var b = document.querySelector('.wc-music-btn');
       if (b) b.click();
@@ -621,12 +670,26 @@
     setImg('stripPhoto1', d.stripPhoto1);
     setImg('stripPhoto2', d.stripPhoto2);
     setImg('dressCodePhoto', d.dressCodePhoto);
+    var clothes = document.querySelector('.dress__clothes'), dress = document.querySelector('.dress');
+    if (clothes && dress) {
+      var def = '';
+      try { def = new URL(clothes.getAttribute('data-def') || '', window.location.href).href; } catch (e) {}
+      dress.classList.toggle('has-own', !!clothes.src && clothes.src !== def);
+    }
     setImg('closingPhoto', d.closingPhoto);
+    stillDance();
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);
 
     rebuildColors(d.dressCodeColors);
     applySchedule(d.schedule);
     rebuildDrinks(d.drinks);
+  }
+
+  // «Меньше движения»: вместо танца — неподвижная пара
+  function stillDance() {
+    if (!REDUCED) return;
+    var img = document.querySelector('img[data-edit="closingPhoto"]');
+    if (img && /assets\/dance\.svg$/.test(img.getAttribute('src') || '')) img.setAttribute('src', 'assets/dance-still.svg');
   }
 
   function dataFromUrl() {
@@ -653,6 +716,7 @@
     });
     initReveal();
     applySchedule(DEFAULT_SCHEDULE);
+    window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', function () { layoutTrack(); fitNames(); fitGreeting(); }, { passive: true });
     window.addEventListener('load', function () { layoutTrack(); fitNames(); fitGreeting(); });
     if ('ResizeObserver' in window) {
