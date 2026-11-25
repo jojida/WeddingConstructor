@@ -62,9 +62,9 @@ export interface RingsPalette {
   glowBlend: 'screen' | 'normal';
 }
 
-/** Неон на тёмном — свечение по-настоящему светится */
+/** Неон на тёмном — свечение по-настоящему светится (сейчас не используется) */
 export const RINGS_NIGHT: RingsPalette = { bg: '#170e14', ink: '#ff6fa8', hot: '#fff1f7', track: 0.17, glow: 0.95, glowBlend: 'screen' };
-/** Тот же неон на светлом фоне сайта */
+/** Тот же неон на светлом фоне сайта — на сайте сейчас эта */
 export const RINGS_DAY: RingsPalette = { bg: '#faf8f5', ink: '#e0508a', hot: '#ff2f85', track: 0.15, glow: 0.45, glowBlend: 'normal' };
 
 const HEART = 'M0 3.4 C-1.3 2.3 -5.2 -.4 -5.2 -3.1 C-5.2 -5 -3.8 -6.2 -2.4 -6.2 C-1.3 -6.2 -.4 -5.5 0 -4.5 ' +
@@ -442,7 +442,9 @@ export function ringsAssets(p: RingsPalette) {
   return { markup: `<style>${css(p).trim()}</style>${SVG}`, script: script(p) };
 }
 
-const ASSETS = ringsAssets(RINGS_NIGHT);
+/* На сайте — светлая палитра: из двух показанных рядом (тёмный неон и тот же
+   неон на светлом фоне) владелец выбрал светлую, 25.11.26. */
+const ASSETS = ringsAssets(RINGS_DAY);
 /** Стили и знак — содержимое блока .wc-boot (без скрипта). */
 export const RINGS_MARKUP = ASSETS.markup;
 export const RINGS_SCRIPT = ASSETS.script;
