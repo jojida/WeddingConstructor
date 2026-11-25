@@ -26,7 +26,7 @@ const BY_TEMPLATE: Record<string, string> = {
   calla: 'classic', ivory: 'classic', vadimdarya: 'classic', etalon: 'classic', velvet: 'classic',
   angels: 'romance', tenderness: 'romance', powder: 'romance', sketch: 'romance', strawberry: 'romance',
   floral: 'garden', 'garden-arch': 'garden', 'garden-evening': 'garden', forest: 'garden',
-  mediterranean: 'modern',
+  mediterranean: 'modern', photobooth: 'modern',
 };
 
 export function themeFor(templateId: string, requested?: unknown): Theme {

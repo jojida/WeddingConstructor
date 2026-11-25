@@ -156,6 +156,19 @@ const HANDMADE_TEMPLATES = [
     sampleDaysAhead: 241,
   },
   {
+    id: 'photobooth',
+    name: 'Фотобудка',
+    description: 'Чёрно-белая вечеринка: заставка-фотобудка печатает ленту ваших фото, дальше — сердце, пластинка и диско.',
+    tags: ['Чёрно-белый', 'Вечеринка', 'Заставка', 'Фото', 'Анимация'],
+    colors: ['#fffaf2', '#000000', '#a83e3d'],
+    preview: '/invite/photobooth/assets/preview.jpg',
+    defaultCover: '/invite/photobooth/assets/cover.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Анна',
+    sampleGroom: 'Михаил',
+    sampleDaysAhead: 199,
+  },
+  {
     id: 'strawberry',
     name: 'Клубника',
     description: 'Розовый скрапбук: полароид, стикеры, клубника и ваша переписка в телефоне.',
@@ -308,7 +321,7 @@ const HANDMADE_TEMPLATES = [
    потом его место — по спросу.
    Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
 const CATALOG_ORDER = [
-  'tenderness', 'powder', 'strawberry', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
+  'tenderness', 'powder', 'photobooth', 'strawberry', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
   'sketch', 'vadimdarya', 'mediterranean', 'garden-arch', 'angels', 'floral',
 ];
 const catalogRank = (id: string) => {
@@ -541,6 +554,7 @@ export const TEMPLATE_GREETING_KEY: Record<string, string> = {
   tenderness: 'greetingTitle',
   powder: 'greetingTitle',
   strawberry: 'greetingTitle',
+  photobooth: 'greetingTitle',
   velvet: 'greetingTitle',
   angels: 'greetingTitle',
   forest: 'greetingTitle',
@@ -666,6 +680,17 @@ export const ICON_SETS: Record<string, string[]> = {
     '/invite/powder/assets/perfume.webp',
     '/invite/powder/assets/jewelbox.webp',
     '/invite/powder/assets/bag.webp',
+  ],
+  photobooth: [
+    '/invite/photobooth/assets/ic-clapper.webp',
+    '/invite/photobooth/assets/ic-rings.webp',
+    '/invite/photobooth/assets/ic-glasses.webp',
+    '/invite/photobooth/assets/ic-mic.webp',
+    '/invite/photobooth/assets/ic-disco.webp',
+    '/invite/photobooth/assets/heart-white.webp',
+    '/invite/photobooth/assets/spark-white.webp',
+    '/invite/photobooth/assets/cloche.webp',
+    '/invite/photobooth/assets/sparkles-silver.webp',
   ],
   strawberry: [
     '/invite/strawberry/assets/ic-rings.webp',
@@ -830,6 +855,7 @@ const TEMPLATE_MUSIC: Record<string, string> = {
   tenderness: 'nocturne',
   powder: 'canon',
   strawberry: 'canon',
+  photobooth: 'canon',
   velvet: 'nocturne',
   angels: 'air',
   forest: 'thousand',
@@ -1211,6 +1237,88 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
         { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
+  photobooth: [
+    {
+      title: 'Фотобудка', icon: '📸',
+      fields: [
+        { id: 'stripPhoto1', type: 'image', label: 'Фото 1 на ленте', hint: 'Лучше горизонтальное', scope: 'custom' },
+        { id: 'stripPhoto2', type: 'image', label: 'Фото 2 на ленте', hint: 'Лучше горизонтальное', scope: 'custom' },
+        { id: 'introLabel',  type: 'text',  label: 'Надпись над заголовком', hint: 'Пусто — без надписи', scope: 'custom', maxLength: 30 },
+        { id: 'introTitle',  type: 'text',  label: 'Заголовок', hint: 'Пусто — без заголовка', scope: 'custom', maxLength: 26 },
+        { id: 'introHint',   type: 'text',  label: 'Подсказка над кнопкой', hint: 'Пусто — без подсказки', scope: 'custom', maxLength: 34 },
+      ],
+    },
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'coverPhoto', type: 'image',  label: 'Фото в сердце', hint: 'Лучше вертикальное или квадратное', scope: 'data' },
+        { id: 'coverBw',    type: 'toggle', label: 'Чёрно-белое фото, как в макете', scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'Например: Дорогие гости. По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения (абзацы с новой строки)', scope: 'data', maxLength: 260 },
+      ],
+    },
+    {
+      title: 'Меню', icon: '🍽',
+      fields: [
+        { id: 'menuText', type: 'textarea', label: 'Текст о меню (абзацы с новой строки)', scope: 'custom', maxLength: 200 },
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'programTitle',    type: 'text', label: 'Заголовок', scope: 'custom', maxLength: 30 },
+        { id: 'programSubtitle', type: 'text', label: 'Подзаголовок', hint: 'Пусто — без подзаголовка', scope: 'custom', maxLength: 40 },
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', iconSet: 'photobooth' },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', hint: 'Пусто — без текста', scope: 'custom', maxLength: 140 },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета', scope: 'data' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Фото образов', hint: 'Пусто — вешалки с одеждой из макета', scope: 'data' },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Лофт «Звёзды»', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK,
+      ],
+    },
+    {
+      title: 'Пожелания', icon: '💌',
+      fields: [
+        { id: 'wish1Title', type: 'text',     label: 'Пункт 1: заголовок', scope: 'custom', maxLength: 30 },
+        { id: 'story',      type: 'textarea', label: 'Пункт 1: текст (о подарках)', scope: 'data', maxLength: 220 },
+        { id: 'wish2Title', type: 'text',     label: 'Пункт 2: заголовок', hint: 'Пусто — без пункта', scope: 'custom', maxLength: 30 },
+        { id: 'wish2Text',  type: 'textarea', label: 'Пункт 2: текст', scope: 'custom', maxLength: 220 },
+        { id: 'wish3Title', type: 'text',     label: 'Пункт 3: заголовок', hint: 'Пусто — без пункта', scope: 'custom', maxLength: 30 },
+        { id: 'wish3Text',  type: 'textarea', label: 'Пункт 3: текст (контакты)', scope: 'custom', maxLength: 220 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingTitle', type: 'text',  label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'closingPhoto', type: 'image', label: 'Картинка над именами', hint: 'Пусто — танцующая пара из макета', scope: 'custom' },
       ],
     },
     MUSIC_SECTION,
@@ -2050,6 +2158,7 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
     'Фото места': 'hall', 'Жених и невеста': 'couple', 'Фото пары': 'photos', 'Витражные двери': 'envelope',
     'История пары': 'story', 'Детали': 'details',
     'Детские фото': 'story', 'Переписка': 'chat', 'Советы гостям': 'forecast',
+    'Фотобудка': 'envelope',
   };
   const result: TemplateSection[] = [];
   if (!sections.some(s => ids[s.title] === 'cover')) {
@@ -2230,6 +2339,59 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       rsvpQuestions:  ['menu'],
       closingTitle:   'С любовью, ваши',
       closingSign:    '', // Пустое поле — имена пары.
+    },
+  },
+
+  photobooth: {
+    inviteText:
+      'Мы хотим провести этот день с теми, кто делает нашу жизнь ярче.\n' +
+      'Будут объятия, счастливые слёзы и танцы до самых звёзд. Ждём вас на нашей свадьбе!',
+    venue: 'Лофт «Звёзды»',
+    venueAddress: 'Москва, ул. Крымский Вал, 9',
+    story: 'Ваше присутствие — уже подарок. Если захотите порадовать нас ещё, будем благодарны за вклад в наше свадебное путешествие.',
+    schedule: [
+      { time: '16:00', title: 'Собираемся', icon: '/invite/photobooth/assets/ic-clapper.webp' },
+      { time: '17:00', title: 'Говорим «Да»', icon: '/invite/photobooth/assets/ic-rings.webp' },
+      { time: '18:00', title: 'Поднимаем бокалы', icon: '/invite/photobooth/assets/ic-glasses.webp' },
+      { time: '20:00', title: 'Зажигаем танцпол', icon: '/invite/photobooth/assets/ic-mic.webp' },
+    ],
+    dressCodeColors: ['#000000', '#ffffff', '#766a66'],
+    dressCodePhoto: '/invite/photobooth/assets/clothes.webp',
+    drinks: [
+      { value: 'sparkling',  label: 'Шампанское' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'cognac',     label: 'Коньяк или виски' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      introLabel:      'Фотобудка любви',
+      introTitle:      'Сейчас вы всё узнаете',
+      introHint:       'Нажмите, чтобы сделать фото',
+      stripPhoto1:     '/invite/photobooth/assets/strip-1.jpg',
+      stripPhoto2:     '/invite/photobooth/assets/strip-2.jpg',
+      coverBw:         true,
+      greetingTitle:   'Дорогие гости',
+      menuTitle:       'Меню',
+      menuText:        'Меню разнообразно, поэтому сообщите нам заранее, если у вас есть какие-либо предпочтения или диетические ограничения.',
+      programTitle:    'Планы на эту ночь',
+      programSubtitle: 'Один день, тысяча воспоминаний',
+      dressTitle:      'Блистать разрешается',
+      dressText:       'Чёрный, белый, серебро. Выбирайте то, в чём хочется танцевать.',
+      venueTitle:      'Локация',
+      wishTitle:       'Пара пожеланий',
+      wish1Title:      'О подарках',
+      wish2Title:      'О цветах',
+      wish2Text:       'Вместо букета принесите хорошее настроение и любимую песню для нашего танцпола.',
+      wish3Title:      'Есть вопросы',
+      wish3Text:       'Напишите нам — поможем со всеми деталями.\nАнна · +7 (999) 123-45-67',
+      surveyTitle:     'Вы с нами?',
+      surveyText:      'Без вас эта вечеринка не будет полной. Ответьте, пожалуйста, до {{rsvpDate}}.',
+      rsvpChildren:    true,
+      rsvpQuestions:   ['menu', 'allergy'],
+      closingTitle:    'До встречи на танцполе!',
+      closingPhoto:    '/invite/photobooth/assets/couple-dance.jpg',
+      countdownTitle:  'До нашей встречи',
     },
   },
 

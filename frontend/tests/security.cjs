@@ -34,7 +34,7 @@ test('studio proxy blocks private/reserved IPs and unsafe URL schemes', async ()
 });
 
 test('all invitation runtimes reject executable links and attribute injection', () => {
-  for (const name of ['script.js', 'calla/script.js', 'floral/script.js', 'garden-arch/script.js', 'sketch/script.js', 'vadimdarya/script.js', 'ivory/script.js', 'garden-evening/script.js', 'forest/script.js', 'angels/script.js', 'tenderness/script.js', 'vitrage/script.js', 'powder/script.js', 'strawberry/script.js', 'velvet/script.js', 'assets/studio-runtime.js']) {
+  for (const name of ['script.js', 'calla/script.js', 'floral/script.js', 'garden-arch/script.js', 'sketch/script.js', 'vadimdarya/script.js', 'ivory/script.js', 'garden-evening/script.js', 'forest/script.js', 'angels/script.js', 'tenderness/script.js', 'vitrage/script.js', 'powder/script.js', 'strawberry/script.js', 'photobooth/script.js', 'velvet/script.js', 'assets/studio-runtime.js']) {
     const filename = path.join(__dirname, '../public/invite', name);
     const source = fs.readFileSync(filename, 'utf8');
     // Parse the actual runtime functions; exercise malicious persisted field values.

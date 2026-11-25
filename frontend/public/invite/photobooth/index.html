@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Анна и Михаил — приглашение на свадьбу</title>
+  <!-- До отрисовки: в редакторе заставка — слой на обложке (не поверх сайта),
+       без анимации в тарифе (intro=0) и при «меньше движения» — сразу сайт -->
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search), h = document.documentElement;
+      var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (q.get('editing') === '1') h.classList.add('wc-edit', 'no-anim', 'hero-go');
+      else if (q.get('intro') === '0' || reduced) h.classList.add('wc-no-intro', 'no-anim', 'hero-go');
+      else h.classList.add('intro-on', 'intro-lock');
+    })();
+  </script>
+  <link rel="preload" as="font" type="font/woff2" href="../assets/fonts/roboto-condensed-cyrillic.woff2" crossorigin />
+  <link rel="preload" as="image" href="assets/camera.webp" />
+  <link rel="stylesheet" href="styles.css" />
+  <noscript><style>
+    .intro { display: none !important; }
+    html.intro-lock, html.intro-lock body { overflow: auto !important; }
+    .rv, .rv-soft, .rv-pop > *, .hero-in { opacity: 1 !important; transform: none !important; }
+  </style></noscript>
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="../assets/intro-preview.js"></script>
+</head>
+<body>
+
+  <!-- ЗАСТАВКА «ФОТОБУДКА»: гость нажимает красную кнопку — вспышка, камера
+       печатает ленту с фото пары и датой, потом открывается сайт.
+       Платная (intro=0 — нет), в редакторе — слой на обложке по кнопке -->
+  <div class="intro" id="intro" data-wc-section="envelope">
+    <div class="intro__box">
+      <img width="134" height="132" class="intro__spark" src="assets/spark-black.webp" alt="" />
+      <p class="intro__label" data-edit="introLabel">Фотобудка любви</p>
+      <p class="intro__title" data-edit="introTitle">Сейчас вы всё узнаете</p>
+      <!-- лента выезжает из щели камеры: окно обрезки начинается у щели -->
+      <div class="intro__slot">
+        <div class="strip" id="strip">
+          <div class="strip__frame"><img src="assets/strip-1.jpg" data-edit="stripPhoto1" alt="" /></div>
+          <div class="strip__frame"><img src="assets/strip-2.jpg" data-edit="stripPhoto2" alt="" /></div>
+          <p class="strip__date" id="stripDate">12.06.2027</p>
+        </div>
+      </div>
+      <img width="788" height="683" class="intro__camera" src="assets/camera.webp" alt="Фотоаппарат" />
+      <span class="intro__flash" aria-hidden="true"></span>
+      <img width="75" height="111" class="intro__bolt" src="assets/bolt.webp" alt="" />
+      <div class="intro__call">
+        <p class="intro__hint" data-edit="introHint">Нажмите, чтобы сделать фото</p>
+        <img width="12" height="102" class="intro__arrow" src="assets/arrow.webp" alt="" />
+        <button type="button" class="intro__btn" id="introBtn" aria-label="Сделать фото">
+          <img width="303" height="303" src="assets/button.webp" alt="" />
+          <img width="161" height="161" class="intro__btn-spark" src="assets/button-spark.webp" alt="" />
+        </button>
+      </div>
+    </div>
+    <div class="intro__checker" aria-hidden="true"></div>
+    <button type="button" class="intro__skip" id="introSkip">Пропустить заставку</button>
+    <span class="intro__white" aria-hidden="true"></span>
+  </div>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА: фото в сердце, «мы женимся» в кружках, имена и дата -->
+    <section class="hero" id="hero" data-wc-section="cover">
+      <img width="1193" height="1500" class="hero__card" src="assets/hero-card.webp" alt="" />
+      <div class="hero__heart hero-in hero-in--1">
+        <img src="assets/cover.jpg" data-edit="coverPhoto" alt="Наше фото" />
+      </div>
+      <img width="1088" height="1145" class="hero__line hero-in hero-in--1" src="assets/heart-line.webp" alt="" />
+      <p class="hero__words" aria-label="Мы женимся">
+        <span class="dot" style="--x:137;--y:840;--i:0">М</span><span class="dot" style="--x:238;--y:840;--i:1">Ы</span>
+        <span class="dot" style="--x:444;--y:1000;--i:2">Ж</span><span class="dot" style="--x:568;--y:1020;--i:3">Е</span>
+        <span class="dot" style="--x:680;--y:1003;--i:4">Н</span><span class="dot" style="--x:776;--y:1047;--i:5">И</span>
+        <span class="dot" style="--x:864;--y:1017;--i:6">М</span><span class="dot" style="--x:983;--y:1058;--i:7">С</span>
+        <span class="dot" style="--x:1072;--y:1017;--i:8">Я</span>
+      </p>
+      <img class="spark hero-in hero-in--2" style="--x:11;--y:29;--w:123" src="assets/spark-black.webp" alt="" />
+      <img class="spark hero-in hero-in--2" style="--x:1000;--y:27;--w:127" src="assets/spark-black.webp" alt="" />
+      <img class="spark hero-in hero-in--2" style="--x:162;--y:154;--w:96" src="assets/spark-black.webp" alt="" />
+      <img class="spark hero-in hero-in--2" style="--x:176;--y:1080;--w:123" src="assets/spark-black.webp" alt="" />
+      <img class="spark hero-in hero-in--2" style="--x:92;--y:1374;--w:117" src="assets/spark-black.webp" alt="" />
+      <img class="spark hero-in hero-in--2" style="--x:1029;--y:1279;--w:110" src="assets/spark-black.webp" alt="" />
+      <h1 class="hero__names hero-in hero-in--3" id="heroNames"><span data-name="bride">Анна</span> &amp; <span data-name="groom">Михаил</span></h1>
+      <p class="hero__date hero-in hero-in--3" id="heroDate" data-edit="heroDate">12/06/2027</p>
+    </section>
+
+    <!-- 2 — ПРИВЕТСТВИЕ: пластинка крутится; «Дорогие» мелко, обращение крупно -->
+    <section class="greet" id="greeting" data-wc-section="greeting">
+      <img width="720" height="720" class="greet__vinyl" id="vinyl" src="assets/vinyl.webp" alt="" />
+      <h2 class="greet__head rv" data-edit="greetingTitle"><span class="greet__label" id="greetLabel">Дорогие</span><span class="title greet__title" id="greetTitle">гости</span></h2>
+      <div class="greet__text rv" data-edit="inviteText">
+        <p>Мы хотим провести этот день с теми, кто делает нашу жизнь ярче.</p>
+        <p>Будут объятия, счастливые слёзы и танцы до самых звёзд. Ждём вас на нашей свадьбе!</p>
+      </div>
+    </section>
+
+    <!-- 3 — ДАТА: билет на чёрном, день в сердце -->
+    <section class="dark ticketbox" id="date" data-wc-section="date">
+      <div class="ticket rv-soft" data-edit="calendar">
+        <img width="893" height="1698" class="ticket__img" src="assets/ticket.webp" alt="" />
+        <span class="ticket__line ticket__line--t" aria-hidden="true"></span>
+        <span class="ticket__line ticket__line--b" aria-hidden="true"></span>
+        <span class="ticket__line ticket__line--l" aria-hidden="true"></span>
+        <span class="ticket__line ticket__line--r" aria-hidden="true"></span>
+        <div class="ticket__heart"><span id="tDay">12</span></div>
+        <p class="ticket__month" id="tMonth">июня</p>
+        <p class="ticket__year" id="tYear">2027</p>
+        <p class="ticket__wday" id="tWday">суббота</p>
+      </div>
+    </section>
+
+    <!-- 4 — МЕНЮ: клош и рука с подносом -->
+    <section class="menu" id="menu" data-wc-section="menu">
+      <img width="626" height="535" class="menu__cloche rv-soft" src="assets/cloche.webp" alt="" loading="lazy" decoding="async" />
+      <h2 class="title title--s menu__title rv" data-edit="menuTitle">Меню</h2>
+      <div class="menu__text rv" data-edit="menuText">
+        <p>Меню разнообразно, поэтому сообщите нам заранее, если у вас есть какие-либо предпочтения или диетические ограничения.</p>
+      </div>
+      <img width="844" height="808" class="menu__waiter rv-soft" src="assets/waiter.webp" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 5 — ПРОГРАММА: «Планы на эту ночь» на чёрном, пунктир с сердцем -->
+    <section class="dark plans" id="program" data-wc-section="schedule">
+      <h2 class="title plans__title rv" data-edit="programTitle">Планы на эту ночь</h2>
+      <p class="label plans__sub rv" data-edit="programSubtitle">Один день, тысяча воспоминаний</p>
+      <div class="prog" id="prog">
+        <svg class="prog__svg" id="progSvg" aria-hidden="true"><path id="progPath" class="prog__path" d="" /></svg>
+        <img width="73" height="66" class="prog__heart" src="assets/heart-white.webp" alt="" />
+        <!-- пункты .prog__row строит script.js из расписания -->
+      </div>
+    </section>
+
+    <!-- 6 — ДРЕСС-КОД: «Блистать разрешается», цвета кружками, вешалки -->
+    <section class="dress" id="dresscode" data-wc-section="dresscode">
+      <img width="178" height="438" class="dress__disco" src="assets/disco.webp" alt="" loading="lazy" decoding="async" />
+      <h2 class="title dress__title rv" data-edit="dressTitle">Блистать разрешается</h2>
+      <p class="text dress__text rv" data-edit="dressText">Чёрный, белый, серебро. Выбирайте то, в чём хочется танцевать.</p>
+      <div class="dress__colors rv-pop" data-edit="palette">
+        <span style="--c:#000000"></span><span style="--c:#ffffff"></span><span style="--c:#766a66"></span>
+      </div>
+      <div class="dress__rail"></div>
+      <img width="1261" height="1091" class="dress__clothes rv-soft" src="assets/clothes.webp" data-edit="dressCodePhoto" alt="Образы гостей" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 7 — ЛОКАЦИЯ -->
+    <section class="place" id="venue" data-wc-section="venue">
+      <h2 class="title title--l place__title rv" data-edit="venueTitle">Локация</h2>
+      <p class="place__name rv" data-edit="venue">Лофт «Звёзды»</p>
+      <p class="place__addr rv" data-edit="venueAddress">Москва, ул. Приморная, 12</p>
+      <a class="pill place__btn rv" id="mapBtn" href="#" target="_blank" rel="noopener" data-edit="mapButton">Смотреть на карте</a>
+      <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
+      <div class="wc-map pb-map" data-wc-map hidden></div>
+    </section>
+
+    <!-- 8 — ПОЖЕЛАНИЯ на чёрном: подарки, цветы, вопросы -->
+    <section class="dark wishes" id="wishes" data-wc-section="wishes">
+      <h2 class="title wishes__title rv" data-edit="wishTitle">Пара пожеланий</h2>
+      <div class="wish rv">
+        <p class="label wish__label"><img src="assets/spark-white.webp" alt="" /><span data-edit="wish1Title">О подарках</span></p>
+        <div class="wish__text" data-edit="story"><p>Ваше присутствие — уже подарок. Если захотите порадовать нас ещё, будем благодарны за вклад в наше свадебное путешествие.</p></div>
+      </div>
+      <div class="wish rv">
+        <p class="label wish__label"><img src="assets/spark-white.webp" alt="" /><span data-edit="wish2Title">О цветах</span></p>
+        <div class="wish__text" data-edit="wish2Text"><p>Вместо букета принесите хорошее настроение и любимую песню для нашего танцпола.</p></div>
+      </div>
+      <div class="wish rv">
+        <p class="label wish__label"><img src="assets/spark-white.webp" alt="" /><span data-edit="wish3Title">Есть вопросы</span></p>
+        <div class="wish__text" data-edit="wish3Text"><p>Напишите нам — поможем со всеми деталями.</p><p>Анна · +7 (999) 123-45-67</p></div>
+      </div>
+    </section>
+
+    <!-- 9 — АНКЕТА «Вы с нами?» -->
+    <section class="rsvp" id="rsvp" data-wc-section="rsvp">
+      <img width="474" height="504" class="rsvp__sparkles rv-soft" src="assets/sparkles-silver.webp" alt="" loading="lazy" decoding="async" />
+      <h2 class="title rsvp__title rv" data-edit="surveyTitle">Вы с нами?</h2>
+      <p class="text rsvp__lead rv" data-edit="surveyText">Без вас эта вечеринка не будет полной. Ответьте, пожалуйста, до 12 мая 2027.</p>
+      <form class="rsvp__form rv" id="rsvpForm" novalidate>
+        <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+        <fieldset class="rsvp__group">
+          <legend>Сможете прийти?</legend>
+          <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>С радостью буду</label>
+          <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+        </fieldset>
+        <fieldset class="rsvp__group" data-rsvp-count>
+          <legend>Сколько вас будет?</legend>
+          <div class="wc-count" data-wc-count>
+            <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+            <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+            <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+          </div>
+        </fieldset>
+        <fieldset class="rsvp__group" data-edit="drinks">
+          <legend>Что вы предпочитаете из напитков?</legend>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Шампанское</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк или виски</label>
+          <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+        </fieldset>
+        <button class="pill pill--dark rsvp__submit" type="submit">Буду частью праздника ↗</button>
+        <p class="rsvp__error" id="rsvpError" role="alert"></p>
+      </form>
+      <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен</p>
+    </section>
+
+    <!-- 10 — ДО ВСТРЕЧИ НА ТАНЦПОЛЕ! Пара, имена, таймер -->
+    <section class="fin" id="final" data-wc-section="closing">
+      <div class="fin__band">
+        <img width="368" height="445" class="fin__doodle rv-soft" src="assets/disco-doodle.webp" alt="" loading="lazy" decoding="async" />
+        <img class="spark" style="--x:1229;--y:-65;--w:127" src="assets/spark-black.webp" alt="" />
+        <img class="spark" style="--x:109;--y:62;--w:127" src="assets/spark-black.webp" alt="" />
+        <img class="spark" style="--x:1134;--y:582;--w:127" src="assets/spark-black.webp" alt="" />
+        <h2 class="title fin__title rv" data-edit="closingTitle">До встречи на танцполе!</h2>
+        <div class="fin__photo rv-soft"><img src="assets/couple-dance.jpg" data-edit="closingPhoto" alt="Мы танцуем" loading="lazy" decoding="async" /></div>
+        <p class="title title--s fin__names rv" id="finNames"><span data-name="bride">Анна</span> &amp; <span data-name="groom">Михаил</span></p>
+        <div class="cd rv" data-wc-section="countdown" aria-live="off">
+          <p class="label cd__title" data-edit="countdownTitle">До нашей встречи</p>
+          <div class="cd__row">
+            <div class="cd__cell"><span class="cd__num" id="cdD">199</span><span class="cd__lbl" id="cdDl">Дней</span></div><span class="cd__colon">:</span>
+            <div class="cd__cell"><span class="cd__num" id="cdH">01</span><span class="cd__lbl" id="cdHl">Час</span></div><span class="cd__colon">:</span>
+            <div class="cd__cell"><span class="cd__num" id="cdM">26</span><span class="cd__lbl" id="cdMl">Минут</span></div><span class="cd__colon">:</span>
+            <div class="cd__cell"><span class="cd__num" id="cdS">20</span><span class="cd__lbl" id="cdSl">Секунд</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../assets/preload.js"></script>
+  <script src="/invite/assets/sections.js"></script>
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="../assets/brand.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
