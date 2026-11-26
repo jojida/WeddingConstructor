@@ -199,8 +199,8 @@ export default function PhotoboothTemplate({ data, apiBase, fullPage, slug, edit
         <div style={abs(460, 1808.7, { width: u(758), textAlign: 'right', color: '#000' })}>
           {gLabel ? <p style={{ margin: 0, fontFamily: text, fontSize: u(36), lineHeight: u(44), letterSpacing: '.1em', textTransform: 'uppercase' }}>{gLabel}</p> : null}
           <p style={{
-            margin: `${u(8)} 0 0`, fontFamily: head, fontWeight: 400, fontSize: u(117), lineHeight: u(198),
-            letterSpacing: '.1em', textTransform: 'uppercase', overflowWrap: 'anywhere',
+            margin: `${u(8)} 0 0`, fontFamily: head, fontWeight: 400, fontSize: u(150), lineHeight: u(168),
+            letterSpacing: '.03em', textTransform: 'uppercase', overflowWrap: 'anywhere',
           }}>{gTitle}</p>
         </div>
       </div>

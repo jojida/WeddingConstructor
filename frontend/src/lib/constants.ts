@@ -2556,7 +2556,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       greetingTitle:   'Дорогие гости',
       menuTitle:       'Меню',
       menuText:        'Меню разнообразно, поэтому сообщите нам заранее, если у вас есть какие-либо предпочтения или диетические ограничения.',
-      programTitle:    'Планы на эту ночь',
+      programTitle:    'Планы на этот вечер',
       programSubtitle: 'Один день, тысяча воспоминаний',
       dressTitle:      'Блистать разрешается',
       dressText:       'Чёрный, белый, серебро. Выбирайте то, в чём хочется танцевать.',

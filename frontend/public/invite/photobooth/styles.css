@@ -103,21 +103,21 @@ img { max-width: none; }
 section { position: relative; }
 p, h1, h2 { margin: 0; }
 
-/* Заголовки — Fallout заглавными с разрядкой. Кегль подобран так, чтобы высота
-   заглавных была как в макете (у Fallout они выше: 0,8 кегля против 0,71);
-   разрядка и после последней буквы — отступ слева той же величины держит
-   строку по центру */
+/* Заголовки — Fallout заглавными. С 26.11.26 по просьбе владельца крупнее
+   макета (117 → 150 единиц, +28 %) и плотнее: разрядка .1em → .03em,
+   строки двухстрочных заголовков ближе (198 → 168). Разрядка стоит и после
+   последней буквы — у центрованных отступ слева той же величины */
 .title {
   font-family: var(--f-title);
   font-weight: 400;
-  font-size: calc(117 * var(--u));
-  line-height: calc(198 * var(--u));
-  letter-spacing: .1em;
+  font-size: calc(150 * var(--u));
+  line-height: calc(168 * var(--u));
+  letter-spacing: .03em;
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
-.title--s { font-size: calc(69 * var(--u)); line-height: calc(92 * var(--u)); letter-spacing: .12em; }
-.title--l { font-size: calc(146 * var(--u)); line-height: calc(200 * var(--u)); letter-spacing: .1em; }
+.title--s { font-size: calc(90 * var(--u)); line-height: calc(104 * var(--u)); letter-spacing: .04em; }
+.title--l { font-size: calc(186 * var(--u)); line-height: calc(200 * var(--u)); letter-spacing: .03em; }
 .label {
   font-family: var(--f-text);
   font-weight: 400;
@@ -397,7 +397,7 @@ html.no-anim .hero-in, html.no-anim .dot { transition: none !important; }
   letter-spacing: .1em; text-transform: uppercase;
 }
 .greet__label:empty { display: none; }
-.greet__title { position: relative; display: block; margin-top: calc(8 * var(--u)); font-size: calc(var(--gfs, 117) * var(--u)); overflow-wrap: normal; }
+.greet__title { position: relative; display: block; margin-top: calc(8 * var(--u)); font-size: calc(var(--gfs, 150) * var(--u)); overflow-wrap: normal; }
 .greet__text {
   position: relative; z-index: 1;
   margin: calc(430 * var(--u)) calc(60 * var(--u)) 0 calc(72 * var(--u));
@@ -448,7 +448,7 @@ html.no-anim .hero-in, html.no-anim .dot { transition: none !important; }
    ============================================================ */
 .menu { padding: calc(457 * var(--u)) 0 calc(85 * var(--u)); text-align: center; }
 .menu__cloche { display: block; width: calc(626 * var(--u)); height: auto; margin-left: calc(314 * var(--u)); }
-.menu__title { margin-top: calc(-1 * var(--u)); padding-left: .12em; }
+.menu__title { margin-top: calc(-1 * var(--u)); padding-left: .04em; }
 .menu__text {
   max-width: calc(620 * var(--u));
   margin: calc(48.6 * var(--u)) auto 0;
@@ -464,7 +464,7 @@ html.no-anim .hero-in, html.no-anim .dot { transition: none !important; }
    5 — ПЛАНЫ НА ЭТУ НОЧЬ (макет: 8086–10400)
    ============================================================ */
 .plans { padding: calc(179.8 * var(--u)) 0 calc(230 * var(--u)); }
-.plans__title { margin-left: calc(157 * var(--u)); max-width: calc(640 * var(--u)); }
+.plans__title { margin-left: calc(157 * var(--u)); max-width: calc(800 * var(--u)); }   /* «Планы на / этот вечер» — в две строки */
 .plans__sub { margin: calc(47 * var(--u)) calc(60 * var(--u)) 0 calc(156 * var(--u)); letter-spacing: .117em; }
 .prog { position: relative; margin-top: calc(137 * var(--u)); padding-top: calc(59 * var(--u)); }
 .prog__heart { pointer-events: none; }
@@ -537,7 +537,7 @@ html.no-anim .hero-in, html.no-anim .dot { transition: none !important; }
    7 — ЛОКАЦИЯ (макет: 12807–14764)
    ============================================================ */
 .place { padding: calc(120 * var(--u)) calc(60 * var(--u)) calc(330 * var(--u)); text-align: center; }
-.place__title { padding-left: .1em; }
+.place__title { padding-left: .03em; }
 .place__name, .place__addr {
   font-family: var(--f-text); font-weight: 400;
   font-size: calc(46 * var(--u)); line-height: calc(60 * var(--u));
@@ -712,7 +712,7 @@ html.no-anim .hero-in, html.no-anim .dot { transition: none !important; }
 .fin__title { position: relative; margin: 0 calc(200 * var(--u)) 0 calc(124 * var(--u)); }
 .fin__photo { width: calc(1132 * var(--u)); height: calc(1011 * var(--u)); margin: calc(150 * var(--u)) 0 0 calc(97 * var(--u)); overflow: hidden; }
 .fin__photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
-.fin__names { margin-top: calc(98 * var(--u)); text-align: center; padding-left: .12em; white-space: nowrap; font-size: calc(var(--nfs2, 69) * var(--u)); }
+.fin__names { margin-top: calc(98 * var(--u)); text-align: center; padding-left: .12em; letter-spacing: .12em; line-height: calc(92 * var(--u)); white-space: nowrap; font-size: calc(var(--nfs2, 69) * var(--u)); }
 .cd { margin-top: calc(51 * var(--u)); text-align: center; }
 .cd__title { font-size: calc(32 * var(--u)); line-height: calc(40 * var(--u)); letter-spacing: .2em; padding-left: .2em; }
 .cd__row { display: flex; justify-content: center; align-items: flex-start; margin-top: calc(58.6 * var(--u)); }

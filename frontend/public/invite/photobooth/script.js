@@ -159,7 +159,7 @@
     var title = document.getElementById('greetTitle');
     var u = unit();
     if (!title || !u) return;
-    title.style.setProperty('--gfs', 117);
+    title.style.setProperty('--gfs', 150);
     var probe = document.createElement('span');
     probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;left:0;top:0';
     title.appendChild(probe);
@@ -171,7 +171,7 @@
     });
     title.removeChild(probe);
     var room = 758 * u;
-    if (max > room) title.style.setProperty('--gfs', (117 * room / max).toFixed(1));
+    if (max > room) title.style.setProperty('--gfs', (150 * room / max).toFixed(1));
   }
 
   /* ─── Дата: обложка, билет, лента, таймер ─────────── */
