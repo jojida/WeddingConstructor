@@ -367,15 +367,16 @@ html.no-anim .cover__agate, html.no-anim .hero-in { transition: none !important;
    6 — ПРОГРАММА ДНЯ (макет: 10776–14611): агат по краям, пунктир между
    временем и рисунками, камень едет по пунктиру за прокруткой
    ============================================================ */
-.program { padding: calc(200 * var(--u)) 0 calc(330 * var(--u)); overflow: hidden; }
-/* Агат слева — как в макете; справа — срез агата (картинка пары, отражённая:
-   неровный край смотрит внутрь, ровный срез уходит за край экрана) */
+.program { padding: calc(200 * var(--u)) 0 calc(460 * var(--u)); overflow: hidden; }
+/* Агат слева — как в макете; справа — агат с блёстками от пары: в макете он
+   повёрнут на 7°, в файле поворот снят — ровные срезы прижаты к правому краю
+   и низу раздела, неровный край с блёстками смотрит на программу */
 .program__agate-l { position: absolute; z-index: 0; left: 0; top: calc(164 * var(--u)); width: calc(315 * var(--u)); height: auto; }
 .program__agate-r {
-  position: absolute; z-index: 0; right: calc(-330 * var(--u)); bottom: calc(-40 * var(--u));
-  width: calc(660 * var(--u)); height: auto;
-  transform: scaleX(-1) rotate(-6deg);
+  position: absolute; z-index: 0; right: calc(var(--ar-x) * var(--u)); bottom: 0;
+  width: calc(var(--ar-w) * var(--u)); height: auto;
 }
+.program { --ar-w: 824; --ar-x: -318; }
 .program__title { position: relative; z-index: 2; }
 .prog { position: relative; z-index: 1; margin-top: calc(170 * var(--u)); padding-top: calc(120 * var(--u)); }
 .prog__svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 0; }
@@ -383,18 +384,18 @@ html.no-anim .cover__agate, html.no-anim .hero-in { transition: none !important;
 .prog__row { position: relative; z-index: 1; display: flex; align-items: center; min-height: calc(330 * var(--u)); margin-bottom: calc(180 * var(--u)); }
 .prog__row:last-child { margin-bottom: 0; }
 .prog__half { flex: none; display: flex; align-items: center; }
-.prog__half--l { width: calc(683 * var(--u)); padding-left: calc(330 * var(--u)); padding-right: calc(70 * var(--u)); }
-.prog__half--r { width: calc(683 * var(--u)); padding-left: calc(70 * var(--u)); padding-right: calc(300 * var(--u)); }
+.prog__half--l { width: calc(683 * var(--u)); padding-left: calc(300 * var(--u)); padding-right: calc(120 * var(--u)); }
+.prog__half--r { width: calc(683 * var(--u)); padding-left: calc(120 * var(--u)); padding-right: calc(300 * var(--u)); }
 .prog__half--icon { justify-content: center; }
 .prog__time {
   font-family: var(--f-hand);
-  font-size: calc(110 * var(--u)); line-height: calc(124 * var(--u));
-  letter-spacing: .1em;
+  font-size: calc(92 * var(--u)); line-height: calc(140 * var(--u));
+  letter-spacing: .08em;
   color: #111;
   white-space: nowrap;
 }
-.prog__title { margin-top: calc(6 * var(--u)); font-family: var(--f-text); font-size: calc(37 * var(--u)); line-height: calc(46 * var(--u)); overflow-wrap: anywhere; }
-.prog__icon { display: block; max-width: calc(300 * var(--u)); max-height: calc(320 * var(--u)); width: auto; height: auto; object-fit: contain; }
+.prog__title { margin-top: calc(10 * var(--u)); font-family: var(--f-text); font-size: calc(37 * var(--u)); line-height: calc(46 * var(--u)); overflow-wrap: anywhere; -webkit-hyphens: auto; hyphens: auto; }
+.prog__icon { display: block; max-width: calc(270 * var(--u)); max-height: calc(300 * var(--u)); width: auto; height: auto; object-fit: contain; }
 .prog__icon--emoji { font-size: calc(190 * var(--u)); line-height: 1; }
 
 /* ============================================================
@@ -404,12 +405,72 @@ html.no-anim .cover__agate, html.no-anim .hero-in { transition: none !important;
 .dress__icon { display: block; width: calc(253 * var(--u)); height: auto; margin: calc(60 * var(--u)) auto 0; }
 .dress__text { max-width: calc(860 * var(--u)); margin-top: calc(70 * var(--u)); }
 .dress__text:empty { display: none; }
-.dress__colors { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(19 * var(--u)); margin-top: calc(110 * var(--u)); }
+.dress__colors { display: flex; flex-wrap: wrap; justify-content: center; gap: calc(19 * var(--u)); margin-top: calc(100 * var(--u)); }
 .dress__colors > span {
   display: block; width: calc(157 * var(--u)); height: calc(157 * var(--u)); border-radius: 50%;
   background: var(--c, #3ebadf);
   box-shadow: inset 0 0 0 calc(5 * var(--u)) #111;
 }
+/* Вкладки «Женщины / Мужчины» — золотой кант, как у кнопки карты; активная — бирюзовая */
+.looks__tabs {
+  display: inline-flex;
+  margin-top: calc(100 * var(--u));
+  padding: calc(8 * var(--u));
+  border: calc(3 * var(--u)) solid var(--gold);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .85);
+  box-shadow: 0 calc(10 * var(--u)) calc(26 * var(--u)) rgba(7, 70, 90, .12);
+}
+.looks__tab {
+  margin: 0;
+  padding: calc(22 * var(--u)) calc(56 * var(--u)) calc(22 * var(--u)) calc(56 * var(--u) + .16em);
+  border: 0; border-radius: 999px;
+  background: transparent;
+  font-family: var(--f-text); font-weight: 600;
+  font-size: max(12px, calc(38 * var(--u)));
+  line-height: 1.2;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--teal);
+  cursor: pointer;
+  transition: background-color .3s ease, color .3s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.looks__tab.is-active { background: var(--teal); color: #fff; }
+.looks__tab:focus-visible { outline: calc(3 * var(--u)) solid rgba(7, 108, 138, .45); outline-offset: calc(4 * var(--u)); }
+/* Обе вкладки в одной ячейке сетки: высота блока не прыгает, смена — растворением */
+.looks__panels { display: grid; }
+.looks__panel {
+  grid-area: 1 / 1;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(calc(18 * var(--u)));
+  transition: opacity .5s ease, transform .5s ease, visibility 0s linear .5s;
+}
+.looks__panel.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s ease, transform .5s ease, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) { .looks__panel { transition: none; transform: none; } }
+/* Фото образов — карточки в белой рамке, как фото пары, чуть вразнобой */
+.looks {
+  display: grid; grid-template-columns: repeat(2, calc(500 * var(--u)));
+  justify-content: center; gap: calc(80 * var(--u)) calc(64 * var(--u));
+  margin-top: calc(130 * var(--u)); padding-bottom: calc(40 * var(--u));
+}
+.look {
+  margin: 0; aspect-ratio: 3 / 4; overflow: hidden;
+  background: #fff;
+  border: calc(14 * var(--u)) solid #fff;
+  box-shadow: 0 calc(14 * var(--u)) calc(34 * var(--u)) rgba(7, 70, 90, .22);
+}
+.look img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+.look--1 { transform: rotate(-4deg); }
+.look--2 { transform: translateY(calc(50 * var(--u))) rotate(3.5deg); }
+.look--3 { transform: rotate(3deg); }
+.look--4 { transform: translateY(calc(50 * var(--u))) rotate(-3.5deg); }
 .place { padding: calc(300 * var(--u)) calc(60 * var(--u)) calc(290 * var(--u)); text-align: center; }
 .place__name { max-width: calc(1000 * var(--u)); margin-top: calc(70 * var(--u)); font-size: calc(42 * var(--u)); }
 .place__addr {
@@ -615,6 +676,6 @@ html.no-anim .cover__agate, html.no-anim .hero-in { transition: none !important;
   /* Агат программы — у краёв окна */
   .program { overflow: visible; }
   .program__agate-l { left: calc((100% - 100vw) / 2); }
-  .program__agate-r { right: calc((100% - 100vw) / 2 - 330 * var(--u)); }
+  .program__agate-r { right: calc((100% - 100vw) / 2 + var(--ar-x) * var(--u)); }
   .invite { overflow: hidden; }
 }

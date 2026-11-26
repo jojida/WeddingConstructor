@@ -120,7 +120,7 @@
     <!-- 6 — ПРОГРАММА ДНЯ: агат по краям, пунктир, камень едет по нему за прокруткой -->
     <section class="program" id="program" data-wc-section="schedule">
       <img width="315" height="3672" class="program__agate-l" src="assets/agate-left.webp" alt="" loading="lazy" decoding="async" />
-      <img width="900" height="1501" class="program__agate-r" src="assets/agate-slab.webp" alt="" loading="lazy" decoding="async" />
+      <img width="749" height="1563" class="program__agate-r" src="assets/agate-right.webp" alt="" loading="lazy" decoding="async" />
       <h2 class="head program__title rv" data-edit="programTitle">Программа дня</h2>
       <div class="prog" id="prog">
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
@@ -133,12 +133,41 @@
 
     <!-- 7 — ДРЕСС-КОД И МЕСТО на мраморе -->
     <div class="marble marble--2">
+      <!-- Вкладки «Женщины / Мужчины»: у каждой свои цвета и четыре фото образов
+           в белых рамках. Неактивная вкладка скрыта visibility, а не display:
+           так редактор находит и подсвечивает её фото, а кадрирование
+           (photo-frame.js) знает размеры рамок -->
       <section class="dress" id="dresscode" data-wc-section="dresscode">
         <h2 class="head dress__title rv" data-edit="dressTitle">Дресс-код</h2>
         <img width="253" height="280" class="dress__icon rv-soft" src="assets/ic-dress.webp" alt="" loading="lazy" decoding="async" />
         <p class="caps caps--s dress__text rv" data-edit="dressText">Будем рады, если вы поддержите цвета нашего праздника</p>
-        <div class="dress__colors rv-pop" data-edit="palette">
-          <span style="--c:#1f65ff"></span><span style="--c:#3ebadf"></span><span style="--c:#14eaea"></span><span style="--c:#c98f33"></span>
+        <div class="looks__tabs rv" role="tablist" aria-label="Дресс-код гостей">
+          <button class="looks__tab is-active" type="button" role="tab" aria-selected="true" data-look="women">Женщины</button>
+          <button class="looks__tab" type="button" role="tab" aria-selected="false" data-look="men">Мужчины</button>
+        </div>
+        <div class="looks__panels">
+          <div class="looks__panel is-active" role="tabpanel" data-look="women">
+            <div class="dress__colors rv-pop" data-edit="palette">
+              <span style="--c:#1f65ff"></span><span style="--c:#3ebadf"></span><span style="--c:#14eaea"></span><span style="--c:#c98f33"></span>
+            </div>
+            <div class="looks rv-soft">
+              <figure class="look look--1"><img width="600" height="800" src="assets/look-w1.jpg" data-edit="dressCodePhoto" alt="Образ для женщин 1" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--2"><img width="600" height="800" src="assets/look-w2.jpg" data-edit="dressPhoto2" alt="Образ для женщин 2" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--3"><img width="600" height="800" src="assets/look-w3.jpg" data-edit="dressPhoto3" alt="Образ для женщин 3" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--4"><img width="600" height="800" src="assets/look-w4.jpg" data-edit="dressPhoto4" alt="Образ для женщин 4" loading="lazy" decoding="async" /></figure>
+            </div>
+          </div>
+          <div class="looks__panel" role="tabpanel" data-look="men" aria-hidden="true">
+            <div class="dress__colors rv-pop" data-edit="menColors">
+              <span style="--c:#0f2a55"></span><span style="--c:#2f6db5"></span><span style="--c:#9fb4c7"></span><span style="--c:#c9b79c"></span>
+            </div>
+            <div class="looks rv-soft">
+              <figure class="look look--1"><img width="600" height="800" src="assets/look-m1.jpg" data-edit="dressMan1" alt="Образ для мужчин 1" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--2"><img width="600" height="800" src="assets/look-m2.jpg" data-edit="dressMan2" alt="Образ для мужчин 2" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--3"><img width="600" height="800" src="assets/look-m3.jpg" data-edit="dressMan3" alt="Образ для мужчин 3" loading="lazy" decoding="async" /></figure>
+              <figure class="look look--4"><img width="600" height="800" src="assets/look-m4.jpg" data-edit="dressMan4" alt="Образ для мужчин 4" loading="lazy" decoding="async" /></figure>
+            </div>
+          </div>
         </div>
       </section>
       <section class="place" id="venue" data-wc-section="venue">

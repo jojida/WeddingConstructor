@@ -19,6 +19,7 @@
     date: '2030-06-21', time: '12:30',
     groom: 'Евгений', bride: 'Диана',
     scheduleSig: '',
+    looksSeen: false,       // данные дресс-кода уже приходили (дальше правки переключают вкладку)
     paraSig: {}
   };
 
@@ -275,8 +276,8 @@
     layoutTrack();
   }
 
-  // Пунктир — плавная волна посередине (x 713, размах 70, шаг 760), как в
-  // макете; камень едет по нему вслед за прокруткой
+  // Пунктир — плавная волна посередине (x 683, размах 50, шаг 760): текст и
+  // рисунки отстоят от неё не меньше чем на 70; камень едет по ней за прокруткой
   var TRACK = { len: 0, y0: 0, y1: 0, u: 1 };
   function layoutTrack() {
     var prog = document.getElementById('prog');
@@ -288,8 +289,9 @@
     if (!rows.length || !W || !H) return;
     var u = W / 1366;
     var last = rows[rows.length - 1];
-    var y0 = 40 * u, y1 = Math.min(H - 4 * u, last.offsetTop + last.offsetHeight + 60 * u);
-    var xAt = function (y) { return 713 * u + 70 * u * Math.sin(2 * Math.PI * (y - y0) / (760 * u)); };
+    // под последним пунктом пунктир идёт дальше, в нижний отступ раздела (svg — overflow: visible)
+    var y0 = 40 * u, y1 = last.offsetTop + last.offsetHeight + 160 * u;
+    var xAt = function (y) { return 683 * u + 50 * u * Math.sin(2 * Math.PI * (y - y0) / (760 * u)); };
     var pts = [];
     for (var y = y0; y < y1; y += 8 * u) pts.push([xAt(y), y]);
     pts.push([xAt(y1), y1]);
@@ -329,12 +331,13 @@
   function cleanColors(colors) {
     return Array.isArray(colors) ? colors.filter(function (c) { return typeof c === 'string' && /^#[0-9a-f]{3,8}$|^rgb/i.test(c.trim()); }).slice(0, 9) : [];
   }
-  function rebuildColors(colors) {
+  // key — data-edit блока (palette — платья, menColors — костюмы); true — цвета сменились
+  function rebuildColors(key, colors) {
     var list = cleanColors(colors);
-    var box = document.querySelector('[data-edit="palette"]');
-    if (!box || !list.length) return;
+    var box = document.querySelector('[data-edit="' + key + '"]');
+    if (!box || !list.length) return false;
     var sig = list.join(',');
-    if (box.dataset.sig === sig) return;
+    if (box.dataset.sig === sig) return false;
     box.dataset.sig = sig;
     var shown = box.classList.contains('in');
     box.innerHTML = '';
@@ -344,6 +347,47 @@
       box.appendChild(sp);
     });
     if (shown) box.classList.add('in');
+    return true;
+  }
+
+  /* ─── Дресс-код: вкладки «Женщины / Мужчины» ─── */
+  function showLooks(which, replay) {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      var on = b.getAttribute('data-look') === which;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.looks__panel').forEach(function (p) {
+      var on = p.getAttribute('data-look') === which;
+      var was = p.classList.contains('is-active');
+      p.classList.toggle('is-active', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+      // открытая вкладка: кружки цветов появляются по очереди заново
+      if (on && !was && replay && !REDUCED) {
+        var dots = p.querySelector('.rv-pop.in');
+        if (dots) { dots.classList.remove('in'); void dots.offsetWidth; dots.classList.add('in'); }
+      }
+    });
+  }
+
+  function initLooks() {
+    document.querySelectorAll('.looks__tab').forEach(function (b) {
+      b.addEventListener('click', function () { showLooks(b.getAttribute('data-look'), true); });
+    });
+    // В редакторе подсвеченное (правимое) поле дресс-кода — сразу на экране:
+    // скрытая вкладка (visibility) находится и подсвечивается редактором
+    if (EDITING && 'MutationObserver' in window) {
+      var mo = new MutationObserver(function (list) {
+        list.forEach(function (r) {
+          if (!r.target.classList || !r.target.classList.contains('wc-editor-flash')) return;
+          var panel = r.target.closest('.looks__panel');
+          if (panel) showLooks(panel.getAttribute('data-look'));
+        });
+      });
+      document.querySelectorAll('.looks__panel [data-edit]').forEach(function (el) {
+        mo.observe(el, { attributes: true, attributeFilter: ['class'] });
+      });
+    }
   }
 
   /* ─── Анкета ──────────────────────────────────────── */
@@ -562,9 +606,20 @@
     setImg('coverPhoto', d.coverPhoto);
     setImg('groomPhoto', d.groomPhoto);
     setImg('bridePhoto', d.bridePhoto);
+    // Дресс-код: в редакторе правку сразу видно — открываем её вкладку
+    // (первые данные после загрузки вкладку не переключают)
+    var looksReady = STATE.looksSeen, showTab = '';
+    [['dressCodePhoto', 'women'], ['dressPhoto2', 'women'], ['dressPhoto3', 'women'], ['dressPhoto4', 'women'],
+     ['dressMan1', 'men'], ['dressMan2', 'men'], ['dressMan3', 'men'], ['dressMan4', 'men']].forEach(function (k) {
+      if (setImg(k[0], d[k[0]])) showTab = k[1];
+      if (d[k[0]] != null) STATE.looksSeen = true;
+    });
     if (window.WCPhotoFrame) window.WCPhotoFrame.apply(d.photoFrames);
 
-    rebuildColors(d.dressCodeColors);
+    if (rebuildColors('palette', d.dressCodeColors)) showTab = 'women';
+    if (rebuildColors('menColors', d.menColors)) showTab = 'men';
+    if (d.dressCodeColors != null || d.menColors != null) STATE.looksSeen = true;
+    if (EDITING && looksReady && showTab) showLooks(showTab);
     applySchedule(d.schedule);
     rebuildDrinks(d.drinks);
   }
@@ -600,6 +655,7 @@
       if (prog) new ResizeObserver(function () { layoutTrack(); }).observe(prog);
     }
     bindFormOptions();
+    initLooks();
     initRsvp();
     applyDate();
     updateMapButton();

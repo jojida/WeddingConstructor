@@ -334,8 +334,8 @@ const HANDMADE_TEMPLATES = [
    потом его место — по спросу.
    Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
 const CATALOG_ORDER = [
-  'tenderness', 'powder', 'turquoise', 'photobooth', 'strawberry', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
-  'sketch', 'vadimdarya', 'mediterranean', 'garden-arch', 'angels', 'floral',
+  'tenderness', 'powder', 'photobooth', 'strawberry', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
+  'sketch', 'vadimdarya', 'mediterranean', 'turquoise', 'garden-arch', 'angels', 'floral',
 ];
 const catalogRank = (id: string) => {
   const i = CATALOG_ORDER.indexOf(id);
@@ -1324,7 +1324,16 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       title: 'Дресс-код', icon: '👗',
       fields: [
         { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', hint: 'Пусто — без текста', scope: 'custom', maxLength: 140 },
-        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета', scope: 'data' },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Женщины: цвета', scope: 'data' },
+        { id: 'dressCodePhoto',  type: 'image',     label: 'Женщины: фото 1', scope: 'data' },
+        { id: 'dressPhoto2',     type: 'image',     label: 'Женщины: фото 2', scope: 'custom' },
+        { id: 'dressPhoto3',     type: 'image',     label: 'Женщины: фото 3', scope: 'custom' },
+        { id: 'dressPhoto4',     type: 'image',     label: 'Женщины: фото 4', scope: 'custom' },
+        { id: 'menColors',       type: 'colorList', label: 'Мужчины: цвета', scope: 'custom' },
+        { id: 'dressMan1',       type: 'image',     label: 'Мужчины: фото 1', scope: 'custom' },
+        { id: 'dressMan2',       type: 'image',     label: 'Мужчины: фото 2', scope: 'custom' },
+        { id: 'dressMan3',       type: 'image',     label: 'Мужчины: фото 3', scope: 'custom' },
+        { id: 'dressMan4',       type: 'image',     label: 'Мужчины: фото 4', scope: 'custom' },
       ],
     },
     {
@@ -2470,6 +2479,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       { time: '20:00', title: 'Танцы', icon: '/invite/turquoise/assets/ic-disco.webp' },
     ],
     dressCodeColors: ['#1f65ff', '#3ebadf', '#14eaea', '#c98f33'],
+    dressCodePhoto: '/invite/turquoise/assets/look-w1.jpg',
     drinks: [
       { value: 'sparkling',  label: 'Шампанское' },
       { value: 'white',      label: 'Белое вино' },
@@ -2495,6 +2505,14 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       programTitle:  'Программа дня',
       dressTitle:    'Дресс-код',
       dressText:     'Будем рады, если вы поддержите цвета нашего праздника',
+      dressPhoto2:   '/invite/turquoise/assets/look-w2.jpg',
+      dressPhoto3:   '/invite/turquoise/assets/look-w3.jpg',
+      dressPhoto4:   '/invite/turquoise/assets/look-w4.jpg',
+      menColors:     ['#0f2a55', '#2f6db5', '#9fb4c7', '#c9b79c'],
+      dressMan1:     '/invite/turquoise/assets/look-m1.jpg',
+      dressMan2:     '/invite/turquoise/assets/look-m2.jpg',
+      dressMan3:     '/invite/turquoise/assets/look-m3.jpg',
+      dressMan4:     '/invite/turquoise/assets/look-m4.jpg',
       venueTitle:    'Место проведения',
       wishTitle:     'Пожелания и детали',
       surveyTitle:   'Анкета',

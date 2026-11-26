@@ -82,6 +82,7 @@ export default function TurquoiseTemplate({ data, apiBase, fullPage, slug, editi
           story: d.story,
           schedule: d.schedule,
           dressCodeColors: d.dressCodeColors,
+          dressCodePhoto: d.dressCodePhoto,
           musicUrl: d.musicUrl,
         },
       },
@@ -131,8 +132,10 @@ export default function TurquoiseTemplate({ data, apiBase, fullPage, slug, editi
 
   /* ── Карточка-превью: обложка из тех же слоёв, что на странице (координаты
      макета 1366px), имена, дата и адрес живым текстом. Единица — от ширины
-     и высоты карточки: в телефоне — как у гостя, в низкой открытке обложка
-     ужимается, по бокам фон бумаги. */
+     и высоты карточки с запасом «на вылет»: обложка (до волны, 2172) всегда
+     заполняет карточку целиком, без полей — в высоком телефоне до самого низа
+     (края агата и блёсток уходят за рамку), в открытке низ волны обрезается.
+     Текст (x 392–1220) остаётся в кадре при любой пропорции до 1:2. */
   const A = '/invite/turquoise/assets/';
   const u = (n: number) => `calc(${n} * var(--e))`;
   const abs = (x: number, y: number, extra: CSSProperties = {}): CSSProperties => ({ position: 'absolute', left: u(x), top: u(y), margin: 0, ...extra });
@@ -156,7 +159,7 @@ export default function TurquoiseTemplate({ data, apiBase, fullPage, slug, editi
   return (
     <div style={{
       position: 'relative', width: '100%', height: '100%', overflow: 'hidden', background: '#f5f4f4',
-      containerType: 'size', ['--e' as string]: 'min(100cqw / 1366, 100cqh / 2300)',
+      containerType: 'size', ['--e' as string]: 'max(100cqw / 1366, 100cqh / 2172)',
     } as CSSProperties}>
       <style>{CARD_FONTS}</style>
       <div style={{ position: 'absolute', left: '50%', top: 0, width: u(1366), height: u(2300), transform: 'translateX(-50%)' }}>
