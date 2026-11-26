@@ -2389,7 +2389,7 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       surveyText:      'Без вас эта вечеринка не будет полной. Ответьте, пожалуйста, до {{rsvpDate}}.',
       rsvpChildren:    true,
       rsvpQuestions:   ['menu', 'allergy'],
-      closingTitle:    'До встречи на танцполе!',
+      closingTitle:    'До встречи на\u00a0танцполе!', // неразрывный пробел: «на танцполе!» — одной строкой, как в макете
       closingPhoto:    '/invite/photobooth/assets/dance.svg',
       countdownTitle:  'До нашей встречи',
     },

@@ -11,8 +11,8 @@ interface Props {
   editing?: boolean;
 }
 
-/* Шрифты миниатюры — те же локальные файлы, что у шаблона: Roboto Condensed
-   (имена, заголовок) и Open Sans (дата, текст). Только кириллица и латиница. */
+/* Шрифты миниатюры — те же локальные файлы, что у шаблона: Fallout (имена,
+   обращение) и Open Sans (дата, текст). Только кириллица и латиница. */
 const F = '/invite/assets/fonts/';
 const G = '/invite/assets/fonts/google/';
 const CYR = 'U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116';
@@ -20,8 +20,7 @@ const LAT = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0
 const face = (family: string, weight: string, url: string, range: string) =>
   `@font-face{font-family:'${family}';font-style:normal;font-weight:${weight};font-display:swap;src:url('${url}') format('woff2');unicode-range:${range}}`;
 const CARD_FONTS = [
-  face('Roboto Condensed', '300 700', `${F}roboto-condensed-cyrillic.woff2`, CYR),
-  face('Roboto Condensed', '300 700', `${F}roboto-condensed-latin.woff2`, LAT),
+  `@font-face{font-family:'Fallout';font-style:normal;font-weight:400;font-display:swap;src:url('${F}fallout.woff2') format('woff2')}`,
   face('Open Sans', '300 800', `${G}2809606237a64bd9c146.woff2`, CYR),
   face('Open Sans', '300 800', `${G}d8e4fe0452aa2076429a.woff2`, LAT),
 ].join('');
@@ -141,14 +140,14 @@ export default function PhotoboothTemplate({ data, apiBase, fullPage, slug, edit
   const A = '/invite/photobooth/assets/';
   const u = (n: number) => `calc(${n} * var(--e))`;
   const abs = (x: number, y: number, extra: CSSProperties = {}): CSSProperties => ({ position: 'absolute', left: u(x), top: u(y), margin: 0, ...extra });
-  const head = "'Roboto Condensed', 'Arial Narrow', Arial, sans-serif";
+  const head = "'Fallout', 'Arial Narrow', Arial, sans-serif";
   const text = "'Open Sans', 'Segoe UI', Arial, sans-serif";
   const custom = data.customData || {};
   const groom = data.groomName || 'Артём';
   const bride = data.brideName || 'Вера';
   const names = `${bride} & ${groom}`;
-  // Как fitNames в script.js: строка не шире 1240, ~0,68 кегля на знак с разрядкой
-  const nfs = Math.min(78, 1240 / (names.length * 0.68));
+  // Как fitNames в script.js: строка не шире 1240, ~0,62 кегля на знак с разрядкой
+  const nfs = Math.min(69, 1240 / (names.length * 0.62));
   const [y, m, d] = (data.weddingDate || '').split('-').map(Number);
   const pad = (n: number) => String(n).padStart(2, '0');
   const date = y && m && d ? `${pad(d)}/${pad(m)}/${y}` : '';
@@ -186,8 +185,8 @@ export default function PhotoboothTemplate({ data, apiBase, fullPage, slug, edit
           <img key={i} src={`${A}spark-black.webp`} alt="" style={abs(x, yy, { width: u(w), height: 'auto' })} />
         ))}
         <p style={abs(0, 1453.1, {
-          width: '100%', textAlign: 'center', fontFamily: head, fontWeight: 700, fontSize: u(nfs), lineHeight: u(92),
-          letterSpacing: '.095em', paddingLeft: '.095em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: '#000',
+          width: '100%', textAlign: 'center', fontFamily: head, fontWeight: 400, fontSize: u(nfs), lineHeight: u(92),
+          letterSpacing: '.12em', paddingLeft: '.12em', textTransform: 'uppercase', whiteSpace: 'nowrap', color: '#000',
         })}>{names}</p>
         {date ? (
           <p style={abs(-30, 1616, {
@@ -200,8 +199,8 @@ export default function PhotoboothTemplate({ data, apiBase, fullPage, slug, edit
         <div style={abs(460, 1808.7, { width: u(758), textAlign: 'right', color: '#000' })}>
           {gLabel ? <p style={{ margin: 0, fontFamily: text, fontSize: u(36), lineHeight: u(44), letterSpacing: '.1em', textTransform: 'uppercase' }}>{gLabel}</p> : null}
           <p style={{
-            margin: `${u(8)} 0 0`, fontFamily: head, fontWeight: 700, fontSize: u(133), lineHeight: u(198),
-            letterSpacing: '.094em', textTransform: 'uppercase', overflowWrap: 'anywhere',
+            margin: `${u(8)} 0 0`, fontFamily: head, fontWeight: 400, fontSize: u(117), lineHeight: u(198),
+            letterSpacing: '.1em', textTransform: 'uppercase', overflowWrap: 'anywhere',
           }}>{gTitle}</p>
         </div>
       </div>

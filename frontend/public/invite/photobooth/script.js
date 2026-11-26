@@ -139,8 +139,8 @@
     if (w > room) el.style.setProperty(prop, (base * room / w).toFixed(1));
   }
   function fitNames() {
-    fitLine(document.getElementById('heroNames'), '--nfs', 78, 1240);
-    fitLine(document.getElementById('finNames'), '--nfs2', 78, 1200);
+    fitLine(document.getElementById('heroNames'), '--nfs', 69, 1240);
+    fitLine(document.getElementById('finNames'), '--nfs2', 69, 1200);
   }
 
   /* ─── Обращение: «Дорогие» мелко, остальное крупно ─── */
@@ -159,7 +159,7 @@
     var title = document.getElementById('greetTitle');
     var u = unit();
     if (!title || !u) return;
-    title.style.setProperty('--gfs', 133);
+    title.style.setProperty('--gfs', 117);
     var probe = document.createElement('span');
     probe.style.cssText = 'position:absolute;visibility:hidden;white-space:nowrap;left:0;top:0';
     title.appendChild(probe);
@@ -171,7 +171,7 @@
     });
     title.removeChild(probe);
     var room = 758 * u;
-    if (max > room) title.style.setProperty('--gfs', (133 * room / max).toFixed(1));
+    if (max > room) title.style.setProperty('--gfs', (117 * room / max).toFixed(1));
   }
 
   /* ─── Дата: обложка, билет, лента, таймер ─────────── */
