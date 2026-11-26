@@ -506,26 +506,17 @@ html.no-anim .hero-in, html.no-anim .dot { transition: none !important; }
   box-shadow: inset 0 0 0 calc(4 * var(--u)) #3a3533;
 }
 .dress__rail { height: calc(2.5 * var(--u)); margin-top: calc(88 * var(--u)); background: #000; }
-/* Вешалки по умолчанию: четыре части выезжают справа по рейке одна за другой
-   и покачиваются, пока не замрут. Своё фото образов — вместо них */
+/* Вешалки по умолчанию: четыре части выезжают справа по рейке вслед за
+   прокруткой — одна за другой, низ чуть отстаёт (сдвиг и наклон ставит
+   script.js). Без скриптов и при «меньше движения» — сразу на месте.
+   Своё фото образов — вместо них */
 .dress__stage { position: relative; }
 .rack { position: relative; width: calc(1261 * var(--u)); height: calc(1091 * var(--u)); margin-left: calc(83 * var(--u)); }
 .rack__item {
   position: absolute; top: 0; left: calc(var(--x) * var(--u)); width: calc(var(--w) * var(--u));
-  transform: translateX(calc(1500 * var(--u)));
+  will-change: transform;
 }
 .rack__item img { display: block; width: 100%; height: auto; transform-origin: 50% 0; }
-.rack.in .rack__item { animation: rackIn 1.5s cubic-bezier(.16, .84, .3, 1) calc(var(--i) * .16s) both; }
-.rack.in .rack__item img { animation: rackSwing 2.2s ease-out calc(1.05s + var(--i) * .16s) both; }
-@keyframes rackIn { from { transform: translateX(calc(1500 * var(--u))); } to { transform: none; } }
-@keyframes rackSwing {
-  0%   { transform: rotate(-5deg); }
-  30%  { transform: rotate(3deg); }
-  55%  { transform: rotate(-1.6deg); }
-  78%  { transform: rotate(.7deg); }
-  100% { transform: rotate(0); }
-}
-html.no-anim .rack__item, html.no-anim .rack__item img { transform: none !important; animation: none !important; }
 .dress__clothes { display: block; width: calc(1261 * var(--u)); height: auto; margin-left: calc(83 * var(--u)); }
 /* по умолчанию картинка вешалок — невидимая подложка под частями (её находит редактор) */
 .dress:not(.has-own) .dress__clothes { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; }

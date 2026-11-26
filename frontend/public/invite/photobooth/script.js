@@ -313,16 +313,15 @@
     var W = prog.clientWidth, H = prog.offsetHeight;
     if (!rows.length || !W || !H) return;
     var u = W / 1366;
-    var pts = [[327 * u, 70 * u]];
-    rows.forEach(function (r, k) { pts.push([(k % 2 ? 385 : 262) * u, r.offsetTop + r.offsetHeight / 2]); });
+    // Ровная волна, как в макете: середина x 312, размах 70, шаг волны 700
+    // (полволны — пункт программы); от сердца вниз до конца последнего пункта
     var last = rows[rows.length - 1];
-    pts.push([300 * u, Math.min(H, last.offsetTop + last.offsetHeight + 60 * u)]);
-    var d = 'M ' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
-    for (var k = 1; k < pts.length; k++) {
-      var a = pts[k - 1], b = pts[k], h = (b[1] - a[1]) / 2;
-      d += ' C ' + a[0].toFixed(1) + ' ' + (a[1] + h).toFixed(1) + ' ' + b[0].toFixed(1) + ' ' + (b[1] - h).toFixed(1) +
-           ' ' + b[0].toFixed(1) + ' ' + b[1].toFixed(1);
-    }
+    var y0 = 74 * u, y1 = Math.min(H - 4 * u, last.offsetTop + last.offsetHeight + 30 * u);
+    var xAt = function (y) { return 312 * u + 70 * u * Math.sin(2 * Math.PI * (y - y0) / (700 * u)); };
+    var pts = [];
+    for (var y = y0; y < y1; y += 8 * u) pts.push([xAt(y), y]);
+    pts.push([xAt(y1), y1]);
+    var d = 'M ' + pts.map(function (q) { return q[0].toFixed(1) + ' ' + q[1].toFixed(1); }).join(' L ');
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     path.setAttribute('d', d);
     TRACK.u = u;
@@ -357,11 +356,39 @@
     if (!vinylEl || REDUCED) return;
     vinylEl.style.transform = 'rotate(' + ((window.pageYOffset || 0) * 0.32).toFixed(1) + 'deg)';
   }
+  // Вешалки дресс-кода выезжают справа вслед за прокруткой: 0 — верх вешалок у
+  // нижнего края экрана, 1 — поднялся на три четверти экрана. Каждая следующая
+  // чуть позже; пока едет, низ отстаёт (наклон), на месте — ровно
+  var rackItems = null;
+  function updateRack() {
+    var rack = document.getElementById('rack');
+    if (!rack) return;
+    if (!rackItems) rackItems = [].slice.call(rack.querySelectorAll('.rack__item'));
+    var dress = rack.closest('.dress');
+    if (REDUCED || (dress && dress.classList.contains('has-own'))) return;
+    var vh = window.innerHeight || 1;
+    var p = (vh - rack.getBoundingClientRect().top) / (vh * 0.75);
+    var uu = rack.clientWidth / 1261;
+    rackItems.forEach(function (item, i) {
+      var q = Math.max(0, Math.min(1, (p - i * 0.12) / 0.55));
+      var e = 1 - Math.pow(1 - q, 3);
+      var x = (1 - e) * 1500 * uu;
+      item.style.transform = x > 0.5 ? 'translateX(' + x.toFixed(1) + 'px)' : '';
+      var img = item.firstElementChild;
+      if (img) {
+        // широкая связка качается меньше — верх ниток не отходит от рейки
+        var amp = Math.min(8, 1600 / (parseFloat(item.style.getPropertyValue('--w')) || 200));
+        var a = -amp * Math.sin(Math.PI * q) * (1 - 0.3 * q);
+        img.style.transform = Math.abs(a) > 0.05 ? 'rotate(' + a.toFixed(2) + 'deg)' : '';
+      }
+    });
+  }
+
   var scrollQueued = false;
   function onScroll() {
     if (scrollQueued) return;
     scrollQueued = true;
-    requestAnimationFrame(function () { scrollQueued = false; updateHeart(); updateVinyl(); });
+    requestAnimationFrame(function () { scrollQueued = false; updateHeart(); updateVinyl(); updateRack(); });
   }
 
   /* ─── Дресс-код: цвета кружками ───────────────────── */
@@ -488,17 +515,6 @@
       });
     }, { threshold: 0, rootMargin: '0px 0px 10% 0px' });
     observeReveal(document);
-    var rack = document.getElementById('rack');
-    if (rack) {
-      var ioRack = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (!e.isIntersecting) return;
-          rack.classList.add('in');
-          ioRack.disconnect();
-        });
-      }, { threshold: 0.25 });
-      ioRack.observe(rack);
-    }
   }
   function observeReveal(scope) {
     (scope || document).querySelectorAll(REVEAL).forEach(function (el) {
@@ -675,6 +691,7 @@
       var def = '';
       try { def = new URL(clothes.getAttribute('data-def') || '', window.location.href).href; } catch (e) {}
       dress.classList.toggle('has-own', !!clothes.src && clothes.src !== def);
+      updateRack();
     }
     setImg('closingPhoto', d.closingPhoto);
     stillDance();
@@ -717,8 +734,8 @@
     initReveal();
     applySchedule(DEFAULT_SCHEDULE);
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', function () { layoutTrack(); fitNames(); fitGreeting(); }, { passive: true });
-    window.addEventListener('load', function () { layoutTrack(); fitNames(); fitGreeting(); });
+    window.addEventListener('resize', function () { layoutTrack(); fitNames(); fitGreeting(); updateRack(); }, { passive: true });
+    window.addEventListener('load', function () { layoutTrack(); fitNames(); fitGreeting(); updateRack(); });
     if ('ResizeObserver' in window) {
       var prog = document.getElementById('prog');
       if (prog) new ResizeObserver(function () { layoutTrack(); }).observe(prog);
@@ -726,6 +743,7 @@
     bindFormOptions();
     initRsvp();
     initVinyl();
+    updateRack();
     applyDate();
     updateMapButton();
     applyData(dataFromUrl());
