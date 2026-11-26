@@ -156,6 +156,19 @@ const HANDMADE_TEMPLATES = [
     sampleDaysAhead: 241,
   },
   {
+    id: 'turquoise',
+    name: 'Бирюза',
+    description: 'Бирюзовый агат с золотыми прожилками, акварель, мрамор и колье с изумрудом.',
+    tags: ['Бирюзовый', 'Агат', 'Мрамор', 'Элегантный', 'Анимация'],
+    colors: ['#f5f4f4', '#0e7c86', '#be9253'],
+    preview: '/invite/turquoise/assets/preview.jpg',
+    defaultCover: '/invite/turquoise/assets/couple.jpg',
+    defaultGallery: [] as string[],
+    sampleBride: 'Диана',
+    sampleGroom: 'Евгений',
+    sampleDaysAhead: 236,
+  },
+  {
     id: 'photobooth',
     name: 'Фотобудка',
     description: 'Чёрно-белая вечеринка: заставка-фотобудка печатает ленту ваших фото, дальше — сердце, пластинка и диско.',
@@ -321,7 +334,7 @@ const HANDMADE_TEMPLATES = [
    потом его место — по спросу.
    Шаблон не из списка (новый, из «Верстака») встаёт в конец. */
 const CATALOG_ORDER = [
-  'tenderness', 'powder', 'photobooth', 'strawberry', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
+  'tenderness', 'powder', 'turquoise', 'photobooth', 'strawberry', 'ivory', 'vitrage', 'velvet', 'calla', 'forest', 'garden-evening',
   'sketch', 'vadimdarya', 'mediterranean', 'garden-arch', 'angels', 'floral',
 ];
 const catalogRank = (id: string) => {
@@ -555,6 +568,7 @@ export const TEMPLATE_GREETING_KEY: Record<string, string> = {
   powder: 'greetingTitle',
   strawberry: 'greetingTitle',
   photobooth: 'greetingTitle',
+  turquoise: 'greetingTitle',
   velvet: 'greetingTitle',
   angels: 'greetingTitle',
   forest: 'greetingTitle',
@@ -680,6 +694,16 @@ export const ICON_SETS: Record<string, string[]> = {
     '/invite/powder/assets/perfume.webp',
     '/invite/powder/assets/jewelbox.webp',
     '/invite/powder/assets/bag.webp',
+  ],
+  turquoise: [
+    '/invite/turquoise/assets/ic-glasses.webp',
+    '/invite/turquoise/assets/ic-rings.webp',
+    '/invite/turquoise/assets/ic-cake.webp',
+    '/invite/turquoise/assets/ic-disco.webp',
+    '/invite/turquoise/assets/ic-dress.webp',
+    '/invite/turquoise/assets/gem.webp',
+    '/invite/turquoise/assets/rings-gold.webp',
+    '/invite/turquoise/assets/plate.webp',
   ],
   photobooth: [
     '/invite/photobooth/assets/ic-clapper.webp',
@@ -856,6 +880,7 @@ const TEMPLATE_MUSIC: Record<string, string> = {
   powder: 'canon',
   strawberry: 'canon',
   photobooth: 'canon',
+  turquoise: 'clair',
   velvet: 'nocturne',
   angels: 'air',
   forest: 'thousand',
@@ -1237,6 +1262,97 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
       fields: [
         { id: 'closingTitle', type: 'text', label: 'Финальный заголовок', scope: 'custom', maxLength: 40 },
         { id: 'closingSign',  type: 'text', label: 'Подпись', hint: 'Пусто — ваши имена', scope: 'custom', maxLength: 60 },
+      ],
+    },
+    MUSIC_SECTION,
+  ],
+
+  turquoise: [
+    {
+      title: 'Обложка', icon: '🖼',
+      fields: [
+        { id: 'heroTitle', type: 'text',     label: 'Надпись над именами', hint: 'Пусто — без надписи', scope: 'custom', maxLength: 32 },
+        { id: 'heroText',  type: 'textarea', label: 'Цитата под именами', hint: 'Пусто — без цитаты', scope: 'custom', maxLength: 110 },
+      ],
+    },
+    {
+      title: 'Приветствие', icon: '✍️',
+      fields: [
+        { id: 'greetingTitle', type: 'text',     label: 'Обращение', hint: 'По персональной ссылке здесь будет обращение к гостю', scope: 'custom', maxLength: 40 },
+        { id: 'inviteText',    type: 'textarea', label: 'Текст приглашения (абзацы с новой строки)', scope: 'data', maxLength: 220 },
+      ],
+    },
+    {
+      title: 'Фото в рамке', icon: '💍',
+      fields: [
+        { id: 'heartTitle', type: 'text',  label: 'Надпись над рамкой', hint: 'Пусто — без надписи', scope: 'custom', maxLength: 60 },
+        { id: 'coverPhoto', type: 'image', label: 'Фото в овальной раме', hint: 'Лучше вертикальное', scope: 'data' },
+      ],
+    },
+    {
+      title: 'Жених и невеста', icon: '💑',
+      fields: [
+        { id: 'coupleTitle', type: 'text',     label: 'Заголовок', scope: 'custom', maxLength: 40 },
+        { id: 'groomPhoto',  type: 'image',    label: 'Фото жениха', scope: 'custom' },
+        { id: 'groomLabel',  type: 'text',     label: 'Подпись под фото жениха', hint: 'Пусто — без подписи', scope: 'custom', maxLength: 16 },
+        { id: 'bridePhoto',  type: 'image',    label: 'Фото невесты', scope: 'custom' },
+        { id: 'brideLabel',  type: 'text',     label: 'Подпись под фото невесты', hint: 'Пусто — без подписи', scope: 'custom', maxLength: 16 },
+        { id: 'coupleText',  type: 'textarea', label: 'Пара слов о вас (абзацы с новой строки)', scope: 'custom', maxLength: 200 },
+      ],
+    },
+    {
+      title: 'Меню', icon: '🍽',
+      fields: [
+        { id: 'menuText', type: 'textarea', label: 'Текст о меню (абзацы с новой строки)', scope: 'custom', maxLength: 200 },
+      ],
+    },
+    {
+      title: 'Детали', icon: '🤍',
+      fields: [
+        { id: 'detailsTitle', type: 'text',     label: 'Заголовок', scope: 'custom', maxLength: 30 },
+        { id: 'detailsText',  type: 'textarea', label: 'Текст (абзацы с новой строки)', scope: 'custom', maxLength: 260 },
+      ],
+    },
+    {
+      title: 'Программа дня', icon: '⏱',
+      fields: [
+        { id: 'programTitle', type: 'text', label: 'Заголовок', scope: 'custom', maxLength: 30 },
+        { id: 'schedule', type: 'schedule', label: 'Пункты программы', scope: 'data', iconSet: 'turquoise' },
+      ],
+    },
+    {
+      title: 'Дресс-код', icon: '👗',
+      fields: [
+        { id: 'dressText',       type: 'textarea',  label: 'Описание дресс-кода', hint: 'Пусто — без текста', scope: 'custom', maxLength: 140 },
+        { id: 'dressCodeColors', type: 'colorList', label: 'Цвета', scope: 'data' },
+      ],
+    },
+    {
+      title: 'Место проведения', icon: '📍',
+      fields: [
+        { id: 'venueTitle', type: 'text', label: 'Заголовок', scope: 'custom', maxLength: 30 },
+        { id: 'venue', type: 'text', label: 'Место проведения', hint: 'Например: Дворец бракосочетания №1', scope: 'data', maxLength: 50 },
+        MAP_ADDRESS, MAP_LINK,
+      ],
+    },
+    {
+      title: 'Пожелания', icon: '💌',
+      fields: [
+        { id: 'wishTitle', type: 'text',     label: 'Заголовок', scope: 'custom', maxLength: 30 },
+        { id: 'story',     type: 'textarea', label: 'Пожелания по подаркам (абзацы с новой строки)', scope: 'data', maxLength: 220 },
+      ],
+    },
+    {
+      title: 'Анкета гостя', icon: '📝',
+      fields: [
+        { id: 'surveyText', type: 'textarea', label: 'Текст-приглашение к анкете', scope: 'custom' },
+        { id: 'drinks',     type: 'drinks',   label: 'Список напитков',            scope: 'custom' },
+      ],
+    },
+    {
+      title: 'Завершение', icon: '💍',
+      fields: [
+        { id: 'closingTitle', type: 'text', label: 'Надпись над именами', hint: 'Пусто — без надписи', scope: 'custom', maxLength: 30 },
       ],
     },
     MUSIC_SECTION,
@@ -2339,6 +2455,54 @@ const HANDMADE_TEMPLATE_DEFAULTS: Record<string, TemplateDefaults> = {
       rsvpQuestions:  ['menu'],
       closingTitle:   'С любовью, ваши',
       closingSign:    '', // Пустое поле — имена пары.
+    },
+  },
+
+  turquoise: {
+    inviteText: 'Мы женимся! Приглашаем вас на день, полный нежности, улыбок и тёплых встреч.',
+    venue: 'Дворец бракосочетания №1',
+    venueAddress: 'Санкт-Петербург, Английская наб., 28',
+    story: 'Будем рады подарку в конверте — на мечты нашей семьи. Просим обойтись без букетов.',
+    schedule: [
+      { time: '15:00', title: 'Сбор гостей', icon: '/invite/turquoise/assets/ic-glasses.webp' },
+      { time: '15:30', title: 'Церемония', icon: '/invite/turquoise/assets/ic-rings.webp' },
+      { time: '17:00', title: 'Банкет и торт', icon: '/invite/turquoise/assets/ic-cake.webp' },
+      { time: '20:00', title: 'Танцы', icon: '/invite/turquoise/assets/ic-disco.webp' },
+    ],
+    dressCodeColors: ['#1f65ff', '#3ebadf', '#14eaea', '#c98f33'],
+    drinks: [
+      { value: 'sparkling',  label: 'Шампанское' },
+      { value: 'white',      label: 'Белое вино' },
+      { value: 'red',        label: 'Красное вино' },
+      { value: 'cognac',     label: 'Коньяк или виски' },
+      { value: 'no_alcohol', label: 'Без алкоголя' },
+    ],
+    custom: {
+      heroTitle:     'приглашение на свадьбу',
+      heroText:      'Любовь — это когда лучший друг становится семьёй',
+      greetingTitle: 'Дорогие гости!',
+      heartTitle:    'Там, где посеяна любовь, растёт радость!',
+      coupleTitle:   'Две половинки одной истории',
+      groomPhoto:    '/invite/turquoise/assets/groom.jpg',
+      groomLabel:    'Муж',
+      bridePhoto:    '/invite/turquoise/assets/bride.jpg',
+      brideLabel:    'Жена',
+      coupleText:    'Мы такие разные — и такие похожие. Вместе нам всегда хорошо, и мы хотим разделить этот день с вами.',
+      menuTitle:     'Меню',
+      menuText:      'Сообщите в анкете о своих предпочтениях в еде и аллергиях — мы всё учтём.',
+      detailsTitle:  'Примечания',
+      detailsText:   'Будем благодарны, если вы воздержитесь от криков «Горько» на празднике, ведь поцелуй — это знак выражения чувств, он не может быть по заказу.',
+      programTitle:  'Программа дня',
+      dressTitle:    'Дресс-код',
+      dressText:     'Будем рады, если вы поддержите цвета нашего праздника',
+      venueTitle:    'Место проведения',
+      wishTitle:     'Пожелания и детали',
+      surveyTitle:   'Анкета',
+      surveyText:    'Пожалуйста, подтвердите своё присутствие до {{rsvpDate}}.',
+      rsvpChildren:  true,
+      rsvpQuestions: ['menu', 'allergy'],
+      closingTitle:  'Ваши,',
+      countdownTitle: 'До свадьбы осталось',
     },
   },
 

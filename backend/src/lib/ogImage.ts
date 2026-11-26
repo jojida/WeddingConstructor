@@ -20,6 +20,7 @@ const PALETTES: Record<string, Palette> = {
   powder:           { bg: '#fdf3f3', ink: '#735e59', accent: '#cc7c72' },
   strawberry:       { bg: '#fbe3ec', ink: '#b0244f', accent: '#f16298' },
   photobooth:       { bg: '#fffaf2', ink: '#000000', accent: '#a83e3d' },
+  turquoise:        { bg: '#eef6f6', ink: '#062456', accent: '#0e7c86' },
   velvet:           { bg: '#f4ece6', ink: '#3d0d17', accent: '#7a1f2e' },
   forest:           { bg: '#eef2ea', ink: '#2f3a2c', accent: '#6b7d5a' },
   'garden-evening': { bg: '#f6efe4', ink: '#3b3127', accent: '#b07b4f' },

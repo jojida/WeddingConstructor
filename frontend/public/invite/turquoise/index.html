@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Диана и Евгений — приглашение на свадьбу</title>
+  <!-- Анимация обложки: в редакторе, без анимации в тарифе и при «меньше движения» —
+       сразу готовая обложка, без мигания до загрузки скриптов -->
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      if (q.get('editing') === '1' || q.get('intro') === '0' ||
+          (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+        document.documentElement.classList.add('no-anim', 'hero-go');
+      }
+    })();
+  </script>
+  <link rel="preload" as="font" type="font/woff2" href="../assets/fonts/kurale-cyrillic.woff2" crossorigin />
+  <link rel="preload" as="image" href="assets/agate-cover.webp" />
+  <link rel="stylesheet" href="styles.css" />
+  <noscript><style>
+    .hero-in, .rv, .rv-soft, .rv-pop > * { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+  </style></noscript>
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="../assets/intro-preview.js"></script>
+</head>
+<body>
+
+  <main class="invite" id="invite">
+
+    <!-- 1 — ОБЛОЖКА: агат с золотом слева, блёстки, имена, дата.
+         У гостя агат «наплывает» слева, блёстки мерцают, имена проявляются -->
+    <section class="cover" id="hero" data-wc-section="cover">
+      <img width="831" height="537" class="cover__glitter cover__glitter--1 hero-in hero-in--3" src="assets/glitter-1.webp" alt="" />
+      <img width="578" height="719" class="cover__glitter cover__glitter--2 hero-in hero-in--3" src="assets/glitter-2.webp" alt="" />
+      <img width="349" height="506" class="cover__glitter cover__glitter--3 hero-in hero-in--3" src="assets/glitter-3.webp" alt="" />
+      <img width="286" height="273" class="cover__glitter cover__glitter--4 hero-in hero-in--3" src="assets/glitter-4.webp" alt="" />
+      <img width="676" height="2167" class="cover__agate" src="assets/agate-cover.webp" alt="" />
+      <p class="cover__label hero-in hero-in--1" data-edit="heroTitle">приглашение на свадьбу</p>
+      <h1 class="cover__names hero-in hero-in--1" id="heroNames">
+        <span class="cover__name cover__name--1" data-name="groom">Евгений</span>
+        <img width="193" height="196" class="cover__amp" src="assets/amp.webp" alt="" /><span class="vh"> и </span>
+        <span class="cover__name cover__name--2" data-name="bride">Диана</span>
+      </h1>
+      <p class="cover__quote hero-in hero-in--2" data-edit="heroText">Любовь — это когда лучший друг становится семьёй</p>
+      <!-- дата — обязательный блок -->
+      <div class="cover__date hero-in hero-in--2" data-wc-section="date" data-edit="heroDate">
+        <span class="cover__month" id="dateMonth">июнь</span>
+        <span class="cover__day" id="dateDay">21</span>
+        <span class="cover__time" id="dateTime">12:30</span>
+        <span class="cover__year" id="dateYear">2030</span>
+      </div>
+      <p class="cover__addr hero-in hero-in--2" data-wc-section="venue" data-edit="venueAddress">Санкт-Петербург, Английская наб., 28</p>
+      <img width="1093" height="462" class="cover__wave rv-line" src="assets/gold-wave.webp" alt="" />
+    </section>
+
+    <!-- 2 — ДОРОГИЕ ГОСТИ: текст, вензель, фото в овальной раме с бантом -->
+    <section class="greet" id="greeting" data-wc-section="greeting">
+      <img class="wash" style="--x:0;--y:-239;--w:353" src="assets/wash-l1.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:0;--y:877;--w:512" src="assets/wash-l2.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:1107;--y:-351;--w:259" src="assets/wash-r1.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:997;--y:843;--w:369" src="assets/wash-r2.webp" alt="" loading="lazy" decoding="async" />
+      <h2 class="script greet__title rv" data-edit="greetingTitle">Дорогие гости!</h2>
+      <div class="caps greet__text rv" data-edit="inviteText">
+        <p>Мы женимся! Приглашаем вас на день, полный нежности, улыбок и тёплых встреч.</p>
+      </div>
+      <img width="893" height="101" class="divider rv-line" src="assets/divider.webp" alt="" loading="lazy" decoding="async" />
+    </section>
+
+    <!-- 3 — ФОТО В ОВАЛЬНОЙ РАМЕ -->
+    <section class="oval" id="photo" data-wc-section="photos">
+      <p class="caps oval__quote rv" data-edit="heartTitle">Там, где посеяна любовь, растёт радость!</p>
+      <div class="oval__box rv-soft">
+        <div class="oval__photo"><img src="assets/couple.jpg" data-edit="coverPhoto" alt="Наше фото" loading="lazy" decoding="async" /></div>
+        <img width="1004" height="1302" class="oval__frame" src="assets/oval-frame.webp" alt="" loading="lazy" decoding="async" />
+      </div>
+    </section>
+
+    <!-- 4 — ЖЕНИХ И НЕВЕСТА: колье, два фото «Муж» / «Жена», пара слов о себе -->
+    <section class="couple" id="couple" data-wc-section="couple">
+      <img class="wash" style="--x:0;--y:-62;--w:446" src="assets/wash-l3.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:1012;--y:26;--w:353" src="assets/wash-r3.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:894;--y:895;--w:472" src="assets/wash-r4.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:0;--y:895;--w:489" src="assets/wash-l4.webp" alt="" loading="lazy" decoding="async" />
+      <h2 class="caps caps--l couple__title rv" data-edit="coupleTitle">Две половинки одной истории</h2>
+      <img width="1366" height="756" class="couple__necklace rv-soft" src="assets/necklace-blue.webp" alt="" loading="lazy" decoding="async" />
+      <div class="couple__pics">
+        <figure class="card card--groom rv-soft">
+          <div class="card__photo"><img src="assets/groom.jpg" data-edit="groomPhoto" alt="Жених" loading="lazy" decoding="async" /></div>
+          <figcaption class="card__label" data-edit="groomLabel">Муж</figcaption>
+        </figure>
+        <figure class="card card--bride rv-soft">
+          <div class="card__photo"><img src="assets/bride.jpg" data-edit="bridePhoto" alt="Невеста" loading="lazy" decoding="async" /></div>
+          <figcaption class="card__label" data-edit="brideLabel">Жена</figcaption>
+        </figure>
+      </div>
+      <div class="caps couple__text rv" data-edit="coupleText">
+        <p>Мы такие разные — и такие похожие. Вместе нам всегда хорошо, и мы хотим разделить этот день с вами.</p>
+      </div>
+    </section>
+
+    <!-- 5 — МЕНЮ И ПРИМЕЧАНИЯ на мраморе -->
+    <div class="marble">
+      <section class="menu" id="menu" data-wc-section="menu">
+        <img width="640" height="526" class="menu__plate rv-soft" src="assets/plate.webp" alt="" loading="lazy" decoding="async" />
+        <h2 class="head menu__title rv" data-edit="menuTitle">Меню</h2>
+        <div class="caps caps--s menu__text rv" data-edit="menuText">
+          <p>Сообщите в анкете о своих предпочтениях в еде и аллергиях — мы всё учтём.</p>
+        </div>
+      </section>
+      <section class="notes" id="details" data-wc-section="details">
+        <img width="347" height="301" class="notes__rings rv-soft" src="assets/rings-gold.webp" alt="" loading="lazy" decoding="async" />
+        <h2 class="head notes__title rv" data-edit="detailsTitle">Примечания</h2>
+        <div class="notes__text rv" data-edit="detailsText">
+          <p>Будем благодарны, если вы воздержитесь от криков «Горько» на празднике, ведь поцелуй — это знак выражения чувств, он не может быть по заказу.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- 6 — ПРОГРАММА ДНЯ: агат по краям, пунктир, камень едет по нему за прокруткой -->
+    <section class="program" id="program" data-wc-section="schedule">
+      <img width="315" height="3672" class="program__agate-l" src="assets/agate-left.webp" alt="" loading="lazy" decoding="async" />
+      <img width="900" height="1501" class="program__agate-r" src="assets/agate-slab.webp" alt="" loading="lazy" decoding="async" />
+      <h2 class="head program__title rv" data-edit="programTitle">Программа дня</h2>
+      <div class="prog" id="prog">
+        <svg class="prog__svg" id="progSvg" aria-hidden="true">
+          <path id="progPath" class="prog__path" d="" />
+          <image id="progGem" class="prog__gem" href="assets/gem.webp" width="119" height="153" x="-300" y="-300" />
+        </svg>
+        <!-- пункты .prog__row строит script.js из расписания -->
+      </div>
+    </section>
+
+    <!-- 7 — ДРЕСС-КОД И МЕСТО на мраморе -->
+    <div class="marble marble--2">
+      <section class="dress" id="dresscode" data-wc-section="dresscode">
+        <h2 class="head dress__title rv" data-edit="dressTitle">Дресс-код</h2>
+        <img width="253" height="280" class="dress__icon rv-soft" src="assets/ic-dress.webp" alt="" loading="lazy" decoding="async" />
+        <p class="caps caps--s dress__text rv" data-edit="dressText">Будем рады, если вы поддержите цвета нашего праздника</p>
+        <div class="dress__colors rv-pop" data-edit="palette">
+          <span style="--c:#1f65ff"></span><span style="--c:#3ebadf"></span><span style="--c:#14eaea"></span><span style="--c:#c98f33"></span>
+        </div>
+      </section>
+      <section class="place" id="venue" data-wc-section="venue">
+        <h2 class="head place__title rv" data-edit="venueTitle">Место проведения</h2>
+        <p class="caps caps--s place__name rv" data-edit="venue">Дворец бракосочетания №1</p>
+        <p class="place__addr rv" data-edit="venueAddress">Санкт-Петербург, Английская наб., 28</p>
+        <a class="pill place__btn rv" id="mapBtn" href="#" target="_blank" rel="noopener" data-edit="mapButton">Открыть карту</a>
+        <!-- Карта (Яндекс) по адресу — ../assets/venue-map.js -->
+        <div class="wc-map tq-map" data-wc-map hidden></div>
+      </section>
+    </div>
+
+    <!-- 8 — ПОЖЕЛАНИЯ, АНКЕТА, ФИНАЛ -->
+    <div class="tail">
+      <img class="wash" style="--x:962;--y:316;--w:404" src="assets/wash-r5.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:0;--y:260;--w:369" src="assets/wash-l6.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:0;--y:2654;--w:495" src="assets/wash-l5.webp" alt="" loading="lazy" decoding="async" />
+      <img class="wash" style="--x:815;--y:2832;--w:551" src="assets/wash-r6.webp" alt="" loading="lazy" decoding="async" />
+
+      <section class="wishes" id="wishes" data-wc-section="wishes">
+        <img width="378" height="378" class="wishes__agate rv-soft" src="assets/agate-round.webp" alt="" loading="lazy" decoding="async" />
+        <h2 class="head wishes__title rv" data-edit="wishTitle">Пожелания и детали</h2>
+        <div class="caps caps--s wishes__text rv" data-edit="story">
+          <p>Будем рады подарку в конверте — на мечты нашей семьи. Просим обойтись без букетов.</p>
+        </div>
+        <img width="773" height="87" class="divider divider--2 rv-line" src="assets/divider-2.webp" alt="" loading="lazy" decoding="async" />
+      </section>
+
+      <!-- 9 — АНКЕТА в кремовой карточке -->
+      <section class="rsvp" id="rsvp" data-wc-section="rsvp">
+        <div class="rsvp__card rv-soft">
+          <h2 class="rsvp__title" data-edit="surveyTitle">Анкета</h2>
+          <p class="rsvp__lead" data-edit="surveyText">Пожалуйста, подтвердите своё присутствие</p>
+          <form class="rsvp__form" id="rsvpForm" novalidate>
+            <input class="rsvp__name" type="text" name="guestName" placeholder="Ваше имя и фамилия" autocomplete="name" maxlength="120" />
+            <fieldset class="rsvp__group">
+              <legend>Будете ли вы на празднике?</legend>
+              <label class="form-option"><input type="radio" name="attend" value="yes" /><span class="custom-radio"></span>Да, с радостью приду</label>
+              <label class="form-option"><input type="radio" name="attend" value="no" /><span class="custom-radio"></span>К сожалению, не смогу</label>
+            </fieldset>
+            <fieldset class="rsvp__group" data-rsvp-count>
+              <legend>Сколько вас будет?</legend>
+              <div class="wc-count" data-wc-count>
+                <button type="button" class="wc-count__btn" data-step="-1" aria-label="Меньше">−</button>
+                <input class="wc-count__num" type="number" name="guestsCount" value="1" min="1" max="10" inputmode="numeric" aria-label="Сколько вас будет" />
+                <button type="button" class="wc-count__btn" data-step="1" aria-label="Больше">+</button>
+              </div>
+            </fieldset>
+            <fieldset class="rsvp__group" data-edit="drinks">
+              <legend>Что вы предпочитаете из напитков?</legend>
+              <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="sparkling" />Шампанское</label>
+              <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="white" />Белое вино</label>
+              <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="red" />Красное вино</label>
+              <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="cognac" />Коньяк или виски</label>
+              <label class="form-option"><span class="custom-check"></span><input type="checkbox" name="drink" value="no_alcohol" />Без алкоголя</label>
+            </fieldset>
+            <button class="pill pill--dark rsvp__submit" type="submit">Отправить</button>
+            <p class="rsvp__error" id="rsvpError" role="alert"></p>
+          </form>
+          <p class="rsvp__thanks" id="rsvpThanks" hidden>Спасибо! Ваш ответ получен</p>
+        </div>
+      </section>
+
+      <!-- 10 — ФИНАЛ: колье с изумрудом, «Ваши,» и имена, таймер -->
+      <section class="fin" id="final" data-wc-section="closing">
+        <img width="1000" height="699" class="fin__necklace rv-soft" src="assets/necklace-emerald.webp" alt="" loading="lazy" decoding="async" />
+        <p class="fin__title rv" data-edit="closingTitle">Ваши,</p>
+        <p class="fin__names rv" id="finNames"><span class="fin__name" data-name="groom">Евгений</span><img width="193" height="196" class="fin__amp" src="assets/amp.webp" alt="" /><span class="vh"> и </span><span class="fin__name" data-name="bride">Диана</span></p>
+        <div class="cd rv" data-wc-section="countdown" aria-live="off">
+          <p class="cd__title" data-edit="countdownTitle">До свадьбы осталось</p>
+          <div class="cd__row">
+            <div class="cd__cell"><span class="cd__num" id="cdD">213</span><span class="cd__lbl" id="cdDl">дней</span></div>
+            <div class="cd__cell"><span class="cd__num" id="cdH">05</span><span class="cd__lbl" id="cdHl">часов</span></div>
+            <div class="cd__cell"><span class="cd__num" id="cdM">30</span><span class="cd__lbl" id="cdMl">минут</span></div>
+            <div class="cd__cell"><span class="cd__num" id="cdS">00</span><span class="cd__lbl" id="cdSl">секунд</span></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <script src="../assets/preload.js"></script>
+  <script src="/invite/assets/sections.js"></script>
+  <script src="../assets/music.js"></script>
+  <script src="../assets/photo-frame.js"></script>
+  <script src="../assets/venue-map.js"></script>
+  <script src="../assets/rsvp-count.js"></script>
+  <script src="../assets/signature.js"></script>
+  <script src="../assets/brand.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
