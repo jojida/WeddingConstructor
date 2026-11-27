@@ -729,6 +729,13 @@ function trackMarkerField(templateId: string): TemplateField | null {
   };
 }
 
+/** Есть ли у сайта анимация открытия: своя заставка шаблона или выбранный общий конверт.
+    У «Каллы», «Скетча» и других шаблонов без своей заставки раздел «Заставка» есть
+    (там можно поставить конверт), но пока конверт не выбран — открывать нечего. */
+export function hasOpeningAnimation(templateId: string, custom: Record<string, unknown> = {}): boolean {
+  return !!OWN_INTRO[templateId] || isUniversalIntro(custom.introStyle);
+}
+
 /** Какая заставка на самом деле у сайта: общий конверт или своя шаблона ('own') */
 export function effectiveIntro(templateId: string, custom: Record<string, unknown>): UniversalIntro | 'own' {
   if (isUniversalIntro(custom.introStyle)) return custom.introStyle;

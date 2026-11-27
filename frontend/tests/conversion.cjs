@@ -43,6 +43,11 @@ test('на бесплатном тарифе — что гости не увид
   const sample = freeLosses({ ...invite, venue: 'Усадьба Кусково', venueAddress: 'Москва, ул. Юности, 2', enabledSections: { rsvp: false, schedule: false } });
   assert.equal(sample[0], 'место и карту проезда');
   assert.ok(!sample.some(item => item.startsWith('анкету') || item.startsWith('программу')), JSON.stringify(sample));
+  // Анимация открытия — у шаблона со своей заставкой («Лес»); у «Каллы» без заставки её нет,
+  // пока пара не поставила общий конверт
+  assert.ok(losses.includes('анимацию открытия'), JSON.stringify(losses));
+  assert.ok(!freeLosses({ ...invite, templateId: 'calla' }).includes('анимацию открытия'));
+  assert.ok(freeLosses({ ...invite, templateId: 'calla', customData: { introStyle: 'flap' } }).includes('анимацию открытия'));
   // Шаблон без схемы блоков — сказать нечего
   assert.deepEqual(freeLosses({ templateId: 'no-such-template' }), []);
 });

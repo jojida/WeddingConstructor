@@ -1,4 +1,4 @@
-import { TEMPLATE_FIELDS } from './constants';
+import { TEMPLATE_FIELDS, hasOpeningAnimation } from './constants';
 import { ownPlace, quotePlace } from './own-place';
 import { isSectionEnabled } from './section-visibility';
 
@@ -35,7 +35,8 @@ export function freeLosses(invite: InviteLike): string[] {
     : 0;
   if (on('schedule') && steps) items.push(`программу дня (${steps} ${plural(steps, 'пункт', 'пункта', 'пунктов')})`);
   if (on('dresscode')) items.push('дресс-код');
-  if (on('envelope')) items.push('анимацию открытия');
+  // раздел «Заставка» есть у всех шаблонов (27.11.26), а сама анимация — не у всех
+  if (on('envelope') && hasOpeningAnimation(invite.templateId || '', invite.customData || {})) items.push('анимацию открытия');
   if (on('hall')) items.push('фото места');
   return items;
 }
