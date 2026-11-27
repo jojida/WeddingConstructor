@@ -72,11 +72,12 @@ export default function TemplatesCatalog({ sampleFrom }: { sampleFrom: number })
             className={styles.card}
           >
             {/* Слева открытка для печати, справа телефон — TemplateShowcase.
-                Нажатие на шаблон — сразу к анкете «Расскажите о вашей свадьбе»:
-                слева шаблон, справа поля (app/editor/SetupStep.tsx), как «Выбрать» */}
-            <Link href={`/editor?template=${tpl.id}`} prefetch={false} className={styles.cardImageWrapper}
-              aria-label={`Выбрать шаблон «${tpl.name}»`}
-              onClick={() => reachGoal(GOAL.templateChoose, { template: tpl.name, from: 'catalog' })}>
+                Нажатие на шаблон — его просмотр (демо) в новой вкладке, как
+                «Посмотреть» и карточки на главной (28.11.26). С 16.11 картинка
+                вела в анкету редактора — туда по-прежнему ведёт «Выбрать». */}
+            <Link href={`/demo/${tpl.id}`} target="_blank" className={styles.cardImageWrapper}
+              aria-label={`Посмотреть шаблон «${tpl.name}»`}
+              onClick={() => reachGoal(GOAL.templatePreview, { template: tpl.name, from: 'catalog' })}>
               <TemplateShowcase
                 initialVisible={i < 4}
                 data={withPreviewNames(templateCardData(SAMPLE_DATA, tpl, templateSampleDate(tpl, sampleFrom)), shown)}
