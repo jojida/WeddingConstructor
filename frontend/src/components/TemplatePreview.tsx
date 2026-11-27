@@ -2,6 +2,7 @@
 import { planSections, isBrandFree, hasWatermark } from '@/lib/plans';
 import { TEMPLATE_DEFAULTS } from '@/lib/constants';
 import dynamic from 'next/dynamic';
+import { Fragment } from 'react';
 import { isStudioTemplate } from '@/lib/studioTemplates';
 
 // Keep server rendering; only the selected design needs client JavaScript.
@@ -65,7 +66,15 @@ interface Props {
   editing?: boolean;
 }
 
-export default function TemplatePreview({ data, apiBase, fullPage, slug, editing }: Props) {
+/* Заставку страница шаблона узнаёт из адреса до своей отрисовки (lib/intro-choice.ts),
+   поэтому другая заставка — это новая страница: обёртка строится заново (ключ),
+   iframe грузится с новым адресом. Цвет печати меняется на лету, без перезагрузки. */
+export default function TemplatePreview(props: Props) {
+  const style = props.data.customData?.introStyle;
+  return <Fragment key={typeof style === 'string' ? style : ''}><TemplateFrame {...props} /></Fragment>;
+}
+
+function TemplateFrame({ data, apiBase, fullPage, slug, editing }: Props) {
   // wcBrand — подпись «Создано на WeddingCraft» (assets/signature.js), wcWatermark — водяной знак (assets/brand.js); оба рисуются внутри страницы шаблона
   data = { ...data, enabledSections: planSections(data.plan, data.enabledSections), customData: { ...data.customData, plan: data.plan, wcBrand: !isBrandFree(data.plan, data.status), wcWatermark: hasWatermark(data.status) } };
   // «Программа дня» не должна оказаться пустой ни у гостей, ни в превью:

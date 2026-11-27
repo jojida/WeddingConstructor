@@ -998,10 +998,12 @@ function EditorContent() {
                                 <button type="button" className={styles.sectionSetup} onClick={openSetup}>Изменить имена и дату</button>
                               </>
                             : <p className={styles.sectionsHint}>Настраивать здесь нечего — блок можно убрать и вернуть переключателем.</p>)}
-                          {shownSection.fields.map(f => (
+                          {/* Поле с условием (showIf) — только когда оно к месту: цвет печати — у конвертов */}
+                          {shownSection.fields.filter(f => !f.showIf || f.showIf(data.customData || {})).map(f => (
                             <div key={f.id} data-field={f.id}>
                               <SchemaFieldRenderer
                                 field={f}
+                                fallback={f.defaultValue?.(data.customData || {})}
                                 value={f.scope === 'data' ? (data as any)[f.id] : (data.customData || {})[f.id]}
                                 onChange={(v: any) => (f.scope === 'data' ? setAny(f.id, v) : setCustom(f.id, v))}
                                 apiBase={apiBase}
@@ -1200,8 +1202,10 @@ function CharCounter({ value, max }: { value: string; max: number }) {
   );
 }
 
-function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, weddingDate, uploadImage, uploadAudio, frame, slot, onFrame, photoCutout, onPhotoCutout, customIcons, onCustomIcons }: {
+function SchemaFieldRenderer({ field, value, fallback, onChange, apiBase, templateId, weddingDate, uploadImage, uploadAudio, frame, slot, onFrame, photoCutout, onPhotoCutout, customIcons, onCustomIcons }: {
   field: TemplateField;
+  /** choice: что считается выбранным, пока пара не выбирала (field.defaultValue) */
+  fallback?: string;
   templateId?: string;
   weddingDate?: string;   // срок ответа в готовых текстах анкеты
   value: any;
@@ -1303,9 +1307,11 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, wedd
       );
     }
     case 'choice': {
-      // Не задано — первый вариант: так поле работает и у сайтов, созданных до его появления.
+      // Не задано — вариант по умолчанию (fallback, напр. родной цвет печати выбранного
+      // конверта) или первый: так поле работает и у сайтов, созданных до его появления.
       const opts = field.options || [];
-      const cur = opts.some(o => o.value === value) ? value : opts[0]?.value;
+      const cur = opts.some(o => o.value === value) ? value
+        : opts.some(o => o.value === fallback) ? fallback : opts[0]?.value;
       return (
         <Field label={field.label}>
           {/* Плитки, как образцы цвета в конфигураторах */}
@@ -1315,7 +1321,11 @@ function SchemaFieldRenderer({ field, value, onChange, apiBase, templateId, wedd
               return (
                 <button key={o.value} type="button" role="radio" aria-checked={on} title={o.label} onClick={() => onChange(o.value)}
                   className={styles.choiceTile}>
-                  <span className={styles.choiceSwatch} style={{ background: o.color || '#ccc' }} />
+                  <span className={styles.choiceSwatch}
+                    style={o.image && o.fit === 'contain'
+                      // значок с прозрачным фоном — целиком, с полями, на светлой плитке
+                      ? { background: `url("${o.image}") center / contain no-repeat content-box, ${o.color || '#f6f2ec'}`, padding: 10, boxSizing: 'border-box' }
+                      : { background: o.image ? `center / cover no-repeat url("${o.image}")` : o.color || '#ccc' }} />
                   {o.label}
                 </button>
               );

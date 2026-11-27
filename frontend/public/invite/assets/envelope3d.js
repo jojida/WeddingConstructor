@@ -26,9 +26,17 @@
 
    Без WebGL2 конверта нет — сайт открывается как обычно. Так же при intro=0:
    анимация открытия не входит в тариф (бесплатный).
+
+   С 27.11.26 — одна из универсальных заставок: её подключает
+   ../assets/intro-choice.js любому шаблону, если пара выбрала её вместо своей
+   (цвет печати тогда сразу из адреса — seal=…; после показа в редакторе
+   играет и анимация обложки шаблона, WCHero.replay).
    ============================================================ */
 (function () {
   'use strict';
+
+  var CH = window.WCIntroChoice;
+  if (CH && CH.style !== 'wax3d') return;          // выбрана другая заставка — не наш конверт
 
   var script = document.currentScript;
   var attr = function (n, def) { return (script && script.getAttribute(n)) || def; };
@@ -37,7 +45,7 @@
   var EDITING = Q.get('editing') === '1';
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var SERIF = attr('data-serif', 'Cormorant Garamond');
-  var WAXES = ['beige', 'ivory', 'gold', 'burgundy', 'sage', 'blue'];
+  var WAXES = ['beige', 'ivory', 'gold', 'pink', 'burgundy', 'brown', 'sage', 'blue'];
   var root = document.documentElement;
 
   function hasGL2() {
@@ -59,7 +67,7 @@
     groom: (Q.get('groom') || attr('data-groom', '')).trim(),
     bride: (Q.get('bride') || attr('data-bride', '')).trim(),
     date: Q.get('date') || attr('data-date', ''),
-    wax: attr('data-wax', 'beige')
+    wax: CH && WAXES.indexOf(CH.seal) >= 0 ? CH.seal : attr('data-wax', 'beige')
   };
   var first = function (s) { return (s || '').trim().charAt(0).toUpperCase(); };
   var letters = function () { return [first(D.groom) || 'А', first(D.bride) || 'Д']; };
@@ -217,7 +225,9 @@
     phase = 'closed';
     var d = previewDone;
     previewDone = null;
-    if (d) d();
+    // у обложки своя анимация (шаблон с конвертом вместо своей заставки) — показать и её
+    var hero = window.WCHero && window.WCHero.replay;
+    if (d && hero) hero(d); else if (d) d();
   }
   if (IP) {
     IP.onPeek = function () { if (phase === 'closed') ensure().catch(function () {}); };

@@ -24,6 +24,10 @@
   <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <!-- 0 — КОНВЕРТ: видео раскрытия (../assets/envelope.js). Видео обрезано
        на 1,83 с: дальше на правом пионе появлялось лишнее свечение -->
@@ -104,7 +108,7 @@
              при прокрутке, без CSS-переходов (как в других шаблонах) -->
         <svg class="prog__svg" id="progSvg" aria-hidden="true" preserveAspectRatio="none">
           <path id="progPath" class="prog__path" d="" />
-          <path id="progHeart" class="prog__heart" d="M62 111C22 82 1 60 1 33 1 14 15 1 32 1c13 0 24 7 30 18C68 8 79 1 92 1c17 0 31 13 31 32 0 27-21 49-61 78z" />
+          <path id="progHeart" class="prog__heart" data-wc-marker="own" d="M62 111C22 82 1 60 1 33 1 14 15 1 32 1c13 0 24 7 30 18C68 8 79 1 92 1c17 0 31 13 31 32 0 27-21 49-61 78z" />
         </svg>
         <!-- пункты .prog__node строит script.js из расписания -->
       </div>
@@ -212,6 +216,9 @@
   <script src="../assets/signature.js"></script>
   <script src="../assets/envelope.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

@@ -637,7 +637,17 @@
     if (EDITING || REDUCED || NO_INTRO) {
       ROOT.classList.add('no-anim');
       startHero();
-      if (EDITING && !REDUCED && window.WCIntroPreview && window.WCIntroPreview.on) window.WCIntroPreview.button(replayHero);
+      if (EDITING && !REDUCED && window.WCIntroPreview && window.WCIntroPreview.on) {
+        // Общий конверт вместо своей заставки (../assets/intro-choice.js): кнопку
+        // ставит он, а после его показа обложка собирается заново (WCHero.replay)
+        if (window.WCIntroChoice && window.WCIntroChoice.swapped) window.WCHero = { replay: replayHero };
+        else window.WCIntroPreview.button(replayHero);
+      }
+      return;
+    }
+    // Конверт закрывает страницу — обложка собирается, когда он откроется
+    if (window.WCEnvelope && window.WCEnvelope.active) {
+      window.addEventListener('wc:envelope-open', initHero, { once: true });
       return;
     }
     var waits = [];

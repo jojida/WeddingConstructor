@@ -549,8 +549,9 @@
     });
 
     // Касание конверта «разрешает» видео: iPhone в режиме энергосбережения
-    // без касания не запустит даже беззвучное. Запуск и сразу пауза
-    var env = document.getElementById('envelope');
+    // без касания не запустит даже беззвучное. Запуск и сразу пауза.
+    // Конверт свой (#envelope) или общий, если пара выбрала его (intro-choice.js)
+    var env = document.getElementById('envelope') || document.querySelector('.wc-slide, .wc-flap, .wc-env3d');
     if (!env) return;
     var prime = function () {
       env.removeEventListener('click', prime);
@@ -573,6 +574,13 @@
      конверт (../assets/envelope.js) → живое видео обложки → надпись и имена.
      Пока конверт закрыт, обложка под ним возвращается к началу. */
   function previewIntro(done) {
+    window.WCEnvelope.preview(coverPreview(done));
+  }
+
+  /* Обложка с начала: живое видео (если можно) → надпись и имена, в конце done().
+     Возвращает «пуск» — его зовут, когда конверт раскрылся: свой (envelope.js)
+     или общий, если пара поставила его вместо своего (WCHero.replay). */
+  function coverPreview(done) {
     var v = document.getElementById('heroLive');
     var live = !!(v && !REDUCED && v.canPlayType && v.canPlayType('video/mp4'));
     ROOT.classList.remove('hero-go');
@@ -601,7 +609,7 @@
       setTimeout(function () { if (v) { try { v.pause(); } catch (e) {} } done(); }, 3400);
     }
     function near() { if (v.duration && v.currentTime >= v.duration - 0.3) names(); }
-    window.WCEnvelope.preview(function () {
+    return function () {
       if (!live) { names(); return; }
       v.addEventListener('timeupdate', near);
       v.addEventListener('ended', names);
@@ -610,7 +618,7 @@
       var p;
       try { p = v.play(); } catch (e) { names(); return; }
       if (p && typeof p.catch === 'function') p.catch(names);
-    });
+    };
   }
 
   function initHero() {
@@ -621,7 +629,11 @@
     }
     var IP = window.WCEnvelope && window.WCEnvelope.preview && window.WCIntroPreview && window.WCIntroPreview.on
       ? window.WCIntroPreview : null;
+    var swappedPreview = !IP && window.WCIntroChoice && window.WCIntroChoice.swapped &&
+      window.WCIntroPreview && window.WCIntroPreview.on;
     if (IP) IP.button(previewIntro);
+    // Общий конверт вместо своего в редакторе: после его показа — живая обложка, как у гостя
+    else if (swappedPreview) window.WCHero = { replay: function (done) { coverPreview(done)(); } };
     else dropLive();
     // Без конверта ждём шрифты (не дольше секунды), чтобы имена не мигнули запасным
     var started = false;

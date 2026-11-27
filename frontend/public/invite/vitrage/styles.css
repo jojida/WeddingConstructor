@@ -325,6 +325,8 @@ p, h1, h2 { margin: 0; font-weight: 500; }
    поворот на петлях у краёв к гостю (rotateY), блик бежит, створка темнеет. */
 /* на весь первый экран: не ниже обложки и не ниже экрана телефона */
 .wc-no-intro .doors { display: none; }
+/* вместо дверей пара выбрала общий конверт (../assets/intro-choice.js) */
+.wc-intro-swapped .doors { display: none; }
 /* редактор: двери станут слоем поверх обложки (intro-preview.js), до этого их не видно */
 .wc-edit .doors:not(.wc-ip-layer) { display: none; }
 .doors {

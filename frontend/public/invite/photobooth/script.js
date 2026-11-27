@@ -14,6 +14,8 @@
   var Q = new URLSearchParams(window.location.search);
   var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var EDITING = Q.get('editing') === '1';
+  // вместо своей заставки пара выбрала общий конверт (../assets/intro-choice.js)
+  var SWAPPED = !!(window.WCIntroChoice && window.WCIntroChoice.swapped);
 
   var STATE = {
     apiBase: '', slug: '', guestToken: '', guestName: '',
@@ -607,6 +609,15 @@
 
   function initIntro() {
     var el = INTRO.el = document.getElementById('intro');
+    // Пара поставила вместо «Фотобудки» общий конверт (../assets/intro-choice.js):
+    // своей заставки нет, обложка оживает, когда конверт откроется
+    if (SWAPPED) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      INTRO.el = null;
+      if (window.WCEnvelope && window.WCEnvelope.active) window.addEventListener('wc:envelope-open', startHero, { once: true });
+      else startHero();
+      return;
+    }
     if (!el) { startHero(); return; }
     if (EDITING) {
       var api = window.WCIntroPreview;
@@ -623,8 +634,9 @@
     if (skip) skip.addEventListener('click', function () { finishIntro(false); });
   }
 
-  // sections.js: раздел «Фотобудка» выключен (или тариф без анимации) — сразу сайт
-  window.WCEnvelope = {
+  // sections.js: раздел «Фотобудка» выключен (или тариф без анимации) — сразу сайт.
+  // С общим конвертом вместо «Фотобудки» WCEnvelope — его, не трогаем
+  if (!SWAPPED) window.WCEnvelope = {
     setEnabled: function (on) {
       if (on || EDITING) return;
       if (ROOT.classList.contains('intro-on') && INTRO.state !== 'gone') finishIntro(true);

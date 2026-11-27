@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useMemo, useRef } from 'react';
 import type { InviteData } from './TemplatePreview';
-import { hasIntro } from '@/lib/plans';
+import { introParams } from '@/lib/intro-choice';
 
 interface Props {
   data: InviteData;
@@ -20,7 +20,7 @@ function buildParams(data: InviteData, apiBase: string, editing?: boolean): stri
   const p = new URLSearchParams();
   p.set('apiBase', apiBase || '');
   if (editing) p.set('editing', '1');
-  if (!hasIntro(data.plan)) p.set('intro', '0');   // анимация открытия — платная
+  introParams(p, data);   // заставка: своя, общий конверт или никакой (бесплатный)
   if (data.groomName) p.set('groom', data.groomName);
   if (data.brideName) p.set('bride', data.brideName);
   if (data.weddingDate) p.set('date', data.weddingDate);

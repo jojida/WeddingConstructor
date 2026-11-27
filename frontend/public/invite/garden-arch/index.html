@@ -9,9 +9,15 @@
   <link
     href="/invite/assets/fonts/google/e7710b270aacc3f44b4a.css"
     rel="stylesheet">
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="../assets/intro-preview.js"></script>
 </head>
 
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <div class="card">
 
@@ -82,7 +88,7 @@
         <svg id="tl-svg" class="tl-svg" viewBox="0 0 440 610" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path id="tl-path" d="M 158 60 C 158 140 282 140 282 220 C 282 300 158 300 158 380 C 158 460 282 460 282 540"
             stroke="#9aab84" stroke-width="2" stroke-dasharray="1 12" stroke-linecap="round" />
-          <image id="tl-heart" href="assets/icons/heart_green.svg" x="145" y="48" width="26" height="24" />
+          <image id="tl-heart" href="assets/icons/heart_green.svg" data-wc-marker="own" x="145" y="48" width="26" height="24" />
         </svg>
 
         <div class="tl-node tl-nl">
@@ -249,7 +255,10 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 
 </html>

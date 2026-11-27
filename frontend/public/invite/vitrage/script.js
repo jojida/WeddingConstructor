@@ -680,6 +680,13 @@
 
   function initDoors() {
     var el = DOORS.el = document.getElementById('doors');
+    // Пара поставила вместо дверей общий конверт (../assets/intro-choice.js): дверей
+    // нет ни у гостя, ни в редакторе, а WCEnvelope — за конвертом, его не трогаем
+    if (window.WCIntroChoice && window.WCIntroChoice.swapped) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+      DOORS.el = null;
+      return;
+    }
     window.WCEnvelope = {
       active: false,
       setEnabled: function (on) { if (!on && !EDITING && DOORS.el) dropDoors(); }

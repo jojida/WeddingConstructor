@@ -12,6 +12,8 @@
       var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (q.get('editing') === '1') h.classList.add('wc-edit', 'no-anim', 'hero-go');
       else if (q.get('intro') === '0' || reduced) h.classList.add('wc-no-intro', 'no-anim', 'hero-go');
+      // вместо своей заставки — общий конверт (../assets/intro-choice.js): обложка ждёт его
+      else if (/^(slide|flap|wax3d)$/.test(q.get('introStyle') || '')) h.classList.add('wc-intro-swapped');
       else h.classList.add('intro-on', 'intro-lock');
     })();
   </script>
@@ -27,6 +29,10 @@
   <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <!-- ЗАСТАВКА «ФОТОБУДКА»: гость нажимает красную кнопку — вспышка, камера
        печатает ленту с фото пары и датой, потом открывается сайт.
@@ -129,7 +135,7 @@
       <div class="prog" id="prog">
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
           <path id="progPath" class="prog__path" d="" />
-          <image id="progHeart" class="prog__heart" href="assets/heart-white.webp" width="73" height="66" x="-200" y="-200" />
+          <image id="progHeart" class="prog__heart" data-wc-marker="own" href="assets/heart-white.webp" width="73" height="66" x="-200" y="-200" />
         </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
@@ -248,6 +254,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

@@ -1,8 +1,7 @@
 'use client';
-import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { InviteData } from './TemplatePreview';
-import { hasIntro } from '@/lib/plans';
-import WeddingEnvelope from './WeddingEnvelope';
+import { introParams } from '@/lib/intro-choice';
 
 interface Props {
   data: InviteData;
@@ -13,8 +12,9 @@ interface Props {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   Full-page (гость) → конверт → iframe реального дизайна
-   Editing (редактор) → iframe напрямую (без конверта)
+   Гость и редактор → iframe реального дизайна. Конверт с клапаном —
+   с 27.11.26 внутри страницы шаблона (public/invite/assets/envelope-flap.js,
+   общий для всех шаблонов), раньше был React-компонентом здесь.
    Данные: URL-параметры + postMessage('wc:data') без перезагрузки.
    Preview-миниатюра → карточка-миниатюра в стиле флорал.
 ───────────────────────────────────────────────────────────── */
@@ -22,8 +22,6 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const dataRef = useRef(data);
   useEffect(() => { dataRef.current = data; }, [data]);
-  // Конверт — анимация открытия: на бесплатном тарифе гость сразу видит приглашение
-  const [revealed, setRevealed] = useState(!hasIntro(data.plan));
 
   const live = !!(fullPage || editing);
 
@@ -49,7 +47,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
     p.set('apiBase', apiBase || '');
     if (slug) p.set('slug', slug);
     if (editing) p.set('editing', '1');
-    if (!hasIntro(data.plan)) p.set('intro', '0');   // анимация открытия — платная
+    introParams(p, data);   // заставка: своя, другой конверт или никакой (бесплатный)
     if (data.groomName) p.set('groom', data.groomName);
     if (data.brideName) p.set('bride', data.brideName);
     if (data.weddingDate) p.set('date', data.weddingDate);
@@ -102,32 +100,6 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, apiBase, slug]);
 
-  /* Редактор: кнопка «▶ Посмотреть, как откроется» на обложке (в iframe) просит
-     показать конверт гостя — рисуем его поверх обложки превью, по её высоте,
-     он открывается сам и гаснет; iframe узнаёт об этом из 'wc:intro-done'. */
-  const [intro, setIntro] = useState<{ height: number; fading: boolean } | null>(null);
-  const introTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    if (!editing) return;
-    const onMsg = (e: MessageEvent) => {
-      if (e.origin !== window.location.origin || e.source !== iframeRef.current?.contentWindow) return;
-      if (e.data?.type === 'wc:intro-play') setIntro({ height: Math.max(200, Number(e.data.height) || 0), fading: false });
-    };
-    window.addEventListener('message', onMsg);
-    return () => {
-      window.removeEventListener('message', onMsg);
-      if (introTimer.current) clearTimeout(introTimer.current);
-    };
-  }, [editing]);
-  const introOpened = () => {
-    setIntro(cur => (cur ? { ...cur, fading: true } : cur));
-    if (introTimer.current) clearTimeout(introTimer.current);
-    introTimer.current = setTimeout(() => {
-      setIntro(null);
-      iframeRef.current?.contentWindow?.postMessage({ type: 'wc:intro-done' }, window.location.origin);
-    }, 650);
-  };
-
   if (live) {
     // Редактор — iframe напрямую (живое превью, скролл внутри)
     if (editing) {
@@ -139,33 +111,7 @@ export default function FloralTemplate({ data, apiBase, fullPage, slug, editing 
             style={{ width: '100%', height: '100%', border: 'none', display: 'block', background: '#d5d0c8' }}
             title="Превью «Цветущий»"
           />
-          {intro && (
-            <div style={{
-              position: 'absolute', left: 0, top: 0, width: '100%', height: intro.height, overflow: 'hidden', zIndex: 2,
-              opacity: intro.fading ? 0 : 1, transition: 'opacity .6s ease',
-            }}>
-              <WeddingEnvelope
-                fill
-                autoOpenMs={900}
-                onOpen={introOpened}
-                brideInitial={(data.brideName || 'Оливия').trim().charAt(0).toUpperCase()}
-                groomInitial={(data.groomName || 'Себастьян').trim().charAt(0).toUpperCase()}
-              />
-            </div>
-          )}
         </div>
-      );
-    }
-    // Гость — сначала конверт, затем приглашение
-    if (!revealed) {
-      const brideInitial = (data.brideName || 'Оливия').trim().charAt(0).toUpperCase();
-      const groomInitial = (data.groomName || 'Себастьян').trim().charAt(0).toUpperCase();
-      return (
-        <WeddingEnvelope
-          onOpen={() => setRevealed(true)}
-          brideInitial={brideInitial}
-          groomInitial={groomInitial}
-        />
       );
     }
     return (

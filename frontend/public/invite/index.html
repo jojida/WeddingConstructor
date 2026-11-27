@@ -54,6 +54,10 @@
   <script src="assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="assets/intro-choice.js"></script>
 
   <!-- ════════════════════════════════════
        INTRO VIDEO SPLASH (plays once)
@@ -178,7 +182,7 @@
                C 310 620 130 620 130 680"
             stroke="#114e88" stroke-width="1.5" stroke-dasharray="6 5" stroke-linecap="round"/>
           <!-- Heart: starts at path start (130,60); JS updates x/y on scroll -->
-          <image id="tl-heart" href="assets/icons/heart.svg"
+          <image id="tl-heart" href="assets/icons/heart.svg" data-wc-marker="own"
                  x="118" y="49" width="24" height="22"/>
         </svg>
 
@@ -519,6 +523,15 @@
         setTimeout(remove, 900);
       }
 
+      // Пара поставила вместо видео общий конверт (assets/intro-choice.js):
+      // видео не грузим (заставку прячет CSS), а из страницы убираем, когда
+      // конверт откроется, — до тех пор ждёт и анимация даты
+      if (window.WCIntroChoice && window.WCIntroChoice.swapped) {
+        if (window.WCEnvelope && window.WCEnvelope.active) window.addEventListener('wc:envelope-open', remove, { once: true });
+        else remove();
+        return;
+      }
+
       // Skip the intro in the editor (the landing preview explicitly opts in)
       // and when the plan has no opening animation (intro=0).
       if (document.documentElement.classList.contains('wc-no-intro')) {
@@ -787,6 +800,8 @@
         return Math.max(0, Math.round(docTop + circlesWrap.offsetHeight / 2 - window.innerHeight * 0.5));
       }
       function gateActive() { return active && !revealed; }
+      // Мягкая прокрутка колесом (assets/smooth-scroll.js) не листает дальше кружков, пока вода не стекла
+      window.WCScrollGate = function () { return gateActive() ? lockTarget() : null; };
 
       /* rAF loop snaps the page back — reliable even when 'scroll' events are
          coalesced/not fired for programmatic scrolls. Stops once revealed. */
@@ -835,6 +850,9 @@
   <script src="assets/rsvp-count.js"></script>
   <script src="assets/signature.js"></script>
   <script src="assets/brand.js"></script>
+  <script src="assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="assets/smooth-scroll.js"></script>
 </body>
 </html>

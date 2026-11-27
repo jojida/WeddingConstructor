@@ -23,6 +23,10 @@
   'use strict';
 
   var env = document.getElementById('envelope');
+  // Пара поставила вместо этого конверта универсальный (../assets/intro-choice.js):
+  // наш убираем, а WCEnvelope — уже за тем, общим
+  var CH = window.WCIntroChoice;
+  if (CH && CH.swapped) { if (env && env.parentNode) env.parentNode.removeChild(env); return; }
   if (!env) { window.WCEnvelope = { active: false }; return; }
 
   var Q = new URLSearchParams(window.location.search);

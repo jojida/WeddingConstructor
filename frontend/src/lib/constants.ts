@@ -1,5 +1,6 @@
 /** Публичный адрес сайта (канонические URL, sitemap, OG). */
 import { STUDIO_TEMPLATES } from './studioTemplates';
+import { UNIVERSAL_INTROS, isUniversalIntro, type UniversalIntro } from './intro-choice';
 import { SKETCH_DEMO_DEFAULTS } from './sketch-demo-photos';
 import { SKETCH_DEMO_VENUE, SKETCH_LOCATION_TEXT } from './sketch-location';
 
@@ -603,7 +604,11 @@ export type FieldType =
   | 'rsvpQuestions'           // список готовых вопросов анкеты (RSVP_QUESTIONS)
   | 'chat';                   // переписка пары: сообщения «он / она» (ChatMessage[])
 
-export interface ChoiceOption { value: string; label: string; color?: string; }
+export interface ChoiceOption {
+  value: string; label: string; color?: string; image?: string;
+  /** image целиком на плитке цвета color (светлой, если не задан) — значок с прозрачным фоном, а не во всю плитку */
+  fit?: 'contain';
+}
 
 export interface TemplateField {
   id: string;                 // data-edit ключ + ключ хранения
@@ -617,20 +622,148 @@ export interface TemplateField {
   noIcon?: boolean;           // для schedule — у пунктов нет иконок (не показывать ввод эмодзи)
   maxLength?: number;         // ограничение длины для text/textarea
   defaultOff?: boolean;       // для toggle — не задано значит выключено
-  options?: ChoiceOption[];   // для choice — варианты; не задано = первый
+  options?: ChoiceOption[];   // для choice — варианты; не задано = первый (или defaultValue)
+  /** Поле видно, только пока условие верно (по customData) — напр. цвет печати только у конвертов */
+  showIf?: (custom: Record<string, unknown>) => boolean;
+  /** choice: что выбрано, пока пара не выбирала (иначе — первый вариант) */
+  defaultValue?: (custom: Record<string, unknown>) => string;
 }
 
-/* Цвета сургучной печати 3D-конверта (../assets/envelope3d.js). value совпадают
-   с WAXES движка (public/invite/assets/envelope3d/engine.js), color — образец
-   в редакторе, близкий к тону воска на рендере. */
+/* Цвета печати универсальных конвертов (lib/intro-choice.ts). value одинаковы у
+   всех трёх: WAXES 3D-движка (public/invite/assets/envelope3d/engine.js),
+   картинки seal-<цвет>.webp конвертов со створками и с клапаном
+   (scripts/generate-seal-colors.py); color — образец в редакторе. */
 export const SEAL_COLORS: ChoiceOption[] = [
   { value: 'beige',    label: 'Бежевый', color: '#dbc7a3' },
   { value: 'ivory',    label: 'Айвори',  color: '#efe6d6' },
   { value: 'gold',     label: 'Золото',  color: '#d9b77c' },
+  { value: 'pink',     label: 'Пудровый', color: '#dcaaa9' },
   { value: 'burgundy', label: 'Бордо',   color: '#7a1f27' },
+  { value: 'brown',    label: 'Шоколад', color: '#4f3324' },
   { value: 'sage',     label: 'Шалфей',  color: '#a4b095' },
   { value: 'blue',     label: 'Голубой', color: '#9fb8d6' },
 ];
+
+/* ─── Заставка: своя у шаблона или общий конверт (27.11.26) ──────────────────
+   Пара ставит любому шаблону один из общих конвертов вместо его заставки;
+   страница шаблона узнаёт выбор из адреса (lib/intro-choice.ts →
+   public/invite/assets/intro-choice.js). Значение '' — своя заставка шаблона. */
+export const INTRO_LABELS: Record<UniversalIntro, string> = {
+  slide: 'Конверт со створками',
+  flap:  'Конверт с клапаном',
+  wax3d: '3D-конверт',
+};
+/** Образцы в редакторе: печать конверта и его бумага */
+const INTRO_SWATCH: Record<UniversalIntro, string> = {
+  slide: 'radial-gradient(circle at 50% 50%, #d9b77c 0 22%, transparent 23%), linear-gradient(90deg, #f7f5f1 50%, #ece8e1 50%)',
+  flap:  'radial-gradient(circle at 50% 58%, #4f3324 0 20%, transparent 21%), linear-gradient(160deg, #dbad8c, #a16c4e 60%, #6c412a)',
+  wax3d: 'radial-gradient(circle at 50% 46%, #dbc7a3 0 20%, transparent 21%), linear-gradient(180deg, #f3efe8, #d9d0c3)',
+};
+/** Своя заставка шаблона: тематическая (подпись плитки) или одна из общих (value) */
+const OWN_INTRO: Record<string, { value?: UniversalIntro; label: string; color?: string }> = {
+  vitrage:          { label: 'Витражные двери', color: 'linear-gradient(90deg, #b9cde6 49%, #2c4468 49% 51%, #b9cde6 51%)' },
+  mediterranean:    { label: 'Видео-заставка',  color: 'linear-gradient(180deg, #9cc6dd, #e8d9bd)' },
+  'garden-evening': { label: 'Свой конверт',    color: 'linear-gradient(160deg, #e9e0cf, #b9a682)' },
+  photobooth:       { label: 'Фотобудка',       color: 'linear-gradient(180deg, #fbf6ec 60%, #222 60%)' },
+  forest:           { label: 'Деревья расступаются', color: 'linear-gradient(90deg, #4c5a45, #c9d1bf 50%, #4c5a45)' },
+  powder:           { label: 'Анимация обложки', color: 'linear-gradient(160deg, #f6e4dd, #d8b3a7)' },
+  strawberry:       { label: 'Анимация обложки', color: 'linear-gradient(160deg, #fde9ec, #e46a7c)' },
+  turquoise:        { label: 'Анимация обложки', color: 'linear-gradient(160deg, #e3f2f1, #3aa7a1)' },
+  velvet:           { label: 'Анимация обложки', color: 'linear-gradient(160deg, #6a1e2b, #2a0b12)' },
+  tenderness:       { value: 'slide', label: INTRO_LABELS.slide },
+  floral:           { value: 'flap',  label: INTRO_LABELS.flap },
+  angels:           { value: 'wax3d', label: INTRO_LABELS.wax3d },
+};
+const DEFAULT_SEAL: Record<UniversalIntro, string> = { slide: 'gold', flap: 'brown', wax3d: 'beige' };
+
+/* ─── «Ползунок» на линии программы дня (27.11.26) ──────────────────────────
+   Значок, который едет по треку программы, пока гости листают. Пара ставит
+   любой из общего списка (public/invite/assets/track-marker.js, картинки —
+   assets/markers/, scripts/generate-track-markers.py); '' — свой значок шаблона. */
+const markerImg = (k: string) => `/invite/assets/markers/${k}.${k === 'heart' ? 'svg' : 'webp'}`;
+export const TRACK_MARKERS: ChoiceOption[] = [
+  { value: 'heart',   label: 'Сердце' },
+  { value: 'glitter', label: 'Сердце с блёстками' },
+  { value: 'pearl',   label: 'Жемчужина' },
+  { value: 'rings',   label: 'Кольца' },
+  { value: 'dove',    label: 'Голубь' },
+  { value: 'cupid',   label: 'Купидон' },
+  { value: 'gem',     label: 'Самоцвет' },
+  { value: 'berry',   label: 'Клубника' },
+  { value: 'acorn',   label: 'Жёлудь' },
+  { value: 'car',     label: 'Машинка' },
+].map(o => ({ ...o, image: markerImg(o.value), fit: 'contain' as const }));
+
+/** Сердце-контур своего значка шаблона — образец на плитке «Как в шаблоне» */
+const heartSwatch = (color: string, d: string, box: string) =>
+  `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${box}"><path fill="${color}" d="${d}"/></svg>`)}`;
+const HEART_D = 'M32 56C14 43.2 2 32.4 2 18.2 2 8.8 9.4 2 18.2 2c6 0 11.3 3.3 13.8 8.5C34.5 5.3 39.8 2 45.8 2 54.6 2 62 8.8 62 18.2 62 32.4 50 43.2 32 56z';
+/** Свой значок шаблона на треке: его ключ в списке (если он там есть) и образец */
+const OWN_MARKER: Record<string, { key?: string; image: string; tile?: string }> = {
+  mediterranean:    { image: '/invite/assets/icons/heart.svg' },
+  'garden-arch':    { image: '/invite/garden-arch/assets/icons/heart_green.svg' },
+  calla:            { key: 'pearl', image: markerImg('pearl') },
+  forest:           { key: 'acorn', image: markerImg('acorn') },
+  sketch:           { key: 'car',   image: '/invite/sketch/assets/car.lossless.webp' },
+  ivory:            { image: heartSwatch('#111111', HEART_D, '0 0 64 58') },
+  'garden-evening': { image: heartSwatch('#9a824f', HEART_D, '0 0 64 58') },
+  tenderness:       { image: heartSwatch('#724025', HEART_D, '0 0 64 58') },
+  powder:           { image: heartSwatch('#d89b92', HEART_D, '0 0 64 58') },
+  angels:           { key: 'cupid', image: '/invite/angels/assets/cupid-cream.webp' },
+  strawberry:       { key: 'berry', image: markerImg('berry') },
+  turquoise:        { key: 'gem',   image: markerImg('gem') },
+  photobooth:       { image: '/invite/photobooth/assets/heart-white.webp', tile: '#3b3a38' },
+};
+
+/** Поле «Ползунок» — в раздел программы дня шаблонов с треком */
+function trackMarkerField(templateId: string): TemplateField | null {
+  const own = OWN_MARKER[templateId];
+  if (!own) return null;
+  return {
+    id: 'trackMarker', type: 'choice', label: 'Ползунок на линии программы', scope: 'custom',
+    hint: 'Значок, который едет по линии программы, пока гости листают приглашение',
+    options: [
+      { value: '', label: 'Как в шаблоне', image: own.image, fit: 'contain', color: own.tile },
+      ...TRACK_MARKERS.filter(o => o.value !== own.key),
+    ],
+  };
+}
+
+/** Какая заставка на самом деле у сайта: общий конверт или своя шаблона ('own') */
+export function effectiveIntro(templateId: string, custom: Record<string, unknown>): UniversalIntro | 'own' {
+  if (isUniversalIntro(custom.introStyle)) return custom.introStyle;
+  return OWN_INTRO[templateId]?.value ?? 'own';
+}
+
+/** Раздел «Заставка»: выбор заставки, цвет печати и надпись конверта; ownFields —
+    поля своей заставки шаблона (видны, пока выбрана она) */
+function introSection(templateId: string, ownFields: TemplateField[] = []): TemplateSection {
+  const own = OWN_INTRO[templateId];
+  // Плитки — снимки заставок (public/invite/assets/intro-thumbs: конверт или обложка шаблона)
+  const thumb = (key: string) => `/invite/assets/intro-thumbs/${key}.webp`;
+  const ownOption: ChoiceOption = own?.value
+    ? { value: '', label: own.label, color: INTRO_SWATCH[own.value], image: thumb(own.value) }
+    : { value: '', label: own?.label ?? 'Без заставки', color: own?.color ?? 'linear-gradient(160deg, #f4f1ec, #dcd5ca)', image: thumb(templateId) };
+  const options = [ownOption, ...UNIVERSAL_INTROS.filter(v => v !== own?.value)
+    .map(v => ({ value: v, label: INTRO_LABELS[v], color: INTRO_SWATCH[v], image: thumb(v) }))];
+  const is = (...styles: string[]) => (cd: Record<string, unknown>) => styles.includes(effectiveIntro(templateId, cd));
+  return {
+    title: 'Заставка', icon: '✉️',
+    fields: [
+      { id: 'introStyle', type: 'choice', label: 'Как открывается приглашение', scope: 'custom', options,
+        hint: 'Первый вариант — заставка этого шаблона. Посмотреть — кнопка «▶» на обложке слева' },
+      ...ownFields.map(f => ({ ...f, showIf: is('own') })),
+      { id: 'sealColor', type: 'choice', label: 'Цвет печати', hint: 'Буквы на печати — первые буквы ваших имён', scope: 'custom',
+        options: SEAL_COLORS, showIf: is(...UNIVERSAL_INTROS),
+        defaultValue: cd => {
+          const style = effectiveIntro(templateId, cd);
+          return style === 'own' ? 'beige' : DEFAULT_SEAL[style];
+        } },
+      { id: 'envelopeHint', type: 'text', label: 'Надпись на конверте', hint: 'Например: Нажмите, чтобы открыть',
+        scope: 'custom', maxLength: 32, showIf: is('slide', 'flap') },
+    ],
+  };
+}
 
 /* Цвета плашек обложки «Скетча»: цветные пятна за вырезанными фото и мазки-подписи.
    value — data-theme в public/invite/sketch/styles.css (.polaroids[data-theme]);
@@ -962,11 +1095,9 @@ function withRsvpFields(sections: TemplateSection[]): TemplateSection[] {
 
 const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   vitrage: [
-    {
-      // полей нет: инициалы на медальоне — из имён; раздел включает/выключает двери,
-      // а превью при открытии раздела показывает, как они раздвинутся
-      title: 'Витражные двери', icon: '🚪', fields: [],
-    },
+    // своя заставка — двери (инициалы на медальоне — из имён); раздел включает/выключает
+    // её, а превью при открытии раздела показывает, как они раздвинутся
+    introSection('vitrage'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1065,12 +1196,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   tenderness: [
-    {
-      title: 'Конверт', icon: '✉️',
-      fields: [
-        { id: 'envelopeHint', type: 'text', label: 'Надпись над печатью', hint: 'Например: Нажмите, чтобы открыть', scope: 'custom', maxLength: 32 },
-      ],
-    },
+    introSection('tenderness'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1159,6 +1285,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   powder: [
+    introSection('powder'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1268,6 +1395,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   turquoise: [
+    introSection('turquoise'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1368,16 +1496,13 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   photobooth: [
-    {
-      title: 'Фотобудка', icon: '📸',
-      fields: [
+    introSection('photobooth', [
         { id: 'stripPhoto1', type: 'image', label: 'Фото 1 на ленте', hint: 'Лучше горизонтальное', scope: 'custom' },
         { id: 'stripPhoto2', type: 'image', label: 'Фото 2 на ленте', hint: 'Лучше горизонтальное', scope: 'custom' },
         { id: 'introLabel',  type: 'text',  label: 'Надпись над заголовком', hint: 'Пусто — без надписи', scope: 'custom', maxLength: 30 },
         { id: 'introTitle',  type: 'text',  label: 'Заголовок', hint: 'Пусто — без заголовка', scope: 'custom', maxLength: 26 },
         { id: 'introHint',   type: 'text',  label: 'Подсказка над кнопкой', hint: 'Пусто — без подсказки', scope: 'custom', maxLength: 34 },
-      ],
-    },
+    ]),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1450,6 +1575,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   strawberry: [
+    introSection('strawberry'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1553,6 +1679,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   velvet: [
+    introSection('velvet'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1614,12 +1741,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   angels: [
-    {
-      title: 'Конверт', icon: '✉️',
-      fields: [
-        { id: 'sealColor', type: 'choice', label: 'Цвет печати', hint: 'Буквы на печати — первые буквы ваших имён', scope: 'custom', options: SEAL_COLORS },
-      ],
-    },
+    introSection('angels'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1688,6 +1810,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   forest: [
+    introSection('forest'),
     {
       title: 'Приветствие', icon: '✍️',
       fields: [
@@ -1754,6 +1877,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   'garden-evening': [
+    introSection('garden-evening'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1816,6 +1940,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   ivory: [
+    introSection('ivory'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -1881,6 +2006,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   calla: [
+    introSection('calla'),
     {
       title: 'Приветствие', icon: '✍️',
       fields: [
@@ -1937,6 +2063,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   sketch: [
+    introSection('sketch'),
     {
       title: 'Фото на обложке', icon: '📸',
       fields: [
@@ -2001,6 +2128,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   floral: [
+    introSection('floral'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -2068,6 +2196,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   'garden-arch': [
+    introSection('garden-arch'),
     {
       title: 'Приветствие', icon: '✍️',
       fields: [
@@ -2127,6 +2256,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   mediterranean: [
+    introSection('mediterranean'),
     {
       title: 'Приветствие', icon: '✍️',
       fields: [
@@ -2195,6 +2325,7 @@ const HANDMADE_TEMPLATE_FIELDS: Record<string, TemplateSection[]> = {
   ],
 
   vadimdarya: [
+    introSection('vadimdarya'),
     {
       title: 'Обложка', icon: '🖼',
       fields: [
@@ -2283,7 +2414,7 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
     'Фото места': 'hall', 'Жених и невеста': 'couple', 'Фото пары': 'photos', 'Витражные двери': 'envelope',
     'История пары': 'story', 'Детали': 'details',
     'Детские фото': 'story', 'Переписка': 'chat', 'Советы гостям': 'forecast',
-    'Фотобудка': 'envelope',
+    'Фотобудка': 'envelope', 'Заставка': 'envelope',
   };
   const result: TemplateSection[] = [];
   if (!sections.some(s => ids[s.title] === 'cover')) {
@@ -2291,7 +2422,10 @@ function withSectionControls(templateId: string, sections: TemplateSection[]): T
   }
   for (const section of sections) {
     const id = ids[section.title];
-    result.push({ ...section, id, required: required.has(id), fields: section.fields.filter(f => f.id !== 'showMap' && f.id !== 'mapLink') });
+    const fields = section.fields.filter(f => f.id !== 'showMap' && f.id !== 'mapLink');
+    // У программы с треком — выбор «ползунка» (значок, который едет по линии)
+    const marker = id === 'schedule' ? trackMarkerField(templateId) : null;
+    result.push({ ...section, id, required: required.has(id), fields: marker ? [...fields, marker] : fields });
     if (id === 'greeting') {
       result.push({ id: 'date', required: true, title: 'Дата', icon: '📅', fields: [], previewFields: ['calendar', 'heroDate', 'letterDate', 'dateLine', 'calMonth'] });
     }

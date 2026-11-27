@@ -457,6 +457,11 @@
   }
 
   function initHero() {
+    // Пара выбрала конверт (../assets/intro-choice.js) — обложка появляется, когда он откроется
+    if (window.WCEnvelope && window.WCEnvelope.active) {
+      window.addEventListener('wc:envelope-open', initHero, { once: true });
+      return;
+    }
     // Ждём шрифты (не дольше секунды), чтобы имена не мигнули запасным
     var started = false;
     var go = function () { if (!started) { started = true; startHero(); } };

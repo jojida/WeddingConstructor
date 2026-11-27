@@ -554,8 +554,11 @@ ${rulesCss(project, naming)}
   <title>${esc(project.catalog.name)}</title>
 ${fontHead(project)}  <link rel="stylesheet" href="../assets/studio-blocks.css" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- заставка: общий конверт, если пара выбрала его в редакторе -->
+  <script src="../assets/intro-choice.js"></script>
   <main class="invite">
 ${panels.join('\n\n')}
   </main>
@@ -568,6 +571,7 @@ ${panels.join('\n\n')}
   <script src="../assets/brand.js"></script>
   <script src="../assets/studio-runtime.js"></script>
   <script src="script.js"></script>
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>
 `;

@@ -6,8 +6,14 @@
   <title>Артем и Екатерина — Свадебное приглашение</title>
   <link rel="stylesheet" href="styles.css">
   <link href="/invite/assets/fonts/google/3ffb6ef260e41ac986bb.css" rel="stylesheet">
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <main class="card">
 
@@ -110,7 +116,7 @@
         </svg>
 
         <!-- едет по треку при прокрутке, положение и поворот считает script.js -->
-        <img decoding="async" loading="lazy" class="tl-car" src="assets/car.lossless.webp" alt="">
+        <img decoding="async" loading="lazy" class="tl-car" data-wc-marker="car" src="assets/car.lossless.webp" alt="">
 
         <!-- 15:30 -->
         <div class="stop left s1 fu">
@@ -271,6 +277,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

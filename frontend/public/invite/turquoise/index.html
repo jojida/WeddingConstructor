@@ -25,6 +25,10 @@
   <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <main class="invite" id="invite">
 
@@ -125,7 +129,7 @@
       <div class="prog" id="prog">
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
           <path id="progPath" class="prog__path" d="" />
-          <image id="progGem" class="prog__gem" href="assets/gem.webp" width="119" height="153" x="-300" y="-300" />
+          <image id="progGem" class="prog__gem" data-wc-marker="gem" href="assets/gem.webp" width="119" height="153" x="-300" y="-300" />
         </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
@@ -258,6 +262,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

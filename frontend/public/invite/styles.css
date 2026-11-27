@@ -218,6 +218,9 @@ body {
 .wc-no-intro .intro-wrap:not(.wc-ip-layer),
 .wc-no-intro .win-birds { display: none; }
 .wc-no-intro .name-card { animation: none; }
+/* Вместо видео пара выбрала общий конверт (assets/intro-choice.js): заставки нет,
+   ставни и плашка играют, когда конверт откроется */
+.wc-intro-swapped .intro-wrap { display: none !important; }
 
 /* Accessibility: skip animations for reduced-motion users */
 @media (prefers-reduced-motion: reduce) {

@@ -7,8 +7,14 @@
   <meta name="description" content="Приглашение на свадьбу Александра и Анны. 20 сентября 2026 года, Усадьба «Белый сад»." />
   <link href="/invite/assets/fonts/google/cc25253c85f10f6ac74a.css" rel="stylesheet" />
   <link rel="stylesheet" href="style.css?v=41" />
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <!-- ===== MAIN INVITATION ===== -->
   <main id="invitation">
@@ -348,6 +354,8 @@
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
   <script src="script.js?v=26"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>
 

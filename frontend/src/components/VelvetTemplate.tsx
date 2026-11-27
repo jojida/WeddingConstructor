@@ -1,7 +1,7 @@
 'use client';
 import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { InviteData } from './TemplatePreview';
-import { hasIntro } from '@/lib/plans';
+import { introParams } from '@/lib/intro-choice';
 
 interface Props {
   data: InviteData;
@@ -69,7 +69,7 @@ export default function VelvetTemplate({ data, apiBase, fullPage, slug, editing 
     p.set('apiBase', apiBase || '');
     if (slug) p.set('slug', slug);
     if (editing) p.set('editing', '1');
-    if (!hasIntro(data.plan)) p.set('intro', '0');   // анимация открытия — платная
+    introParams(p, data);   // заставка: своя, общий конверт или никакой (бесплатный)
     if (data.groomName) p.set('groom', data.groomName);
     if (data.brideName) p.set('bride', data.brideName);
     if (data.weddingDate) p.set('date', data.weddingDate);

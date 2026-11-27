@@ -7,8 +7,14 @@
   <link href="/invite/assets/fonts/google/617d36abf1a8a81d60af.css" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="_studio.css" />
+  <!-- Анимация открытия в редакторе: кнопка показа на обложке -->
+  <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
   <main class="invite">
 
     <!-- 1 — ОБЛОЖКА -->
@@ -68,7 +74,7 @@
           <div class="timeline-inner">
             <svg id="tl-svg" class="tl-svg" viewBox="0 0 440 1000" preserveAspectRatio="xMidYMin meet" aria-hidden="true">
               <path id="tl-path" class="tl-path" d="" fill="none" />
-              <image id="tl-heart" class="tl-heart" href="assets/pearl-bead.png" width="30" height="30" />
+              <image id="tl-heart" class="tl-heart" href="assets/pearl-bead.png" data-wc-marker="pearl" width="30" height="30" />
             </svg>
             <!-- .tl-node элементы строятся скриптом из расписания -->
           </div>
@@ -194,6 +200,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

@@ -288,8 +288,11 @@
     var ky = CAR.svg.clientHeight / ((vb && vb.height) || 1500);
     var x = p.x * kx, y = p.y * ky;
 
-    /* Картинка нарисована носом вверх, отсюда поправка на 90 градусов. */
-    var angle = Math.atan2((b.y - a.y) * ky, (b.x - a.x) * kx) * 180 / Math.PI + 90;
+    /* Картинка нарисована носом вверх, отсюда поправка на 90 градусов.
+       Пара поставила вместо машинки другой ползунок (../assets/track-marker.js) —
+       он едет ровно, не поворачиваясь по линии. */
+    var angle = CAR.el.hasAttribute('data-wc-marker-swapped') ? 0
+      : Math.atan2((b.y - a.y) * ky, (b.x - a.x) * kx) * 180 / Math.PI + 90;
 
     CAR.el.style.transform =
       'translate(' + (x - CAR.el.offsetWidth / 2).toFixed(1) + 'px,' +

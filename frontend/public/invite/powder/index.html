@@ -31,6 +31,10 @@
   <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <main class="invite" id="invite">
 
@@ -155,7 +159,7 @@
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
           <path id="progBase" class="prog__base" d="" />
           <path id="progPath" class="prog__path" d="" />
-          <path id="progHeart" class="prog__heart" d="M 65.37 14.58 C 61.67 -4.43 38.51 -4.75 32.8 13.02 C 27.08 -4.75 3.92 -4.43 0.22 14.58 C -3.13 31.83 32.8 59.03 32.8 59.03 C 32.8 59.03 68.72 31.83 65.37 14.58 Z" />
+          <path id="progHeart" class="prog__heart" data-wc-marker="own" d="M 65.37 14.58 C 61.67 -4.43 38.51 -4.75 32.8 13.02 C 27.08 -4.75 3.92 -4.43 0.22 14.58 C -3.13 31.83 32.8 59.03 32.8 59.03 C 32.8 59.03 68.72 31.83 65.37 14.58 Z" />
         </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
@@ -319,6 +323,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

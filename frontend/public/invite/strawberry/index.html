@@ -30,6 +30,10 @@
   <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <main class="invite" id="invite">
 
@@ -187,7 +191,7 @@
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
           <path id="progBase" class="prog__base" d="" />
           <path id="progPath" class="prog__path" d="" />
-          <image id="progBerry" class="prog__berry" href="assets/berry.webp" width="191" height="256" />
+          <image id="progBerry" class="prog__berry" data-wc-marker="berry" href="assets/berry.webp" width="191" height="256" />
         </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
@@ -372,6 +376,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

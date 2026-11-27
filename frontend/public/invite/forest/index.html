@@ -22,6 +22,10 @@
   <script src="../assets/intro-preview.js"></script>
 </head>
 <body>
+  <!-- Заставка: своя шаблона или один из общих конвертов, если пара выбрала его
+       в редакторе (../assets/intro-choice.js). Стоит первым — конверт закрывает
+       страницу до её отрисовки. -->
+  <script src="../assets/intro-choice.js"></script>
 
   <main class="invite" id="invite">
 
@@ -114,7 +118,7 @@
         <span class="sched__line" id="schedLine" aria-hidden="true"></span>
         <span class="sched__fill" id="schedFill" aria-hidden="true"></span>
         <!-- пункты .sched__row строит script.js из расписания -->
-        <img decoding="async" loading="lazy" class="sched__acorn" id="schedAcorn" src="assets/acorn.webp" alt="" />
+        <img decoding="async" loading="lazy" class="sched__acorn" id="schedAcorn" data-wc-marker="acorn" src="assets/acorn.webp" alt="" />
       </div>
     </section>
 
@@ -220,6 +224,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js?v=3"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

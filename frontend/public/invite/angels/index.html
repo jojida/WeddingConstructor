@@ -22,7 +22,7 @@
   <!-- 0 — КОНВЕРТ: 3D-конверт с печатью-монограммой (../assets/envelope3d.js).
        Стоит первым, чтобы закрыть страницу до её отрисовки; обложка ждёт
        события 'wc:envelope-open'. В редакторе — первый экран превью. -->
-  <script src="../assets/envelope3d.js" data-wax="beige" data-serif="Old Standard TT"
+  <script src="../assets/intro-choice.js" data-own="wax3d" data-wax="beige" data-serif="Old Standard TT"
           data-groom="Алексей" data-bride="Ангелина" data-date="2027-07-12"></script>
 
   <main class="invite" id="invite">
@@ -100,7 +100,7 @@
              transform при прокрутке, без CSS-переходов (как в других шаблонах) -->
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
           <path id="progPath" class="prog__path" d="" />
-          <image id="progCupid" class="prog__cupid" href="assets/cupid-cream.webp" width="277" height="180" />
+          <image id="progCupid" class="prog__cupid" data-wc-marker="cupid" href="assets/cupid-cream.webp" width="277" height="180" />
         </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
@@ -213,6 +213,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>

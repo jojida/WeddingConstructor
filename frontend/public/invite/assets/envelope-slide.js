@@ -18,12 +18,22 @@
 
    Редактор (editing=1): обложка готовая, конверт — скрытый слой ровно поверх
    обложки (../assets/intro-preview.js). Кнопка «▶ Посмотреть, как откроется»
-   на обложке проигрывает открытие; раздел «Конверт» и правка надписи
-   показывают конверт закрытым на пару секунд.
+   на обложке проигрывает открытие (у обложки с анимацией — потом и её,
+   WCHero.replay); раздел «Конверт» и правка надписи показывают конверт
+   закрытым на пару секунд.
    intro=0 — анимация открытия не входит в тариф (бесплатный): конверта нет.
+
+   С 27.11.26 — одна из универсальных заставок: её подключает
+   ../assets/intro-choice.js любому шаблону, если пара выбрала её вместо своей.
+   Цвет печати — customData.sealColor (SEAL_COLORS; по умолчанию золото):
+   картинки envelope-slide/seal-<цвет>.webp (scripts/generate-seal-colors.py),
+   буквы монограммы и надпись — в тон печати (TONES ниже).
    ============================================================ */
 (function () {
   'use strict';
+
+  var CH = window.WCIntroChoice;
+  if (CH && CH.style !== 'slide') return;          // выбрана другая заставка — не наш конверт
 
   var script = document.currentScript;
   var attr = function (n, def) { return (script && script.getAttribute(n)) || def; };
@@ -35,10 +45,24 @@
 
   if (!document.body || Q.get('intro') === '0') { window.WCEnvelope = { active: false }; return; }
 
+  /* Цвет печати: градиент букв монограммы (5 точек) и цвет надписи над печатью */
+  var TONES = {
+    gold:     [['#fbe9bf', '#e6c27d', '#c08a43', '#e9cc8f', '#b07a36'], '#b38a3c'],
+    beige:    [['#fbf1df', '#e3cfac', '#a88e67', '#e8d8bb', '#8f7651'], '#8c7553'],
+    ivory:    [['#fffdf7', '#eee6d6', '#b8ad97', '#f1eadc', '#9b917c'], '#8c826f'],
+    pink:     [['#fdeceb', '#ecc2c1', '#b47b7d', '#efcbca', '#985f62'], '#a2676a'],
+    burgundy: [['#e9a0a7', '#b54a57', '#6e1622', '#c0606b', '#4a0b13'], '#7a1f2b'],
+    brown:    [['#e2bfa6', '#a8775a', '#5e3a28', '#b48466', '#4a2c1d'], '#6b4330'],
+    sage:     [['#eef2e6', '#c6ceb7', '#85917a', '#ccd3be', '#6b7660'], '#66705a'],
+    blue:     [['#f2f7fc', '#c4d6ea', '#7d98ba', '#cbdbed', '#607c9f'], '#5a7395']
+  };
+  var pickSeal = function (v) { return TONES[v] ? v : ''; };
+
   var D = {
     groom: (Q.get('groom') || attr('data-groom', '')).trim(),
     bride: (Q.get('bride') || attr('data-bride', '')).trim(),
-    hint: attr('data-hint', 'Нажмите, чтобы открыть')
+    hint: attr('data-hint', 'Нажмите, чтобы открыть'),
+    seal: pickSeal(CH && CH.seal) || pickSeal(attr('data-seal', '')) || 'gold'
   };
   var first = function (s) { return (s || '').trim().charAt(0).toUpperCase(); };
 
@@ -140,6 +164,8 @@
   var el = document.createElement('div');
   el.className = 'wc-slide' + (EDITING ? ' wc-slide--preview' : '');
   el.setAttribute('data-wc-section', 'envelope');
+  // редактор: поле «Цвет печати» листает превью к конверту и показывает его
+  if (EDITING) el.setAttribute('data-edit', 'sealColor');
   if (!EDITING) {
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
@@ -155,7 +181,7 @@
           '<text font-size="22" letter-spacing=".4"><textPath href="#' + uid + '" startOffset="50%" text-anchor="middle"' +
           (EDITING ? ' data-edit="envelopeHint"' : '') + '></textPath></text>' +
         '</svg>' +
-        '<img src="' + BASE + 'seal-gold.webp" alt="" draggable="false" />' +
+        '<img alt="" draggable="false" />' +
         '<svg class="wc-slide__mono" viewBox="0 0 336 339" aria-hidden="true">' +
           '<defs><linearGradient id="' + uid + 'g" gradientUnits="userSpaceOnUse" x1="70" y1="60" x2="266" y2="280">' +
             '<stop offset="0" stop-color="#fbe9bf"/><stop offset=".3" stop-color="#e6c27d"/><stop offset=".58" stop-color="#c08a43"/>' +
@@ -175,6 +201,9 @@
   var monoSvg = el.querySelector('.wc-slide__mono');
   var mono = monoSvg.querySelectorAll('text');
   var hintPath = el.querySelector('.wc-slide__hint textPath');
+  var hintSvg = el.querySelector('.wc-slide__hint');
+  var sealImg = el.querySelector('.wc-slide__seal img');
+  var monoStops = monoSvg.querySelectorAll('stop');
 
   /* ─── Монограмма: две буквы внутри лица печати ───
      Размер и место — по реальным контурам букв (canvas): вторая буква правее
@@ -252,7 +281,17 @@
     mono[1].textContent = first(D.bride) || 'Н';
     hintPath.textContent = D.hint;
     el.setAttribute('aria-label', (D.hint || 'Открыть приглашение'));
+    paintSeal();
     placeMono();
+  }
+
+  // Цвет печати: картинка воска, буквы монограммы и надпись над печатью
+  function paintSeal() {
+    var src = BASE + 'seal-' + D.seal + '.webp';
+    if (sealImg.getAttribute('src') !== src) sealImg.setAttribute('src', src);
+    var tone = TONES[D.seal] || TONES.gold;
+    for (var i = 0; i < monoStops.length; i++) monoStops[i].setAttribute('stop-color', tone[0][i] || tone[0][0]);
+    hintSvg.style.fill = tone[1];
   }
   render();
 
@@ -350,7 +389,9 @@
       void el.offsetWidth;
       el.classList.remove('is-snap');
       phase = 'closed';
-      done();
+      // у обложки своя анимация (шаблон с конвертом вместо своей заставки) — показать и её
+      var hero = window.WCHero && window.WCHero.replay;
+      if (hero) hero(done); else done();
     }, 700 + 380 + 1650);
   }
 
@@ -383,7 +424,13 @@
       var h = p.envelopeHint.trim() || attr('data-hint', 'Нажмите, чтобы открыть');
       if (h !== D.hint) { D.hint = h; changed = true; }
     }
+    var sealChanged = false;
+    if (typeof p.sealColor === 'string') {
+      var s = pickSeal(p.sealColor) || 'gold';
+      if (s !== D.seal) { D.seal = s; sealChanged = true; }
+    }
     if (changed) render();
-    if (changed && !first && IP) IP.peek(3200);
+    else if (sealChanged) paintSeal();
+    if ((changed || sealChanged) && !first && IP) IP.peek(3200);
   });
 })();

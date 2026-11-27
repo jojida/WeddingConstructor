@@ -25,7 +25,7 @@
        (../assets/envelope-slide.js). Касание — левая створка с печатью уезжает
        влево, правая — вправо; обложка ждёт события 'wc:envelope-open'.
        В редакторе — первый экран превью. -->
-  <script src="../assets/envelope-slide.js" data-groom="Евгений" data-bride="Надежда" data-hint="Нажмите, чтобы открыть"></script>
+  <script src="../assets/intro-choice.js" data-own="slide" data-groom="Евгений" data-bride="Надежда" data-hint="Нажмите, чтобы открыть"></script>
 
   <main class="invite" id="invite">
 
@@ -137,7 +137,7 @@
         <svg class="prog__svg" id="progSvg" aria-hidden="true">
           <path id="progBase" class="prog__base" d="" />
           <path id="progPath" class="prog__path" d="" />
-          <path id="progHeart" class="prog__heart" d="M 45.84 8.5 C 44.44 3.75 39.92 0 34.58 0 C 30.09 0 26.2 2.53 24.23 6.25 C 22.25 2.53 18.36 0 13.87 0 C 8.29 0 3.39 3.75 2.44 9.19 C 0 22.98 15.43 33.77 24.26 40.23 C 32.43 34.26 49.84 22.09 45.84 8.5 Z M 45.84 8.5" />
+          <path id="progHeart" class="prog__heart" data-wc-marker="own" d="M 45.84 8.5 C 44.44 3.75 39.92 0 34.58 0 C 30.09 0 26.2 2.53 24.23 6.25 C 22.25 2.53 18.36 0 13.87 0 C 8.29 0 3.39 3.75 2.44 9.19 C 0 22.98 15.43 33.77 24.26 40.23 C 32.43 34.26 49.84 22.09 45.84 8.5 Z M 45.84 8.5" />
         </svg>
         <!-- пункты .prog__row строит script.js из расписания -->
       </div>
@@ -255,6 +255,9 @@
   <script src="../assets/rsvp-count.js"></script>
   <script src="../assets/signature.js"></script>
   <script src="../assets/brand.js"></script>
+  <script src="../assets/track-marker.js"></script>
   <script src="script.js"></script>
+  <!-- мягкая прокрутка колесом мыши (общий модуль) -->
+  <script src="../assets/smooth-scroll.js"></script>
 </body>
 </html>
