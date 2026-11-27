@@ -1,6 +1,7 @@
 'use client';
 import { useLayoutEffect, useRef, useState, type ReactNode, type Ref } from 'react';
 import RingsLoader from '@/components/RingsLoader';
+import { useEditorBoot } from './EditorBoot';
 import { DEVICES, fitScale, type PreviewDevice } from './PreviewDevice';
 import s from './SitePreview.module.css';
 
@@ -20,11 +21,15 @@ import s from './SitePreview.module.css';
    финалом. Кольца начинают складываться, когда ответил скрипт шаблона
    (сообщение wc:ready), а тает загрузка, когда iframe догрузился с картинками
    первого экрана (событие load). Другое устройство или другой шаблон — новый
-   iframe, и загрузка показывается заново. */
+   iframe, и загрузка показывается заново.
+   Пока весь экран редактора закрыт загрузкой на всё окно (EditorBoot.tsx,
+   27.11.26), своей загрузки в окне нет: окно только сообщает ей, готов ли сайт. */
 const DESKTOP = { w: 1440, h: 900 };
 
-export default function SitePreview({ device, innerRef, onTap, children }: {
+export default function SitePreview({ device, template, innerRef, onTap, children }: {
   device: PreviewDevice;
+  /** Какой шаблон в окне: другой — это новый iframe, загрузка заново */
+  template?: string;
   /** Обёртка, в которой лежит iframe шаблона — редактор находит его там */
   innerRef?: Ref<HTMLDivElement>;
   /** Нажатие на сайт на телефоне (≤768 px) — обычно «во весь экран» */
@@ -54,10 +59,31 @@ export default function SitePreview({ device, innerRef, onTap, children }: {
   }, [device]);
 
   // Загрузка поверх сайта: gen — номер iframe шаблона (новый — загрузка заново);
-  // ready — можно складывать кольца, settled — можно таять
-  const [boot, setBoot] = useState({ gen: 0, device, ready: false, settled: false, on: true });
-  if (boot.device !== device) setBoot({ gen: boot.gen + 1, device, ready: false, settled: false, on: true });
+  // ready — можно складывать кольца, settled — можно таять.
+  // Другой шаблон сбрасывает готовность сразу, ещё до того, как найдётся его
+  // iframe: иначе загрузка на всё окно приняла бы готовность прошлого шаблона
+  // (редактор готового приглашения сперва рисует шаблон по умолчанию)
+  const [boot, setBoot] = useState({ gen: 0, device, template, ready: false, settled: false, on: true });
+  if (boot.device !== device || boot.template !== template) {
+    setBoot({ gen: boot.gen + 1, device, template, ready: false, settled: false, on: true });
+  }
   const gen = boot.gen;
+
+  // Загрузка на всё окно редактора: пока она закрывает экран, своей не рисуем,
+  // а сообщаем ей о готовности сайта — до отрисовки (layout): в том же кадре она
+  // не должна принять готовность окна прошлого экрана
+  const page = useEditorBoot();
+  const covering = !!page?.covering;
+  const report = page?.report;
+  useLayoutEffect(() => { report?.(boot.ready, boot.settled); }, [report, boot.ready, boot.settled]);
+  useLayoutEffect(() => () => report?.(false, false), [report]);
+  // Она ушла, а сайт в окне уже догрузился — своя загрузка в окне не нужна;
+  // не догрузился (она перестала ждать) — дальше ждёт своя
+  const [wasCovering, setWasCovering] = useState(covering);
+  if (wasCovering !== covering) {
+    setWasCovering(covering);
+    if (!covering) setBoot(b => (b.on && b.settled ? { ...b, on: false } : b));
+  }
   useLayoutEffect(() => {
     const content = contentRef.current;
     if (!content) return;
@@ -108,7 +134,7 @@ export default function SitePreview({ device, innerRef, onTap, children }: {
   // Шаблон — в обёртке display: contents (раскладку не меняет), загрузка — рядом с ней
   const content = <div ref={contentRef} className={s.content}>{children}</div>;
   // В уменьшенном окне знак крупнее в его пикселях — на экране он те же ~200 px
-  const loader = boot.on ? (
+  const loader = boot.on && !covering ? (
     <RingsLoader key={gen} ready={boot.ready} settled={boot.settled} size={device === 'window' ? 200 : 200 / (scale ?? 1)}
       onDone={() => setBoot(b => (b.gen === gen ? { ...b, on: false } : b))} />
   ) : null;

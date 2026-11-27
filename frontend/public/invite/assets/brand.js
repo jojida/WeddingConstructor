@@ -7,14 +7,18 @@
        демо Digital Yes. Кликов не перехватывает. Только у неопубликованного —
        демо шаблонов и предпросмотр черновика; опубликованным сайтам, бесплатным
        тоже, знака нет (с 08.10.26).
-   В редакторе (editing=1) бренда нет — как и у подписи: пара правит свой сайт
-   и не должна видеть рекламу сервиса поверх него.
+   В редакторе (editing=1) — только водяной знак, по тому же правилу: черновик
+   до публикации — со знаком, опубликованный сайт — без (27.11.26: «в редакторе
+   нет водяного знака, добавь» — иначе живое превью редактора было чистой копией
+   сайта без оплаты). Подписи внизу в редакторе по-прежнему нет — signature.js
+   там молчит сам.
 
    Решает страница-хозяин (TemplatePreview.tsx): в данных wc:data приходят
    wcBrand (подпись) и wcWatermark (знак) — true или false. Пока данных нет,
    ничего не рисуем, чтобы у опубликованных не мелькало. Страницу открыли
    напрямую (без родителя) или данных нет 6 секунд — показываются оба: так
-   выглядят демо и сырые файлы шаблонов.
+   выглядят демо и сырые файлы шаблонов. Редактор шлёт данные всегда — там
+   ждём их без срока.
 
    Подключение: <script src="../assets/brand.js"></script> ПОСЛЕ signature.js в
    каждом шаблоне (и в генераторе студии — studio/export/generate.ts). Больше
@@ -23,7 +27,7 @@
   'use strict';
 
   if (window.WCBrand) return;                    // защита от двойного подключения
-  if (window.location.search.indexOf('editing=1') !== -1) return;
+  var EDITING = window.location.search.indexOf('editing=1') !== -1;
 
   var SRC = (document.currentScript && document.currentScript.src) || '';
   var WM_URL = SRC ? new URL('brand-wm.svg', SRC).href : '/invite/assets/brand-wm.svg';
@@ -83,8 +87,10 @@
   });
 
   function start() {
+    // В редакторе подпись ничего не сделает (signature.js молчит при editing=1),
+    // так что set(true, true) там — только водяной знак
     if (!framed) set(true, true);
-    else setTimeout(function () { if (!decided) set(true, true); }, 6000);
+    else if (!EDITING) setTimeout(function () { if (!decided) set(true, true); }, 6000);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

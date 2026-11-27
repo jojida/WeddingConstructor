@@ -157,7 +157,7 @@ export default function SetupStep({ templateId, initialData, previewBase, apiBas
         {/* Тот же вид, что в редакторе (SitePreview.tsx). На телефоне сайт не ловит
             касания (свайп листал бы приглашение, а не страницу к анкете) —
             нажатие открывает его во весь экран */}
-        <SitePreview device={shownDevice} onTap={openFull}>
+        <SitePreview device={shownDevice} template={templateId} onTap={openFull}>
           {/* Другое устройство — шаблон грузится заново под его ширину */}
           <TemplatePreview key={shownDevice} data={preview} apiBase={apiBase} editing />
         </SitePreview>

@@ -196,10 +196,11 @@ function TemplatesSection() {
 
         <div className={styles.templatesScroll} data-animate data-delay="150">
           {TEMPLATES.map((tpl) => (
-            // Нажатие на шаблон — к анкете «Расскажите о вашей свадьбе»: слева шаблон,
-            // справа поля (app/editor/SetupStep.tsx). Раньше открывалось демо в новой вкладке
-            <Link key={tpl.id} href={`/editor?template=${tpl.id}`} prefetch={false} className={styles.templateScrollItem}
-              onClick={() => reachGoal(GOAL.templateChoose, { template: tpl.name, from: 'home' })}>
+            // Нажатие на шаблон — его просмотр (демо) в новой вкладке, как «Посмотреть»
+            // в каталоге; оттуда «Выбрать этот шаблон» ведёт в редактор. С 16.11.26
+            // карточка вела сразу в анкету редактора — владелец вернул просмотр 27.11.26
+            <Link key={tpl.id} href={`/demo/${tpl.id}`} target="_blank" className={styles.templateScrollItem}
+              onClick={() => reachGoal(GOAL.templatePreview, { template: tpl.name, from: 'home' })}>
               {/* Слева открытка для печати, справа телефон — TemplateShowcase */}
               <TemplateShowcase
                 data={withPreviewNames(templateCardData(SAMPLE_DATA, tpl, templateSampleDate(tpl)), shown)}

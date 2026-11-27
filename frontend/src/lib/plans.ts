@@ -30,8 +30,9 @@ export const isBrandFree = (plan?: string | null, status?: string | null): boole
   isPublished(status) &&
   ['premium', 'maximum', 'pro', 'lite', 'basic', 'standard'].includes(plan || '');
 
-/** Водяной знак WeddingCraft (assets/brand.js) — только у неопубликованного: демо шаблонов
-    и предпросмотр черновика. Опубликованным сайтам, бесплатным тоже, знака нет (с 08.10.26). */
+/** Водяной знак WeddingCraft (assets/brand.js) — только у неопубликованного: демо шаблонов,
+    превью черновика в редакторе и анкете (с 27.11.26) и его предпросмотр. Опубликованным
+    сайтам, бесплатным тоже, знака нет (с 08.10.26) — и в редакторе тоже. */
 export const hasWatermark = (status?: string | null): boolean => !isPublished(status);
 
 export const PLAN_TITLES: Record<string, string> = {

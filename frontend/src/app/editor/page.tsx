@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useMemo, useState, useRef, useCallback, Suspense } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
@@ -26,6 +26,7 @@ import type { PhotoFrame, PhotoSlot } from './PhotoFrameEditor';
 import type { PhotoCutout } from './BackgroundRemovalEditor';
 import { DEVICE_OPTIONS, DeviceSwitch, FullPreview, useMediaQuery, useStoredDevice, type FullPreviewMode, type PreviewDevice } from './PreviewDevice';
 import SitePreview from './SitePreview';
+import EditorBoot, { useEditorBoot } from './EditorBoot';
 import TextVariants from './TextVariants';
 import SetupStep from './SetupStep';
 import { demoInviteData } from '@/lib/demo-invite';
@@ -159,7 +160,16 @@ function EditorContent() {
   // Анкету «Расскажите о вашей свадьбе» открыли из редактора («Имена и дата»):
   // крестик возвращает в редактор, а не к шаблонам
   const [setupFromEditor, setSetupFromEditor] = useState(false);
-  
+
+  // Загрузка на всё окно (EditorBoot.tsx): новый экран — анкета или редактор —
+  // закрыт ею, пока сайт в окне слева не готов. Редактор, построенный заново
+  // (вход в аккаунт, другой шаблон в адресе), — тоже новый экран.
+  const boot = useEditorBoot();
+  const bootEnter = boot?.enter;
+  const bootHold = boot?.hold;
+  useLayoutEffect(() => { bootEnter?.(); }, [bootEnter]);
+  const goStep = (next: 'setup' | 'editor') => { bootEnter?.(); setStep(next); };
+
   const [newColorHex, setNewColorHex] = useState('#000000');
 
   const coverInputRef      = useRef<HTMLInputElement>(null);
@@ -432,6 +442,13 @@ function EditorContent() {
   // /auth/me, двойной эффект в dev, возврат из «Имена и дата») создавал второй черновик
   // и затирал данные первого шага и несохранённые правки ответом сервера.
   const draftLoadedFor = useRef<string | null>(null);
+  // Готовое приглашение (?id=) пришло с сервера или не пришло вовсе
+  const [inviteLoaded, setInviteLoaded] = useState(false);
+  // Данные на месте — загрузке на всё окно можно складывать кольца: черновик
+  // проверен, вход выяснен (с входом редактор строится заново), приглашение из
+  // кабинета загружено — до этого в окне шаблон по умолчанию, он ещё сменится
+  const dataReady = draftChecked && !authLoading && (!idFromUrl || !user || inviteLoaded);
+  useLayoutEffect(() => { bootHold?.(!dataReady); }, [bootHold, dataReady]);
   useEffect(() => {
     if (step !== 'editor' || authLoading || (idFromUrl && !user)) return;
     const loadKey = user?.id ?? 'guest';
@@ -446,7 +463,8 @@ function EditorContent() {
           setData(prev => ({ ...prev, ...res.data, ...(setup || {}), dressCodeColors: Array.isArray(res.data.dressCodeColors) ? res.data.dressCodeColors : [], schedule: Array.isArray(res.data.schedule) ? res.data.schedule : [], galleryPhotos: Array.isArray(res.data.galleryPhotos) ? res.data.galleryPhotos : [], customData: res.data.customData || {} }));
           writeStorage('sessionStorage', 'wc_draft_id', idFromUrl);
         })
-        .catch(() => toast.error('Не удалось загрузить приглашение'));
+        .catch(() => toast.error('Не удалось загрузить приглашение'))
+        .finally(() => setInviteLoaded(true));
       return;
     }
     if (user) {
@@ -757,13 +775,13 @@ function EditorContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [step, data.templateId, data.id],
   );
-  const openSetup = () => { setSetupFromEditor(true); setStep('setup'); };
+  const openSetup = () => { setSetupFromEditor(true); goStep('setup'); };
 
   const handleSetupComplete = (setupData: Partial<InviteData>) => {
     funnelGoal(GOAL.editorSetup);
     pendingSetupRef.current = setupData;
     setData(prev => ({ ...prev, ...setupData }));
-    setStep('editor');
+    goStep('editor');
   };
 
   if (!draftChecked) {
@@ -778,7 +796,7 @@ function EditorContent() {
     return (
       <SetupStep templateId={data.templateId} initialData={data} previewBase={setupPreviewBase} apiBase={apiBase}
         device={device} onDevice={setDevice}
-        onComplete={handleSetupComplete} onClose={setupFromEditor ? () => setStep('editor') : undefined} />
+        onComplete={handleSetupComplete} onClose={setupFromEditor ? () => goStep('editor') : undefined} />
     );
   }
 
@@ -881,7 +899,7 @@ function EditorContent() {
             {/* На телефоне сайт не ловит касания (иначе свайп листал бы
                 приглашение вместо страницы), зато нажатие на него открывает
                 полноэкранный просмотр. */}
-            <SitePreview device={shownDevice} innerRef={previewRef} onTap={openPreview}>
+            <SitePreview device={shownDevice} template={data.templateId} innerRef={previewRef} onTap={openPreview}>
               {/* Другое устройство — шаблон грузится заново под его ширину:
                   часть шаблонов раскладывает блоки скриптом один раз */}
               <TemplatePreview key={shownDevice} data={data} apiBase={apiBase} editing />
@@ -1871,14 +1889,20 @@ function EditorForSelection() {
   return <EditorContent key={`${accountId}:${key}`} />;
 }
 
+/* Загрузка на всё окно (EditorBoot) — снаружи Suspense и редактора: она есть уже
+   в HTML с сервера (кольца с первой отрисовки) и не начинается заново, когда
+   редактор строится повторно (выяснился вход — другой key у EditorContent).
+   Кружок ниже виден, только если она перестала ждать раньше, чем загрузился JS. */
 export default function EditorPage() {
   return (
-    <Suspense fallback={
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-        <div style={{ width: 36, height: 36, border: '2px solid rgba(206,197,186,0.4)', borderTopColor: '#685d4a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      </div>
-    }>
-      <EditorForSelection />
-    </Suspense>
+    <EditorBoot>
+      <Suspense fallback={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+          <div style={{ width: 36, height: 36, border: '2px solid rgba(206,197,186,0.4)', borderTopColor: '#685d4a', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        </div>
+      }>
+        <EditorForSelection />
+      </Suspense>
+    </EditorBoot>
   );
 }
